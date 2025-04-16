@@ -1,0 +1,183 @@
+#ifndef NIRVANAENGINE_STRUCTS_H_INCLUDED
+#define NIRVANAENGINE_STRUCTS_H_INCLUDED
+
+#include <irrlicht.h>
+#include <vector>
+
+struct canvas_obj
+{
+    irr::video::ITexture* texture;
+
+    int type;
+
+    irr::core::dimension2d<irr::u32> dimension;
+
+    struct rc_canvas_viewport
+    {
+        irr::core::vector2d<irr::s32> position;
+        irr::core::dimension2d<irr::u32> dimension;
+    } viewport;
+
+
+    irr::core::vector2d<irr::s32> offset;
+
+    bool visible = true;
+    int z = 0;
+
+    irr::u32 color_mod;
+
+    irr::core::array<irr::s32> sprite_id;
+
+    int tilemap;
+};
+
+struct CircleSettings
+{
+    irr::core::vector2di center;       // in screen coordinates
+    irr::f32 radius;             // in pixels
+    irr::f32 radius2;
+    irr::video::SColor color;
+    irr::u32 numVertices = 21;   // including center
+};
+
+struct image_obj
+{
+    irr::video::ITexture* image;
+    irr::u8 alpha = 255;
+    irr::video::SColor color_mod = irr::video::SColor(255,255,255,255);
+};
+
+struct tile_obj
+{
+	int id;
+
+	double fps;
+	int num_frames;
+	int current_frame;
+	std::vector<int> frames;
+
+	irr::u32 frame_start_time;
+	irr::u32 frame_swap_time;
+};
+
+struct tileset_obj
+{
+	bool active;
+
+	int img_id;
+
+	int tile_width;
+	int tile_height;
+
+	std::vector<tile_obj> tiles;
+};
+
+struct tilemap_row_obj
+{
+	std::vector<int> tile;
+};
+
+struct tilemap_obj
+{
+	bool active;
+
+	int tileset;
+	irr::video::ITexture* texture;
+
+	int num_tiles_across;
+	int num_tiles_down;
+
+	std::vector<tilemap_row_obj> rows;
+};
+
+struct sprite2D_physics_obj
+{
+	bool init = false; //specifically to prevent project from overriding default values on creation
+	int body_type;
+	int shape_type;
+
+	int offset_x;
+	int offset_y;
+
+	int box_width;
+	int box_height;
+
+	double radius;
+
+	irr::core::array<irr::core::vector2di> points;
+	irr::core::array<irr::core::vector2di> prev_points;
+	irr::core::array<irr::core::vector2di> next_points;
+};
+
+struct sprite2D_animation_obj
+{
+	std::string name;
+
+	irr::core::array<int> frames;
+
+	int num_frames;
+
+	int current_frame;
+
+	double fps;
+	double frame_start_time;
+	double frame_swap_time;
+};
+
+struct sprite2D_obj
+{
+	int id; //This is needed to reference this sprite in the contact listener
+	bool active = false;
+	int image_id;
+	int sheet_numFrames;
+	int frames_per_row;
+
+	int type;
+
+	irr::core::vector2di position;
+	double angle;
+
+	irr::core::vector2df scale;
+
+	irr::core::dimension2di frame_size;
+
+	bool visible = true;
+	irr::u8 alpha;
+
+	irr::video::SColor color_mod;
+
+	bool isSolid = false;
+	sprite2D_physics_obj physics;
+
+	int current_animation;
+	int num_animation_loops;
+	int current_animation_loop;
+	bool isPlaying;
+	irr::core::array<int> deleted_animation;
+	irr::core::array<sprite2D_animation_obj> animation;
+
+	int parent_canvas = -1;
+
+	double z;
+};
+
+struct render_cmd_arg_obj
+{
+	int type;
+	irr::core::array<irr::s32> int_arg;
+	irr::core::array<irr::f64> double_arg;
+	irr::core::array<irr::core::vector2di> i_vec_arg;
+	irr::core::array<irr::core::vector2df> f_vec_arg;
+	irr::core::array<irr::core::dimension2di> i_dim_arg;
+	irr::core::array<irr::core::dimension2df> f_dim_arg;
+};
+
+
+
+struct render_cmd_obj
+{
+	int cmd;
+	irr::core::array<render_cmd_arg_obj> arg;
+};
+
+#endif // NIRVANAENGINE_STRUCTS_H_INCLUDED

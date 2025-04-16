@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_layout_file>
+	<FileVersion major="1" minor="0" />
+	<ActiveTarget name="Debug" />
+	<File name="rc_gfx_core.h" open="0" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1279" topLine="51" />
+		</Cursor>
+	</File>
+	<File name="NirvanaBase.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="31156" topLine="723" />
+		</Cursor>
+	</File>
+	<File name="gui_freetype_font.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7478" topLine="327" />
+		</Cursor>
+	</File>
+	<File name="Nirvana_TileAnimation.cpp" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="5619" topLine="172" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_NewSprite_Dialog.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="442" topLine="13" />
+		</Cursor>
+	</File>
+	<File name="wxIrrlicht.cpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="79508" topLine="1929" />
+		</Cursor>
+		<Folding>
+			<Collapse line="224" />
+			<Collapse line="252" />
+			<Collapse line="259" />
+			<Collapse line="354" />
+			<Collapse line="377" />
+			<Collapse line="411" />
+			<Collapse line="477" />
+			<Collapse line="536" />
+			<Collapse line="564" />
+			<Collapse line="585" />
+			<Collapse line="658" />
+			<Collapse line="1120" />
+			<Collapse line="1136" />
+		</Folding>
+	</File>
+	<File name="NirvanaEditor_NewSprite_Dialog.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="643" topLine="13" />
+		</Cursor>
+	</File>
+	<File name="Nirvana_SpriteAnimation.h" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2588" topLine="69" />
+		</Cursor>
+	</File>
+	<File name="Nirvana_Project.cpp" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="3790" topLine="126" />
+		</Cursor>
+	</File>
+	<File name="rc_defines.h" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1053" topLine="11" />
+		</Cursor>
+	</File>
+	<File name="Nirvana_SpriteAnimation.cpp" open="1" top="1" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="12010" topLine="337" />
+		</Cursor>
+		<Folding>
+			<Collapse line="401" />
+		</Folding>
+	</File>
+	<File name="Nirvana_Project.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1338" topLine="36" />
+		</Cursor>
+	</File>
+	<File name="Nirvana2DApp.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="511" topLine="5" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_MainFrame.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1677" topLine="37" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_MainFrame.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="12940" topLine="379" />
+		</Cursor>
+	</File>
+	<File name="rc_gfx.h" open="0" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="61726" topLine="2177" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEngine_Structs.h" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1827" topLine="103" />
+		</Cursor>
+	</File>
+	<File name="NirvanaBase.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="8841" topLine="258" />
+		</Cursor>
+	</File>
+	<File name="wxIrrlicht.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7839" topLine="173" />
+		</Cursor>
+	</File>
+</CodeBlocks_layout_file>
