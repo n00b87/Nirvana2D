@@ -191,6 +191,7 @@ class wxIrrlicht : public wxControl {
 		void getImageSize(int img_id, double* w, double* h);
 		void getImageSizeI(int img_id, int* w, int* h);
 		void setColorKey(int img_id, irr::u32 colorkey);
+		void getImageBuffer(int img_id, irr::u32 * pdata);
 
 		// SPRITES
 		irr::core::array<sprite2D_obj> sprite;
@@ -269,6 +270,7 @@ class wxIrrlicht : public wxControl {
 		//--------------------------------------TILEMAP-----------------------------------------------
 		int createTileMap(int tset, int widthInTiles, int heightInTiles);
 		void deleteTileMap(int tmap);
+		bool tilesetExists(int tset);
 		void setTileMapSize(int tmap, int widthInTiles, int heightInTiles);
 		void getTileMapSize(int tmap, double* widthInTiles, double* heightInTiles);
 		void setTile(int tmap, int tile, int x, int y);
@@ -277,7 +279,7 @@ class wxIrrlicht : public wxControl {
 		void getTileInTileset(int tset, int tile, int* x, int* y);
 		int getNumTilesInTileset(int tset);
 		void updateTileset(int tset);
-		void util_drawTileMap(int tmap, int x, int y, int w, int h, int offset_x, int offset_y);
+		void drawTileMap(int tmap, int x, int y, int w, int h, int offset_x, int offset_y);
 
 
         irr::video::ITexture* test_texture;
@@ -301,6 +303,8 @@ class wxIrrlicht : public wxControl {
         bool enable_update = true;
         void OnUpdate();
 
+        bool tst_tset_render = true;
+
         int control_id = -1;
 
         int current_frame_width = 32;
@@ -317,6 +321,7 @@ class wxIrrlicht : public wxControl {
         int scroll_speed = 2;
 
         int sheet_canvas = -1;
+        int overlay_canvas = -1;
         int frame_canvas = -1;
         int preview_canvas = -1;
         int collision_canvas = -1;
@@ -331,12 +336,24 @@ class wxIrrlicht : public wxControl {
         bool collision_boxShapeSelect_lr = false;
         irr::core::vector2di collision_move_start_offset;
         irr::core::vector2di collision_move_start_size;
-        irr::core::array<irr::core::vector2di> collision_selected_points; //index in the points of the collision object
+        int collision_move_start_radius = 0;
+
+        bool collision_circleShapeSelect_center = false;
+        bool collision_circleShapeSelect_u = false;
+        bool collision_circleShapeSelect_d = false;
+        bool collision_circleShapeSelect_l = false;
+        bool collision_circleShapeSelect_r = false;
+
+		bool collision_poly_draw_flag = false;
+        irr::core::array<int> collision_selected_points; //index in the points of the collision object
+        irr::core::array<irr::core::vector2di> collision_move_start_points;
 
         void collisionEdit_select();
         void collisionEdit_boxSelect();
         void collisionEdit_move();
         void collisionEdit_draw();
+
+        bool collisionPointIsSelected(int pt_index);
 
         int spriteEdit_selected_sprite = -1;
         int spriteEdit_selected_animation = -1;
@@ -350,10 +367,43 @@ class wxIrrlicht : public wxControl {
         void UpdateSpriteAnimationPreview();
         void UpdateSpriteCollision();
 
+
+        int tileEdit_selected_tileset = -1;
+        int tileEdit_selected_tile = -1;
+        int tileEdit_selected_sheet_frame = -1;
+        int tileEdit_selected_frame_frame = -1;
+        bool tileEdit_mask_set = false;
+
+        bool tileEdit_Sheet_Update = false;
+        int tileEdit_animationMode = 0;
+
+        int tileEdit_preview_tilemap = -1;
+        bool tileEdit_play_preview = false;
+
+        tilemask_obj tileEdit_tileMask;
+
         void UpdateTileAnimationSheet();
         void UpdateTileAnimationFrame();
         void UpdateTileAnimationPreview();
         void UpdateTileMask();
+
+        Nirvana_Stage current_stage;
+        int selected_layer = -1;
+        int selected_sprite = -1;
+        int selected_tile = -1;
+
+        int mapEdit_layerType = -1;
+
+        void UpdateStageSheet();
+        void UpdateStageTileSelect();
+        void UpdateStageSpritePreview();
+
+        wxIrrlicht* shared_control;
+        bool mapEdit_hasContext = false;
+
+        void util_draw_cursor(int tile_x, int tile_y, irr::video::SColor cursor_color);
+
+        void mapEdit_getContext();
 
 
         irr::IrrlichtDevice* m_pDevice;
@@ -387,6 +437,7 @@ class wxIrrlicht : public wxControl {
         bool VIEW_KEY_D = false;
         bool VIEW_KEY_R = false;
         bool VIEW_KEY_F = false;
+        bool VIEW_KEY_CTRL = false;
 
         #ifdef __linux__
         GdkWindow* gdkWindow;

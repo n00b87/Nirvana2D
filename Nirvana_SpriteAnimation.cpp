@@ -22,6 +22,8 @@ Nirvana_SpriteEditor::Nirvana_SpriteEditor(wxWindow* parent, wxPanel* ani_sheet_
 	initAnimationFrame();
 	initAnimationPreview();
 
+	getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+
 	project = NULL;
 }
 
@@ -380,7 +382,69 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	}
 
 	if(!sprite_found)
+	{
+		stopEditor(); //just to temporarily release context from whatever has it
+
+		//START COLLISION SCREEN IMAGE LOADING
+		getCollisionControl()->GetDevice()->getContextManager()->activateContext(getCollisionControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
+
+		getCollisionControl()->setActiveCanvas(getCollisionControl()->sheet_canvas);
+		getCollisionControl()->clearCanvas();
+
+		if(spriteCollision_target->imageExists(spriteCollision_target->current_sheet_image))
+			spriteCollision_target->deleteImage(spriteCollision_target->current_sheet_image);
+
+		spriteCollision_target->current_sheet_image = -1;
+
+
+		//STOP COLLISION SCREEN IMAGE LOADING
+		getCollisionControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+
+
+		getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(getAnimationSheetControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
+
+		getAnimationSheetControl()->setActiveCanvas(getAnimationSheetControl()->sheet_canvas);
+		getAnimationSheetControl()->clearCanvas();
+
+		if(spriteSheet_target->imageExists(spriteSheet_target->current_sheet_image))
+			spriteSheet_target->deleteImage(spriteSheet_target->current_sheet_image);
+
+		spriteSheet_target->current_sheet_image = -1;
+
+		getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+
+		startEditor(editor_page_num);
+
+
+		getAnimationFrameControl()->setActiveCanvas(getAnimationFrameControl()->frame_canvas);
+		getAnimationFrameControl()->clearCanvas();
+
+		if(spriteFrame_target->spriteExists(spriteFrame_target->spriteEdit_selected_sprite))
+			spriteFrame_target->deleteSprite(spriteFrame_target->spriteEdit_selected_sprite);
+
+		spriteFrame_target->spriteEdit_selected_sprite = -1;
+
+		if(spriteFrame_target->imageExists(spriteFrame_target->current_sheet_image))
+			spriteFrame_target->deleteImage(spriteFrame_target->current_sheet_image);
+
+		spriteFrame_target->current_sheet_image = -1;
+
+
+		getAnimationPreviewControl()->setActiveCanvas(getAnimationPreviewControl()->preview_canvas);
+		getAnimationPreviewControl()->clearCanvas();
+
+		if(spritePreview_target->imageExists(spritePreview_target->current_sheet_image))
+			spritePreview_target->deleteImage(spritePreview_target->current_sheet_image);
+
+		spritePreview_target->current_sheet_image = -1;
+
+		if(spritePreview_target->spriteExists(spritePreview_target->spriteEdit_selected_sprite))
+			spritePreview_target->deleteSprite(spritePreview_target->spriteEdit_selected_sprite);
+
+		spritePreview_target->spriteEdit_selected_sprite = -1;
+
 		return;
+	}
 
 	//std::cout << "NSP TEST: " << n_sprite.object.physics.offset_x << std::endl;
 

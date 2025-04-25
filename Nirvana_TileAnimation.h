@@ -16,6 +16,7 @@ class Nirvana_TileEditor
 
 		int selected_tileset = -1;
 		int selected_tile = -1;
+		int selected_mask = -1;
 
 		wxPanel* animation_tileSheet;
 		wxPanel* animation_tileFrames;
@@ -33,6 +34,9 @@ class Nirvana_TileEditor
 		void initAnimationSheet();
 		void initAnimationFrame();
 		void initAnimationPreview();
+		void initMaskSheet();
+
+		int editor_page_num = 0;
 
 	public:
 		Nirvana_TileEditor(wxWindow* parent, wxPanel* ani_sheet_panel, wxPanel* ani_frame_panel, wxPanel* ani_preview_panel, wxPanel* mask_sheet_panel);
@@ -43,17 +47,27 @@ class Nirvana_TileEditor
 		wxIrrlicht* getAnimationSheetControl();
 		wxIrrlicht* getAnimationFrameControl();
 		wxIrrlicht* getAnimationPreviewControl();
+		wxIrrlicht* getMaskSheetControl();
 
 		void stopEditor();
-		void startEditor();
+		void startEditor(int n);
+		int getEditorPageIndex();
 
 		void setAnimationView();
 
 		void selectTileset(wxString tset_id);
-		void selectTile(wxString tile_id);
+		void selectTile(int tile_index);
 
 		int getSelectedTileset();
 		int getSelectedTile();
+
+		void updateTileAnimation();
+
+		void playPreview();
+		void stopPreview();
+
+		void selectMask(wxString mask_name);
+		int getSelectedMask();
 };
 
 #endif // NIRVANA_TILEANIMATION_H_INCLUDED

@@ -77,6 +77,13 @@ struct tilemap_row_obj
 	std::vector<int> tile;
 };
 
+struct tilemask_obj
+{
+	bool active = false;
+	std::string mask_name;
+	std::vector<bool> tiles;
+};
+
 struct tilemap_obj
 {
 	bool active;
@@ -178,6 +185,88 @@ struct render_cmd_obj
 {
 	int cmd;
 	irr::core::array<render_cmd_arg_obj> arg;
+};
+
+
+struct Nirvana_SpriteBase
+{
+	wxString file;
+	wxString sprite_name;
+
+	sprite2D_obj object;
+};
+
+struct Nirvana_Tileset
+{
+	wxString file;
+	wxString tileset_name;
+
+	tileset_obj object;
+
+	std::vector<tilemask_obj> mask;
+};
+
+struct Nirvana_Map_Sprite
+{
+	std::string sprite_name;
+	int map_sprite_id = -1;
+	int layer_id = -1;
+	int sprite_base;
+
+	irr::core::vector2di position;
+	irr::core::vector2df scale;
+	float angle = 0;
+};
+
+struct Nirvana_Map_TileMap
+{
+	int nv_tileset_index = -1;
+	int tile_map_index = -1;
+	tilemap_obj tile_map;
+};
+
+struct Nirvana_Map_Background
+{
+	int image_id = -1;
+	std::string img_file;
+	image_obj image;
+};
+
+struct Nirvana_Map_CollisionShape
+{
+	int type = -1;
+	std::string shape_name;
+	irr::core::vector2di position;
+	irr::core::array<irr::core::vector2di> points;
+	float radius;
+
+	irr::core::array<irr::core::vector2di> prev_points;
+	irr::core::array<irr::core::vector2di> next_points;
+};
+
+struct Nirvana_Map_Layer
+{
+	std::string layer_name;
+	int layer_type = -1;
+	bool visible = true;
+	Nirvana_Map_TileMap layer_map;
+	std::vector<Nirvana_Map_Sprite> layer_sprites;
+	std::vector<Nirvana_Map_CollisionShape> layer_shapes;
+	Nirvana_Map_Background bkg;
+	irr::core::vector2df scroll_speed;
+	int layer_alpha = 255;
+};
+
+struct Nirvana_Stage
+{
+	int stage_id = -1;
+	std::string stage_name;
+	int tile_width = 0;
+	int tile_height = 0;
+	int width_in_tiles = 0;
+	int height_in_tiles = 0;
+	std::vector<int> layer_order;
+	std::vector<Nirvana_Map_Layer> layers;
 };
 
 #endif // NIRVANAENGINE_STRUCTS_H_INCLUDED

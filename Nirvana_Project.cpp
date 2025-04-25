@@ -121,6 +121,14 @@ void Nirvana_Project::setSpriteAnimationName(int spr_index, int animation_index,
 	sprite_base[spr_index].object.animation[animation_index].name = ani_name;
 }
 
+void Nirvana_Project::deleteSprite(int spr_index)
+{
+	if(spr_index < 0 || spr_index >= sprite_base.size())
+		return;
+
+	sprite_base.erase(sprite_base.begin() + spr_index);
+}
+
 void Nirvana_Project::setSpriteNumAnimationFrames(int spr_index, int animation_index, int num_frames)
 {
 	if(spr_index < 0 || spr_index >= sprite_base.size())
@@ -304,9 +312,975 @@ int Nirvana_Project::getSpriteCollisionBox_Height(int spr_index)
 	return sprite_base[spr_index].object.physics.box_height;
 }
 
+void Nirvana_Project::setSpriteCollisionCircle_Radius(int spr_index, float radius)
+{
+	if(spr_index < 0 || spr_index >= sprite_base.size())
+		return;
+
+	sprite_base[spr_index].object.physics.radius = radius;
+}
+
+float Nirvana_Project::getSpriteCollisionCircle_Radius(int spr_index)
+{
+	if(spr_index < 0 || spr_index >= sprite_base.size())
+		return 0;
+
+	return sprite_base[spr_index].object.physics.radius;
+}
 
 
 int Nirvana_Project::getSpriteCount()
 {
 	return sprite_base.size();
+}
+
+//TILESETS
+bool Nirvana_Project::createTileset(wxString tset_id, wxString img_file, int tile_width, int tile_height)
+{
+	wxString check_id = tset_id.Lower().Trim();
+
+	for(int i = 0; i < tileset.size(); i++)
+	{
+		if(check_id.compare(tileset[i].tileset_name)==0)
+			return false;
+	}
+
+	Nirvana_Tileset obj;
+	obj.tileset_name = tset_id.Trim();
+	obj.file = img_file;
+	obj.object.tile_width = tile_width;
+	obj.object.tile_height = tile_height;
+	obj.object.active = true;
+
+	tileset.push_back(obj);
+
+	return true;
+}
+
+void Nirvana_Project::setTilesetObject(int tileset_index, tileset_obj obj)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		tileset[tileset_index].object = obj;
+	}
+}
+
+void Nirvana_Project::setTilesetName(int  tileset_index, std::string tileset_name)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		tileset[tileset_index].tileset_name = tileset_name;
+	}
+}
+
+std::string Nirvana_Project::getTilesetName(int tileset_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		return tileset[tileset_index].tileset_name.ToStdString();
+	}
+	return "";
+}
+
+int Nirvana_Project::getTilesetIndex(std::string tileset_name)
+{
+	wxString tst_name = wxString(tileset_name).Upper().Trim();
+	for(int i = 0; i < tileset.size(); i++)
+	{
+		wxString t_name = tileset[i].tileset_name.Upper().Trim();
+		if(t_name.compare(tst_name)==0)
+			return i;
+	}
+
+	return -1;
+}
+
+irr::core::vector2di Nirvana_Project::getTilesetTileSize(int tileset_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		return irr::core::vector2di(tileset[tileset_index].object.tile_width, tileset[tileset_index].object.tile_height);
+	}
+	return irr::core::vector2di();
+}
+
+void Nirvana_Project::deleteTileset(int tileset_index)
+{
+	if(tileset_index < 0 || tileset_index >= tileset.size())
+		return;
+
+	tileset.erase(tileset.begin() + tileset_index);
+}
+
+void Nirvana_Project::setTileNumAnimationFrames(int tileset_index, int base_tile_index, int num_frames)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(base_tile_index >= 0 && base_tile_index < tileset[tileset_index].object.tiles.size())
+		{
+			for(int i = tileset[tileset_index].object.tiles[base_tile_index].frames.size(); i < num_frames; i++)
+				tileset[tileset_index].object.tiles[base_tile_index].frames.push_back(base_tile_index);
+
+			tileset[tileset_index].object.tiles[base_tile_index].num_frames = num_frames;
+		}
+	}
+}
+
+void Nirvana_Project::setTileAnimationFrame(int tileset_index, int base_tile_index, int ani_frame, int sheet_frame)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(base_tile_index >= 0 && base_tile_index < tileset[tileset_index].object.tiles.size())
+		{
+			if(ani_frame >= 0 && ani_frame < tileset[tileset_index].object.tiles[base_tile_index].frames.size())
+				tileset[tileset_index].object.tiles[base_tile_index].frames[ani_frame] = sheet_frame;
+		}
+	}
+}
+
+void Nirvana_Project::setTileAnimationFPS(int tileset_index, int base_tile_index, int fps)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(base_tile_index >= 0 && base_tile_index < tileset[tileset_index].object.tiles.size())
+		{
+			tileset[tileset_index].object.tiles[base_tile_index].fps = fps;
+		}
+	}
+}
+
+int Nirvana_Project::getTileNumAnimationFrames(int tileset_index, int base_tile_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(base_tile_index >= 0 && base_tile_index < tileset[tileset_index].object.tiles.size())
+		{
+			return tileset[tileset_index].object.tiles[base_tile_index].num_frames;
+		}
+	}
+	return 0;
+}
+
+int Nirvana_Project::getTileAnimationFrame(int tileset_index, int base_tile_index, int ani_frame)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(base_tile_index >= 0 && base_tile_index < tileset[tileset_index].object.tiles.size())
+		{
+			if(ani_frame >= 0 && ani_frame < tileset[tileset_index].object.tiles[base_tile_index].frames.size())
+				return tileset[tileset_index].object.tiles[base_tile_index].frames[ani_frame];
+		}
+	}
+
+	return -1;
+}
+
+int Nirvana_Project::getTileAnimationFPS(int tileset_index, int base_tile_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(base_tile_index >= 0 && base_tile_index < tileset[tileset_index].object.tiles.size())
+		{
+			return tileset[tileset_index].object.tiles[base_tile_index].fps;
+		}
+	}
+
+	return 0;
+}
+
+Nirvana_Tileset Nirvana_Project::getTileset(int tileset_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		return tileset[tileset_index];
+	}
+
+	Nirvana_Tileset obj;
+	return obj;
+}
+
+int Nirvana_Project::getTilesetCount()
+{
+	return tileset.size();
+}
+
+int Nirvana_Project::getTilesetNumTiles(int tileset_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		return tileset[tileset_index].object.tiles.size();
+	}
+	return 0;
+}
+
+
+//--------MASK------------
+int Nirvana_Project::createMask(int tileset_index, std::string mask_name)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		tilemask_obj obj;
+		obj.mask_name = mask_name;
+		obj.active = true;
+		for(int i = 0; i < tileset[tileset_index].object.tiles.size(); i++)
+		{
+			obj.tiles.push_back(false);
+		}
+
+		int mask_id = tileset[tileset_index].mask.size();
+		tileset[tileset_index].mask.push_back(obj);
+
+		return mask_id;
+	}
+
+	return 0;
+}
+
+void Nirvana_Project::deleteMask(int tileset_index, int mask_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(mask_index >= 0 && mask_index < tileset[tileset_index].mask.size())
+		{
+			tileset[tileset_index].mask.erase( tileset[tileset_index].mask.begin() + mask_index );
+		}
+	}
+}
+
+int Nirvana_Project::getMaskIndex(int tileset_index, std::string mask_name)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		for(int i = 0; i < tileset[tileset_index].mask.size(); i++)
+		{
+			if(tileset[tileset_index].mask[i].mask_name.compare(mask_name)==0)
+				return i;
+		}
+	}
+
+	return -1;
+}
+
+void Nirvana_Project::setTileMask(int tileset_index, int mask_index, int tile_index, bool flag)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(mask_index >= 0 && mask_index < tileset[tileset_index].mask.size())
+		{
+			if(tile_index >= 0 && tile_index < tileset[tileset_index].mask[mask_index].tiles.size())
+			{
+				tileset[tileset_index].mask[mask_index].tiles[tile_index] = flag;
+			}
+		}
+	}
+}
+
+bool Nirvana_Project::getTileMask(int tileset_index, int mask_index, int tile_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(mask_index >= 0 && mask_index < tileset[tileset_index].mask.size())
+		{
+			if(tile_index >= 0 && tile_index < tileset[tileset_index].mask[mask_index].tiles.size())
+			{
+				return tileset[tileset_index].mask[mask_index].tiles[tile_index];
+			}
+		}
+	}
+	return false;
+}
+
+void Nirvana_Project::clearTileMask(int tileset_index, int mask_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(mask_index >= 0 && mask_index < tileset[tileset_index].mask.size())
+		{
+			for(int i = 0; i < tileset[tileset_index].mask[mask_index].tiles.size(); i++)
+			{
+				tileset[tileset_index].mask[mask_index].tiles[i] = false;
+			}
+		}
+	}
+}
+
+int Nirvana_Project::getMaskCount(int tileset_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		return tileset[tileset_index].mask.size();
+	}
+	return 0;
+}
+
+bool Nirvana_Project::isValidName(wxString test_name)
+{
+	if(test_name.Trim().length() == 0)
+		return false;
+
+	if(test_name.substr(0,1).compare("[") == 0)
+		return false;
+
+	return true;
+}
+
+void Nirvana_Project::setMaskName(int tileset_index, int mask_index, std::string mask_name)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(mask_index >= 0 && mask_index < tileset[tileset_index].mask.size())
+		{
+			if(isValidName(wxString(mask_name)))
+			{
+				for(int i = 0; i < tileset[tileset_index].mask.size(); i++)
+				{
+					wxString tm_name = wxString(tileset[tileset_index].mask[i].mask_name);
+					if(tm_name.Trim().Upper().compare(wxString(mask_name).Trim().Upper())==0)
+						return;
+				}
+				tileset[tileset_index].mask[mask_index].mask_name = mask_name;
+			}
+		}
+	}
+}
+
+std::string Nirvana_Project::getMaskName(int tileset_index, int mask_index)
+{
+	if(tileset_index >= 0 && tileset_index < tileset.size())
+	{
+		if(mask_index >= 0 && mask_index < tileset[tileset_index].mask.size())
+		{
+			return tileset[tileset_index].mask[mask_index].mask_name;
+		}
+	}
+	return "";
+}
+
+
+//STAGE
+void Nirvana_Project::createStage(std::string stage_name, int tile_width, int tile_height)
+{
+	Nirvana_Stage new_stage;
+	new_stage.stage_name = stage_name;
+	new_stage.tile_width = tile_width;
+	new_stage.tile_height = tile_height;
+	new_stage.stage_id = 0;
+
+	for(int i = 0; i < stages.size(); i++)
+	{
+		if(stages[i].stage_id >= new_stage.stage_id)
+			new_stage.stage_id = stages[i].stage_id + 1;
+	}
+
+	stages.push_back(new_stage);
+}
+
+void Nirvana_Project::deleteStage(int stage_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	stages.erase(stages.begin() + stage_index);
+}
+
+int Nirvana_Project::copyStage(int stage_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	int n = 1;
+
+	Nirvana_Stage tmp = stages[stage_index];
+
+	wxString tst_name = wxString(tmp.stage_name).Upper().Trim() + _("_");
+	wxString nameB = tst_name + wxString::Format(_("%i"), n).Upper().Trim();
+
+	for(int i = 0; i < stages.size(); i++)
+	{
+		if(i < 0)
+			continue;
+
+		wxString nameA = wxString(stages[i].stage_name).Upper().Trim();
+		if(nameA.compare(nameB) == 0)
+		{
+			i = -1;
+			n++;
+			nameB = tst_name + wxString::Format(_("%i"), n).Upper().Trim();
+			continue;
+		}
+	}
+
+	tmp.stage_name = nameB.ToStdString();
+
+	int copy_index = stages.size();
+	stages.push_back(tmp);
+
+	return copy_index;
+}
+
+int Nirvana_Project::getStageCount()
+{
+	return stages.size();
+}
+
+int Nirvana_Project::getStageIndex(std::string stage_name)
+{
+	wxString tst_name(stage_name);
+	tst_name = tst_name.Upper().Trim();
+
+	for(int i = 0; i < stages.size(); i++)
+	{
+		wxString s_name = wxString(stages[i].stage_name).Upper().Trim();
+
+		if(s_name.compare(tst_name)==0)
+			return i;
+	}
+
+	return -1;
+}
+
+std::string Nirvana_Project::getStageName(int stage_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return "";
+
+	return stages[stage_index].stage_name;
+}
+
+void Nirvana_Project::setStageName(int stage_index, std::string stage_name)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	stages[stage_index].stage_name = stage_name;
+}
+
+void Nirvana_Project::setStageSize(int stage_index, int width, int height)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	stages[stage_index].width_in_tiles = width;
+	stages[stage_index].height_in_tiles = height;
+
+	for(int i = 0; i < stages[stage_index].layers.size(); i++)
+	{
+		if(stages[stage_index].layers[i].layer_type == LAYER_TYPE_TILEMAP)
+		{
+			int original_width = stages[stage_index].layers[i].layer_map.tile_map.num_tiles_across;
+			int original_height = stages[stage_index].layers[i].layer_map.tile_map.num_tiles_down;
+
+			stages[stage_index].layers[i].layer_map.tile_map.num_tiles_across = width;
+			stages[stage_index].layers[i].layer_map.tile_map.num_tiles_down = height;
+
+			stages[stage_index].layers[i].layer_map.tile_map.rows.resize(height);
+
+			for(int m_row = 0; m_row < stages[stage_index].layers[i].layer_map.tile_map.rows.size(); m_row++)
+			{
+				stages[stage_index].layers[i].layer_map.tile_map.rows[m_row].tile.resize(width);
+
+				for(int m_col = (m_row < original_height ? original_width : 0); m_col < width; m_col++)
+				{
+					if(m_col < 0)
+						continue;
+
+					stages[stage_index].layers[i].layer_map.tile_map.rows[m_row].tile[m_col] = -1;
+				}
+			}
+		}
+	}
+}
+
+irr::core::vector2di Nirvana_Project::getStageSize(int stage_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return irr::core::vector2di();
+
+	return irr::core::vector2di(stages[stage_index].width_in_tiles, stages[stage_index].height_in_tiles);
+}
+
+irr::core::vector2di Nirvana_Project::getStageTileSize(int stage_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return irr::core::vector2di();
+
+	return irr::core::vector2di(stages[stage_index].tile_width, stages[stage_index].tile_height);
+}
+
+//LAYER
+void Nirvana_Project::addLayer(int stage_index, std::string layer_name, int layer_type)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	Nirvana_Map_Layer n_layer;
+	n_layer.layer_name = layer_name;
+	n_layer.layer_type = layer_type;
+	n_layer.scroll_speed.set(1.0, 1.0);
+	n_layer.layer_alpha = 255;
+
+	wxString n_layer_name = wxString(layer_name).Upper().Trim();
+
+	for(int i = 0; i < stages[stage_index].layers.size(); i++)
+	{
+		wxString st_layer_name = wxString(stages[stage_index].layers[i].layer_name).Upper().Trim();
+
+		if(st_layer_name.compare(layer_name) == 0)
+			return;
+	}
+
+	stages[stage_index].layers.push_back(n_layer);
+
+	if(layer_type == LAYER_TYPE_TILEMAP)
+		setStageSize(stage_index, stages[stage_index].width_in_tiles, stages[stage_index].height_in_tiles);
+}
+
+int Nirvana_Project::getStageNumLayers(int stage_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	return stages[stage_index].layers.size();
+}
+
+int Nirvana_Project::getLayerIndex(int stage_index, std::string layer_name)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	wxString n_layer_name = wxString(layer_name).Upper().Trim();
+
+	for(int i = 0; i < stages[stage_index].layers.size(); i++)
+	{
+		wxString st_layer_name = wxString(stages[stage_index].layers[i].layer_name).Upper().Trim();
+
+		if(st_layer_name.compare(n_layer_name) == 0)
+			return i;
+	}
+
+	//std::cout << "Layer [" << layer_name << "] NOT FOUND" << std::endl;
+
+	return -1;
+}
+
+int Nirvana_Project::getLayerType(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	return stages[stage_index].layers[layer_index].layer_type;
+}
+
+void Nirvana_Project::setLayerName(int stage_index, int layer_index, std::string layer_name)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	wxString test_name = wxString(layer_name).Upper().Trim();
+	if(test_name.length()==0)
+		return;
+
+	for(int i = 0; i < stages[stage_index].layers.size(); i++)
+	{
+		wxString l_name = wxString(stages[stage_index].layers[layer_index].layer_name).Upper().Trim();
+		if(l_name.compare(test_name)==0)
+		{
+			return;
+		}
+	}
+
+	stages[stage_index].layers[layer_index].layer_name = layer_name;
+}
+
+std::string Nirvana_Project::getLayerName(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return "";
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return "";
+
+	return stages[stage_index].layers[layer_index].layer_name;
+}
+
+void Nirvana_Project::setLayerScrollSpeed(int stage_index, int layer_index, float h_scroll, float v_scroll)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers[layer_index].scroll_speed.set(h_scroll, v_scroll);
+}
+
+irr::core::vector2df Nirvana_Project::getLayerScrollSpeed(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return irr::core::vector2df(0, 0);
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return irr::core::vector2df(0, 0);
+
+	return stages[stage_index].layers[layer_index].scroll_speed;
+}
+
+void Nirvana_Project::setLayerAlpha(int stage_index, int layer_index, int alpha)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers[layer_index].layer_alpha = alpha;
+}
+
+int Nirvana_Project::getLayerAlpha(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return 0;
+
+	return stages[stage_index].layers[layer_index].layer_alpha;
+}
+
+void Nirvana_Project::setLayerVisible(int stage_index, int layer_index, bool visible_flag)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers[layer_index].visible = visible_flag;
+}
+
+bool Nirvana_Project::getLayerVisible(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return false;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return false;
+
+	return stages[stage_index].layers[layer_index].visible;
+}
+
+void Nirvana_Project::setLayerTileset(int stage_index, int layer_index, int tileset_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	if(tileset_index < 0 || tileset_index >= tileset.size())
+		return;
+
+	stages[stage_index].layers[layer_index].layer_map.nv_tileset_index = tileset_index;
+}
+
+int Nirvana_Project::getLayerTileset(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	return stages[stage_index].layers[layer_index].layer_map.nv_tileset_index;
+}
+
+void Nirvana_Project::setLayerTile(int stage_index, int layer_index, int x_in_tiles, int y_in_tiles, int tile_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	if(y_in_tiles < 0 || y_in_tiles >= stages[stage_index].layers[layer_index].layer_map.tile_map.rows.size())
+		return;
+
+	if(x_in_tiles < 0 || x_in_tiles >= stages[stage_index].layers[layer_index].layer_map.tile_map.rows[y_in_tiles].tile.size())
+		return;
+
+	stages[stage_index].layers[layer_index].layer_map.tile_map.rows[y_in_tiles].tile[x_in_tiles] = tile_index;
+}
+
+int Nirvana_Project::getLayerTile(int stage_index, int layer_index, int x_in_tiles, int y_in_tiles)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	if(y_in_tiles < 0 || y_in_tiles >= stages[stage_index].layers[layer_index].layer_map.tile_map.rows.size())
+		return -1;
+
+	if(x_in_tiles < 0 || x_in_tiles >= stages[stage_index].layers[layer_index].layer_map.tile_map.rows[y_in_tiles].tile.size())
+		return -1;
+
+	return stages[stage_index].layers[layer_index].layer_map.tile_map.rows[y_in_tiles].tile[x_in_tiles];
+}
+
+int Nirvana_Project::addLayerSprite(int stage_index, int layer_index, std::string sprite_name, int sprite_base_index, int x, int y)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	if(sprite_base_index < 0 || sprite_base_index >= sprite_base.size())
+		return -1;
+
+	Nirvana_Map_Sprite layer_sprite;
+	layer_sprite.sprite_name = sprite_name;
+	layer_sprite.sprite_base = sprite_base_index;
+
+	wxString tst_name = wxString(sprite_name).Upper().Trim();
+
+	for(int i = 0; i < sprite_base.size(); i++)
+	{
+		wxString sp_name = sprite_base[i].sprite_name.Upper().Trim();
+		if(sp_name.compare(tst_name)==0)
+			return -1;
+	}
+
+	layer_sprite.position.set(x, y);
+	layer_sprite.scale.set(1, 1);
+	layer_sprite.angle = 0;
+
+	int s_index = stages[stage_index].layers[layer_index].layer_sprites.size();
+	stages[stage_index].layers[layer_index].layer_sprites.push_back(layer_sprite);
+
+	return s_index;
+}
+
+int Nirvana_Project::getLayerSpriteIndex(int stage_index, int layer_index, std::string sprite_name)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	wxString tst_name = wxString(sprite_name).Upper().Trim();
+
+	for(int i = 0; i < stages[stage_index].layers[layer_index].layer_sprites.size(); i++)
+	{
+		wxString sp_name = wxString(stages[stage_index].layers[layer_index].layer_sprites[i].sprite_name).Upper().Trim();
+		if(sp_name.compare(tst_name)==0)
+			return i;
+	}
+
+	return -1;
+}
+
+int Nirvana_Project::getLayerSpriteBaseIndex(int stage_index, int layer_index, int sprite_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	if(sprite_index < 0 || sprite_index >= stages[stage_index].layers[layer_index].layer_sprites.size())
+		return -1;
+
+	return stages[stage_index].layers[layer_index].layer_sprites[sprite_index].sprite_base;
+}
+
+void Nirvana_Project::setLayerSpritePosition(int stage_index, int layer_index, int sprite_index, int x, int y)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	if(sprite_index < 0 || sprite_index >= stages[stage_index].layers[layer_index].layer_sprites.size())
+		return ;
+
+	stages[stage_index].layers[layer_index].layer_sprites[sprite_index].position.set(x, y);
+}
+
+irr::core::vector2di Nirvana_Project::getLayerSpritePosition(int stage_index, int layer_index, int sprite_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return irr::core::vector2di();
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return irr::core::vector2di();
+
+	if(sprite_index < 0 || sprite_index >= stages[stage_index].layers[layer_index].layer_sprites.size())
+		return irr::core::vector2di();
+
+	return stages[stage_index].layers[layer_index].layer_sprites[sprite_index].position;
+}
+
+void Nirvana_Project::setLayerSpriteRotation(int stage_index, int layer_index, int sprite_index, float angle)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	if(sprite_index < 0 || sprite_index >= stages[stage_index].layers[layer_index].layer_sprites.size())
+		return;
+
+	stages[stage_index].layers[layer_index].layer_sprites[sprite_index].angle = angle;
+}
+
+float Nirvana_Project::getLayerSpriteRotation(int stage_index, int layer_index, int sprite_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return 0;
+
+	if(sprite_index < 0 || sprite_index >= stages[stage_index].layers[layer_index].layer_sprites.size())
+		return 0;
+
+	return stages[stage_index].layers[layer_index].layer_sprites[sprite_index].angle;
+}
+
+void Nirvana_Project::setLayerSpriteScale(int stage_index, int layer_index, int sprite_index, float scale_x, float scale_y)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	if(sprite_index < 0 || sprite_index >= stages[stage_index].layers[layer_index].layer_sprites.size())
+		return ;
+
+	stages[stage_index].layers[layer_index].layer_sprites[sprite_index].scale.set(scale_x, scale_y);
+}
+
+irr::core::vector2df Nirvana_Project::getLayerSpriteScale(int stage_index, int layer_index, int sprite_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return irr::core::vector2df();
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return irr::core::vector2df();
+
+	if(sprite_index < 0 || sprite_index >= stages[stage_index].layers[layer_index].layer_sprites.size())
+		return irr::core::vector2df();
+
+	return stages[stage_index].layers[layer_index].layer_sprites[sprite_index].scale;
+}
+
+int Nirvana_Project::getStageLayerNumSprites(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return 0;
+
+	return stages[stage_index].layers[layer_index].layer_sprites.size();
+}
+
+Nirvana_Map_Layer Nirvana_Project::getStageLayer(int stage_index, int layer_index)
+{
+	Nirvana_Map_Layer empty_layer;
+	empty_layer.layer_type = -1;
+
+	if(stage_index < 0 || stage_index >= stages.size())
+		return empty_layer;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return empty_layer;
+
+	return stages[stage_index].layers[layer_index];
+}
+
+void Nirvana_Project::setLayerOrder(int stage_index, int layer_index, int new_layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	if(layer_index == new_layer_index)
+		return;
+
+	if(new_layer_index < 0 || new_layer_index >= stages[stage_index].layers.size())
+		return;
+
+	Nirvana_Map_Layer tmp = stages[stage_index].layers[layer_index];
+
+	stages[stage_index].layers.erase( stages[stage_index].layers.begin() + layer_index );
+
+	stages[stage_index].layers.insert( stages[stage_index].layers.begin() + new_layer_index, tmp);
+
+	//for(int i = 0; i < stages[stage_index].layers.size(); i++)
+	//	std::cout << "LAYER: " << stages[stage_index].layers[i].layer_name << std::endl;
+}
+
+
+void Nirvana_Project::deleteLayer(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers.erase( stages[stage_index].layers.begin() + layer_index);
+}
+
+int Nirvana_Project::copyLayer(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	Nirvana_Map_Layer tmp = stages[stage_index].layers[layer_index];
+
+	int n = 1;
+	wxString tst_name = wxString(tmp.layer_name).Upper().Trim() + _("_");
+	wxString nameB = tst_name + wxString::Format(_("%i"), n).Upper().Trim();
+
+	for(int i = 0; i < stages[stage_index].layers.size(); i++)
+	{
+		if(i < 0)
+			continue;
+
+		wxString nameA = wxString(stages[stage_index].layers[i].layer_name).Upper().Trim();
+		if(nameA.compare(nameB) == 0)
+		{
+			i = -1;
+			n++;
+			nameB = tst_name + wxString::Format(_("%i"), n).Upper().Trim();
+			continue;
+		}
+	}
+
+	tmp.layer_name = nameB.ToStdString();
+
+	int new_index = stages[stage_index].layers.size();
+
+	stages[stage_index].layers.push_back(tmp);
+
+	return new_index;
 }

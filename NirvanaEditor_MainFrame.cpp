@@ -5,6 +5,7 @@
 
 #include "Nirvana_Project.h"
 #include "NirvanaEditor_NewSprite_Dialog.h"
+#include "NirvanaEditor_NewTileset_Dialog.h"
 
 
 
@@ -19,6 +20,11 @@ Nirvana_MainFrame( parent )
 
 	tile_editor->setProject(project);
 
+	tile_editor->getAnimationSheetControl()->tileEdit_animationMode = TILE_EDIT_ANIMATION_MODE_SELECT;
+	tile_editor->getAnimationFrameControl()->tileEdit_animationMode = TILE_EDIT_ANIMATION_MODE_SELECT;
+
+	m_tileEdit_mode_auiToolBar->ToggleTool(m_tileEdit_tileSelect_tool->GetId(), true);
+
 	tile_editor->getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
 
 	sprite_editor = new Nirvana_SpriteEditor(this, m_spriteAnimation_spriteSheet_panel, m_spriteAnimation_frame_panel,
@@ -26,11 +32,27 @@ Nirvana_MainFrame( parent )
 
 	sprite_editor->setProject(project);
 
-	sprite_editor->getAnimationSheetControl()->update_events = true;
+	sprite_editor->getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+	sprite_editor->getAnimationSheetControl()->update_events = false;
 
 	m_spriteEdit_collisionShape_comboBox->Append(_("BOX"));
 	m_spriteEdit_collisionShape_comboBox->Append(_("POLYGON"));
 	m_spriteEdit_collisionShape_comboBox->Append(_("CIRCLE"));
+
+	map_editor = new Nirvana_MapEditor(this, m_mapEdit_map_panel, m_mapEdit_tileSelect_panel, m_mapEdit_sprite_preview_panel);
+	map_editor->getMapViewControl()->GetDevice()->getContextManager()->activateContext(map_editor->getMapViewControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
+	map_editor->getMapViewControl()->mapEdit_hasContext = true;
+
+	map_editor->setProject(project);
+
+
+	stage_tree_imageList = new wxImageList(16,16,true);
+    stage_tree_rootImage = stage_tree_imageList->Add(wxArtProvider::GetBitmap( wxART_FOLDER, wxART_MENU ));
+    stage_tree_stageImage  = stage_tree_imageList->Add(wxArtProvider::GetBitmap( wxART_NORMAL_FILE, wxART_MENU ));
+
+    m_project_treeCtrl->AssignImageList(stage_tree_imageList);
+
+	project_root_treeItem = m_project_treeCtrl->AddRoot(wxString::FromUTF8(_("NO PROJECT")), stage_tree_rootImage);
 }
 
 void NirvanaEditor_MainFrame::OnProjectPropertiesTabChanged( wxAuiNotebookEvent& event )
@@ -39,10 +61,34 @@ void NirvanaEditor_MainFrame::OnProjectPropertiesTabChanged( wxAuiNotebookEvent&
 
 void NirvanaEditor_MainFrame::OnMapEditToolsTabChanged( wxAuiNotebookEvent& event )
 {
+	int page_index = event.GetSelection();
+	wxPanel* new_panel = (wxPanel*)m_mapEdit_layerObjectTools_auinotebook->GetPage(page_index);
+
+	if(new_panel == m_mapEdit_tile_panel)
+	{
+		map_editor->startEditor(0);
+	}
+	else if(new_panel == m_mapEdit_sprite_panel)
+	{
+		map_editor->startEditor(1);
+	}
 }
 
 void NirvanaEditor_MainFrame::OnTileEditor_Edit_Changed( wxAuiNotebookEvent& event )
 {
+	int page_index = event.GetSelection();
+	wxPanel* new_panel = (wxPanel*)m_tileEdit_tools_auinotebook->GetPage(page_index);
+
+	tile_editor->stopEditor();
+
+	if(new_panel == m_tileEdit_tileAnimation_panel)
+	{
+		tile_editor->startEditor(0);
+	}
+	else if(new_panel == m_tileEdit_tileMask_panel)
+	{
+		tile_editor->startEditor(1);
+	}
 }
 
 void NirvanaEditor_MainFrame::OnSpriteEditor_Edit_Changed( wxAuiNotebookEvent& event )
@@ -70,6 +116,7 @@ void NirvanaEditor_MainFrame::OnMainTabChanged( wxAuiNotebookEvent& event )
 	switch(main_page_index)
 	{
 		case NIRVANA_MAIN_PAGE_INDEX_MAP:
+			map_editor->stopEditor(true);
 		break;
 
 		case NIRVANA_MAIN_PAGE_INDEX_TILE:
@@ -84,10 +131,12 @@ void NirvanaEditor_MainFrame::OnMainTabChanged( wxAuiNotebookEvent& event )
 	if(new_panel == m_mapEdit_panel)
 	{
 		main_page_index = NIRVANA_MAIN_PAGE_INDEX_MAP;
+
+		map_editor->startEditor(map_editor->getEditorPageIndex(), true);
 	}
 	else if(new_panel == m_tileEdit_panel)
 	{
-		tile_editor->startEditor();
+		tile_editor->startEditor(tile_editor->getEditorPageIndex());
 
 		main_page_index = NIRVANA_MAIN_PAGE_INDEX_TILE;
 	}
@@ -129,67 +178,6 @@ wxArrayString NirvanaEditor_MainFrame::getDirFileList(wxString dir_path, wxStrin
 
 	return files_list;
 }
-
-void NirvanaEditor_MainFrame::OnTestButtonClick( wxCommandEvent& event )
-{
-	this->RefreshLayerProperties();
-}
-
-void NirvanaEditor_MainFrame::RefreshLayerProperties()
-{
-	LayerProperties_Sizer->Clear();
-
-	wxStaticText* m_staticText43 = new wxStaticText( m_layerProperties_panel, wxID_ANY, _("0:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText43->Wrap( -1 );
-	LayerProperties_Sizer->Add( m_staticText43, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
-	wxStaticLine* m_staticline10 = new wxStaticLine( m_layerProperties_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
-	LayerProperties_Sizer->Add( m_staticline10, 0, wxEXPAND | wxALL, 5 );
-
-	wxBitmapButton* m_bpButton29 = new wxBitmapButton( m_layerProperties_panel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
-
-	m_bpButton29->SetBitmap( wxBitmap( wxT("icons/up-arrow.png"), wxBITMAP_TYPE_ANY ) );
-	LayerProperties_Sizer->Add( m_bpButton29, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
-	wxBitmapButton* m_bpButton30 = new wxBitmapButton( m_layerProperties_panel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
-
-	m_bpButton30->SetBitmap( wxBitmap( wxT("icons/down-arrow.png"), wxBITMAP_TYPE_ANY ) );
-	LayerProperties_Sizer->Add( m_bpButton30, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
-	wxStaticLine* m_staticline11 = new wxStaticLine( m_layerProperties_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
-	LayerProperties_Sizer->Add( m_staticline11, 0, wxEXPAND | wxALL, 5 );
-
-	wxBitmapButton* m_bpButton31 = new wxBitmapButton( m_layerProperties_panel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
-
-	m_bpButton31->SetBitmap( wxBitmap( wxT("icons/delete.png"), wxBITMAP_TYPE_ANY ) );
-	LayerProperties_Sizer->Add( m_bpButton31, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
-	wxStaticLine* m_staticline12 = new wxStaticLine( m_layerProperties_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
-	LayerProperties_Sizer->Add( m_staticline12, 0, wxEXPAND | wxALL, 5 );
-
-	wxStaticText* m_staticText45 = new wxStaticText( m_layerProperties_panel, wxID_ANY, _("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText45->Wrap( -1 );
-	LayerProperties_Sizer->Add( m_staticText45, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
-	wxTextCtrl* m_textCtrl12 = new wxTextCtrl( m_layerProperties_panel, wxID_ANY, _("Tile Layer"), wxDefaultPosition, wxDefaultSize, 0 );
-	LayerProperties_Sizer->Add( m_textCtrl12, 0, wxALL, 5 );
-
-	wxStaticLine* m_staticline13 = new wxStaticLine( m_layerProperties_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_VERTICAL );
-	LayerProperties_Sizer->Add( m_staticline13, 0, wxEXPAND | wxALL, 5 );
-
-	wxCheckBox* m_checkBox8 = new wxCheckBox( m_layerProperties_panel, wxID_ANY, _("Tile"), wxDefaultPosition, wxDefaultSize, 0 );
-	LayerProperties_Sizer->Add( m_checkBox8, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
-
-	LayerProperties_Sizer->Add( 0, 0, 1, wxEXPAND, 5 );
-
-
-	m_layerProperties_panel->SetSizer( LayerProperties_Sizer );
-	m_layerProperties_panel->Layout();
-	LayerProperties_Sizer->Fit( m_layerProperties_panel );
-}
-
-
 
 
 // ------- SPRITE EDITOR ----------------
@@ -235,6 +223,42 @@ void NirvanaEditor_MainFrame::OnNewSpriteClicked( wxCommandEvent& event )
 	m_spriteEdit_sprite_listBox->AppendAndEnsureVisible(dialog->id_name);
 }
 
+void NirvanaEditor_MainFrame::OnDeleteSpriteClicked( wxCommandEvent& event )
+{
+	int list_index = m_spriteEdit_sprite_listBox->GetSelection();
+
+	if(list_index < 0 || list_index >= m_spriteEdit_sprite_listBox->GetCount())
+		return;
+
+	int spr_index = sprite_editor->getSelectedSprite();
+
+	if(spr_index < 0 || spr_index >= project->getSpriteCount())
+		return;
+
+	project->deleteSprite(spr_index);
+
+	m_spriteEdit_sprite_listBox->Delete(spr_index);
+	sprite_editor->selectSprite(_(""));
+
+	m_spriteEdit_sprite_listBox->SetSelection(-1);
+	m_spriteEdit_spriteID_textCtrl->SetValue(_(""));
+	m_spriteEdit_numFrames_spinCtrl->SetValue(0);
+	m_spriteEdit_FPS_spinCtrl->SetValue(0);
+	m_spriteEdit_animationID_textCtrl->SetValue(_(""));
+	m_spriteEdit_animation_listBox->Clear();
+
+	m_spriteEdit_collisionBox_X_spinCtrl->SetValue(0);
+	m_spriteEdit_collisionBox_Y_spinCtrl->SetValue(0);
+	m_spriteEdit_collisionBox_Width_spinCtrl->SetValue(0);
+	m_spriteEdit_collisionBox_Height_spinCtrl->SetValue(0);
+
+	m_spriteEdit_collisionPolygon_grid->ClearGrid();
+
+	m_spriteEdit_collisionCircle_X_spinCtrl->SetValue(0);
+	m_spriteEdit_collisionCircle_Y_spinCtrl->SetValue(0);
+	m_spriteEdit_collisionCircle_Radius_spinCtrl->SetValue(0);
+}
+
 void NirvanaEditor_MainFrame::OnSpriteEdit_Sprite_Selected( wxCommandEvent& event )
 {
 	int selected_index = event.GetSelection();
@@ -252,6 +276,8 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_Sprite_Selected( wxCommandEvent& even
 
 	sprite2D_obj n_sprite = project->getSprite(spr_id).object;
 
+	m_spriteEdit_frameSize_staticText->SetLabel(wxString::Format(_("%i"), n_sprite.frame_size.Width)  + _(" x ") + wxString::Format(_("%i"), n_sprite.frame_size.Height));
+
 	//std::cout << "N_SPRT2: " << n_sprite.physics.offset_x << std::endl;
 
 	for(int i = 0; i < n_sprite.animation.size(); i++)
@@ -259,6 +285,8 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_Sprite_Selected( wxCommandEvent& even
 		m_spriteEdit_animation_listBox->AppendAndEnsureVisible(wxString(n_sprite.animation[i].name));
 	}
 
+	sprite_editor->getAnimationSheetControl()->scroll_offset_x = 0;
+	sprite_editor->getAnimationSheetControl()->scroll_offset_y = 0;
 
 	//Set Physics Stuff
 	switch(n_sprite.physics.shape_type)
@@ -318,6 +346,8 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_Animation_Selected( wxCommandEvent& e
 	m_spriteEdit_animationID_textCtrl->SetValue(ani_name);
 	m_spriteEdit_numFrames_spinCtrl->SetValue(project->getSpriteNumAnimationFrames(spr_id, ani_id));
 	m_spriteEdit_FPS_spinCtrl->SetValue(project->getSpriteAnimationFPS(spr_id, ani_id));
+
+	sprite_editor->getAnimationFrameControl()->scroll_offset_x = 0;
 }
 
 void NirvanaEditor_MainFrame::OnSpriteEdit_NewAnimation_Click( wxCommandEvent& event )
@@ -523,7 +553,7 @@ void NirvanaEditor_MainFrame::OnUpdateSpriteAnimationUI( wxUpdateUIEvent& event 
 			{
 				if(sheet_selected_frame >= 0) //Its set to -1 if outside the sprite sheet so I am not wasting my time checking here. Also, I am fucking lazy.
 				{
-					std::cout << "Set frames: " << frame_selected_frame << " -> " << sheet_selected_frame  << std::endl;
+					//std::cout << "Set frames: " << frame_selected_frame << " -> " << sheet_selected_frame  << std::endl;
 					project->setSpriteAnimationFrame(spr_index, ani_index, frame_selected_frame, sheet_selected_frame);
 					sprite_editor->updateSpriteAnimation();
 				}
@@ -572,6 +602,8 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_ShapeSelect( wxCommandEvent& event )
 {
 	int shape_index = event.GetSelection();
 
+	//There are currently only 3 sprite shapes supported in the sprite editor.
+	//The chain shape is only accessible in the map editor
 	if(shape_index < 0 || shape_index >= 3)
 		return;
 
@@ -610,6 +642,8 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_ShapeSelect( wxCommandEvent& event )
 			project->setSpriteCollision_Shape(spr_id, SPRITE_SHAPE_CIRCLE);
 		break;
 	}
+
+	n_sprite = project->getSprite(spr_id).object; // re-pulling sprite since it has changed with the last switch
 
 	//Set Physics Stuff
 	switch(n_sprite.physics.shape_type)
@@ -701,4 +735,435 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_collisionBox_Height_spinCtrl( wxSpinE
 
 	project->setSpriteCollisionBox_Height(spr_id, event.GetValue());
 	sprite_editor->getCollisionControl()->collision_physics_obj = project->getSpritePhysics(sprite_editor->getSelectedSprite());
+}
+
+
+void NirvanaEditor_MainFrame::OnSpriteEdit_collisionCircle_X_spinCtrl( wxSpinEvent& event )
+{
+	int spr_id = sprite_editor->getSelectedSprite();
+	if(spr_id < 0)
+		return;
+
+	project->setSpriteCollision_OffsetX(spr_id, event.GetValue());
+	sprite_editor->getCollisionControl()->collision_physics_obj = project->getSpritePhysics(sprite_editor->getSelectedSprite());
+}
+
+void NirvanaEditor_MainFrame::OnSpriteEdit_collisionCircle_Y_spinCtrl( wxSpinEvent& event )
+{
+	int spr_id = sprite_editor->getSelectedSprite();
+	if(spr_id < 0)
+		return;
+
+	project->setSpriteCollision_OffsetY(spr_id, event.GetValue());
+	sprite_editor->getCollisionControl()->collision_physics_obj = project->getSpritePhysics(sprite_editor->getSelectedSprite());
+}
+
+void NirvanaEditor_MainFrame::OnSpriteEdit_collisionCircle_Radius_spinCtrl( wxSpinEvent& event )
+{
+	int spr_id = sprite_editor->getSelectedSprite();
+	if(spr_id < 0)
+		return;
+
+	project->setSpriteCollisionCircle_Radius(spr_id, event.GetValue());
+	sprite_editor->getCollisionControl()->collision_physics_obj = project->getSpritePhysics(sprite_editor->getSelectedSprite());
+}
+
+void NirvanaEditor_MainFrame::OnSpriteEdit_collisionPolygon_gridCellChange( wxGridEvent& event )
+{
+	int spr_id = sprite_editor->getSelectedSprite();
+	if(spr_id < 0)
+		return;
+
+	int cell_value = 0;
+	int col = event.GetCol();
+	int row = event.GetRow();
+
+	m_spriteEdit_collisionPolygon_grid->GetCellValue(row, col).ToInt(&cell_value);
+
+	sprite2D_physics_obj physics = project->getSpritePhysics(spr_id);
+
+	if(row < 0 || row >= physics.points.size())
+		return;
+
+	if(col == 0)
+		physics.points[row].X = cell_value;
+	else
+		physics.points[row].Y = cell_value;
+
+	project->setSpritePhysics(spr_id, physics);
+	sprite_editor->getCollisionControl()->collision_physics_obj = project->getSpritePhysics(sprite_editor->getSelectedSprite());
+
+	m_spriteEdit_collisionPolygon_grid->SetCellValue(row, col, wxString::Format(_("%i"), cell_value));
+
+	//std::cout << "Cell DBG: point_num=" << event.GetRow() << " " << (event.GetCol() == 0 ? "x -> " : "y -> ") << cell_value << std::endl;
+}
+
+//TILE EDITOR
+void NirvanaEditor_MainFrame::OnNewTilesetClick( wxCommandEvent& event )
+{
+	tile_editor->getAnimationSheetControl()->enable_update = false;
+	NirvanaEditor_NewTileset_Dialog* dialog = new NirvanaEditor_NewTileset_Dialog(this);
+
+	wxFileName gfx_path(project->getDir());
+	gfx_path.AppendDir(_("gfx"));
+
+	dialog->files = getDirFileList(gfx_path.GetAbsolutePath());
+
+	dialog->refresh_list();
+
+	dialog->ShowModal();
+
+	tile_editor->getAnimationSheetControl()->enable_update = true;
+
+	project->createTileset(dialog->id_name, dialog->selected_file, dialog->frame_width, dialog->frame_height);
+
+	m_tileEdit_tileset_listBox->AppendAndEnsureVisible(dialog->id_name);
+}
+
+void NirvanaEditor_MainFrame::OnDeleteTilesetClick( wxCommandEvent& event )
+{
+	int list_index = m_tileEdit_tileset_listBox->GetSelection();
+
+	if(list_index < 0 || list_index >= m_tileEdit_tileset_listBox->GetCount())
+		return;
+
+	int tset_id = tile_editor->getSelectedTileset();
+
+	if(tset_id < 0 || tset_id >= project->getTilesetCount())
+		return;
+
+	project->deleteTileset(tset_id);
+
+	m_tileEdit_tileset_listBox->Delete(tset_id);
+	tile_editor->selectTileset(_(""));
+
+	m_tileEdit_tileset_listBox->SetSelection(-1);
+	m_tileEdit_tilesetID_textCtrl->SetValue(_(""));
+	m_tileEdit_numFrames_spinCtrl->SetValue(0);
+	m_tileEdit_FPS_spinCtrl->SetValue(0);
+	m_tileEdit_maskID_textCtrl->SetValue(_(""));
+	m_tileEdit_mask_listBox->Clear();
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_TileIDChanged( wxCommandEvent& event )
+{
+	int list_index = m_tileEdit_tileset_listBox->GetSelection();
+
+	if(list_index < 0 || list_index >= m_tileEdit_tileset_listBox->GetCount())
+		return;
+
+	int tset_id = tile_editor->getSelectedTileset();
+
+	if(tset_id < 0 || tset_id >= project->getTilesetCount())
+		return;
+
+	wxString new_value = m_tileEdit_tilesetID_textCtrl->GetValue();
+
+	if(new_value.Trim().length() == 0)
+		new_value = _("WARNING: [MISSING ID]");
+
+	m_tileEdit_tileset_listBox->SetString(list_index, new_value);
+	project->setTilesetName(tset_id, new_value.ToStdString());
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event )
+{
+	int selected_index = event.GetSelection();
+	wxString tileset_name = m_tileEdit_tileset_listBox->GetString(selected_index);
+
+	tile_editor->selectTileset(tileset_name);
+
+	int tset_id = tile_editor->getSelectedTileset();
+	if(tset_id < 0)
+		return;
+
+	m_tileEdit_tilesetID_textCtrl->SetValue(tileset_name);
+
+	tileset_obj n_tile = project->getTileset(tset_id).object;
+
+	m_tileSize_staticText->SetLabel(wxString::Format(_("%i"), n_tile.tile_width)  + _(" x ") + wxString::Format(_("%i"), n_tile.tile_height));
+
+	tile_editor->getAnimationSheetControl()->setActiveCanvas(tile_editor->getMaskSheetControl()->sheet_canvas);
+	tile_editor->getAnimationSheetControl()->clearCanvas();
+
+	tile_editor->getMaskSheetControl()->setActiveCanvas(tile_editor->getMaskSheetControl()->sheet_canvas);
+	tile_editor->getMaskSheetControl()->clearCanvas();
+
+	tile_editor->getAnimationSheetControl()->scroll_offset_x = 0;
+	tile_editor->getAnimationSheetControl()->scroll_offset_y = 0;
+	tile_editor->getAnimationSheetControl()->tileEdit_selected_sheet_frame = -1;
+	tile_editor->getAnimationFrameControl()->tileEdit_selected_tile = -1;
+
+	m_tileEdit_mask_listBox->Clear();
+
+	Nirvana_Tileset n_tset = project->getTileset(tset_id);
+	for(int i = 0; i < n_tset.mask.size(); i++)
+	{
+		m_tileEdit_mask_listBox->AppendAndEnsureVisible(n_tset.mask[i].mask_name);
+	}
+	tilemask_obj empty_mask;
+	empty_mask.active = false;
+	tile_editor->getMaskSheetControl()->tileEdit_tileMask = empty_mask;
+}
+
+void NirvanaEditor_MainFrame::OnEnterTileAnimationSheet( wxMouseEvent& event )
+{
+	//std::cout << "ENTER" << std::endl;
+	tile_editor->getAnimationSheetControl()->stage_window_isActive = true;
+}
+
+void NirvanaEditor_MainFrame::OnLeaveTileAnimationSheet( wxMouseEvent& event )
+{
+	tile_editor->getAnimationSheetControl()->stage_window_isActive = false;
+	//std::cout << "LEAVE" << std::endl;
+}
+
+void NirvanaEditor_MainFrame::OnUpdateTileAnimationUI( wxUpdateUIEvent& event )
+{
+	if(tile_editor->getAnimationSheetControl()->tileEdit_Sheet_Update)
+	{
+		tile_editor->getAnimationSheetControl()->tileEdit_Sheet_Update = false;
+
+		if(tile_editor->getAnimationSheetControl()->tileEdit_animationMode == TILE_EDIT_ANIMATION_MODE_SELECT)
+		{
+			tile_editor->selectTile(tile_editor->getAnimationSheetControl()->tileEdit_selected_sheet_frame);
+			int selected_tileset = tile_editor->getSelectedTileset();
+			int selected_tile = tile_editor->getSelectedTile();
+
+			m_tileEdit_numFrames_spinCtrl->SetValue(project->getTileNumAnimationFrames(selected_tileset, selected_tile));
+			m_tileEdit_FPS_spinCtrl->SetValue(project->getTileAnimationFPS(selected_tileset, selected_tile));
+		}
+		else if(tile_editor->getAnimationSheetControl()->tileEdit_animationMode == TILE_EDIT_ANIMATION_MODE_ANIMATE)
+		{
+			int selected_tileset = tile_editor->getSelectedTileset();
+			int selected_tile = tile_editor->getSelectedTile();
+			int selected_ani_frame = tile_editor->getAnimationFrameControl()->tileEdit_selected_frame_frame;
+			int selected_sheet_frame = tile_editor->getAnimationSheetControl()->tileEdit_selected_sheet_frame;
+
+			project->setTileAnimationFrame(selected_tileset, selected_tile, selected_ani_frame, selected_sheet_frame);
+		}
+
+		tile_editor->updateTileAnimation();
+		//tile_editor->getAnimationFrameControl()->tileEdit_selected_tile = selected_tile;
+		//tile_editor->getAnimationPreviewControl()->tileEdit_selected_tile = selected_tile;
+	}
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_NumFramesChange( wxSpinEvent& event )
+{
+	int tset_id = tile_editor->getSelectedTileset();
+
+	if(tset_id < 0 || tset_id >= project->getTilesetCount())
+		return;
+
+	int tile_id = tile_editor->getSelectedTile();
+
+	if(tile_id < 0 || tile_id >= project->getTilesetNumTiles(tset_id))
+		return;
+
+	int new_frame_count = event.GetValue();
+
+	if(new_frame_count < 0 || new_frame_count >= m_tileEdit_numFrames_spinCtrl->GetMax())
+		return;
+
+	project->setTileNumAnimationFrames(tset_id, tile_id, new_frame_count);
+	tile_editor->updateTileAnimation();
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_FPSChanged( wxSpinEvent& event )
+{
+	int tset_id = tile_editor->getSelectedTileset();
+
+	if(tset_id < 0 || tset_id >= project->getTilesetCount())
+		return;
+
+	int tile_id = tile_editor->getSelectedTile();
+
+	if(tile_id < 0 || tile_id >= project->getTilesetNumTiles(tset_id))
+		return;
+
+	int new_fps = event.GetValue();
+
+	project->setTileAnimationFPS(tset_id, tile_id, new_fps);
+	tile_editor->updateTileAnimation();
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_TileSelect_Tool( wxCommandEvent& event )
+{
+	tile_editor->getAnimationSheetControl()->tileEdit_animationMode = TILE_EDIT_ANIMATION_MODE_SELECT;
+	tile_editor->getAnimationFrameControl()->tileEdit_animationMode = TILE_EDIT_ANIMATION_MODE_SELECT;
+	m_tileEdit_mode_auiToolBar->ToggleTool(m_tileEdit_tileSelect_tool->GetId(), true);
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_TileAnimation_Tool( wxCommandEvent& event )
+{
+	tile_editor->getAnimationSheetControl()->tileEdit_animationMode = TILE_EDIT_ANIMATION_MODE_ANIMATE;
+	tile_editor->getAnimationFrameControl()->tileEdit_animationMode = TILE_EDIT_ANIMATION_MODE_ANIMATE;
+	m_tileEdit_mode_auiToolBar->ToggleTool(m_tileEdit_tileAnimate_tool->GetId(), true);
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_PreviousFrame_Click( wxCommandEvent& event )
+{
+	int tset_id = tile_editor->getSelectedTileset();
+
+	if(tset_id < 0 || tset_id >= project->getTilesetCount())
+		return;
+
+	int tile_id = tile_editor->getSelectedTile();
+
+	if(tile_id < 0 || tile_id >= project->getTilesetNumTiles(tset_id))
+		return;
+
+	int new_offset = tile_editor->getAnimationFrameControl()->scroll_offset_x - 64;
+
+	tile_editor->getAnimationFrameControl()->scroll_offset_x = new_offset;
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_NextFrame_Click( wxCommandEvent& event )
+{
+	int tset_id = tile_editor->getSelectedTileset();
+
+	if(tset_id < 0 || tset_id >= project->getTilesetCount())
+		return;
+
+	int tile_id = tile_editor->getSelectedTile();
+
+	if(tile_id < 0 || tile_id >= project->getTilesetNumTiles(tset_id))
+		return;
+
+	int new_offset = tile_editor->getAnimationFrameControl()->scroll_offset_x + 64;
+
+	tile_editor->getAnimationFrameControl()->scroll_offset_x = new_offset;
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_PlayPreviewClick( wxCommandEvent& event )
+{
+	tile_editor->playPreview();
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_StopPreviewClick( wxCommandEvent& event )
+{
+	tile_editor->stopPreview();
+}
+
+
+//MASK
+
+void NirvanaEditor_MainFrame::OnTileEdit_newMaskClick( wxCommandEvent& event )
+{
+	int tset_id = tile_editor->getSelectedTileset();
+
+	if(tset_id < 0 || tset_id >= project->getTilesetCount())
+		return;
+
+	int n = 0;
+	wxString tmp_name = _("MASK") + wxString::Format(_("%i"), n);
+	for(int i = 0; i < project->getMaskCount(tset_id); i++)
+	{
+		if(i < 0)
+			continue;
+
+		wxString mask_name = wxString(project->getMaskName(tset_id, i));
+		if(mask_name.Upper().compare(tmp_name)==0)
+		{
+			n++;
+			tmp_name = _("MASK") + wxString::Format(_("%i"), n);
+			i = -1;
+		}
+	}
+
+	project->createMask(tset_id, tmp_name.ToStdString());
+	m_tileEdit_mask_listBox->AppendAndEnsureVisible(tmp_name);
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_deleteMaskClick( wxCommandEvent& event )
+{
+	int tset_id = tile_editor->getSelectedTileset();
+
+	if(tset_id < 0 || tset_id >= project->getTilesetCount())
+		return;
+
+	int mask_index = tile_editor->getSelectedMask();
+
+	if(mask_index < 0 && mask_index >= project->getMaskCount(tset_id))
+		return;
+
+	project->deleteMask(tset_id, mask_index);
+
+	m_tileEdit_mask_listBox->Clear();
+
+	Nirvana_Tileset n_tset = project->getTileset(tset_id);
+	for(int i = 0; i < n_tset.mask.size(); i++)
+	{
+		m_tileEdit_mask_listBox->AppendAndEnsureVisible(n_tset.mask[i].mask_name);
+	}
+
+	tile_editor->selectMask(_("[NULL]"));
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_maskIDChanged( wxCommandEvent& event )
+{
+	int tset_id = tile_editor->getSelectedTileset();
+
+	if(tset_id < 0 || tset_id >= project->getTilesetCount())
+		return;
+
+	int mask_index = tile_editor->getSelectedMask();
+
+	if(mask_index < 0 && mask_index >= project->getMaskCount(tset_id))
+		return;
+
+	project->setMaskName(tset_id, mask_index, event.GetString().ToStdString());
+
+	m_tileEdit_mask_listBox->SetString(mask_index, project->getMaskName(tset_id, mask_index));
+}
+
+void NirvanaEditor_MainFrame::OnEnterTileMaskSheet( wxMouseEvent& event )
+{
+	tile_editor->getMaskSheetControl()->stage_window_isActive = true;
+}
+
+void NirvanaEditor_MainFrame::OnLeaveTileMaskSheet( wxMouseEvent& event )
+{
+	tile_editor->getMaskSheetControl()->stage_window_isActive = false;
+}
+
+void NirvanaEditor_MainFrame::OnTileEdit_maskSelected( wxCommandEvent& event )
+{
+	int tset_id = tile_editor->getSelectedTileset();
+
+	if(tset_id < 0 || tset_id >= project->getTilesetCount())
+		return;
+
+	tile_editor->selectMask(event.GetString());
+
+	int mask_index = tile_editor->getSelectedMask();
+
+	if(mask_index < 0 || mask_index >= project->getMaskCount(tset_id))
+		return;
+
+	m_tileEdit_maskID_textCtrl->SetValue(project->getMaskName(tset_id, mask_index));
+}
+
+void NirvanaEditor_MainFrame::OnUpdateTileMaskUI( wxUpdateUIEvent& event )
+{
+	if(tile_editor->getMaskSheetControl()->tileEdit_Sheet_Update)
+	{
+		tile_editor->getMaskSheetControl()->tileEdit_Sheet_Update = false;
+
+		tile_editor->selectTile(tile_editor->getAnimationSheetControl()->tileEdit_selected_sheet_frame);
+		int selected_tileset = tile_editor->getSelectedTileset();
+		int selected_tile = tile_editor->getMaskSheetControl()->tileEdit_selected_sheet_frame;
+		int selected_mask = tile_editor->getSelectedMask();
+		bool mask_set = tile_editor->getMaskSheetControl()->tileEdit_mask_set;
+
+		if(selected_tileset >= 0 && selected_tileset < project->getTilesetCount())
+		{
+			if(selected_mask >= 0 && selected_mask < project->getMaskCount(selected_tileset))
+			{
+				project->setTileMask(selected_tileset, selected_mask, selected_tile, mask_set);
+				tile_editor->getMaskSheetControl()->tileEdit_tileMask = project->getTileset(selected_tileset).mask[selected_mask];
+			}
+		}
+	}
 }

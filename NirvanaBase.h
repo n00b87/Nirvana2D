@@ -11,11 +11,12 @@
 #include <wx/xrc/xmlres.h>
 #include <wx/intl.h>
 #include <wx/string.h>
-#include <wx/combobox.h>
+#include <wx/stattext.h>
 #include <wx/gdicmn.h>
 #include <wx/font.h>
 #include <wx/colour.h>
 #include <wx/settings.h>
+#include <wx/combobox.h>
 #include <wx/bmpbuttn.h>
 #include <wx/bitmap.h>
 #include <wx/image.h>
@@ -25,17 +26,14 @@
 #include <wx/panel.h>
 #include <wx/treectrl.h>
 #include <wx/statline.h>
-#include <wx/stattext.h>
-#include <wx/checkbox.h>
-#include <wx/scrolwin.h>
+#include <wx/checklst.h>
+#include <wx/textctrl.h>
+#include <wx/spinctrl.h>
 #include <wx/aui/auibook.h>
 #include <wx/aui/aui.h>
 #include <wx/aui/auibar.h>
 #include <wx/listbox.h>
-#include <wx/textctrl.h>
-#include <wx/spinctrl.h>
-#include <wx/bmpcbox.h>
-#include <wx/clrpicker.h>
+#include <wx/scrolwin.h>
 #include <wx/splitter.h>
 #include <wx/grid.h>
 #include <wx/simplebook.h>
@@ -60,10 +58,12 @@ class Nirvana_MainFrame : public wxFrame
 		wxSplitterWindow* m_splitter1;
 		wxPanel* m_panel1;
 		wxPanel* m_panel7;
-		wxComboBox* m_comboBox1;
-		wxBitmapButton* m_bpButton1;
+		wxStaticText* m_staticText53;
+		wxComboBox* m_activeLayer_comboBox;
+		wxBitmapButton* m_bpButton20;
+		wxStaticText* m_mapEdit_stageName_staticText;
 		wxPanel* m_panel8;
-		wxPanel* m_panel9;
+		wxPanel* m_mapEdit_map_panel;
 		wxPanel* m_panel2;
 		wxSplitterWindow* m_splitter2;
 		wxPanel* m_panel13;
@@ -73,20 +73,27 @@ class Nirvana_MainFrame : public wxFrame
 		wxBitmapButton* m_bpButton4;
 		wxBitmapButton* m_bpButton8;
 		wxBitmapButton* m_bpButton9;
-		wxTreeCtrl* m_treeCtrl1;
+		wxTreeCtrl* m_project_treeCtrl;
 		wxPanel* m_panel40;
 		wxButton* m_button9;
 		wxButton* m_button10;
-		wxStaticLine* m_staticline15;
-		wxStaticText* m_staticText42;
-		wxCheckBox* m_checkBox5;
-		wxCheckBox* m_checkBox6;
-		wxCheckBox* m_checkBox7;
+		wxButton* m_button15;
+		wxButton* m_button22;
 		wxStaticLine* m_staticline14;
-		wxScrolledWindow* m_layerProperties_panel;
-		wxFlexGridSizer* LayerProperties_Sizer;
+		wxBitmapButton* m_bpButton201;
+		wxBitmapButton* m_bpButton21;
+		wxBitmapButton* m_bpButton22;
+		wxCheckListBox* m_layerVisible_checkList;
+		wxStaticText* m_staticText48;
+		wxTextCtrl* m_layerName_textCtrl;
+		wxStaticText* m_staticText56;
+		wxSpinCtrlDouble* m_mapEdit_layerHScroll_spinCtrlDouble;
+		wxStaticText* m_staticText561;
+		wxSpinCtrlDouble* m_mapEdit_layerVScroll_spinCtrlDouble;
+		wxStaticText* m_staticText5611;
+		wxSpinCtrl* m_mapEdit_layerAlpha_spinCtrl;
 		wxPanel* m_panel14;
-		wxAuiNotebook* m_auinotebook2;
+		wxAuiNotebook* m_mapEdit_layerObjectTools_auinotebook;
 		wxPanel* m_mapEdit_tile_panel;
 		wxAuiToolBar* m_auiToolBar3;
 		wxAuiToolBarItem* m_tool18;
@@ -95,8 +102,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxAuiToolBarItem* m_tool21;
 		wxAuiToolBarItem* m_tool22;
 		wxAuiToolBarItem* m_tool23;
-		wxComboBox* m_comboBox3;
-		wxPanel* m_panel17;
+		wxPanel* m_mapEdit_tileSelect_panel;
 		wxPanel* m_mapEdit_sprite_panel;
 		wxAuiToolBar* m_auiToolBar1;
 		wxAuiToolBarItem* m_tool4;
@@ -107,16 +113,15 @@ class Nirvana_MainFrame : public wxFrame
 		wxAuiToolBarItem* m_tool1;
 		wxAuiToolBarItem* m_tool2;
 		wxAuiToolBarItem* m_tool3;
-		wxListBox* m_listBox2;
-		wxPanel* m_panel18;
-		wxPanel* m_panel19;
+		wxListBox* m_mapEdit_layerSprite_listBox;
+		wxPanel* m_mapEdit_sprite_preview_panel;
+		wxScrolledWindow* m_scrolledWindow2;
 		wxStaticText* m_staticText81;
 		wxTextCtrl* m_textCtrl2;
 		wxStaticText* m_staticText11;
 		wxComboBox* m_comboBox31;
 		wxStaticText* m_staticText7;
-		wxStaticText* m_staticText8;
-		wxBitmapButton* m_bpButton10;
+		wxComboBox* m_comboBox6;
 		wxStaticText* m_staticText5;
 		wxTextCtrl* m_textCtrl4;
 		wxStaticText* m_staticText6;
@@ -133,61 +138,52 @@ class Nirvana_MainFrame : public wxFrame
 		wxAuiToolBarItem* m_tool14;
 		wxAuiToolBarItem* m_tool15;
 		wxAuiToolBarItem* m_tool16;
-		wxListBox* m_listBox21;
+		wxListBox* m_mapEdit_collisionShape_listBox;
 		wxPanel* m_panel16;
-		wxPanel* m_panel171;
-		wxScrolledWindow* m_scrolledWindow1;
+		wxPanel* m_mapEdit_image_preview_panel;
 		wxStaticText* m_staticText82;
-		wxBitmapComboBox* m_bcomboBox1;
-		wxStaticText* m_staticText91;
-		wxColourPickerCtrl* m_colourPicker1;
-		wxStaticText* m_staticText12;
-		wxSpinCtrl* m_spinCtrl2;
-		wxStaticText* m_staticText13;
-		wxComboBox* m_comboBox4;
-		wxStaticText* m_staticText10;
-		wxSpinCtrlDouble* m_spinCtrlDouble2;
-		wxStaticText* m_staticText111;
-		wxSpinCtrlDouble* m_spinCtrlDouble3;
+		wxTextCtrl* m_textCtrl14;
+		wxBitmapButton* m_bpButton202;
+		wxStaticText* m_staticText562;
+		wxComboBox* m_comboBox7;
 		wxPanel* m_tileEdit_panel;
 		wxSplitterWindow* m_splitter3;
 		wxPanel* m_panel191;
-		wxButton* m_button1;
+		wxButton* m_newTileset_button;
 		wxButton* m_button2;
-		wxListBox* m_listBox3;
+		wxListBox* m_tileEdit_tileset_listBox;
 		wxPanel* m_panel20;
 		wxStaticText* m_staticText19;
-		wxTextCtrl* m_textCtrl6;
-		wxAuiNotebook* m_auinotebook4;
-		wxPanel* m_panel35;
+		wxTextCtrl* m_tileEdit_tilesetID_textCtrl;
+		wxStaticText* m_staticText55;
+		wxStaticText* m_tileSize_staticText;
+		wxAuiNotebook* m_tileEdit_tools_auinotebook;
+		wxPanel* m_tileEdit_tileAnimation_panel;
+		wxSplitterWindow* m_splitter6;
+		wxPanel* m_tileEdit_tileAnimation_middle_panel;
 		wxPanel* m_tileAnimation_tileSheet_panel;
 		wxBitmapButton* m_bpButton81;
 		wxPanel* m_tileAnimation_tileFrames_panel;
 		wxBitmapButton* m_bpButton91;
-		wxBitmapButton* m_bpButton15;
-		wxBitmapButton* m_bpButton14;
-		wxBitmapButton* m_bpButton16;
+		wxAuiToolBar* m_tileEdit_mode_auiToolBar;
+		wxAuiToolBarItem* m_tileEdit_tileSelect_tool;
+		wxAuiToolBarItem* m_tileEdit_tileAnimate_tool;
+		wxStaticText* m_staticText4211;
+		wxSpinCtrl* m_tileEdit_numFrames_spinCtrl;
+		wxStaticText* m_staticText251;
+		wxSpinCtrl* m_tileEdit_FPS_spinCtrl;
+		wxPanel* m_tileEdit_tileAnimation_Right_panel;
 		wxStaticText* m_staticText15;
 		wxPanel* m_tileAnimation_preview_panel;
 		wxBitmapButton* m_bpButton12;
 		wxBitmapButton* m_bpButton13;
-		wxStaticText* m_staticText16;
-		wxTextCtrl* m_textCtrl3;
-		wxStaticText* m_staticText17;
-		wxTextCtrl* m_textCtrl41;
-		wxStaticText* m_staticText18;
-		wxTextCtrl* m_textCtrl5;
-		wxPanel* m_panel36;
-		wxButton* m_button7;
-		wxButton* m_button8;
-		wxListBox* m_listBox6;
+		wxPanel* m_tileEdit_tileMask_panel;
+		wxButton* m_tileEdit_newMask_button;
+		wxButton* m_tileEdit_deleteMask_button;
+		wxListBox* m_tileEdit_mask_listBox;
 		wxStaticText* m_staticText36;
-		wxTextCtrl* m_textCtrl12;
+		wxTextCtrl* m_tileEdit_maskID_textCtrl;
 		wxStaticLine* m_staticline21;
-		wxAuiToolBar* m_auiToolBar6;
-		wxAuiToolBarItem* m_tool30;
-		wxAuiToolBarItem* m_tool31;
-		wxAuiToolBarItem* m_tool32;
 		wxPanel* m_tileMask_tileSheet_panel;
 		wxPanel* m_spriteEdit_panel;
 		wxSplitterWindow* m_splitter4;
@@ -199,7 +195,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxStaticText* m_staticText20;
 		wxTextCtrl* m_spriteEdit_spriteID_textCtrl;
 		wxStaticText* m_staticText21;
-		wxStaticText* m_staticText22;
+		wxStaticText* m_spriteEdit_frameSize_staticText;
 		wxAuiNotebook* m_spriteEdit_tools_auinotebook;
 		wxPanel* m_spriteEdit_spriteAnimation_panel;
 		wxStaticText* m_staticText23;
@@ -210,6 +206,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxPanel* m_panel42;
 		wxStaticText* m_staticText43;
 		wxTextCtrl* m_spriteEdit_animationID_textCtrl;
+		wxStaticLine* m_staticline9;
 		wxPanel* m_spriteAnimation_spriteSheet_panel;
 		wxBitmapButton* m_spriteEdit_previousFrame_bpButton;
 		wxPanel* m_spriteAnimation_frame_panel;
@@ -259,10 +256,51 @@ class Nirvana_MainFrame : public wxFrame
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnMainTabChanged( wxAuiNotebookEvent& event ) { event.Skip(); }
-		virtual void OnTestButtonClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnActiveLayerSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnEnterMapView( wxMouseEvent& event ) { event.Skip(); }
+		virtual void OnLeaveMapView( wxMouseEvent& event ) { event.Skip(); }
 		virtual void OnProjectPropertiesTabChanged( wxAuiNotebookEvent& event ) { event.Skip(); }
+		virtual void OnNewStage( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnDeleteStage( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_StageSettingsClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_CopyStageClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnProjectItemActivated( wxTreeEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_NewLayerClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_CopyLayerClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShowAllLayersClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_HideAllLayersClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_LayerUpClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_LayerDownClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_LayerDeleteClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnLayerCheckListSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_LayerNameChange( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_LayerHScroll( wxSpinDoubleEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_LayerVScroll( wxSpinDoubleEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_LayerAlpha( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnMapEditToolsTabChanged( wxAuiNotebookEvent& event ) { event.Skip(); }
+		virtual void OnNewTilesetClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnDeleteTilesetClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_TilesetSelected( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_TileIDChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnTileEditor_Edit_Changed( wxAuiNotebookEvent& event ) { event.Skip(); }
+		virtual void OnUpdateTileAnimationUI( wxUpdateUIEvent& event ) { event.Skip(); }
+		virtual void OnEnterTileAnimationSheet( wxMouseEvent& event ) { event.Skip(); }
+		virtual void OnLeaveTileAnimationSheet( wxMouseEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_PreviousFrame_Click( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_NextFrame_Click( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_TileSelect_Tool( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_TileAnimation_Tool( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_NumFramesChange( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_FPSChanged( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_PlayPreviewClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_StopPreviewClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnUpdateTileMaskUI( wxUpdateUIEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_newMaskClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_deleteMaskClick( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_maskSelected( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnTileEdit_maskIDChanged( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnEnterTileMaskSheet( wxMouseEvent& event ) { event.Skip(); }
+		virtual void OnLeaveTileMaskSheet( wxMouseEvent& event ) { event.Skip(); }
 		virtual void OnNewSpriteClicked( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnDeleteSpriteClicked( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_Sprite_Selected( wxCommandEvent& event ) { event.Skip(); }
@@ -291,6 +329,10 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnSpriteEdit_collisionBox_Y_spinCtrl( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_collisionBox_Width_spinCtrl( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_collisionBox_Height_spinCtrl( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnSpriteEdit_collisionPolygon_gridCellChange( wxGridEvent& event ) { event.Skip(); }
+		virtual void OnSpriteEdit_collisionCircle_X_spinCtrl( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnSpriteEdit_collisionCircle_Y_spinCtrl( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnSpriteEdit_collisionCircle_Radius_spinCtrl( wxSpinEvent& event ) { event.Skip(); }
 
 
 	public:
@@ -301,7 +343,7 @@ class Nirvana_MainFrame : public wxFrame
 
 		void m_splitter1OnIdle( wxIdleEvent& )
 		{
-			m_splitter1->SetSashPosition( 500 );
+			m_splitter1->SetSashPosition( 646 );
 			m_splitter1->Disconnect( wxEVT_IDLE, wxIdleEventHandler( Nirvana_MainFrame::m_splitter1OnIdle ), NULL, this );
 		}
 
@@ -315,6 +357,12 @@ class Nirvana_MainFrame : public wxFrame
 		{
 			m_splitter3->SetSashPosition( 251 );
 			m_splitter3->Disconnect( wxEVT_IDLE, wxIdleEventHandler( Nirvana_MainFrame::m_splitter3OnIdle ), NULL, this );
+		}
+
+		void m_splitter6OnIdle( wxIdleEvent& )
+		{
+			m_splitter6->SetSashPosition( -100 );
+			m_splitter6->Disconnect( wxEVT_IDLE, wxIdleEventHandler( Nirvana_MainFrame::m_splitter6OnIdle ), NULL, this );
 		}
 
 		void m_splitter4OnIdle( wxIdleEvent& )
@@ -340,18 +388,15 @@ class MyDialog1 : public wxDialog
 
 	protected:
 		wxPanel* m_panel40;
-		wxPanel* m_panel41;
-		wxStaticText* m_staticText43;
-		wxStaticLine* m_staticline10;
-		wxBitmapButton* m_bpButton29;
-		wxBitmapButton* m_bpButton30;
-		wxStaticLine* m_staticline11;
-		wxBitmapButton* m_bpButton31;
-		wxStaticLine* m_staticline12;
 		wxStaticText* m_staticText45;
-		wxTextCtrl* m_textCtrl12;
-		wxStaticLine* m_staticline13;
-		wxCheckBox* m_checkBox8;
+		wxTextCtrl* m_textCtrl9;
+		wxStaticLine* m_staticline5;
+		wxBitmapButton* m_bpButton14;
+		wxBitmapButton* m_bpButton15;
+		wxStaticLine* m_staticline6;
+		wxBitmapButton* m_bpButton16;
+		wxStaticLine* m_staticline7;
+		wxCheckListBox* m_checkList3;
 
 	public:
 
@@ -392,6 +437,197 @@ class NewSprite_Dialog : public wxDialog
 		NewSprite_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("New Sprite"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 603,461 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~NewSprite_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class NewTileset_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class NewTileset_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText39;
+		wxTextCtrl* m_tilesetID_textCtrl;
+		wxStaticText* m_staticText41;
+		wxSpinCtrl* m_tileWidth_spinCtrl;
+		wxStaticText* m_staticText42;
+		wxSpinCtrl* m_tileHeight_spinCtrl;
+		wxStaticText* m_staticText40;
+		wxSearchCtrl* m_tileSheet_searchCtrl;
+		wxListBox* m_tileSheet_listBox;
+		wxButton* m_newTileset_ok_button;
+		wxButton* m_newTileset_cancel_button;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnSearch( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		NewTileset_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("New Tileset"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 603,461 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~NewTileset_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class NewStage_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class NewStage_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxPanel* m_panel45;
+		wxStaticText* m_staticText46;
+		wxTextCtrl* m_stageID_textCtrl;
+		wxStaticText* m_staticText4721;
+		wxSpinCtrl* m_tileWidth_spinCtrl;
+		wxStaticText* m_staticText47211;
+		wxSpinCtrl* m_tileHeight_spinCtrl;
+		wxStaticText* m_staticText472;
+		wxSpinCtrl* m_width_spinCtrl;
+		wxStaticText* m_staticText473;
+		wxSpinCtrl* m_height_spinCtrl;
+		wxButton* m_button16;
+		wxButton* m_button17;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		NewStage_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("New Stage"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 514,310 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~NewStage_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class NewProject_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class NewProject_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxPanel* m_panel45;
+		wxStaticText* m_staticText46;
+		wxTextCtrl* m_textCtrl11;
+		wxStaticText* m_staticText472;
+		wxSpinCtrl* m_spinCtrl182;
+		wxStaticText* m_staticText473;
+		wxSpinCtrl* m_spinCtrl183;
+		wxButton* m_button16;
+		wxButton* m_button17;
+
+	public:
+
+		NewProject_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("New Project"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 514,216 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~NewProject_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class NewLayer_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class NewLayer_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText55;
+		wxTextCtrl* m_layerName_textCtrl;
+		wxStaticText* m_staticText54;
+		wxComboBox* m_layerType_comboBox;
+		wxSimplebook* m_layerType_simplebook;
+		wxPanel* m_layerType_noTileset_panel;
+		wxPanel* m_layerType_tileset_panel;
+		wxStaticText* m_staticText551;
+		wxSearchCtrl* m_tileset_searchCtrl;
+		wxListBox* m_tileset_listBox;
+		wxButton* m_button20;
+		wxButton* m_button21;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnLayerTypeSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSearch( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		NewLayer_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("New Layer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 554,377 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~NewLayer_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class DeleteStage_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class DeleteStage_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_msg_staticText;
+		wxButton* m_button23;
+		wxButton* m_button24;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnDelete( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		DeleteStage_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 341,187 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~DeleteStage_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class StageProperties_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class StageProperties_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxPanel* m_panel45;
+		wxStaticText* m_staticText46;
+		wxTextCtrl* m_stageID_textCtrl;
+		wxStaticText* m_staticText62;
+		wxStaticText* m_tileWidth_staticText;
+		wxStaticText* m_staticText621;
+		wxStaticText* m_tileHeight_staticText;
+		wxStaticText* m_staticText472;
+		wxSpinCtrl* m_width_spinCtrl;
+		wxStaticText* m_staticText473;
+		wxSpinCtrl* m_height_spinCtrl;
+		wxButton* m_button16;
+		wxButton* m_button17;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		StageProperties_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Stage Properties"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 514,282 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~StageProperties_Dialog();
 
 };
 

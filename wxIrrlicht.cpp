@@ -228,6 +228,12 @@ void wxIrrlicht::Render() {
         return;
 	}//if
 
+	if(control_id == NV_MAP_EDIT_MAP_SHEET || control_id == NV_MAP_EDIT_TILE_SHEET)
+	{
+		if(!mapEdit_hasContext)
+			return;
+	}
+
 
     if(this->GetScreenRect().Contains( wxGetMousePosition() ))
         m_windowIsActive = true;
@@ -275,7 +281,7 @@ void wxIrrlicht::OnRender() {
 		m_pDriver->beginScene(false, false, SColor(255,170,170,170));
 
 		setActiveCanvas(back_buffer);
-		setClearColor(rgba(120,120,120,255));
+		setClearColor(rgba(0,0,0,0));
 		clearCanvas();
 
 		//m_pDriver->draw2DImage(test_texture, irr::core::vector2d(0,0));
@@ -314,7 +320,7 @@ void wxIrrlicht::OnRender() {
 					int off_y = canvas[canvas_id].offset.Y;
 					m_pDriver->setRenderTarget(canvas[canvas_id].texture, true, true);
 					m_pDriver->clearBuffers(true, true, true, irr::video::SColor(0,0,0,0));
-					util_drawTileMap(canvas[canvas_id].tilemap, 0, 0, vpw, vph, off_x, off_y);
+					drawTileMap(canvas[canvas_id].tilemap, 0, 0, vpw, vph, off_x, off_y);
 				}
 
 				if(test_init)
@@ -369,6 +375,7 @@ void wxIrrlicht::OnPostRender() {
 }//OnPostRender()
 
 void wxIrrlicht::OnPaint(wxPaintEvent& event){
+    mapEdit_getContext();
     Render();
     wxPaintDC paint_dc(this);
 
@@ -491,6 +498,7 @@ void wxIrrlicht::OnKey(wxKeyEvent& event) {
 
     sevt.KeyInput.Shift = event.ShiftDown();
     sevt.KeyInput.Control = event.CmdDown();
+    VIEW_KEY_CTRL = event.ControlDown();
 #if wxUSE_UNICODE
     sevt.KeyInput.Char = event.GetUnicodeKey();
 #else
@@ -611,6 +619,30 @@ void wxIrrlicht::OnUpdate()
 
 		case NV_TILE_EDIT_ANIMATION_SHEET:
 			UpdateTileAnimationSheet();
+			break;
+
+		case NV_TILE_EDIT_ANIMATION_FRAME:
+			UpdateTileAnimationFrame();
+			break;
+
+		case NV_TILE_EDIT_ANIMATION_PREVIEW:
+			UpdateTileAnimationPreview();
+			break;
+
+		case NV_TILE_EDIT_MASK_SHEET:
+			UpdateTileMask();
+			break;
+
+		case NV_MAP_EDIT_MAP_SHEET:
+			UpdateStageSheet();
+			break;
+
+		case NV_MAP_EDIT_TILE_SHEET:
+			UpdateStageTileSelect();
+			break;
+
+		case NV_MAP_EDIT_SPRITE_PREVIEW:
+			UpdateStageSpritePreview();
 			break;
 	}
 
@@ -846,8 +878,8 @@ void wxIrrlicht::UpdateSpriteAnimationFrame()
 
 						if(mouse_state.RightIsDown())
 						{
-							std::cout << "DEBUG: ani_frame=" << i << "   sheet_frame=" << sheet_frame << "   src=(" << sheet_x << ", " << sheet_y << ") ";
-							std::cout << "sheet=(" << sheet_w << ", " << frames_per_row << ") frame=(" << current_frame_width << ", " << current_frame_height << ") " << std::endl;
+							//std::cout << "DEBUG: ani_frame=" << i << "   sheet_frame=" << sheet_frame << "   src=(" << sheet_x << ", " << sheet_y << ") ";
+							//std::cout << "sheet=(" << sheet_w << ", " << frames_per_row << ") frame=(" << current_frame_width << ", " << current_frame_height << ") " << std::endl;
 						}
 
 						drawImage_BlitEx_SW(current_sheet_image, fx, 0, 64, 64, sheet_x, sheet_y, current_frame_width, current_frame_height);
@@ -936,6 +968,16 @@ void wxIrrlicht::UpdateSpriteAnimationPreview()
 	return;
 }
 
+bool wxIrrlicht::collisionPointIsSelected(int pt_index)
+{
+	for(int i = 0; i < collision_selected_points.size(); i++)
+	{
+		if(collision_selected_points[i] == pt_index)
+			return true;
+	}
+	return false;
+}
+
 void wxIrrlicht::collisionEdit_select()
 {
 	wxMouseState  mouse_state = wxGetMouseState();
@@ -957,6 +999,22 @@ void wxIrrlicht::collisionEdit_select()
 
 	int box_w = (collision_physics_obj.box_width*img_scale);
 	int box_h = (collision_physics_obj.box_height*img_scale);
+
+	int circle_radius = collision_physics_obj.radius*img_scale;
+	int circle_center_x = img_x + (collision_physics_obj.offset_x*img_scale) + (img_w/2);
+	int circle_center_y = img_y + (collision_physics_obj.offset_y*img_scale) + (img_h/2);
+
+	int circle_ux = circle_center_x;
+	int circle_uy = circle_center_y - circle_radius;
+
+	int circle_dx = circle_center_x;
+	int circle_dy = circle_center_y + circle_radius;
+
+	int circle_lx = circle_center_x - circle_radius;
+	int circle_ly = circle_center_y;
+
+	int circle_rx = circle_center_x + circle_radius;
+	int circle_ry = circle_center_y;
 
 	irr::core::vector2di mouse_pos(px, py);
 
@@ -1008,6 +1066,99 @@ void wxIrrlicht::collisionEdit_select()
 			}
 		}
 		break;
+
+		case SPRITE_SHAPE_CIRCLE:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						float u_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(circle_ux, circle_uy)); //need to factor in offset and box size
+						float d_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(circle_dx, circle_dy));
+						float l_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(circle_lx, circle_ly));
+						float r_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(circle_rx, circle_ry));
+
+						//std::cout << "DBG: " << circle_center_x << ", " << circle_center_y << std::endl;
+						//std::cout << "dist: " << ul_distance << ", " << ll_distance << ", " << ur_distance << ", " << lr_distance << std::endl;
+
+						int select_tolerance = 1;
+						collision_circleShapeSelect_u = u_distance < (img_scale+select_tolerance);
+						collision_circleShapeSelect_d = collision_circleShapeSelect_u ? false : d_distance < (img_scale+select_tolerance);
+						collision_circleShapeSelect_l = collision_circleShapeSelect_d ? false : l_distance < (img_scale+select_tolerance);
+						collision_circleShapeSelect_r = collision_circleShapeSelect_l ? false : r_distance < (img_scale+select_tolerance);
+
+						if(collision_circleShapeSelect_u)
+						{
+							//std::cout << "upper left selected" << std::endl;
+						}
+						else if(collision_circleShapeSelect_d)
+						{
+						}
+						else if(collision_circleShapeSelect_l)
+						{
+						}
+						else if(collision_circleShapeSelect_r)
+						{
+						}
+					}
+				}
+			}
+		}
+		break;
+
+		case SPRITE_SHAPE_POLYGON:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						float pt_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(circle_ux, circle_uy)); //need to factor in offset and box size
+						int select_tolerance = 1;
+
+						if(!VIEW_KEY_CTRL)
+							collision_selected_points.clear();
+
+						for(int i = 0; i < collision_physics_obj.points.size(); i++)
+						{
+							int point_x = img_x + collision_physics_obj.points[i].X * img_scale;
+							int point_y = img_y + collision_physics_obj.points[i].Y * img_scale;
+							pt_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(point_x, point_y));
+
+							bool point_select = pt_distance < (img_scale+select_tolerance);
+							if(point_select)
+							{
+								if(!collisionPointIsSelected(i))
+									collision_selected_points.push_back(i);
+
+								//std::cout << "VCTRL: " << (int)VIEW_KEY_CTRL << std::endl;
+
+								if(!VIEW_KEY_CTRL)
+									break;
+							}
+						}
+					}
+				}
+			}
+		}
+		break;
 	}
 }
 
@@ -1032,6 +1183,22 @@ void wxIrrlicht::collisionEdit_boxSelect()
 
 	int box_w = (collision_physics_obj.box_width*img_scale);
 	int box_h = (collision_physics_obj.box_height*img_scale);
+
+	int circle_radius = collision_physics_obj.radius*img_scale;
+	int circle_center_x = img_x + (collision_physics_obj.offset_x*img_scale) + (img_w/2);
+	int circle_center_y = img_y + (collision_physics_obj.offset_y*img_scale) + (img_h/2);
+
+	int circle_ux = circle_center_x;
+	int circle_uy = circle_center_y - circle_radius;
+
+	int circle_dx = circle_center_x;
+	int circle_dy = circle_center_y + circle_radius;
+
+	int circle_lx = circle_center_x - circle_radius;
+	int circle_ly = circle_center_y;
+
+	int circle_rx = circle_center_x + circle_radius;
+	int circle_ry = circle_center_y;
 
 	irr::core::vector2di mouse_pos(px, py);
 
@@ -1126,6 +1293,143 @@ void wxIrrlicht::collisionEdit_boxSelect()
 			}
 		}
 		break;
+
+		case SPRITE_SHAPE_CIRCLE:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						drag_start = wxPoint(px, py);
+					}
+				}
+				else if(left_drag_init)
+				{
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						this->SetFocusFromKbd();
+
+						setColor(rgb(255,255,255));
+						drawRect(drag_start.x, drag_start.y, px-drag_start.x, py-drag_start.y);
+
+						float u_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(circle_ux, circle_uy)); //need to factor in offset and box size
+						float d_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(circle_dx, circle_dy));
+						float l_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(circle_lx, circle_ly));
+						float r_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(circle_rx, circle_ry));
+
+						collision_circleShapeSelect_u = false;
+						collision_circleShapeSelect_d = false;
+						collision_circleShapeSelect_l = false;
+						collision_circleShapeSelect_r = false;
+
+						if( ( (circle_ux >= drag_start.x && circle_ux <= px) || (circle_ux >= px && circle_ux <= drag_start.x) ) &&
+							( (circle_uy >= drag_start.y && circle_uy <= py) || (circle_uy >= py && circle_uy <= drag_start.y) ) )
+							collision_circleShapeSelect_u = true;
+
+						if( ( (circle_dx >= drag_start.x && circle_dx <= px) || (circle_dx >= px && circle_dx <= drag_start.x) ) &&
+							( (circle_dy >= drag_start.y && circle_dy <= py) || (circle_dy >= py && circle_dy <= drag_start.y) ) )
+							collision_circleShapeSelect_d = true;
+
+						if( ( (circle_lx >= drag_start.x && circle_lx <= px) || (circle_lx >= px && circle_lx <= drag_start.x) ) &&
+							( (circle_ly >= drag_start.y && circle_ly <= py) || (circle_ly >= py && circle_ly <= drag_start.y) ) )
+							collision_circleShapeSelect_l = true;
+
+						if( ( (circle_rx >= drag_start.x && circle_rx <= px) || (circle_rx >= px && circle_rx <= drag_start.x) ) &&
+							( (circle_ry >= drag_start.y && circle_ry <= py) || (circle_ry >= py && circle_ry <= drag_start.y) ) )
+							collision_circleShapeSelect_r = true;
+
+						if((collision_circleShapeSelect_u || collision_circleShapeSelect_d || collision_circleShapeSelect_l || collision_circleShapeSelect_r) &&
+						 (!(collision_circleShapeSelect_u && collision_circleShapeSelect_d && collision_circleShapeSelect_l && collision_circleShapeSelect_r)))
+						{
+							bool u = collision_circleShapeSelect_u;
+							bool d = collision_circleShapeSelect_d;
+							bool l = collision_circleShapeSelect_l;
+							bool r = collision_circleShapeSelect_r;
+
+							collision_circleShapeSelect_u = false;
+							collision_circleShapeSelect_d = false;
+							collision_circleShapeSelect_l = false;
+							collision_circleShapeSelect_r = false;
+
+							float min_dist = u ? u_distance : 99999;
+							min_dist = d ? (d_distance < min_dist ? d_distance : min_dist) : min_dist;
+							min_dist = l ? (l_distance < min_dist ? l_distance : min_dist) : min_dist;
+							min_dist = r ? (r_distance < min_dist ? r_distance : min_dist) : min_dist;
+
+							if(min_dist == u_distance && u)
+								collision_circleShapeSelect_u = true;
+							else if(min_dist == d_distance && d)
+								collision_circleShapeSelect_d = true;
+							else if(min_dist == l_distance && l)
+								collision_circleShapeSelect_l = true;
+							else if(min_dist == r_distance && r)
+								collision_circleShapeSelect_r = true;
+						}
+
+					}
+				}
+			}
+		}
+		break;
+
+		case SPRITE_SHAPE_POLYGON:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						drag_start = wxPoint(px, py);
+					}
+				}
+				else if(left_drag_init)
+				{
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						this->SetFocusFromKbd();
+
+						setColor(rgb(255,255,255));
+						drawRect(drag_start.x, drag_start.y, px-drag_start.x, py-drag_start.y);
+
+						collision_selected_points.clear();
+
+						for(int i = 0; i < collision_physics_obj.points.size(); i++)
+						{
+							int point_x = img_x + collision_physics_obj.points[i].X * img_scale;
+							int point_y = img_y + collision_physics_obj.points[i].Y * img_scale;
+							float pt_distance = mouse_pos.getDistanceFrom(irr::core::vector2di(point_x, point_y)); //need to factor in offset and box size
+
+							if( ( (point_x >= drag_start.x && point_x <= px) || (point_x >= px && point_x <= drag_start.x) ) &&
+								( (point_y >= drag_start.y && point_y <= py) || (point_y >= py && point_y <= drag_start.y) ) )
+							{
+								if(!collisionPointIsSelected(i))
+								{
+									collision_selected_points.push_back(i);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		break;
 	}
 }
 
@@ -1214,7 +1518,112 @@ void wxIrrlicht::collisionEdit_move()
 						}
 
 						collision_object_modified = true;
-						parent_window->Refresh();
+						parent_window->UpdateWindowUI();
+					}
+				}
+			}
+		}
+		break;
+
+		case SPRITE_SHAPE_CIRCLE:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						drag_start = wxPoint(px, py);
+						collision_move_start_offset.set(collision_physics_obj.offset_x, collision_physics_obj.offset_y);
+						collision_move_start_radius = collision_physics_obj.radius;
+					}
+				}
+				else if(left_drag_init)
+				{
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						this->SetFocusFromKbd();
+
+						if(collision_circleShapeSelect_u && collision_circleShapeSelect_d && collision_circleShapeSelect_l && collision_circleShapeSelect_r)
+						{
+							collision_physics_obj.offset_x = collision_move_start_offset.X + (px - drag_start.x)/img_scale;
+							collision_physics_obj.offset_y = collision_move_start_offset.Y + (py - drag_start.y)/img_scale;
+						}
+						else if(collision_circleShapeSelect_u)
+						{
+							collision_physics_obj.radius = collision_move_start_radius - (py - drag_start.y)/img_scale;
+						}
+						else if(collision_circleShapeSelect_d)
+						{
+							collision_physics_obj.radius = collision_move_start_radius + (py - drag_start.y)/img_scale;
+						}
+						else if(collision_circleShapeSelect_l)
+						{
+							collision_physics_obj.radius = collision_move_start_radius - (px - drag_start.x)/img_scale;
+						}
+						else if(collision_circleShapeSelect_r)
+						{
+							collision_physics_obj.radius = collision_move_start_radius + (px - drag_start.x)/img_scale;
+						}
+
+						collision_object_modified = true;
+						parent_window->UpdateWindowUI();
+					}
+				}
+			}
+		}
+		break;
+
+		case SPRITE_SHAPE_POLYGON:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						drag_start = wxPoint(px, py);
+						collision_move_start_offset.set(collision_physics_obj.offset_x, collision_physics_obj.offset_y);
+						collision_move_start_points.clear();
+
+						for(int i = 0; i < collision_physics_obj.points.size(); i++)
+						{
+							collision_move_start_points.push_back(collision_physics_obj.points[i]);
+						}
+					}
+				}
+				else if(left_drag_init)
+				{
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						this->SetFocusFromKbd();
+
+						int mouse_move_x = (px - drag_start.x)/img_scale;
+						int mouse_move_y = (py - drag_start.y)/img_scale;
+
+						for(int i = 0; i < collision_selected_points.size(); i++)
+						{
+							int pt_index = collision_selected_points[i];
+							collision_physics_obj.points[pt_index].X = collision_move_start_points[pt_index].X + mouse_move_x;
+							collision_physics_obj.points[pt_index].Y = collision_move_start_points[pt_index].Y + mouse_move_y;
+						}
+
+						collision_object_modified = true;
+						parent_window->UpdateWindowUI();
 					}
 				}
 			}
@@ -1225,6 +1634,76 @@ void wxIrrlicht::collisionEdit_move()
 
 void wxIrrlicht::collisionEdit_draw()
 {
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+	int img_scale = ph/current_frame_height;
+	int img_w = current_frame_width*img_scale;
+	int img_h = current_frame_height*img_scale;
+	int img_x = pw/2 - img_w/2;
+	int img_y = ph/2 - img_h/2;
+
+	irr::core::vector2di mouse_pos(px, py);
+
+	switch(collision_physics_obj.shape_type)
+	{
+		case SPRITE_SHAPE_POLYGON:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						if(!collision_poly_draw_flag)
+						{
+							collision_selected_points.clear();
+
+							collision_physics_obj.points.clear();
+
+							collision_poly_draw_flag = true;
+						}
+
+						collision_physics_obj.points.push_back(irr::core::vector2di((px-img_x)/img_scale, (py-img_y)/img_scale));
+
+						collision_object_modified = true;
+						parent_window->UpdateWindowUI();
+					}
+				}
+			}
+			else if(mouse_state.RightIsDown() && (!right_drag_init))
+			{
+				right_drag_init = true;
+				//must be atleast a triangle
+				if(collision_physics_obj.points.size() < 3)
+				{
+					//collision_physics_obj.points.push_back(collision_physics_obj.points[0]);
+					for(int i = collision_physics_obj.points.size(); i < 3; i++)
+					{
+						collision_physics_obj.points.push_back(irr::core::vector2di(0, 0));
+					}
+				}
+
+				collision_poly_draw_flag = false;
+
+				collision_object_modified = true;
+				parent_window->Refresh();
+			}
+		}
+		break;
+	}
 }
 
 void wxIrrlicht::UpdateSpriteCollision()
@@ -1248,6 +1727,11 @@ void wxIrrlicht::UpdateSpriteCollision()
 	if( (!mouse_state.LeftIsDown()) && left_drag_init )
 	{
 		left_drag_init = false;
+	}
+
+	if( (!mouse_state.RightIsDown()) && right_drag_init )
+	{
+		right_drag_init = false;
 	}
 
 	setActiveCanvas(collision_canvas);
@@ -1295,9 +1779,12 @@ void wxIrrlicht::UpdateSpriteCollision()
 	}
 
 	//Render Collision Shape
+	int ipx = 3; //img_scale;
+
 	switch(collision_physics_obj.shape_type)
 	{
 		case SPRITE_SHAPE_BOX:
+		{
 			int box_x = img_x + (collision_physics_obj.offset_x*img_scale);
 			int box_y = img_y + (collision_physics_obj.offset_y*img_scale);
 			int box_w = collision_physics_obj.box_width * img_scale;
@@ -1305,8 +1792,6 @@ void wxIrrlicht::UpdateSpriteCollision()
 
 			setColor(rgb(0,0,0));
 			drawRect(box_x, box_y, box_w, box_h);
-
-			int ipx = 3; //img_scale;
 
 			setColor( collision_boxShapeSelect_ul ? rgb(0,255, 0) : rgb(0, 0, 0) );
 			drawRectFill(box_x-ipx, box_y-ipx, ipx*2, ipx*2);
@@ -1319,6 +1804,96 @@ void wxIrrlicht::UpdateSpriteCollision()
 
 			setColor( collision_boxShapeSelect_lr ? rgb(0,255, 0) : rgb(0, 0, 0) );
 			drawRectFill((box_x+box_w)-ipx, (box_y+box_h)-ipx, ipx*2, ipx*2);
+		}
+		break;
+
+		case SPRITE_SHAPE_CIRCLE:
+		{
+			int circle_radius = (((int)collision_physics_obj.radius)*img_scale);
+			int circle_x = img_x + (img_w/2) + (collision_physics_obj.offset_x*img_scale);
+			int circle_y = img_y + (img_h/2) + (collision_physics_obj.offset_y*img_scale);
+
+			int pt_u_x = circle_x;
+			int pt_u_y = circle_y-circle_radius;
+
+			int pt_d_x = circle_x;
+			int pt_d_y = circle_y+circle_radius;
+
+			int pt_l_x = circle_x-circle_radius;
+			int pt_l_y = circle_y;
+
+			int pt_r_x = circle_x+circle_radius;
+			int pt_r_y = circle_y;
+
+			setColor(rgb(0,0,0));
+			drawCircle(circle_x, circle_y, circle_radius);
+
+			setColor( collision_circleShapeSelect_u ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_u_x-ipx, pt_u_y-ipx, ipx*2, ipx*2);
+
+			setColor( collision_circleShapeSelect_d ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_d_x-ipx, pt_d_y-ipx, ipx*2, ipx*2);
+
+			setColor( collision_circleShapeSelect_l ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_l_x-ipx, pt_l_y-ipx, ipx*2, ipx*2);
+
+			setColor( collision_circleShapeSelect_r ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_r_x-ipx, pt_r_y-ipx, ipx*2, ipx*2);
+		}
+		break;
+
+		case SPRITE_SHAPE_POLYGON:
+		{
+			if(collision_physics_obj.points.size() == 0)
+				break;
+
+			int prev_x = 0;
+			int prev_y = 0;
+
+			for(int i = 0; i < collision_physics_obj.points.size(); i++)
+			{
+				int pt_x = img_x + (collision_physics_obj.points[i].X*img_scale);
+				int pt_y = img_y + (collision_physics_obj.points[i].Y*img_scale);
+
+				setColor(rgb(0,0,0));
+
+				if(i > 0)
+				{
+					drawLine(prev_x, prev_y, pt_x, pt_y);
+				}
+
+				setColor(rgb(0,0,0));
+				drawRectFill(pt_x-ipx, pt_y-ipx, ipx*2, ipx*2);
+
+				prev_x = pt_x;
+				prev_y = pt_y;
+			}
+
+			if(collision_poly_draw_flag)
+			{
+				drawLine(prev_x, prev_y, px, py);
+				drawRectFill(px-ipx, py-ipx, ipx*2, ipx*2);
+			}
+			else if(collision_physics_obj.points.size() >= 3)
+			{
+				int num_points = collision_physics_obj.points.size();
+				int pt_x = img_x + collision_physics_obj.points[0].X*img_scale;
+				int pt_y = img_y + collision_physics_obj.points[0].Y*img_scale;
+				drawLine(prev_x, prev_y, pt_x, pt_y);
+				drawRectFill(pt_x-ipx, pt_y-ipx, ipx*2, ipx*2);
+			}
+
+			//draw Selected
+			for(int i = 0; i < collision_selected_points.size(); i++)
+			{
+				int pt_index = collision_selected_points[i];
+				int pt_x = img_x + (collision_physics_obj.points[pt_index].X*img_scale);
+				int pt_y = img_y + (collision_physics_obj.points[pt_index].Y*img_scale);
+
+				setColor(rgb(0,255,0));
+				drawRectFill(pt_x-ipx, pt_y-ipx, ipx*2, ipx*2);
+			}
+		}
 		break;
 	}
 
@@ -1327,8 +1902,8 @@ void wxIrrlicht::UpdateSpriteCollision()
 
 void wxIrrlicht::UpdateTileAnimationSheet()
 {
-	//if(current_sheet_image < 0 || current_sheet_image >= image.size())
-	//	return;
+	if(current_sheet_image < 0 || current_sheet_image >= image.size())
+		return;
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -1338,49 +1913,71 @@ void wxIrrlicht::UpdateTileAnimationSheet()
 	int pw = this->GetSize().GetWidth();
 	int ph = this->GetSize().GetHeight();
 
-	if( px < 0 || px >= pw || py < 0 || py >= ph)
-		stage_window_isActive = false;
-	else
-		stage_window_isActive = true;
+	if(stage_window_isActive)
+	{
+		this->SetFocusFromKbd();
+	}
 
 
 	setActiveCanvas(sheet_canvas);
 	clearCanvas();
 
-	setColor(rgb(0,255,0));
-	drawRect(20, 20, 100, 100);
+	if(VIEW_KEY_W)
+	{
+		scroll_offset_y -= scroll_speed;
+	}
 
-	//std::cout << "this is a test" << std::endl;
+	if(VIEW_KEY_A)
+	{
+		scroll_offset_x -= scroll_speed;
+	}
 
-	return;
+	if(VIEW_KEY_S)
+	{
+		scroll_offset_y += scroll_speed;
+	}
 
-	int bx = (px / current_frame_width) *  current_frame_width;
-	int by = (py / current_frame_height) *  current_frame_height;
+	if(VIEW_KEY_D)
+	{
+		scroll_offset_x += scroll_speed;
+	}
 
-	double w = 0;
-	double h = 0;
+	int bx = ( (px+scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)scroll_offset_x;
+	int off_y_i = (int)scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+	int img_x = -scroll_offset_x;
+	int img_y = -scroll_offset_y;
+	int img_w = 0;
+	int img_h = 0;
 
 	if(imageExists(current_sheet_image))
 	{
-		getImageSize(current_sheet_image, &w, &h);
+		getImageSizeI(current_sheet_image, &img_w, &img_h);
+
 		//m_pDriver->draw2DImage(image[current_sheet_image].image, irr::core::vector2di(0,0),);
-		drawImage_BlitEx_SW(current_sheet_image, 0, 0, (int)w, (int)h, 0, 0, (int)w, (int)h);
+		drawImage_BlitEx_SW(current_sheet_image, img_x, img_y, (int)img_w, (int)img_h, 0, 0, (int)img_w, (int)img_h);
 		//drawImage_Rotozoom(current_sheet_image, 0, 0, 0, 1, 1);
 	}
 
-	if( px >= 0 && px < pw && py >= 0 && py < ph )
+	if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
 	{
-
-		double off_x = 0;
-		double off_y = 0;
-
-		getCanvasOffset(sheet_canvas, &off_x, &off_y);
-
-		int off_x_i = (int)off_x;
-		int off_y_i = (int)off_y;
-
 		setColor(rgb(255, 0, 0));
-		drawRect(bx - off_x_i, by - off_y_i, current_frame_width, current_frame_height);
+		drawRect(select_x, select_y, current_frame_width, current_frame_height);
+	}
+
+	if(tileEdit_selected_sheet_frame >= 0)
+	{
+		int selected_tile_x = current_frame_width * (tileEdit_selected_sheet_frame % (img_w/current_frame_width)) - scroll_offset_x;
+		int selected_tile_y = current_frame_height * (tileEdit_selected_sheet_frame / (img_w/current_frame_height)) - scroll_offset_y;
+
+		setColor(rgb(255, 255, 255));
+		drawRect(selected_tile_x, selected_tile_y, current_frame_width, current_frame_height);
 	}
 
 
@@ -1393,56 +1990,31 @@ void wxIrrlicht::UpdateTileAnimationSheet()
 
 			if( px >= 0 && px < pw && py >= 0 && py < ph )
 			{
-				//wxMessageBox(debug_string);
-				left_drag_init = true;
-				//this->CaptureMouse();
-				this->SetFocusFromKbd();
-				//HIDE_CURSOR;
-				//this->WarpPointer(px + (pw/2), py + (ph/2));
-				drag_start.x = px;// + (pw/2);
-				drag_start.y = py;// + (ph/2);
-				init_click = true;
+				int fx = select_x + scroll_offset_x;
+				int fy = select_y + scroll_offset_y;
+				int fw = img_w;
+				int fh = img_h;
 
-
-				setActiveCanvas(sheet_canvas);
-				clearCanvas();
-
-				int bx = (px / current_frame_width) *  current_frame_width;
-				int by = (py / current_frame_height) *  current_frame_height;
-
-
-				int img_w = 0;
-				int img_h = 0;
-
-				if(imageExists(current_sheet_image))
+				if(stage_window_isActive)
 				{
-					double w = 0;
-					double h = 0;
-					getImageSize(current_sheet_image, &w, &h);
-					img_w = (int)w;
-					img_h = (int)h;
-					//wxMessageBox(_("DBG: ") + wxString::Format(_("%i"), img_w) + _(", ") + wxString::Format(_("%i"), img_h) );
-					//drawImage_BlitEx_SW(current_sheet_image, 0, 0, (int)w, (int)h, 0, 0, (int)w, (int)h);
+					if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+						selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+					else
+						selected_frame = -1;
+				}
+				else
+					selected_frame = -1;
+
+				if(selected_frame >= 0)
+				{
+					tileEdit_selected_sheet_frame = selected_frame;
+					tileEdit_Sheet_Update = true;
+					parent_window->UpdateWindowUI();
 				}
 
-				double odx = 0;
-				double ody = 0;
-				getCanvasOffset(sheet_canvas, &odx, &ody);
-				int off_x = (int)odx;
-				int off_y = (int)ody;
+				//std::cout << "TEST: " << selected_frame << std::endl;
 
-
-				int off_x_i = off_x % current_frame_width;
-				int off_y_i = off_y % current_frame_height;
-
-				int sx_index = off_x / current_frame_width;
-				int sy_index = off_y / current_frame_height;
-
-				selected_frame = (sy_index * (img_w/current_frame_width)) + sx_index;
-				//wxMessageBox(_("Selected Frame: ") + wxString::Format(_("%i"), selected_frame));
-
-				setColor(rgb(255, 255, 255));
-				drawRect(bx - off_x_i, by - off_y_i, current_frame_width, current_frame_height);
+				left_drag_init = true;
 			}
 		}
 	}
@@ -1458,13 +2030,721 @@ void wxIrrlicht::UpdateTileAnimationSheet()
 
 void wxIrrlicht::UpdateTileAnimationFrame()
 {
+	if(current_sheet_image < 0 || current_sheet_image >= image.size())
+		return;
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+	if( px < 0 || px >= pw || py < 0 || py >= ph)
+		stage_window_isActive = false;
+	else
+		stage_window_isActive = true;
+
+
+	setActiveCanvas(frame_canvas);
+	clearCanvas();
+
+	setColor(rgb(70,70,70));
+	drawRectFill(0,64,pw,30);
+
+	int bx = (px / current_frame_width) *  current_frame_width;
+	int by = (py / current_frame_height) *  current_frame_height;
+
+	double d_sheet_w = 0;
+	double d_sheet_h = 0;
+
+	int sheet_w = 0;
+	int sheet_h = 0;
+
+	if(imageExists(current_sheet_image))
+	{
+		//getImageSize(current_sheet_image, &d_sheet_w, &d_sheet_h);
+		sheet_w = sheet_width; // (int) d_sheet_w;
+		sheet_h = sheet_height; //(int) d_sheet_h;
+	}
+
+	int num_frames = 0;
+
+	//draw borders
+	if(tilesetExists(tileEdit_selected_tileset))
+	{
+		//std::cout << "FRAME TSET exists: " << tileEdit_selected_tile << std::endl;
+		//wxMessageBox(_("ANIMATION: ") + wxString::Format(_("%i"), sprite[spriteEdit_selected_sprite].animation.size()));
+		if(tileEdit_selected_tile >= 0 &&  tileEdit_selected_tile < tileset[tileEdit_selected_tileset].tiles.size())
+		{
+			num_frames = getTileAnimationLength(tileEdit_selected_tileset, tileEdit_selected_tile);
+
+			//std::cout << "FRAME TILE exists: " << num_frames << "; " << (int)(imageExists(current_sheet_image)) << std::endl;
+
+			int all_frame_width = num_frames*64;
+			if( (all_frame_width - scroll_offset_x) <= 64)
+				scroll_offset_x = all_frame_width - 64;
+
+			if( scroll_offset_x < 0)
+				scroll_offset_x = 0;
+
+			setColor(rgb(30, 30, 30));
+			if(imageExists(current_sheet_image))
+			{
+				irr_SetFont(1);
+				for(int i = 0; i < num_frames; i++)
+				{
+					int sheet_frame = getTileAnimationFrame(tileEdit_selected_tileset, tileEdit_selected_tile, i);
+					int fx = i*64-scroll_offset_x;
+					if(sheet_frame >= 0 && fx >= 0 && fx < pw)
+					{
+						int frames_per_row = sheet_w / current_frame_width;
+						int sheet_x = (sheet_frame % frames_per_row) * current_frame_width;
+						int sheet_y = (sheet_frame / frames_per_row) * current_frame_height;
+
+						if(mouse_state.RightIsDown())
+						{
+							//std::cout << "DEBUG: ani_frame=" << i << "   sheet_frame=" << sheet_frame << "   src=(" << sheet_x << ", " << sheet_y << ") ";
+							//std::cout << "sheet=(" << sheet_w << ", " << frames_per_row << ") frame=(" << current_frame_width << ", " << current_frame_height << ") " << std::endl;
+						}
+
+						drawImage_BlitEx_SW(current_sheet_image, fx, 0, 64, 64, sheet_x, sheet_y, current_frame_width, current_frame_height);
+					}
+					setColor(rgb(30, 30, 30));
+					drawRect(fx, 0, 64, 63);
+					wxString f_num_txt = wxString::Format(_("%i"), i);
+					setColor(rgb(0,0,0));
+					drawRectFill(fx, 0, 20, 20);
+					irr_DrawText(f_num_txt.ToStdString(), fx+1, 1, irr::video::SColor(255, 255, 255, 255), 1);
+
+					setColor(rgb(255,255,255));
+					if(selected_frame == i)
+					{
+						drawRect(fx, 0, 63, 63);
+					}
+				}
+			}
+		}
+	}
+
+	if( px >= 0 && px < pw && py >= 0 && py < ph )
+	{
+
+		double off_x = 0;
+		double off_y = 0;
+
+		getCanvasOffset(frame_canvas, &off_x, &off_y);
+
+		int off_x_i = (int)off_x;
+		int off_y_i = (int)off_y;
+
+		int bx = (px / 64) *  64;
+		int by = (py / 64) *  64;
+
+		setColor(rgb(255, 0, 0));
+		drawRect(bx - off_x_i, 0, 64, 63);
+	}
+
+
+	if(mouse_state.LeftIsDown())
+	{
+        bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				left_drag_init = true;
+
+				selected_frame = (scroll_offset_x/64) + (px/64);
+				tileEdit_selected_frame_frame = selected_frame;
+
+				parent_window->UpdateWindowUI();
+
+				//std::cout << "SELECTED: " << selected_frame << std::endl;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
 }
 
 void wxIrrlicht::UpdateTileAnimationPreview()
 {
+	if(tileEdit_preview_tilemap < 0 || tileEdit_preview_tilemap >= tilemap.size())
+		return;
+
+	setActiveCanvas(preview_canvas);
+	clearCanvas();
+
+	if(!tileEdit_play_preview)
+	{
+		return;
+	}
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+	drawTileMap(tileEdit_preview_tilemap, 0, 0, pw, ph, 0, 0);
 }
 
 void wxIrrlicht::UpdateTileMask()
+{
+	if(current_sheet_image < 0 || current_sheet_image >= image.size())
+		return;
+
+	if(!tileEdit_tileMask.active)
+		return;
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+	if(stage_window_isActive)
+	{
+		this->SetFocusFromKbd();
+	}
+
+
+	setActiveCanvas(sheet_canvas);
+	clearCanvas();
+
+	if(VIEW_KEY_W)
+	{
+		scroll_offset_y -= scroll_speed;
+	}
+
+	if(VIEW_KEY_A)
+	{
+		scroll_offset_x -= scroll_speed;
+	}
+
+	if(VIEW_KEY_S)
+	{
+		scroll_offset_y += scroll_speed;
+	}
+
+	if(VIEW_KEY_D)
+	{
+		scroll_offset_x += scroll_speed;
+	}
+
+	int bx = ( (px+scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)scroll_offset_x;
+	int off_y_i = (int)scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+	int img_x = -scroll_offset_x;
+	int img_y = -scroll_offset_y;
+	int img_w = 0;
+	int img_h = 0;
+
+	if(imageExists(current_sheet_image))
+	{
+		getImageSizeI(current_sheet_image, &img_w, &img_h);
+
+		//m_pDriver->draw2DImage(image[current_sheet_image].image, irr::core::vector2di(0,0),);
+		drawImage_BlitEx_SW(current_sheet_image, img_x, img_y, (int)img_w, (int)img_h, 0, 0, (int)img_w, (int)img_h);
+		//drawImage_Rotozoom(current_sheet_image, 0, 0, 0, 1, 1);
+	}
+
+	if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+	{
+		setColor(rgb(255, 0, 0));
+		drawRect(select_x, select_y, current_frame_width, current_frame_height);
+	}
+
+	for(int i = 0; i < tileEdit_tileMask.tiles.size(); i++)
+	{
+		if(tileEdit_tileMask.tiles[i])
+		{
+			int selected_tile_x = current_frame_width * (i % (img_w/current_frame_width)) - scroll_offset_x;
+			int selected_tile_y = current_frame_height * (i / (img_w/current_frame_height)) - scroll_offset_y;
+
+			setColor(rgb(150, 150, 150));
+			drawRect(selected_tile_x, selected_tile_y, current_frame_width, current_frame_height);
+			drawCircleFill(selected_tile_x+(current_frame_width/2),
+						   selected_tile_y+(current_frame_height/2),
+						   3);
+		}
+	}
+
+
+	if(mouse_state.LeftIsDown())
+	{
+        bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				int fx = select_x + scroll_offset_x;
+				int fy = select_y + scroll_offset_y;
+				int fw = img_w;
+				int fh = img_h;
+
+				if(stage_window_isActive)
+				{
+					if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+						selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+					else
+						selected_frame = -1;
+				}
+				else
+					selected_frame = -1;
+
+				if(selected_frame >= 0)
+				{
+					tileEdit_selected_sheet_frame = selected_frame;
+					tileEdit_mask_set = true;
+					tileEdit_Sheet_Update = true;
+					parent_window->UpdateWindowUI();
+				}
+
+				//std::cout << "TEST: " << selected_frame << std::endl;
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+
+	if(mouse_state.RightIsDown())
+	{
+        bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				int fx = select_x + scroll_offset_x;
+				int fy = select_y + scroll_offset_y;
+				int fw = img_w;
+				int fh = img_h;
+
+				if(stage_window_isActive)
+				{
+					if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+						selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+					else
+						selected_frame = -1;
+				}
+				else
+					selected_frame = -1;
+
+				if(selected_frame >= 0)
+				{
+					tileEdit_selected_sheet_frame = selected_frame;
+					tileEdit_mask_set = false;
+					tileEdit_Sheet_Update = true;
+					parent_window->UpdateWindowUI();
+				}
+
+				//std::cout << "TEST: " << selected_frame << std::endl;
+
+				right_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.RightIsDown()) && right_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		right_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
+void wxIrrlicht::UpdateStageSheet()
+{
+	mapEdit_getContext();
+
+	if(!mapEdit_hasContext)
+		return;
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+	if(stage_window_isActive)
+	{
+		this->SetFocusFromKbd();
+	}
+
+	setActiveCanvas(sheet_canvas);
+	clearCanvas();
+
+	if(VIEW_KEY_W)
+	{
+		scroll_offset_y -= scroll_speed;
+	}
+
+	if(VIEW_KEY_A)
+	{
+		scroll_offset_x -= scroll_speed;
+	}
+
+	if(VIEW_KEY_S)
+	{
+		scroll_offset_y += scroll_speed;
+	}
+
+	if(VIEW_KEY_D)
+	{
+		scroll_offset_x += scroll_speed;
+	}
+
+	int bx = ( (px+scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)scroll_offset_x;
+	int off_y_i = (int)scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+	int img_x = -scroll_offset_x;
+	int img_y = -scroll_offset_y;
+	int img_w = 0;
+	int img_h = 0;
+
+
+	if(stage_window_isActive)
+	{
+		if(mapEdit_layerType == LAYER_TYPE_TILEMAP)
+		{
+			setColor(rgb(255, 0, 0));
+			drawRect(select_x, select_y, current_frame_width, current_frame_height);
+		}
+		else
+		{
+			//NOTE: For some reason, the texture on the tile select panel is all white if I don't draw something here so I am just drawing a 1x1 pixel box
+			setColor(rgba(0,0,0,0));
+			drawRect(0,0,1,1);
+		}
+	}
+
+
+	if(mouse_state.LeftIsDown())
+	{
+        bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				int fx = select_x + scroll_offset_x;
+				int fy = select_y + scroll_offset_y;
+				int fw = img_w;
+				int fh = img_h;
+
+				if(stage_window_isActive)
+				{
+					if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+						selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+					else
+						selected_frame = -1;
+				}
+				else
+					selected_frame = -1;
+
+				if(selected_frame >= 0)
+				{
+					//tileEdit_selected_sheet_frame = selected_frame;
+					//tileEdit_mask_set = true;
+					//tileEdit_Sheet_Update = true;
+					//parent_window->UpdateWindowUI();
+				}
+
+				//std::cout << "TEST: " << selected_frame << std::endl;
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+
+	if(mouse_state.RightIsDown())
+	{
+        bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				int fx = select_x + scroll_offset_x;
+				int fy = select_y + scroll_offset_y;
+				int fw = img_w;
+				int fh = img_h;
+
+				if(stage_window_isActive)
+				{
+					if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+						selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+					else
+						selected_frame = -1;
+				}
+				else
+					selected_frame = -1;
+
+				if(selected_frame >= 0)
+				{
+					//tileEdit_selected_sheet_frame = selected_frame;
+					//tileEdit_mask_set = false;
+					//tileEdit_Sheet_Update = true;
+					//parent_window->UpdateWindowUI();
+				}
+
+				//std::cout << "TEST: " << selected_frame << std::endl;
+
+				right_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.RightIsDown()) && right_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		right_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
+void wxIrrlicht::util_draw_cursor(int tile_x, int tile_y, irr::video::SColor cursor_color)
+{
+	irr::core::dimension2du img_size = image[current_sheet_image].image->getSize();
+	irr::core::dimension2du img_og_size = image[current_sheet_image].image->getOriginalSize();
+	int t_across = img_og_size.Width / current_frame_width;
+	int t_down = img_og_size.Height / current_frame_height;
+	irr::core::dimension2du t_size(img_size.Width / t_across, img_size.Height / t_down);
+
+	float off_tile_x = ( (img_size.Width / t_across) / current_frame_width );
+	float off_tile_y = ( (img_size.Height / t_down) / current_frame_height );
+
+	tile_x = (int)(off_tile_x*tile_x);
+	tile_y = (int)(off_tile_y*tile_y);
+
+	for(int iy = 0; iy < t_size.Height; iy++)
+	{
+		m_pDriver->drawPixel(tile_x, tile_y+iy, cursor_color);
+		m_pDriver->drawPixel(t_size.Width-1, tile_y+iy, cursor_color);
+
+		if(iy > 0 && iy < (t_size.Height-1))
+			continue;
+
+		for(int ix = 1; ix < t_size.Width-1; ix++)
+		{
+			m_pDriver->drawPixel(tile_x+ix, tile_y+iy, cursor_color);
+		}
+	}
+}
+
+void wxIrrlicht::mapEdit_getContext()
+{
+	if(control_id == NV_MAP_EDIT_MAP_SHEET || control_id == NV_MAP_EDIT_TILE_SHEET)
+	{
+		if(shared_control)
+		{
+			if(shared_control->mapEdit_hasContext)
+			{
+				shared_control->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+				shared_control->mapEdit_hasContext = false;
+				GetDevice()->getContextManager()->activateContext(GetDevice()->getVideoDriver()->getExposedVideoData());
+				mapEdit_hasContext = true;
+			}
+		}
+	}
+}
+
+void wxIrrlicht::UpdateStageTileSelect()
+{
+	//std::cout << "DEBUG: " << mapEdit_layerType << ", " << current_sheet_image << std::endl;
+
+	if(mapEdit_layerType != LAYER_TYPE_TILEMAP)
+		return;
+
+	if(current_sheet_image < 0 || current_sheet_image >= image.size())
+		return;
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+	if(stage_window_isActive)
+	{
+		this->SetFocusFromKbd();
+	}
+
+
+	//setActiveCanvas(sheet_canvas);
+	//clearCanvas();
+
+	if(VIEW_KEY_W)
+	{
+		scroll_offset_y -= scroll_speed;
+	}
+
+	if(VIEW_KEY_A)
+	{
+		scroll_offset_x -= scroll_speed;
+	}
+
+	if(VIEW_KEY_S)
+	{
+		scroll_offset_y += scroll_speed;
+	}
+
+	if(VIEW_KEY_D)
+	{
+		scroll_offset_x += scroll_speed;
+	}
+
+	int bx = ( (px+scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)scroll_offset_x;
+	int off_y_i = (int)scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+	int img_x = -scroll_offset_x;
+	int img_y = -scroll_offset_y;
+	int img_w = 0;
+	int img_h = 0;
+
+	mapEdit_getContext();
+
+	if(!mapEdit_hasContext)
+		return;
+
+	if(imageExists(current_sheet_image))
+	{
+		setActiveCanvas(sheet_canvas);
+		clearCanvas();
+
+		getImageSizeI(current_sheet_image, &img_w, &img_h);
+		irr::core::dimension2du t_size = image[current_sheet_image].image->getSize();
+
+		//m_pDriver->draw2DImage(image[current_sheet_image].image, irr::core::vector2di(0,0));
+		drawImage_BlitEx_SW(current_sheet_image, img_x, img_y, img_w, img_h, 0, 0, img_w, img_h);
+		//drawImage_Rotozoom(current_sheet_image, 0, 0, 0, 1, 1);
+	}
+
+	setActiveCanvas(overlay_canvas);
+	clearCanvas();
+
+	if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+	{
+		setColor(rgb(255, 0, 0));
+		drawRect(select_x, select_y, current_frame_width, current_frame_height);
+
+		//util_draw_cursor(select_x, select_y, irr::video::SColor(255,255,0,0));
+	}
+
+	if(selected_tile >= 0)
+	{
+		int selected_tile_x = current_frame_width * (selected_tile % (img_w/current_frame_width)) - scroll_offset_x;
+		int selected_tile_y = current_frame_height * (selected_tile / (img_w/current_frame_height)) - scroll_offset_y;
+
+		setColor(rgb(150, 150, 150));
+		drawRect(selected_tile_x, selected_tile_y, current_frame_width, current_frame_height);
+	}
+
+
+	if(mouse_state.LeftIsDown())
+	{
+        bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				int fx = select_x + scroll_offset_x;
+				int fy = select_y + scroll_offset_y;
+				int fw = img_w;
+				int fh = img_h;
+
+				if(stage_window_isActive)
+				{
+					if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+						selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+					else
+						selected_frame = -1;
+				}
+				else
+					selected_frame = -1;
+
+				if(selected_frame >= 0)
+				{
+					selected_tile = selected_frame;
+					//tileEdit_mask_set = true;
+					//tileEdit_Sheet_Update = true;
+					//parent_window->UpdateWindowUI();
+				}
+
+				//std::cout << "TEST: " << selected_frame << std::endl;
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
+void wxIrrlicht::UpdateStageSpritePreview()
 {
 }
 
@@ -2214,7 +3494,23 @@ void wxIrrlicht::deleteImage(int img_id)
     }
 }
 
+void wxIrrlicht::getImageBuffer(int img_id, irr::u32 * pdata)
+{
+    if(img_id < 0 || img_id >= image.size())
+        return;
 
+    if(!image[img_id].image)
+        return;
+
+    irr::u32* img_pixels = (irr::u32*)image[img_id].image->lock();
+
+    int image_size = image[img_id].image->getSize().Width * image[img_id].image->getSize().Height;
+
+    for(int i = 0; i < image_size; i++)
+        pdata[i] = img_pixels[i];
+
+    image[img_id].image->unlock();
+}
 
 
 
@@ -2231,7 +3527,7 @@ void wxIrrlicht::drawImage(int img_id, int x, int y)
 
     if(image[img_id].image)
     {
-        irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getSize();
+        irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getOriginalSize();
         irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(0, 0), src_size);
 
         irr::core::position2d<irr::s32> position(x, y);
@@ -2249,7 +3545,7 @@ void wxIrrlicht::drawImage(int img_id, int x, int y)
         //irr::core::rect<irr::s32> dest( irr::core::vector2d(x, y), irr::core::dimension2d(src_w, src_h));;
 
         //irr::core::vector2df screenSize(canvas[active_canvas].dimension.Width, canvas[active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         //m_pDriver->setRenderTarget(canvas[active_canvas].texture);
         util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
@@ -2264,7 +3560,7 @@ void wxIrrlicht::drawImage_Rotate(int img_id, int x, int y, double angle)
 
     if(image[img_id].image)
     {
-        irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getSize();
+        irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getOriginalSize();
         irr::core::rect<irr::s32> sourceRect(0, 0, src_size.Width, src_size.Height);
 
         irr::core::position2d<irr::s32> position(x, y);
@@ -2280,7 +3576,7 @@ void wxIrrlicht::drawImage_Rotate(int img_id, int x, int y, double angle)
                                  image[img_id].color_mod.getBlue());
 
         //irr::core::vector2df screenSize(rc_canvas[rc_active_canvas].dimension.Width, rc_canvas[rc_active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
     }
@@ -2293,7 +3589,7 @@ void wxIrrlicht::drawImage_Zoom(int img_id, int x, int y, double zx, double zy)
 
     if(image[img_id].image)
     {
-        irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getSize();
+        irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getOriginalSize();
         irr::core::rect<irr::s32> sourceRect(0, 0, src_size.Width, src_size.Height);
 
         irr::core::position2d<irr::s32> position(x, y);
@@ -2309,7 +3605,7 @@ void wxIrrlicht::drawImage_Zoom(int img_id, int x, int y, double zx, double zy)
                                  image[img_id].color_mod.getBlue());
 
         //irr::core::vector2df screenSize(rc_canvas[rc_active_canvas].dimension.Width, rc_canvas[rc_active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
     }
@@ -2338,7 +3634,7 @@ void wxIrrlicht::drawImage_ZoomEx(int img_id, int x, int y, int src_x, int src_y
                                  image[img_id].color_mod.getBlue());
 
         //irr::core::vector2df screenSize(rc_canvas[rc_active_canvas].dimension.Width, rc_canvas[rc_active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
     }
@@ -2351,7 +3647,7 @@ void wxIrrlicht::drawImage_Rotozoom(int img_id, int x, int y, double angle, doub
 
     if(image[img_id].image)
     {
-        irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getSize();
+        irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getOriginalSize();
         irr::core::rect<irr::s32> sourceRect(0, 0, src_size.Width, src_size.Height);
 
         irr::core::position2d<irr::s32> position(x, y);
@@ -2367,7 +3663,7 @@ void wxIrrlicht::drawImage_Rotozoom(int img_id, int x, int y, double angle, doub
                                  image[img_id].color_mod.getBlue());
 
         //irr::core::vector2df screenSize(rc_canvas[rc_active_canvas].dimension.Width, rc_canvas[rc_active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
     }
@@ -2396,7 +3692,7 @@ void wxIrrlicht::drawImage_RotozoomEx(int img_id, int x, int y, int src_x, int s
                                  image[img_id].color_mod.getBlue());
 
         //irr::core::vector2df screenSize(rc_canvas[rc_active_canvas].dimension.Width, rc_canvas[rc_active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
     }
@@ -2410,7 +3706,7 @@ void wxIrrlicht::drawImage_Flip(int img_id, int x, int y, bool h, bool v)
 
     if(image[img_id].image)
     {
-        irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getSize();
+        irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getOriginalSize();
         irr::core::rect<irr::s32> sourceRect(0, 0, src_size.Width, src_size.Height);
 
         irr::core::position2d<irr::s32> rotationPoint(x + (src_size.Width/2), y + (src_size.Height/2));
@@ -2427,7 +3723,7 @@ void wxIrrlicht::drawImage_Flip(int img_id, int x, int y, bool h, bool v)
                                  image[img_id].color_mod.getBlue());
 
         //irr::core::vector2df screenSize(rc_canvas[rc_active_canvas].dimension.Width, rc_canvas[rc_active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
     }
@@ -2457,7 +3753,7 @@ void wxIrrlicht::drawImage_FlipEx(int img_id, int x, int y, int src_x, int src_y
                                  image[img_id].color_mod.getBlue());
 
         //irr::core::vector2df screenSize(rc_canvas[rc_active_canvas].dimension.Width, rc_canvas[rc_active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
     }
@@ -2489,7 +3785,7 @@ void wxIrrlicht::drawImage_Blit(int img_id, int x, int y, int src_x, int src_y, 
         irr::core::rect<irr::s32> dest( irr::core::vector2d<irr::s32>(x, y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
         //irr::core::vector2df screenSize(rc_canvas[rc_active_canvas].dimension.Width, rc_canvas[rc_active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
     }
@@ -2519,7 +3815,7 @@ void wxIrrlicht::drawImage_RotateEx(int img_id, int x, int y, int src_x, int src
                                  image[img_id].color_mod.getBlue());
 
         //irr::core::vector2df screenSize(rc_canvas[rc_active_canvas].dimension.Width, rc_canvas[rc_active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         irr::core::rect<irr::s32> dest( irr::core::vector2d<irr::s32>(x, y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
@@ -2552,7 +3848,7 @@ void wxIrrlicht::drawImage_BlitEx(int img_id, int x, int y, int w, int h, int sr
         irr::core::rect<irr::s32> dest( irr::core::vector2d<irr::s32>(x, y), irr::core::dimension2d<irr::s32>(w, h));
 
         //irr::core::vector2df screenSize(rc_canvas[rc_active_canvas].dimension.Width, rc_canvas[rc_active_canvas].dimension.Height);
-        irr::core::vector2df screenSize(canvas[active_canvas].texture->getSize().Width, canvas[active_canvas].texture->getSize().Height);
+        irr::core::vector2df screenSize(canvas[active_canvas].texture->getOriginalSize().Width, canvas[active_canvas].texture->getOriginalSize().Height);
 
         util_draw2DImage2(m_pDriver, image[img_id].image, sourceRect, dest, rotationPoint, rotation, useAlphaChannel, color, screenSize );
     }
@@ -2634,8 +3930,8 @@ void wxIrrlicht::getImageSize(int img_id, double* w, double* h)
 
     if(image[img_id].image)
     {
-        *w = (double)image[img_id].image->getSize().Width;
-        *h = (double)image[img_id].image->getSize().Height;
+        *w = (double)image[img_id].image->getOriginalSize().Width;
+        *h = (double)image[img_id].image->getOriginalSize().Height;
     }
 }
 
@@ -2646,8 +3942,8 @@ void wxIrrlicht::getImageSizeI(int img_id, int* w, int* h)
 
     if(image[img_id].image)
     {
-        *w = image[img_id].image->getSize().Width;
-        *h = image[img_id].image->getSize().Height;
+        *w = image[img_id].image->getOriginalSize().Width;
+        *h = image[img_id].image->getOriginalSize().Height;
     }
 }
 
@@ -3034,6 +4330,8 @@ int wxIrrlicht::createSprite(int img_id, double w, double h)
 	sprite[spr_id].physics.box_width = w;
 	sprite[spr_id].physics.box_height = h;
 
+	sprite[spr_id].physics.radius = (w > h ? w : h)/2;
+
 	sprite[spr_id].physics.offset_x = 0; // This should be w/2 but for the purposes of this editor I am using 0 to represent center
 	sprite[spr_id].physics.offset_y = 0; // This should be h/2 but for the purposes of this editor I am using 0 to represent center
 	sprite[spr_id].isSolid = false;
@@ -3074,14 +4372,18 @@ void wxIrrlicht::deleteSprite(int spr_id)
 	sprite[spr_id].active = false;
 	sprite[spr_id].parent_canvas = -1;
 	sprite[spr_id].animation.clear();
+	int parent_canvas = sprite[spr_id].parent_canvas;
 
-	for(int i = 0; i < canvas[active_canvas].sprite_id.size(); i++)
+	if(parent_canvas < 0 || parent_canvas >= canvas.size())
+		return;
+
+	for(int i = 0; i < canvas[parent_canvas].sprite_id.size(); i++)
 	{
-		int canvas_sprite = canvas[active_canvas].sprite_id[i];
+		int canvas_sprite = canvas[parent_canvas].sprite_id[i];
 
 		if(canvas_sprite == spr_id)
 		{
-			canvas[active_canvas].sprite_id.erase(i);
+			canvas[parent_canvas].sprite_id.erase(i,1);
 			break;
 		}
 	}
@@ -3553,7 +4855,11 @@ void wxIrrlicht::util_drawSprites(int canvas_id)
 	for(int spr_index = 0; spr_index < canvas[canvas_id].sprite_id.size(); spr_index++)
 	{
 		int spr_id = canvas[canvas_id].sprite_id[spr_index];
+
 		sprite2D_obj* n_sprite = &sprite[spr_id];
+
+		if(!n_sprite->active)
+			continue;
 		//std::cout << "TEST" << std::endl;
 		//td::cout << "debug info: " << canvas_id << " --> " << spr_index << "   id = " << sprite->id << "   anim_size = " << sprite->animation.size() << std::endl; continue;
 		if(!n_sprite->visible)
@@ -3587,6 +4893,7 @@ void wxIrrlicht::util_drawSprites(int canvas_id)
 
 		//src_size = rc_image[img_id].image->getSize();
 		int current_animation = n_sprite->current_animation;
+		//std::cout << "current_animation = " << n_sprite->current_animation << " ~ " << n_sprite->animation.size() << std::endl;
 		if((spr_timer - n_sprite->animation[current_animation].frame_start_time) >= n_sprite->animation[current_animation].frame_swap_time)
 		{
 			n_sprite->animation[current_animation].current_frame++;
@@ -3676,7 +4983,7 @@ int wxIrrlicht::createTileSet(int img_id, int tile_w, int tile_h)
 	tset.tile_width = tile_w;
 	tset.tile_height = tile_h;
 
-	int num_tiles = ((int)image[img_id].image->getSize().Width / tile_w) * ((int)image[img_id].image->getSize().Height / tile_h);
+	int num_tiles = ((int)image[img_id].image->getOriginalSize().Width / tile_w) * ((int)image[img_id].image->getOriginalSize().Height / tile_h);
 	tset.tiles.resize(num_tiles);
 
 	for(int i = 0; i < tset.tiles.size(); i++)
@@ -3685,6 +4992,7 @@ int wxIrrlicht::createTileSet(int img_id, int tile_w, int tile_h)
 		tset.tiles[i].fps = 0;
 		tset.tiles[i].frame_swap_time = 0;
 		tset.tiles[i].frame_start_time = 0;
+		tset.tiles[i].num_frames = 1;
 	}
 
 	int tset_id = tileset.size();
@@ -3860,6 +5168,14 @@ void wxIrrlicht::deleteTileMap(int tmap)
 	deleted_tilemap.push_back(tmap);
 }
 
+bool wxIrrlicht::tilesetExists(int tset)
+{
+	if(tset < 0 || tset >= tileset.size())
+		return false;
+
+	return tileset[tset].active;
+}
+
 void wxIrrlicht::setTileMapSize(int tmap, int widthInTiles, int heightInTiles)
 {
 	if(tmap < 0 || tmap >= tilemap.size())
@@ -3961,8 +5277,8 @@ void wxIrrlicht::fillTile(int tmap, int tile, int x, int y, int widthInTiles, in
 
 void wxIrrlicht::getTileInTileset(int tset, int tile, int* x, int* y)
 {
-	int img_w = image[ tileset[tset].img_id ].image->getSize().Width;
-	int img_h = image[ tileset[tset].img_id ].image->getSize().Height;
+	int img_w = image[ tileset[tset].img_id ].image->getOriginalSize().Width;
+	int img_h = image[ tileset[tset].img_id ].image->getOriginalSize().Height;
 	int tile_w = tileset[tset].tile_width;
 	int tile_h = tileset[tset].tile_height;
 	int widthInTiles = img_w / tile_w;
@@ -3973,8 +5289,8 @@ void wxIrrlicht::getTileInTileset(int tset, int tile, int* x, int* y)
 
 int wxIrrlicht::getNumTilesInTileset(int tset)
 {
-	int img_w = image[ tileset[tset].img_id ].image->getSize().Width;
-	int img_h = image[ tileset[tset].img_id ].image->getSize().Height;
+	int img_w = image[ tileset[tset].img_id ].image->getOriginalSize().Width;
+	int img_h = image[ tileset[tset].img_id ].image->getOriginalSize().Height;
 	int tile_w = tileset[tset].tile_width;
 	int tile_h = tileset[tset].tile_height;
 	int widthInTiles = img_w / tile_w;
@@ -3999,7 +5315,7 @@ void wxIrrlicht::updateTileset(int tset)
 	}
 }
 
-void wxIrrlicht::util_drawTileMap(int tmap, int x, int y, int w, int h, int offset_x, int offset_y)
+void wxIrrlicht::drawTileMap(int tmap, int x, int y, int w, int h, int offset_x, int offset_y)
 {
 	if(tmap < 0 || tmap >= tilemap.size())
 		return;
@@ -4064,6 +5380,7 @@ void wxIrrlicht::util_drawTileMap(int tmap, int x, int y, int w, int h, int offs
 			int src_x = 0;
 			int src_y = 0;
 			getTileInTileset(tset, tile, &src_x, &src_y);
+			//std::cout << "DEBUG TMAP: " << tile << " -> " << src_x << ", " << src_y << std::endl;
 			irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(src_x, src_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
 			irr::video::SColor color(image[tset_img_id].alpha,
