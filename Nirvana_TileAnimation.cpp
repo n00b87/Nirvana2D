@@ -34,11 +34,6 @@ Nirvana_TileEditor::~Nirvana_TileEditor()
 void Nirvana_TileEditor::setProject(Nirvana_Project* p)
 {
 	this->project = p;
-
-	p->tileSheet_target = tileSheet_target;
-	p->tileFrame_target = tileFrame_target;
-	p->tilePreview_target = tilePreview_target;
-	p->tileMask_target = tileMask_target;
 }
 
 wxIrrlicht* Nirvana_TileEditor::getAnimationSheetControl()
@@ -425,7 +420,6 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 																					  n_tileset.object.tile_width,
 																					  n_tileset.object.tile_height);
 
-	// Starting at 1 because 0 is created by createSprite
 	for(int i = 1; i < n_tileset.object.tiles.size(); i++)
 	{
 		tileFrame_target->setTileAnimationLength(tileFrame_target->tileEdit_selected_tileset,
@@ -438,6 +432,9 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 
 		for(int a_frame = 0; a_frame < n_tileset.object.tiles[i].frames.size(); a_frame++)
 		{
+
+
+			//std::cout << "debug: " << n_tileset.object.tiles.size() << ": " << i << ", " << a_frame << ", " << n_tileset.object.tiles[i].frames.size() << std::endl;
 			tileFrame_target->setTileAnimationFrame(tileFrame_target->tileEdit_selected_tileset, i, a_frame, n_tileset.object.tiles[i].frames[a_frame]);
 		}
 	}

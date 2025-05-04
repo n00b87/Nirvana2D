@@ -2,14 +2,19 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="rc_gfx_core.h" open="0" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="Nirvana_MapEditor.h" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1279" topLine="51" />
+			<Cursor1 position="959" topLine="24" />
 		</Cursor>
 	</File>
-	<File name="NirvanaBase.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="Nirvana_Project.cpp" open="1" top="0" tabpos="17" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="31156" topLine="723" />
+			<Cursor1 position="33011" topLine="1113" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_NewTileset_Dialog.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="46" topLine="12" />
 		</Cursor>
 	</File>
 	<File name="gui_freetype_font.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -17,67 +22,39 @@
 			<Cursor1 position="7478" topLine="327" />
 		</Cursor>
 	</File>
-	<File name="Nirvana_TileAnimation.cpp" open="1" top="0" tabpos="14" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="NirvanaEditor_NewStage_Dialog.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="5619" topLine="172" />
+			<Cursor1 position="544" topLine="9" />
 		</Cursor>
 	</File>
-	<File name="NirvanaEditor_NewSprite_Dialog.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="NirvanaEditor_DeleteStage_Dialog.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="442" topLine="13" />
+			<Cursor1 position="388" topLine="1" />
 		</Cursor>
 	</File>
-	<File name="wxIrrlicht.cpp" open="1" top="0" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="Project_Sprite_Tools.cpp" open="1" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="79508" topLine="1929" />
-		</Cursor>
-		<Folding>
-			<Collapse line="224" />
-			<Collapse line="252" />
-			<Collapse line="259" />
-			<Collapse line="354" />
-			<Collapse line="377" />
-			<Collapse line="411" />
-			<Collapse line="477" />
-			<Collapse line="536" />
-			<Collapse line="564" />
-			<Collapse line="585" />
-			<Collapse line="658" />
-			<Collapse line="1120" />
-			<Collapse line="1136" />
-		</Folding>
-	</File>
-	<File name="NirvanaEditor_NewSprite_Dialog.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="643" topLine="13" />
+			<Cursor1 position="389" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="Nirvana_SpriteAnimation.h" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="NirvanaEditor_DeleteSprite_Dialog.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="2588" topLine="69" />
+			<Cursor1 position="507" topLine="1" />
 		</Cursor>
 	</File>
-	<File name="Nirvana_Project.cpp" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="wxIrrlicht.h" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="3790" topLine="126" />
+			<Cursor1 position="18903" topLine="469" />
 		</Cursor>
 	</File>
-	<File name="rc_defines.h" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="rc_gfx_core.h" open="0" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1053" topLine="11" />
+			<Cursor1 position="1279" topLine="51" />
 		</Cursor>
 	</File>
-	<File name="Nirvana_SpriteAnimation.cpp" open="1" top="1" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="NirvanaEditor_NewStage_Dialog.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="12010" topLine="337" />
-		</Cursor>
-		<Folding>
-			<Collapse line="401" />
-		</Folding>
-	</File>
-	<File name="Nirvana_Project.h" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="1338" topLine="36" />
+			<Cursor1 position="367" topLine="0" />
 		</Cursor>
 	</File>
 	<File name="Nirvana2DApp.cpp" open="0" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -85,14 +62,122 @@
 			<Cursor1 position="511" topLine="5" />
 		</Cursor>
 	</File>
-	<File name="NirvanaEditor_MainFrame.h" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="Project_Controls.cpp" open="1" top="0" tabpos="9" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1677" topLine="37" />
+			<Cursor1 position="8067" topLine="476" />
 		</Cursor>
 	</File>
-	<File name="NirvanaEditor_MainFrame.cpp" open="1" top="0" tabpos="4" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="NirvanaEditor_MainFrame.cpp" open="1" top="0" tabpos="3" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="12940" topLine="379" />
+			<Cursor1 position="4454" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_AddSpriteInstance_Dialog.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="618" topLine="7" />
+		</Cursor>
+	</File>
+	<File name="wxIrrlicht.cpp" open="1" top="1" tabpos="5" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="130302" topLine="742" />
+		</Cursor>
+		<Folding>
+			<Collapse line="261" />
+			<Collapse line="368" />
+			<Collapse line="384" />
+			<Collapse line="392" />
+			<Collapse line="448" />
+			<Collapse line="545" />
+			<Collapse line="555" />
+			<Collapse line="583" />
+			<Collapse line="716" />
+			<Collapse line="828" />
+			<Collapse line="971" />
+			<Collapse line="992" />
+			<Collapse line="1002" />
+			<Collapse line="1141" />
+			<Collapse line="1148" />
+			<Collapse line="1186" />
+			<Collapse line="1457" />
+			<Collapse line="1656" />
+			<Collapse line="1730" />
+			<Collapse line="1924" />
+			<Collapse line="2052" />
+			<Collapse line="2201" />
+			<Collapse line="2220" />
+			<Collapse line="2406" />
+			<Collapse line="2627" />
+			<Collapse line="2648" />
+			<Collapse line="2848" />
+			<Collapse line="3001" />
+			<Collapse line="3216" />
+			<Collapse line="3291" />
+			<Collapse line="3332" />
+			<Collapse line="3464" />
+			<Collapse line="3696" />
+			<Collapse line="3728" />
+			<Collapse line="3767" />
+			<Collapse line="3860" />
+			<Collapse line="3952" />
+			<Collapse line="4065" />
+			<Collapse line="4170" />
+			<Collapse line="4301" />
+			<Collapse line="4424" />
+		</Folding>
+	</File>
+	<File name="Nirvana_SpriteAnimation.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2588" topLine="51" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_NewSprite_Dialog.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="539" topLine="13" />
+		</Cursor>
+	</File>
+	<File name="NirvanaBase.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="16153" topLine="350" />
+		</Cursor>
+	</File>
+	<File name="rc_defines.h" open="1" top="0" tabpos="8" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="2192" topLine="55" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_NewSprite_Dialog.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="868" topLine="33" />
+		</Cursor>
+	</File>
+	<File name="Nirvana_MapEditor.cpp" open="1" top="0" tabpos="10" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="7199" topLine="250" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_StageProperties_Dialog.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="533" topLine="9" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_DeleteSprite_Dialog.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="534" topLine="1" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_AddSpriteInstance_Dialog.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="911" topLine="0" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_StageProperties_Dialog.cpp" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="751" topLine="8" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEngine_Structs.h" open="1" top="0" tabpos="15" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="5226" topLine="280" />
 		</Cursor>
 	</File>
 	<File name="rc_gfx.h" open="0" top="0" tabpos="16" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
@@ -100,19 +185,42 @@
 			<Cursor1 position="61726" topLine="2177" />
 		</Cursor>
 	</File>
-	<File name="NirvanaEngine_Structs.h" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="NirvanaEditor_DeleteStage_Dialog.h" open="0" top="0" tabpos="0" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="1827" topLine="103" />
+			<Cursor1 position="509" topLine="0" />
 		</Cursor>
 	</File>
-	<File name="NirvanaBase.h" open="1" top="0" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="NirvanaBase.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="8841" topLine="258" />
+			<Cursor1 position="30460" topLine="630" />
 		</Cursor>
 	</File>
-	<File name="wxIrrlicht.h" open="1" top="0" tabpos="6" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+	<File name="Nirvana_Project.h" open="1" top="0" tabpos="18" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="7839" topLine="173" />
+			<Cursor1 position="2050" topLine="45" />
+		</Cursor>
+	</File>
+	<File name="Nirvana_TileAnimation.cpp" open="1" top="0" tabpos="12" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="20813" topLine="561" />
+		</Cursor>
+	</File>
+	<File name="Nirvana_SpriteAnimation.cpp" open="1" top="0" tabpos="7" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="19873" topLine="489" />
+		</Cursor>
+		<Folding>
+			<Collapse line="386" />
+		</Folding>
+	</File>
+	<File name="Project_Tile_Tools.cpp" open="1" top="0" tabpos="13" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="1386" topLine="29" />
+		</Cursor>
+	</File>
+	<File name="NirvanaEditor_MainFrame.h" open="1" top="0" tabpos="11" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
+		<Cursor>
+			<Cursor1 position="4320" topLine="93" />
 		</Cursor>
 	</File>
 </CodeBlocks_layout_file>

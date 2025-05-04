@@ -39,9 +39,10 @@ Nirvana_MainFrame( parent )
 	m_spriteEdit_collisionShape_comboBox->Append(_("POLYGON"));
 	m_spriteEdit_collisionShape_comboBox->Append(_("CIRCLE"));
 
-	map_editor = new Nirvana_MapEditor(this, m_mapEdit_map_panel, m_mapEdit_tileSelect_panel, m_mapEdit_sprite_preview_panel);
+	map_editor = new Nirvana_MapEditor(this, m_mapEdit_map_panel, m_mapEdit_tileSelect_panel);
 	map_editor->getMapViewControl()->GetDevice()->getContextManager()->activateContext(map_editor->getMapViewControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 	map_editor->getMapViewControl()->mapEdit_hasContext = true;
+	map_editor->getMapViewControl()->project = project;
 
 	map_editor->setProject(project);
 
@@ -53,6 +54,43 @@ Nirvana_MainFrame( parent )
     m_project_treeCtrl->AssignImageList(stage_tree_imageList);
 
 	project_root_treeItem = m_project_treeCtrl->AddRoot(wxString::FromUTF8(_("NO PROJECT")), stage_tree_rootImage);
+
+
+
+	wxPGChoices choices;
+	choices.Clear();
+
+	choices.Add(_("STATIC"));
+	choices.Add(_("KINEMATIC"));
+	choices.Add(_("DYNAMIC"));
+
+	m_mapEdit_sprite_propertyGrid->GetProperty(_("body_type"))->SetChoices(choices);
+
+	wxPGProperty * sprite_pos_x = m_mapEdit_sprite_propertyGrid->GetProperty(_("position_x"));
+	wxPGProperty * sprite_pos_y = m_mapEdit_sprite_propertyGrid->GetProperty(_("position_y"));
+	wxPGProperty * sprite_angle = m_mapEdit_sprite_propertyGrid->GetProperty(_("angle"));
+	wxPGProperty * sprite_scale_x = m_mapEdit_sprite_propertyGrid->GetProperty(_("scale_x"));
+	wxPGProperty * sprite_scale_y = m_mapEdit_sprite_propertyGrid->GetProperty(_("scale_y"));
+
+	map_editor->getMapViewControl()->nv_sprite_positionX_property = sprite_pos_x;
+    map_editor->getMapViewControl()->nv_sprite_positionY_property = sprite_pos_y;
+    map_editor->getMapViewControl()->nv_sprite_angle_property = sprite_angle;
+    map_editor->getMapViewControl()->nv_sprite_scaleX_property = sprite_scale_x;
+    map_editor->getMapViewControl()->nv_sprite_scaleY_property = sprite_scale_y;
+
+
+    map_editor->getMapViewControl()->m_cameraAbsoluteX_staticText = m_cameraAbsoluteX_staticText;
+	map_editor->getMapViewControl()->m_cameraAbsoluteY_staticText = m_cameraAbsoluteY_staticText;
+	map_editor->getMapViewControl()->m_cameraTileX_staticText = m_cameraTileX_staticText;
+	map_editor->getMapViewControl()->m_cameraTileY_staticText = m_cameraTileY_staticText;
+
+	map_editor->getMapViewControl()->m_stageAbsoluteX_staticText = m_stageAbsoluteX_staticText;
+	map_editor->getMapViewControl()->m_stageAbsoluteY_staticText = m_stageAbsoluteY_staticText;
+	map_editor->getMapViewControl()->m_stageTileX_staticText = m_stageTileX_staticText;
+	map_editor->getMapViewControl()->m_stageTileY_staticText = m_stageTileY_staticText;
+
+	map_editor->getMapViewControl()->m_screenAbsoluteX_staticText = m_screenAbsoluteX_staticText;
+	map_editor->getMapViewControl()->m_screenAbsoluteY_staticText = m_screenAbsoluteY_staticText;
 }
 
 void NirvanaEditor_MainFrame::OnProjectPropertiesTabChanged( wxAuiNotebookEvent& event )
@@ -67,11 +105,31 @@ void NirvanaEditor_MainFrame::OnMapEditToolsTabChanged( wxAuiNotebookEvent& even
 	if(new_panel == m_mapEdit_tile_panel)
 	{
 		map_editor->startEditor(0);
+
+		//default to select tool
+		selected_map_tool = MAP_TOOL_TILE_SELECT;
+		map_editor->setMapTool(selected_map_tool);
+		m_mapEdit_tileTools_auiToolBar->ToggleTool(m_mapEdit_tileToolbar_select_tool->GetId(), true);
 	}
 	else if(new_panel == m_mapEdit_sprite_panel)
 	{
 		map_editor->startEditor(1);
 	}
+}
+
+void NirvanaEditor_MainFrame::OnEnterMapEditTileSelect( wxMouseEvent& event )
+{
+	map_editor->getTileSelectControl()->stage_window_isActive = true;
+}
+
+void NirvanaEditor_MainFrame::OnLeaveMapEditTileSelect( wxMouseEvent& event )
+{
+	map_editor->getTileSelectControl()->stage_window_isActive = false;
+}
+
+void NirvanaEditor_MainFrame::OnUpdateMapEditTileSelect( wxUpdateUIEvent& event )
+{
+	map_editor->getMapViewControl()->map_tool = selected_map_tool;
 }
 
 void NirvanaEditor_MainFrame::OnTileEditor_Edit_Changed( wxAuiNotebookEvent& event )
@@ -108,6 +166,19 @@ void NirvanaEditor_MainFrame::OnSpriteEditor_Edit_Changed( wxAuiNotebookEvent& e
 	}
 }
 
+void NirvanaEditor_MainFrame::reloadStage()
+{
+	int stage_index = map_editor->getSelectedStage();
+	int layer_index = map_editor->getSelectedLayer();
+
+	//std::cout << "RELOAD: " << stage_index << ", " << layer_index << std::endl;
+
+	map_editor->selectStage(stage_index);
+	map_editor->selectLayer(layer_index);
+
+	updateMapEditor();
+}
+
 void NirvanaEditor_MainFrame::OnMainTabChanged( wxAuiNotebookEvent& event )
 {
 	int page_index = event.GetSelection();
@@ -132,7 +203,11 @@ void NirvanaEditor_MainFrame::OnMainTabChanged( wxAuiNotebookEvent& event )
 	{
 		main_page_index = NIRVANA_MAIN_PAGE_INDEX_MAP;
 
+		std::cout << "YOLO" << std::endl;
+
 		map_editor->startEditor(map_editor->getEditorPageIndex(), true);
+		map_editor->getMapViewControl()->clearStage();
+		reloadStage();
 	}
 	else if(new_panel == m_tileEdit_panel)
 	{
@@ -813,11 +888,44 @@ void NirvanaEditor_MainFrame::OnNewTilesetClick( wxCommandEvent& event )
 
 	dialog->ShowModal();
 
+	wxFileName img_file = gfx_path;
+	img_file.SetFullName(dialog->selected_file);
+	int tmp_image = tile_editor->getAnimationFrameControl()->loadImage(img_file.GetAbsolutePath().ToStdString());
+	if(tmp_image < 0)
+	{
+		wxMessageBox(_("Could not load image: ") + img_file.GetAbsolutePath().ToStdString());
+		return;
+	}
+
+	int frame_tset_index = tile_editor->getAnimationFrameControl()->createTileSet(tmp_image, dialog->frame_width, dialog->frame_height);
+
+	if(frame_tset_index < 0)
+	{
+		wxMessageBox(_("Failed to create tileset from [") + img_file.GetAbsolutePath().ToStdString());
+		return;
+	}
+
 	tile_editor->getAnimationSheetControl()->enable_update = true;
 
 	project->createTileset(dialog->id_name, dialog->selected_file, dialog->frame_width, dialog->frame_height);
 
+	int project_tset_index = project->getTilesetIndex(dialog->id_name.ToStdString());
+
+	if(project_tset_index < 0)
+	{
+		tile_editor->getAnimationFrameControl()->deleteTileSet(frame_tset_index);
+		tile_editor->getAnimationFrameControl()->deleteImage(tmp_image);
+		return;
+	}
+
+	//std::cout << "HOLLA: " << tile_editor->getAnimationFrameControl()->tileset[frame_tset_index].tiles[0].frames.size() << std::endl;
+	project->setTilesetObject(project_tset_index, tile_editor->getAnimationFrameControl()->tileset[frame_tset_index]);
+	project->tileset[project_tset_index].object.img_id = -1;
+
 	m_tileEdit_tileset_listBox->AppendAndEnsureVisible(dialog->id_name);
+
+	tile_editor->getAnimationFrameControl()->deleteTileSet(frame_tset_index);
+	tile_editor->getAnimationFrameControl()->deleteImage(tmp_image);
 }
 
 void NirvanaEditor_MainFrame::OnDeleteTilesetClick( wxCommandEvent& event )
@@ -832,7 +940,55 @@ void NirvanaEditor_MainFrame::OnDeleteTilesetClick( wxCommandEvent& event )
 	if(tset_id < 0 || tset_id >= project->getTilesetCount())
 		return;
 
+	int stage_index = map_editor->getSelectedStage();
+
+	map_editor->getMapViewControl()->clearStage();
 	project->deleteTileset(tset_id);
+
+	for(int st_i = 0; st_i < project->stages.size(); st_i++)
+	{
+		for(int layer_index = 0; layer_index < project->stages[st_i].layers.size(); layer_index++)
+		{
+			if(layer_index < 0)
+				continue;
+
+			if(project->stages[st_i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP)
+			{
+				if(project->stages[st_i].layers[layer_index].layer_map.nv_tileset_index == tset_id)
+				{
+					project->deleteLayer(st_i, layer_index);
+					layer_index = -1;
+				}
+			}
+		}
+	}
+
+	if(stage_index >= 0 && stage_index < project->stages.size())
+	{
+		wxString active_layer_name = wxString(project->getLayerName(stage_index, map_editor->getSelectedLayer())).Upper().Trim();
+
+		//SET LAYER COMBO AND CHECKLIST
+		m_layerVisible_checkList->Clear();
+		m_activeLayer_comboBox->Clear();
+
+		for(int i = 0; i < project->getStageNumLayers(stage_index); i++)
+		{
+			m_layerVisible_checkList->AppendAndEnsureVisible(wxString(project->getLayerName(stage_index, i)));
+			m_layerVisible_checkList->Check(i, project->getLayerVisible(stage_index, i));
+
+			m_activeLayer_comboBox->Append(project->getLayerName(stage_index, i));
+		}
+
+		int active_layer_index = project->getLayerIndex(stage_index, active_layer_name.ToStdString());
+		m_activeLayer_comboBox->SetSelection(active_layer_index);
+		map_editor->selectLayer(active_layer_index);
+
+		m_layerName_textCtrl->SetValue(_(""));
+		m_mapEdit_layerHScroll_spinCtrlDouble->SetValue(0.0);
+		m_mapEdit_layerVScroll_spinCtrlDouble->SetValue(0.0);
+		m_mapEdit_layerAlpha_spinCtrl->SetValue(0);
+	}
+
 
 	m_tileEdit_tileset_listBox->Delete(tset_id);
 	tile_editor->selectTileset(_(""));
@@ -1085,7 +1241,7 @@ void NirvanaEditor_MainFrame::OnTileEdit_deleteMaskClick( wxCommandEvent& event 
 
 	int mask_index = tile_editor->getSelectedMask();
 
-	if(mask_index < 0 && mask_index >= project->getMaskCount(tset_id))
+	if(mask_index < 0 || mask_index >= project->getMaskCount(tset_id))
 		return;
 
 	project->deleteMask(tset_id, mask_index);
@@ -1110,12 +1266,14 @@ void NirvanaEditor_MainFrame::OnTileEdit_maskIDChanged( wxCommandEvent& event )
 
 	int mask_index = tile_editor->getSelectedMask();
 
-	if(mask_index < 0 && mask_index >= project->getMaskCount(tset_id))
+	if(mask_index < 0 || mask_index >= project->getMaskCount(tset_id))
 		return;
+
+	//wxMessageBox(_("MASK COUNT: ") + wxString::Format(_("%i"), project->getMaskCount(tset_id)) + ", " + wxString::Format(_("%i"), mask_index));
 
 	project->setMaskName(tset_id, mask_index, event.GetString().ToStdString());
 
-	m_tileEdit_mask_listBox->SetString(mask_index, project->getMaskName(tset_id, mask_index));
+	m_tileEdit_mask_listBox->SetString(mask_index, wxString(project->getMaskName(tset_id, mask_index)));
 }
 
 void NirvanaEditor_MainFrame::OnEnterTileMaskSheet( wxMouseEvent& event )

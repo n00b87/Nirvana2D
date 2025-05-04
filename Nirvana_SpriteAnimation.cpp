@@ -326,13 +326,15 @@ void Nirvana_SpriteEditor::deleteAnimation()
 
 	// Add animation to Frame Panel
 	spriteFrame_target->deleteSprite(spriteFrame_target->spriteEdit_selected_sprite);
-	spriteFrame_target->createSprite(spriteFrame_target->current_sheet_image,
+	spriteFrame_target->createSprite(n_sprite.layer_sprite_index,
+									 spriteFrame_target->current_sheet_image,
 									 spriteFrame_target->current_frame_width,
 									 spriteFrame_target->current_frame_height);
 
 	// Add animation to Preview Panel
 	spritePreview_target->deleteSprite(spritePreview_target->spriteEdit_selected_sprite);
-	spritePreview_target->createSprite(spritePreview_target->current_sheet_image,
+	spritePreview_target->createSprite(n_sprite.layer_sprite_index,
+									   spritePreview_target->current_sheet_image,
 									   spritePreview_target->current_frame_width,
 									   spritePreview_target->current_frame_height);
 
@@ -499,7 +501,8 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	if(spriteFrame_target->spriteExists(spriteFrame_target->spriteEdit_selected_sprite))
 		spriteFrame_target->deleteSprite(spriteFrame_target->spriteEdit_selected_sprite);
 
-	spriteFrame_target->spriteEdit_selected_sprite = spriteFrame_target->createSprite(spriteFrame_target->current_sheet_image,
+	spriteFrame_target->spriteEdit_selected_sprite = spriteFrame_target->createSprite(-1,
+																					  spriteFrame_target->current_sheet_image,
 																					  n_sprite.object.frame_size.Width,
 																					  n_sprite.object.frame_size.Height);
 
@@ -536,7 +539,8 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 		spritePreview_target->deleteSprite(spritePreview_target->spriteEdit_selected_sprite);
 
 	spritePreview_target->setActiveCanvas(spritePreview_target->preview_canvas);
-	spritePreview_target->spriteEdit_selected_sprite = spritePreview_target->createSprite(spritePreview_target->current_sheet_image,
+	spritePreview_target->spriteEdit_selected_sprite = spritePreview_target->createSprite(-1,
+																						  spritePreview_target->current_sheet_image,
 																						  n_sprite.object.frame_size.Width,
 																						  n_sprite.object.frame_size.Height);
 

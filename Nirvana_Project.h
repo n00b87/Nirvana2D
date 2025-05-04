@@ -4,7 +4,8 @@
 #include <wx/filename.h>
 #include <vector>
 
-#include "wxIrrlicht.h"
+#include <irrlicht.h>
+#include "NirvanaEngine_Structs.h"
 #include "rc_defines.h"
 
 class Nirvana_Project
@@ -40,6 +41,8 @@ class Nirvana_Project
 		void setLayerTile(int stage_index, int layer_index, int x_in_tiles, int y_in_tiles, int tile_index);
 		int getLayerTile(int stage_index, int layer_index, int x_in_tiles, int y_in_tiles);
 		int addLayerSprite(int stage_index, int layer_index, std::string sprite_name, int sprite_base_index, int x, int y);
+		void deleteLayerSprite(int stage_index, int layer_index, int sprite_index);
+		int copyLayerSprite(int stage_index, int layer_index, int sprite_index);
 		int getLayerSpriteIndex(int stage_index, int layer_index, std::string sprite_name);
 		int getLayerSpriteBaseIndex(int stage_index, int layer_index, int sprite_index);
 		void setLayerSpritePosition(int stage_index, int layer_index, int sprite_index, int x, int y);
@@ -54,19 +57,16 @@ class Nirvana_Project
 		void deleteLayer(int stage_index, int layer_index);
 		int copyLayer(int stage_index, int layer_index);
 
+		int createShape(int stage_index, int layer_index, int shape_type);
+		bool setShapeName(int stage_index, int layer_index, int shape_index, std::string shape_name);
+		std::string getShapeName(int stage_index, int layer_index, int shape_index);
+		int getShapeIndex(int stage_index, int layer_index, std::string shape_name);
+		int getShapeType(int stage_index, int layer_index, int shape_index);
+
 		wxFileName project_filename_obj;
 
-		wxIrrlicht* tileSheet_target;
-		wxIrrlicht* tileFrame_target;
-		wxIrrlicht* tilePreview_target;
-		wxIrrlicht* tileMask_target;
 
-		wxIrrlicht* spriteCollision_target;
-
-		wxIrrlicht* spriteSheet_target;
-		wxIrrlicht* spriteFrame_target;
-		wxIrrlicht* spritePreview_target;
-
+		int obj_uid_counter = 0;
 		std::vector<Nirvana_SpriteBase> sprite_base;
 		std::vector<Nirvana_Tileset> tileset;
 
@@ -85,6 +85,9 @@ class Nirvana_Project
 		void setSpriteName(int  spr_index, std::string spr_name);
 		void setSpriteAnimationName(int spr_index, int animation_index, std::string ani_name);
 		void deleteSprite(int spr_index);
+
+		int getSpriteBaseIndex(std::string spr_name);
+		std::string getSpriteBaseName(int spr_index);
 
 		void setSpriteNumAnimationFrames(int spr_index, int animation_index, int num_frames);
 		void setSpriteAnimationFrame(int spr_index, int animation_index, int ani_frame, int sheet_frame);

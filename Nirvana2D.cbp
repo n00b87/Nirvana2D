@@ -36,7 +36,7 @@
 			<Add directory="../irrlicht-svn/include" />
 		</Compiler>
 		<Linker>
-			<Add option="`wx-config --libs std,aui` `pkg-config --libs gtk+-3.0` -lfreetype -Wl,--allow-multiple-definition" />
+			<Add option="`wx-config --libs std,aui,propgrid` `pkg-config --libs gtk+-3.0` -lfreetype -Wl,--allow-multiple-definition" />
 			<Add library="EGL" />
 			<Add library="GL" />
 			<Add library="Xxf86vm" />
@@ -47,6 +47,10 @@
 		<Unit filename="Nirvana2DApp.h" />
 		<Unit filename="NirvanaBase.cpp" />
 		<Unit filename="NirvanaBase.h" />
+		<Unit filename="NirvanaEditor_AddSpriteInstance_Dialog.cpp" />
+		<Unit filename="NirvanaEditor_AddSpriteInstance_Dialog.h" />
+		<Unit filename="NirvanaEditor_DeleteSprite_Dialog.cpp" />
+		<Unit filename="NirvanaEditor_DeleteSprite_Dialog.h" />
 		<Unit filename="NirvanaEditor_DeleteStage_Dialog.cpp" />
 		<Unit filename="NirvanaEditor_DeleteStage_Dialog.h" />
 		<Unit filename="NirvanaEditor_MainFrame.cpp" />
@@ -71,6 +75,9 @@
 		<Unit filename="Nirvana_TileAnimation.cpp" />
 		<Unit filename="Nirvana_TileAnimation.h" />
 		<Unit filename="Project_Controls.cpp" />
+		<Unit filename="Project_Shape_Tools.cpp" />
+		<Unit filename="Project_Sprite_Tools.cpp" />
+		<Unit filename="Project_Tile_Tools.cpp" />
 		<Unit filename="gui_freetype_font.cpp" />
 		<Unit filename="gui_freetype_font.h" />
 		<Unit filename="rc_defines.h" />

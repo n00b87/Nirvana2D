@@ -17,26 +17,27 @@
 #include <wx/colour.h>
 #include <wx/settings.h>
 #include <wx/combobox.h>
-#include <wx/bmpbuttn.h>
 #include <wx/bitmap.h>
 #include <wx/image.h>
 #include <wx/icon.h>
-#include <wx/button.h>
+#include <wx/aui/aui.h>
+#include <wx/aui/auibar.h>
 #include <wx/sizer.h>
 #include <wx/panel.h>
-#include <wx/treectrl.h>
 #include <wx/statline.h>
+#include <wx/bmpbuttn.h>
+#include <wx/button.h>
+#include <wx/treectrl.h>
 #include <wx/checklst.h>
 #include <wx/textctrl.h>
 #include <wx/spinctrl.h>
 #include <wx/aui/auibook.h>
-#include <wx/aui/aui.h>
-#include <wx/aui/auibar.h>
 #include <wx/listbox.h>
-#include <wx/scrolwin.h>
-#include <wx/splitter.h>
+#include <wx/propgrid/propgrid.h>
+#include <wx/propgrid/advprops.h>
 #include <wx/grid.h>
 #include <wx/simplebook.h>
+#include <wx/splitter.h>
 #include <wx/menu.h>
 #include <wx/toolbar.h>
 #include <wx/frame.h>
@@ -60,10 +61,40 @@ class Nirvana_MainFrame : public wxFrame
 		wxPanel* m_panel7;
 		wxStaticText* m_staticText53;
 		wxComboBox* m_activeLayer_comboBox;
-		wxBitmapButton* m_bpButton20;
+		wxAuiToolBar* m_auiToolBar6;
+		wxAuiToolBarItem* m_tool351;
 		wxStaticText* m_mapEdit_stageName_staticText;
 		wxPanel* m_panel8;
 		wxPanel* m_mapEdit_map_panel;
+		wxPanel* m_panel48;
+		wxPanel* m_panel50;
+		wxStaticText* m_staticText641;
+		wxStaticText* m_staticText651;
+		wxStaticText* m_screenAbsoluteX_staticText;
+		wxStaticText* m_staticText661;
+		wxStaticText* m_screenAbsoluteY_staticText;
+		wxPanel* m_panel49;
+		wxStaticText* m_staticText64;
+		wxStaticText* m_staticText65;
+		wxStaticText* m_stageAbsoluteX_staticText;
+		wxStaticText* m_staticText66;
+		wxStaticText* m_stageAbsoluteY_staticText;
+		wxStaticLine* m_staticline8;
+		wxStaticText* m_staticText69;
+		wxStaticText* m_stageTileX_staticText;
+		wxStaticText* m_staticText71;
+		wxStaticText* m_stageTileY_staticText;
+		wxPanel* m_panel501;
+		wxStaticText* m_staticText6411;
+		wxStaticText* m_staticText6511;
+		wxStaticText* m_cameraAbsoluteX_staticText;
+		wxStaticText* m_staticText6611;
+		wxStaticText* m_cameraAbsoluteY_staticText;
+		wxStaticLine* m_staticline811;
+		wxStaticText* m_staticText6911;
+		wxStaticText* m_cameraTileX_staticText;
+		wxStaticText* m_staticText7111;
+		wxStaticText* m_cameraTileY_staticText;
 		wxPanel* m_panel2;
 		wxSplitterWindow* m_splitter2;
 		wxPanel* m_panel13;
@@ -95,57 +126,83 @@ class Nirvana_MainFrame : public wxFrame
 		wxPanel* m_panel14;
 		wxAuiNotebook* m_mapEdit_layerObjectTools_auinotebook;
 		wxPanel* m_mapEdit_tile_panel;
-		wxAuiToolBar* m_auiToolBar3;
-		wxAuiToolBarItem* m_tool18;
-		wxAuiToolBarItem* m_tool19;
-		wxAuiToolBarItem* m_tool20;
-		wxAuiToolBarItem* m_tool21;
-		wxAuiToolBarItem* m_tool22;
-		wxAuiToolBarItem* m_tool23;
+		wxAuiToolBar* m_mapEdit_tileTools_auiToolBar;
+		wxAuiToolBarItem* m_mapEdit_tileToolbar_select_tool;
+		wxAuiToolBarItem* m_mapEdit_tileToolbar_boxSelect_tool;
+		wxAuiToolBarItem* m_mapEdit_tileToolbar_move_tool;
+		wxAuiToolBarItem* m_mapEdit_tileToolbar_setTile_tool;
+		wxAuiToolBarItem* m_mapEdit_tileToolbar_copyTile_tool;
+		wxAuiToolBarItem* m_mapEdit_tileToolbar_fillTile_tool;
+		wxAuiToolBarItem* m_mapEdit_tileToolbar_deleteSelected_tool;
 		wxPanel* m_mapEdit_tileSelect_panel;
 		wxPanel* m_mapEdit_sprite_panel;
-		wxAuiToolBar* m_auiToolBar1;
-		wxAuiToolBarItem* m_tool4;
-		wxAuiToolBarItem* m_tool5;
-		wxAuiToolBarItem* m_tool6;
-		wxAuiToolBarItem* m_tool7;
-		wxAuiToolBarItem* m_tool8;
-		wxAuiToolBarItem* m_tool1;
-		wxAuiToolBarItem* m_tool2;
-		wxAuiToolBarItem* m_tool3;
+		wxAuiToolBar* m_mapEdit_spriteTools_auiToolBar;
+		wxAuiToolBarItem* m_mapEdit_spriteToolbar_select_tool;
+		wxAuiToolBarItem* m_mapEdit_spriteToolbar_boxSelect_tool;
+		wxAuiToolBarItem* m_mapEdit_spriteToolbar_move_tool;
+		wxAuiToolBarItem* m_mapEdit_spriteToolbar_rotate_tool;
+		wxAuiToolBarItem* m_mapEdit_spriteToolbar_scale_tool;
+		wxAuiToolBarItem* m_mapEdit_spriteToolbar_addSprite_tool;
+		wxAuiToolBarItem* m_mapEdit_spriteToolbar_deleteSprite_tool;
+		wxAuiToolBarItem* m_mapEdit_spriteToolbar_copySprite_tool;
+		wxAuiToolBarItem* m_mapEdit_spriteToolbar_centerOnSprite_tool;
 		wxListBox* m_mapEdit_layerSprite_listBox;
-		wxPanel* m_mapEdit_sprite_preview_panel;
-		wxScrolledWindow* m_scrolledWindow2;
-		wxStaticText* m_staticText81;
-		wxTextCtrl* m_textCtrl2;
-		wxStaticText* m_staticText11;
-		wxComboBox* m_comboBox31;
-		wxStaticText* m_staticText7;
-		wxComboBox* m_comboBox6;
-		wxStaticText* m_staticText5;
-		wxTextCtrl* m_textCtrl4;
-		wxStaticText* m_staticText6;
-		wxSpinCtrl* m_spinCtrl1;
-		wxStaticText* m_staticText9;
-		wxSpinCtrlDouble* m_spinCtrlDouble1;
+		wxPropertyGrid* m_mapEdit_sprite_propertyGrid;
+		wxPGProperty* m_propertyGridItem12;
+		wxPGProperty* m_propertyGridItem1;
+		wxPGProperty* m_propertyGridItem2;
+		wxPGProperty* m_propertyGridItem3;
+		wxPGProperty* m_propertyGridItem4;
+		wxPGProperty* m_propertyGridItem5;
+		wxPGProperty* m_propertyGridItem6;
+		wxPGProperty* m_propertyGridItem7;
+		wxPGProperty* m_propertyGridItem8;
+		wxPGProperty* m_propertyGridItem9;
+		wxPGProperty* m_propertyGridItem10;
+		wxPGProperty* m_propertyGridItem11;
+		wxPGProperty* m_propertyGridItem13;
+		wxPGProperty* m_propertyGridItem14;
+		wxPGProperty* m_propertyGridItem15;
 		wxPanel* m_mapEdit_collision_panel;
 		wxAuiToolBar* m_auiToolBar2;
-		wxAuiToolBarItem* m_tool141;
-		wxAuiToolBarItem* m_tool161;
-		wxAuiToolBarItem* m_tool17;
-		wxAuiToolBarItem* m_tool12;
-		wxAuiToolBarItem* m_tool13;
-		wxAuiToolBarItem* m_tool14;
-		wxAuiToolBarItem* m_tool15;
-		wxAuiToolBarItem* m_tool16;
+		wxAuiToolBarItem* m_mapEdit_shapeToolbar_select_tool;
+		wxAuiToolBarItem* m_mapEdit_shapeToolbar_boxSelect_tool;
+		wxAuiToolBarItem* m_mapEdit_shapeToolbar_move_tool;
+		wxAuiToolBarItem* m_mapEdit_shapeToolbar_draw_tool;
+		wxAuiToolBarItem* m_mapEdit_shapeToolbar_newBox_tool;
+		wxAuiToolBarItem* m_mapEdit_shapeToolbar_newPolygon_tool;
+		wxAuiToolBarItem* m_mapEdit_shapeToolbar_newChain_tool;
+		wxAuiToolBarItem* m_mapEdit_shapeToolbar_newCircle_tool;
+		wxAuiToolBarItem* m_mapEdit_shapeToolbar_deleteShape_tool;
 		wxListBox* m_mapEdit_collisionShape_listBox;
-		wxPanel* m_panel16;
-		wxPanel* m_mapEdit_image_preview_panel;
-		wxStaticText* m_staticText82;
+		wxStaticText* m_staticText86;
 		wxTextCtrl* m_textCtrl14;
-		wxBitmapButton* m_bpButton202;
+		wxStaticLine* m_staticline10;
+		wxSimplebook* m_mapEdit_shapeEdit_simplebook;
+		wxPanel* m_mapEdit_noShape_panel;
+		wxPanel* m_mapEdit_boxShape_panel;
+		wxStaticText* m_staticText87;
+		wxSpinCtrl* m_spinCtrl25;
+		wxStaticText* m_staticText871;
+		wxSpinCtrl* m_spinCtrl251;
+		wxStaticText* m_staticText872;
+		wxSpinCtrl* m_spinCtrl252;
+		wxStaticText* m_staticText861;
+		wxSpinCtrl* m_spinCtrl28;
+		wxPanel* m_mapEdit_polyShape_panel;
+		wxGrid* m_grid2;
+		wxPanel* m_mapEdit_circleShape_panel;
+		wxStaticText* m_staticText873;
+		wxSpinCtrl* m_spinCtrl253;
+		wxStaticText* m_staticText8711;
+		wxSpinCtrl* m_spinCtrl2511;
+		wxStaticText* m_staticText8721;
+		wxSpinCtrl* m_spinCtrl2521;
+		wxPanel* m_panel16;
+		wxStaticText* m_staticText82;
+		wxComboBox* m_mapEdit_canvasImage_comboBox;
 		wxStaticText* m_staticText562;
-		wxComboBox* m_comboBox7;
+		wxComboBox* m_mapEdit_canvasRenderSetting_comboBox;
 		wxPanel* m_tileEdit_panel;
 		wxSplitterWindow* m_splitter3;
 		wxPanel* m_panel191;
@@ -251,6 +308,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxMenuBar* m_menubar1;
 		wxToolBar* m_toolBar1;
 		wxToolBarToolBase* m_tool33;
+		wxToolBarToolBase* m_tool331;
 		wxToolBarToolBase* m_tool34;
 		wxToolBarToolBase* m_tool35;
 
@@ -259,6 +317,7 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnActiveLayerSelect( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnEnterMapView( wxMouseEvent& event ) { event.Skip(); }
 		virtual void OnLeaveMapView( wxMouseEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_Map_UpdateUI( wxUpdateUIEvent& event ) { event.Skip(); }
 		virtual void OnProjectPropertiesTabChanged( wxAuiNotebookEvent& event ) { event.Skip(); }
 		virtual void OnNewStage( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnDeleteStage( wxCommandEvent& event ) { event.Skip(); }
@@ -278,6 +337,37 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnMapEdit_LayerVScroll( wxSpinDoubleEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_LayerAlpha( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnMapEditToolsTabChanged( wxAuiNotebookEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TileTool_Select( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TileTool_BoxSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TileTool_Move( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TileTool_SetTile( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TileTool_CopyTile( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TileTool_FillTile( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TileTool_DeleteSelected( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnEnterMapEditTileSelect( wxMouseEvent& event ) { event.Skip(); }
+		virtual void OnLeaveMapEditTileSelect( wxMouseEvent& event ) { event.Skip(); }
+		virtual void OnUpdateMapEditTileSelect( wxUpdateUIEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteTool_Select( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteTool_BoxSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteTool_Move( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteTool_Rotate( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteTool_Scale( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteTool_AddSprite( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteTool_CopySprite( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteTool_CenterOnSprite( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteListSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpritePropertyGridChanged( wxPropertyGridEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShapeTool_Select( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShapeTool_BoxSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShapeTool_Move( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShapeTool_Draw( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShapeTool_NewBoxShape( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShapeTool_NewPolygonShape( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShapeTool_NewChainShape( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShapeTool_NewCircleShape( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShapeTool_DeleteShape( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_shapeListSelect( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnNewTilesetClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnDeleteTilesetClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnTileEdit_TilesetSelected( wxCommandEvent& event ) { event.Skip(); }
@@ -343,13 +433,13 @@ class Nirvana_MainFrame : public wxFrame
 
 		void m_splitter1OnIdle( wxIdleEvent& )
 		{
-			m_splitter1->SetSashPosition( 646 );
+			m_splitter1->SetSashPosition( 668 );
 			m_splitter1->Disconnect( wxEVT_IDLE, wxIdleEventHandler( Nirvana_MainFrame::m_splitter1OnIdle ), NULL, this );
 		}
 
 		void m_splitter2OnIdle( wxIdleEvent& )
 		{
-			m_splitter2->SetSashPosition( 152 );
+			m_splitter2->SetSashPosition( 273 );
 			m_splitter2->Disconnect( wxEVT_IDLE, wxIdleEventHandler( Nirvana_MainFrame::m_splitter2OnIdle ), NULL, this );
 		}
 
@@ -590,7 +680,7 @@ class DeleteStage_Dialog : public wxDialog
 
 	public:
 
-		DeleteStage_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = wxEmptyString, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 341,187 ), long style = wxDEFAULT_DIALOG_STYLE );
+		DeleteStage_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Delete Stage"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 341,187 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~DeleteStage_Dialog();
 
@@ -628,6 +718,62 @@ class StageProperties_Dialog : public wxDialog
 		StageProperties_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Stage Properties"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 514,282 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~StageProperties_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class AddSpriteInstance_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class AddSpriteInstance_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText59;
+		wxTextCtrl* m_spriteID_textCtrl;
+		wxStaticText* m_staticText60;
+		wxSearchCtrl* m_baseSprite_searchCtrl;
+		wxListBox* m_baseSpriteList_listBox;
+		wxButton* m_button27;
+		wxButton* m_button28;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnSearch( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		AddSpriteInstance_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Add Sprite"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 566,367 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~AddSpriteInstance_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class DeleteSprite_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class DeleteSprite_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText63;
+		wxStaticText* m_msg_staticText;
+		wxButton* m_button23;
+		wxButton* m_button24;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnDelete( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		DeleteSprite_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Delete Sprite"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 341,187 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~DeleteSprite_Dialog();
 
 };
 

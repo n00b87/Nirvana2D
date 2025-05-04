@@ -2,17 +2,17 @@
 #include <wx/display.h>
 #include <irrlicht.h>
 
-Nirvana_MapEditor::Nirvana_MapEditor(wxWindow* parent, wxPanel* map_panel, wxPanel* tile_panel, wxPanel* sprite_panel)
+Nirvana_MapEditor::Nirvana_MapEditor(wxWindow* parent, wxPanel* map_panel, wxPanel* tile_panel)
 {
 	this->parent = parent;
 
 	map_surface = map_panel;
 	tileSelect_Sheet = tile_panel;
-	spritePreview_surface = sprite_panel;
+	//spritePreview_surface = sprite_panel;
 
 	map_target = NULL;
 	tileSelect_target = NULL;
-	spritePreview_target = NULL;
+	//spritePreview_target = NULL;
 
 	initMapView();
 	getMapViewControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
@@ -20,7 +20,7 @@ Nirvana_MapEditor::Nirvana_MapEditor(wxWindow* parent, wxPanel* map_panel, wxPan
 	initTileSelect();
 	getTileSelectControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
 
-	initSpritePreview();
+	//initSpritePreview();
 
 	getMapViewControl()->shared_control = getTileSelectControl();
 	getTileSelectControl()->shared_control = getMapViewControl();
@@ -47,10 +47,7 @@ wxIrrlicht* Nirvana_MapEditor::getTileSelectControl()
 	return tileSelect_target;
 }
 
-wxIrrlicht* Nirvana_MapEditor::getSpritePreviewControl()
-{
-	return spritePreview_target;
-}
+
 
 void Nirvana_MapEditor::initMapView()
 {
@@ -137,45 +134,7 @@ void Nirvana_MapEditor::initTileSelect()
 	tileSelect_target->control_id = NV_MAP_EDIT_TILE_SHEET;
 }
 
-void Nirvana_MapEditor::initSpritePreview()
-{
-	int numDisplays = wxDisplay::GetCount();
 
-	int t_size = 640;
-
-	for(int i = 0; i < numDisplays; i++)
-	{
-		wxDisplay display(i);
-		int w = display.GetClientArea().GetWidth();
-		int h = display.GetClientArea().GetHeight();
-
-		int max_length = ( w > h ? w : h);
-		t_size = ( max_length > t_size ? max_length : t_size );
-
-		//wxMessageBox(_("SIZE[") + wxString::Format(_("%i"), i) + _("] = ") + wxString::Format(_("%i"), w) + _(", ") + wxString::Format(_("%i"), h) );
-	}
-
-	t_size = t_size/4;
-
-	spritePreview_target=new wxIrrlicht(spritePreview_surface, wxID_ANY, false, wxPoint(ClientW(0), ClientH(0)), wxGetDisplaySize());
-
-	spritePreview_target->debug_string = _("preview");
-
-	irr::SIrrlichtCreationParameters params;
-    params.DriverType = irr::video::EDT_BURNINGSVIDEO;
-    params.WindowSize = irr::core::dimension2d(t_size, t_size);
-
-	spritePreview_target->InitIrr(&params);
-	spritePreview_target->StartRendering();
-
-	irr::IrrlichtDevice* device = spritePreview_target->GetDevice();
-	irr::video::IVideoDriver* driver = device->getVideoDriver();
-	irr::scene::ISceneManager* smgr = device->getSceneManager();
-	irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
-
-	spritePreview_target->preview_canvas = spritePreview_target->createCanvas(t_size, t_size, 0, 0, t_size, t_size);
-	spritePreview_target->control_id = NV_MAP_EDIT_SPRITE_PREVIEW;
-}
 
 
 void Nirvana_MapEditor::stopEditor(bool stop_mapView)
@@ -188,7 +147,7 @@ void Nirvana_MapEditor::stopEditor(bool stop_mapView)
 		break;
 
 		case 1:
-			getSpritePreviewControl()->update_events = false;
+			//getSpritePreviewControl()->update_events = false;
 		break;
 	}
 
@@ -213,7 +172,7 @@ void Nirvana_MapEditor::startEditor(int n, bool start_mapView)
 		break;
 
 		case 1:
-			getSpritePreviewControl()->update_events = true;
+			//getSpritePreviewControl()->update_events = true;
 		break;
 	}
 
@@ -235,20 +194,37 @@ int Nirvana_MapEditor::getEditorPageIndex()
 	return editor_page_num;
 }
 
+void Nirvana_MapEditor::setMapTool(int tool_id)
+{
+	map_tool = tool_id;
+
+	getMapViewControl()->map_tool = tool_id;
+	getTileSelectControl()->map_tool = tool_id;
+}
+
 void Nirvana_MapEditor::selectStage(int stage_index)
 {
 	selected_layer = -1;
 	selected_sprite = -1;
 	selected_tile = -1;
 	selected_stage = stage_index;
+	getMapViewControl()->selected_stage = -1;
+	getMapViewControl()->mapEdit_selectTileTool_selection.clear();
 
 	if(selected_stage >= 0 && selected_stage < project->stages.size())
 	{
 		getTileSelectControl()->current_frame_width = project->stages[selected_stage].tile_width;
 		getTileSelectControl()->current_frame_height = project->stages[selected_stage].tile_height;
+		getTileSelectControl()->mapEdit_selectSpriteTool_selection.clear();
+		getTileSelectControl()->mapEdit_selectTileTool_selection.clear();
+		getTileSelectControl()->mapEdit_selectTileTool_box.clear();
 
 		getMapViewControl()->current_frame_width = project->stages[selected_stage].tile_width;
 		getMapViewControl()->current_frame_height = project->stages[selected_stage].tile_height;
+		getMapViewControl()->initStage(selected_stage);
+		getMapViewControl()->mapEdit_selectSpriteTool_selection.clear();
+		getMapViewControl()->mapEdit_selectTileTool_selection.clear();
+		getMapViewControl()->mapEdit_selectTileTool_box.clear();
 	}
 }
 
@@ -259,12 +235,23 @@ void Nirvana_MapEditor::selectLayer(int layer_index)
 
 	selected_layer = layer_index;
 
+	getMapViewControl()->mapEdit_selectTileTool_selection.clear();
+
 	Nirvana_Map_Layer n_layer = project->getStageLayer(stage_index, layer_index);
 	getMapViewControl()->mapEdit_layerType = project->getLayerType(stage_index, layer_index);
+	getMapViewControl()->selected_layer = layer_index;
+	getMapViewControl()->mapEdit_selectSpriteTool_selection.clear();
+	getMapViewControl()->mapEdit_selectTileTool_selection.clear();
+	getMapViewControl()->mapEdit_selectTileTool_box.clear();
+
 	getTileSelectControl()->selected_layer = layer_index;
 	getTileSelectControl()->mapEdit_layerType = project->getLayerType(stage_index, layer_index);
-	getSpritePreviewControl()->selected_layer = layer_index;
-	getSpritePreviewControl()->mapEdit_layerType = project->getLayerType(stage_index, layer_index);
+	getTileSelectControl()->mapEdit_selectSpriteTool_selection.clear();
+	getTileSelectControl()->mapEdit_selectTileTool_selection.clear();
+	getTileSelectControl()->mapEdit_selectTileTool_box.clear();
+
+	//getSpritePreviewControl()->selected_layer = layer_index;
+	//getSpritePreviewControl()->mapEdit_layerType = project->getLayerType(stage_index, layer_index);
 
 	getTileSelectControl()->mapEdit_getContext();
 	getTileSelectControl()->setActiveCanvas(getTileSelectControl()->sheet_canvas);
@@ -316,6 +303,27 @@ void Nirvana_MapEditor::selectLayer(int layer_index)
 	}
 }
 
+void Nirvana_MapEditor::selectShape(int shape_index)
+{
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	if(shape_index < 0 || shape_index >= project->stages[selected_stage].layers[selected_layer].layer_shapes.size())
+		return;
+
+	selected_shape = shape_index;
+	getMapViewControl()->selected_shape = shape_index;
+
+
+	getMapViewControl()->collision_physics_obj.points.clear();
+	getMapViewControl()->collision_physics_obj.next_points.clear();
+	getMapViewControl()->collision_physics_obj.prev_points.clear();
+	getMapViewControl()->collision_physics_obj.shape_type = project->stages[selected_stage].layers[selected_layer].layer_shapes[shape_index].shape_type;
+}
+
 int Nirvana_MapEditor::getSelectedStage()
 {
 	return selected_stage;
@@ -324,4 +332,9 @@ int Nirvana_MapEditor::getSelectedStage()
 int Nirvana_MapEditor::getSelectedLayer()
 {
 	return selected_layer;
+}
+
+int Nirvana_MapEditor::getSelectedShape()
+{
+	return selected_shape;
 }

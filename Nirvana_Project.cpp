@@ -9,16 +9,6 @@ Nirvana_Project::Nirvana_Project()
 {
 	project_filename_obj = wxFileName(_("/home/n00b/Projects/Nirvana2D/test_project/test.nvprj"));
 
-	tileSheet_target = NULL;
-	tileFrame_target = NULL;
-	tilePreview_target = NULL;
-	tileMask_target = NULL;
-
-	spriteCollision_target = NULL;
-
-	spriteSheet_target = NULL;
-	spriteFrame_target = NULL;
-	spritePreview_target = NULL;
 }
 
 wxString Nirvana_Project::getDir()
@@ -48,6 +38,9 @@ bool Nirvana_Project::createSprite(wxString spr_id, wxString img_file, int frame
 	obj.file = img_file;
 	obj.object.frame_size.set(frame_width, frame_height);
 	obj.object.active = true;
+	obj.object.image_id = -1;
+	obj.unique_id = obj_uid_counter;
+	obj_uid_counter++;
 
 	sprite_base.push_back(obj);
 
@@ -126,8 +119,70 @@ void Nirvana_Project::deleteSprite(int spr_index)
 	if(spr_index < 0 || spr_index >= sprite_base.size())
 		return;
 
+
+	int base_unique_id = sprite_base[spr_index].unique_id;
 	sprite_base.erase(sprite_base.begin() + spr_index);
+
+	//delete all instances of base sprite
+	for(int stage_index = 0; stage_index < stages.size(); stage_index++)
+	{
+		for(int layer_index = 0; layer_index < stages[stage_index].layers.size(); layer_index++)
+		{
+			for(int i = 0; i < stages[stage_index].layers[layer_index].layer_sprites.size(); i++)
+			{
+				if(i < 0)
+					continue;
+
+				if(stages[stage_index].layers[layer_index].layer_sprites[i].base_unique_id == base_unique_id)
+				{
+					stages[stage_index].layers[layer_index].layer_sprites.erase( stages[stage_index].layers[layer_index].layer_sprites.begin() + i );
+					i = -1;
+				}
+			}
+		}
+	}
+
+	//set sprite_base_index based off unique id
+	for(int stage_index = 0; stage_index < stages.size(); stage_index++)
+	{
+		for(int layer_index = 0; layer_index < stages[stage_index].layers.size(); layer_index++)
+		{
+			for(int i = 0; i < stages[stage_index].layers[layer_index].layer_sprites.size(); i++)
+			{
+				for(int base_index = 0; base_index < sprite_base.size(); base_index++)
+				{
+					if(sprite_base[base_index].unique_id == stages[stage_index].layers[layer_index].layer_sprites[i].base_unique_id)
+					{
+						//std::cout << "REMAP: " << stages[stage_index].layers[layer_index].layer_sprites[i].sprite_name << " to " << base_index << std::endl;
+						stages[stage_index].layers[layer_index].layer_sprites[i].sprite_base = base_index;
+						break;
+					}
+				}
+			}
+		}
+	}
 }
+
+int Nirvana_Project::getSpriteBaseIndex(std::string sprite_name)
+{
+	wxString test_name = wxString(sprite_name).Upper().Trim();
+	for(int i = 0; i < sprite_base.size(); i++)
+	{
+		if(wxString(sprite_base[i].sprite_name).Upper().Trim().compare(test_name)==0)
+			return i;
+	}
+
+	return -1;
+}
+
+std::string Nirvana_Project::getSpriteBaseName(int spr_index)
+{
+	if(spr_index < 0 || spr_index >= sprite_base.size())
+		return "";
+
+	return sprite_base[spr_index].sprite_name.ToStdString();
+}
+
 
 void Nirvana_Project::setSpriteNumAnimationFrames(int spr_index, int animation_index, int num_frames)
 {
@@ -351,6 +406,7 @@ bool Nirvana_Project::createTileset(wxString tset_id, wxString img_file, int til
 	obj.object.tile_width = tile_width;
 	obj.object.tile_height = tile_height;
 	obj.object.active = true;
+	obj.object.img_id = -1;
 
 	tileset.push_back(obj);
 
@@ -445,6 +501,7 @@ void Nirvana_Project::setTileAnimationFPS(int tileset_index, int base_tile_index
 		if(base_tile_index >= 0 && base_tile_index < tileset[tileset_index].object.tiles.size())
 		{
 			tileset[tileset_index].object.tiles[base_tile_index].fps = fps;
+			tileset[tileset_index].object.tiles[base_tile_index].frame_swap_time = 1000/fps;
 		}
 	}
 }
@@ -664,7 +721,11 @@ void Nirvana_Project::createStage(std::string stage_name, int tile_width, int ti
 	new_stage.stage_name = stage_name;
 	new_stage.tile_width = tile_width;
 	new_stage.tile_height = tile_height;
+	new_stage.width_in_tiles = 0;
+	new_stage.height_in_tiles = 0;
 	new_stage.stage_id = 0;
+	new_stage.layers.clear();
+	new_stage.layer_order.clear();
 
 	for(int i = 0; i < stages.size(); i++)
 	{
@@ -775,12 +836,15 @@ void Nirvana_Project::setStageSize(int stage_index, int width, int height)
 
 			stages[stage_index].layers[i].layer_map.tile_map.rows.resize(height);
 
+			//std::cout << "ROWS: " << stages[stage_index].layers[i].layer_map.tile_map.rows.size() << std::endl;
+
 			for(int m_row = 0; m_row < stages[stage_index].layers[i].layer_map.tile_map.rows.size(); m_row++)
 			{
 				stages[stage_index].layers[i].layer_map.tile_map.rows[m_row].tile.resize(width);
 
 				for(int m_col = (m_row < original_height ? original_width : 0); m_col < width; m_col++)
 				{
+					//std::cout << "C = " << m_col << std::endl;
 					if(m_col < 0)
 						continue;
 
@@ -818,6 +882,12 @@ void Nirvana_Project::addLayer(int stage_index, std::string layer_name, int laye
 	n_layer.layer_type = layer_type;
 	n_layer.scroll_speed.set(1.0, 1.0);
 	n_layer.layer_alpha = 255;
+	n_layer.layer_map.tile_map.num_tiles_across = 0;
+	n_layer.layer_map.tile_map.num_tiles_down = 0;
+	n_layer.layer_map.nv_tileset_index = -1;
+	n_layer.layer_map.tile_map_index = -1;
+	n_layer.layer_map.tile_map.tileset = -1;
+	n_layer.ref_canvas = -1;
 
 	wxString n_layer_name = wxString(layer_name).Upper().Trim();
 
@@ -987,6 +1057,7 @@ void Nirvana_Project::setLayerTileset(int stage_index, int layer_index, int tile
 		return;
 
 	stages[stage_index].layers[layer_index].layer_map.nv_tileset_index = tileset_index;
+	stages[stage_index].layers[layer_index].layer_map.nv_tileset_name = tileset[tileset_index].tileset_name.ToStdString();
 }
 
 int Nirvana_Project::getLayerTileset(int stage_index, int layer_index)
@@ -1048,6 +1119,9 @@ int Nirvana_Project::addLayerSprite(int stage_index, int layer_index, std::strin
 	Nirvana_Map_Sprite layer_sprite;
 	layer_sprite.sprite_name = sprite_name;
 	layer_sprite.sprite_base = sprite_base_index;
+	layer_sprite.base_unique_id = sprite_base[sprite_base_index].unique_id;
+	layer_sprite.layer_sprite_unique_id = obj_uid_counter;
+	obj_uid_counter++;
 
 	wxString tst_name = wxString(sprite_name).Upper().Trim();
 
@@ -1061,11 +1135,69 @@ int Nirvana_Project::addLayerSprite(int stage_index, int layer_index, std::strin
 	layer_sprite.position.set(x, y);
 	layer_sprite.scale.set(1, 1);
 	layer_sprite.angle = 0;
+	layer_sprite.layer_id = layer_index;
+	layer_sprite.map_sprite_id = -1;
+	layer_sprite.alpha = 255;
 
 	int s_index = stages[stage_index].layers[layer_index].layer_sprites.size();
 	stages[stage_index].layers[layer_index].layer_sprites.push_back(layer_sprite);
 
 	return s_index;
+}
+
+void Nirvana_Project::deleteLayerSprite(int stage_index, int layer_index, int sprite_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	if(sprite_index < 0 || sprite_index >= stages[stage_index].layers[layer_index].layer_sprites.size())
+		return;
+
+	stages[stage_index].layers[layer_index].layer_sprites.erase( stages[stage_index].layers[layer_index].layer_sprites.begin() + sprite_index );
+}
+
+int Nirvana_Project::copyLayerSprite(int stage_index, int layer_index, int sprite_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	if(sprite_index < 0 || sprite_index >= stages[stage_index].layers[layer_index].layer_sprites.size())
+		return -1;
+
+	int n = 1;
+	wxString base_spr_name = wxString(stages[stage_index].layers[layer_index].layer_sprites[sprite_index].sprite_name).Upper().Trim();
+	wxString copy_spr_name = base_spr_name + _("_") + wxString::Format(_("%i"), n);
+
+	for(int i = 0; i < stages[stage_index].layers[layer_index].layer_sprites.size(); i++)
+	{
+		if(i < 0)
+			continue;
+
+		if(wxString(stages[stage_index].layers[layer_index].layer_sprites[i].sprite_name).Upper().Trim().compare(copy_spr_name)==0)
+		{
+			n++;
+			copy_spr_name = base_spr_name + _("_") + wxString::Format(_("%i"), n);
+			i = -1;
+		}
+	}
+
+	Nirvana_Map_Sprite n_sprite = stages[stage_index].layers[layer_index].layer_sprites[sprite_index];
+	n_sprite.sprite_name = copy_spr_name.ToStdString();
+	n_sprite.map_sprite_id = -1;
+	n_sprite.layer_sprite_unique_id = obj_uid_counter;
+	obj_uid_counter++;
+
+	int copy_index = stages[stage_index].layers[layer_index].layer_sprites.size();
+
+	stages[stage_index].layers[layer_index].layer_sprites.push_back(n_sprite);
+
+	return copy_index;
 }
 
 int Nirvana_Project::getLayerSpriteIndex(int stage_index, int layer_index, std::string sprite_name)
@@ -1283,4 +1415,124 @@ int Nirvana_Project::copyLayer(int stage_index, int layer_index)
 	stages[stage_index].layers.push_back(tmp);
 
 	return new_index;
+}
+
+
+int Nirvana_Project::createShape(int stage_index, int layer_index, int shape_type)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	sprite2D_physics_obj p_obj;
+
+	int n = 1;
+	wxString shape_base_name = _("");
+
+	if(shape_type == SPRITE_SHAPE_BOX)
+		shape_base_name = _("BOX_");
+	else if(shape_type == SPRITE_SHAPE_CHAIN)
+		shape_base_name = _("CHAIN_");
+	else if(shape_type == SPRITE_SHAPE_POLYGON)
+		shape_base_name = _("POLYGON_");
+	else if(shape_type == SPRITE_SHAPE_CIRCLE)
+		shape_base_name = _("CIRCLE_");
+
+	wxString shape_name = shape_base_name + wxString::Format(_("%i"),n);
+
+	for(int i = 0; i < stages[stage_index].layers[layer_index].layer_shapes.size(); i++)
+	{
+		if(i < 0)
+			continue;
+
+		if(shape_name.compare(wxString(stages[stage_index].layers[layer_index].layer_shapes[i].shape_name).Upper().Trim())==0)
+		{
+			n++;
+			shape_name = shape_base_name + wxString::Format(_("%i"),n);
+			i = -1;
+		}
+	}
+
+	std::cout << "NAME: " << shape_name.ToStdString() << std::endl;
+	p_obj.shape_name = shape_name.ToStdString();
+	p_obj.shape_type = shape_type;
+
+	int shape_index = stages[stage_index].layers[layer_index].layer_shapes.size();
+	stages[stage_index].layers[layer_index].layer_shapes.push_back(p_obj);
+	return shape_index;
+}
+
+bool Nirvana_Project::setShapeName(int stage_index, int layer_index, int shape_index, std::string shape_name)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return false;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return false;
+
+	if(shape_index < 0 || shape_index >= stages[stage_index].layers[layer_index].layer_shapes.size())
+		return false;
+
+	wxString test_name = wxString(shape_name).Upper().Trim();
+
+	for(int i = 0; i < stages[stage_index].layers[layer_index].layer_shapes.size(); i++)
+	{
+		if(test_name.compare(wxString(stages[stage_index].layers[layer_index].layer_shapes[i].shape_name).Upper().Trim())==0)
+		{
+			return false;
+		}
+	}
+
+	stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_name = shape_name;
+
+	return true;
+}
+
+std::string Nirvana_Project::getShapeName(int stage_index, int layer_index, int shape_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return "";
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return "";
+
+	if(shape_index < 0 || shape_index >= stages[stage_index].layers[layer_index].layer_shapes.size())
+		return "";
+
+	return stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_name;
+}
+
+int Nirvana_Project::getShapeIndex(int stage_index, int layer_index, std::string shape_name)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	wxString test_name = wxString(shape_name).Upper().Trim();
+
+	for(int i = 0; i < stages[stage_index].layers[layer_index].layer_shapes.size(); i++)
+	{
+		if(wxString(stages[stage_index].layers[layer_index].layer_shapes[i].shape_name).Upper().Trim().compare(test_name)==0)
+			return i;
+	}
+
+	return -1;
+}
+
+int Nirvana_Project::getShapeType(int stage_index, int layer_index, int shape_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return -1;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return -1;
+
+	if(shape_index < 0 || shape_index >= stages[stage_index].layers[layer_index].layer_shapes.size())
+		return -1;
+
+	return stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_type;
 }

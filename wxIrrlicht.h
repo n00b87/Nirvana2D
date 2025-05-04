@@ -43,10 +43,12 @@
 
 #include <irrlicht.h>
 #include <wx/wx.h>
+#include <wx/propgrid/property.h>
 #include <wx/glcanvas.h>
 #include "gui_freetype_font.h"
 #include "NirvanaEngine_Structs.h"
 #include "rc_defines.h"
+#include "Nirvana_Project.h"
 
 #define MAX_FONTS 8
 
@@ -215,7 +217,7 @@ class wxIrrlicht : public wxControl {
 
 		void sortSpriteZ(int canvas_id);
 		bool spriteExists(int spr_id);
-		int createSprite(int img_id, double w, double h);
+		int createSprite(int layer_sprite_index, int img_id, double w, double h);
 		void deleteSprite(int spr_id);
 		int getSpriteSource(int spr_id);
 		void setSpriteCollisionShape(int spr_id, int sprite_shape);
@@ -249,6 +251,7 @@ class wxIrrlicht : public wxControl {
 		irr::u32 getSpriteColorMod(int spr_id);
 		irr::u32 getSpriteAlpha(int spr_id);
 		void util_drawSprites(int canvas_id);
+		void util_drawSelectedSprites();
 
 
 		// TILES
@@ -281,6 +284,21 @@ class wxIrrlicht : public wxControl {
 		void updateTileset(int tset);
 		void drawTileMap(int tmap, int x, int y, int w, int h, int offset_x, int offset_y);
 
+		void util_getTileInTileset(int project_tset, int tile, int* x, int* y);
+		int util_getNumTilesInTileset(int project_tset);
+		void util_updateTileset(int project_tset);
+		void util_drawTileLayer(int layer);
+		void util_setSpriteLayerOffset(int layer);
+
+		int util_getImageID(std::string img_file); //checks to see if file has already been loaded
+
+		void initStage(int stage_index);
+		void initLayer(int layer_index);
+		void addLayerSprite(int layer_index, int project_sprite);
+		void resizeLayers();
+
+		void clearStage();
+
 
         irr::video::ITexture* test_texture;
 
@@ -306,6 +324,8 @@ class wxIrrlicht : public wxControl {
         bool tst_tset_render = true;
 
         int control_id = -1;
+
+        int map_tool = -1;
 
         int current_frame_width = 32;
         int current_frame_height = 32;
@@ -387,12 +407,85 @@ class wxIrrlicht : public wxControl {
         void UpdateTileAnimationPreview();
         void UpdateTileMask();
 
-        Nirvana_Stage current_stage;
+        Nirvana_Project* project = NULL;
+        int selected_stage = -1;
         int selected_layer = -1;
         int selected_sprite = -1;
         int selected_tile = -1;
+        int selected_tile_end = -1;
+        Nirvana_TileSelection mapEdit_tile_selection;
+        std::vector<Nirvana_SelectTool_TileSelection> mapEdit_selectTileTool_selection;
+        std::vector<Nirvana_SelectTool_TileSelection> mapEdit_selectTileTool_box;
+        std::vector<Nirvana_SelectTool_SpriteSelection> mapEdit_selectSpriteTool_selection;
 
         int mapEdit_layerType = -1;
+
+        bool mapEdit_lastAction_erase = false;
+
+        void StageSheet_SetTileUpdate();
+        void util_fillTile(int base_tile, int fill_tile, int x, int y);
+        void StageSheet_FillTileUpdate();
+
+        void util_drawSelectedTiles();
+        void StageSheet_SelectTileUpdate();
+        void StageSheet_BoxSelectTileUpdate();
+
+        void StageSheet_MoveTileUpdate();
+        void StageSheet_CopyTileUpdate();
+
+        void StageSheet_DeleteSelectedTileUpdate();
+
+        void updateTileSelectionTilemap();
+
+
+        std::vector<int> pick_sprites;
+        void pickSprites(int start_x, int start_y, int end_x, int end_y, bool current_canvas_only=true);
+
+        bool map_sprite_selection_changed = false;
+        bool map_sprite_pos_changed = false;
+        bool map_sprite_angle_changed = false;
+        bool map_sprite_scale_changed = false;
+        wxPGProperty* nv_sprite_positionX_property = NULL;
+        wxPGProperty* nv_sprite_positionY_property = NULL;
+        wxPGProperty* nv_sprite_angle_property = NULL;
+        wxPGProperty* nv_sprite_scaleX_property = NULL;
+        wxPGProperty* nv_sprite_scaleY_property = NULL;
+
+        void StageSheet_SelectSpriteUpdate();
+        irr::core::vector2di selectSprite_box_start;
+        irr::core::vector2df rotSprite_center_pos;
+        float rotSprite_angle_start;
+        float getHeading(irr::core::vector2df a, irr::core::vector2df b);
+
+        void StageSheet_BoxSelectSpriteUpdate();
+        void StageSheet_MoveSpriteUpdate();
+        void StageSheet_RotateSpriteUpdate();
+        void StageSheet_ScaleSpriteUpdate();
+
+		wxStaticText* m_cameraAbsoluteX_staticText = NULL;
+		wxStaticText* m_cameraAbsoluteY_staticText = NULL;
+		wxStaticText* m_cameraTileX_staticText = NULL;
+		wxStaticText* m_cameraTileY_staticText = NULL;
+
+		wxStaticText* m_stageAbsoluteX_staticText = NULL;
+		wxStaticText* m_stageAbsoluteY_staticText = NULL;
+		wxStaticText* m_stageTileX_staticText = NULL;
+		wxStaticText* m_stageTileY_staticText = NULL;
+
+		wxStaticText* m_screenAbsoluteX_staticText = NULL;
+		wxStaticText* m_screenAbsoluteY_staticText = NULL;
+
+		void updateStageViewportInfo();
+
+
+		int selected_shape = -1;
+		std::vector<sprite2D_physics_obj> stage_physics_obj;
+
+        void stage_collisionEdit_select();
+        void stage_collisionEdit_boxSelect();
+        void stage_collisionEdit_move();
+        void stage_collisionEdit_draw();
+
 
         void UpdateStageSheet();
         void UpdateStageTileSelect();

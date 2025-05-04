@@ -4,6 +4,8 @@
 #include <irrlicht.h>
 #include <vector>
 
+#include "rc_defines.h"
+
 struct canvas_obj
 {
     irr::video::ITexture* texture;
@@ -99,6 +101,8 @@ struct tilemap_obj
 
 struct sprite2D_physics_obj
 {
+	std::string shape_name;
+
 	bool init = false; //specifically to prevent project from overriding default values on creation
 	int body_type;
 	int shape_type;
@@ -138,6 +142,9 @@ struct sprite2D_obj
 	int image_id;
 	int sheet_numFrames;
 	int frames_per_row;
+
+	int layer_sprite_index = -1;
+	int layer_sprite_unique_id = -1;
 
 	int type;
 
@@ -187,6 +194,33 @@ struct render_cmd_obj
 	irr::core::array<render_cmd_arg_obj> arg;
 };
 
+struct Nirvana_TileSelection_Row
+{
+	std::vector<int> data;
+};
+
+struct Nirvana_TileSelection
+{
+	int width_in_tiles = 0;
+	int height_in_tiles = 0;
+	std::vector<Nirvana_TileSelection_Row> row;
+};
+
+struct Nirvana_SelectTool_TileSelection
+{
+	int tile_index = -1;
+	irr::core::vector2di map_tile_pos;
+	irr::core::vector2di box_start_pos;
+};
+
+struct Nirvana_SelectTool_SpriteSelection
+{
+	int layer_sprite_index = -1;
+	irr::core::vector2di start_pos;
+	irr::core::vector2df start_scale;
+	float angle;
+};
+
 
 struct Nirvana_SpriteBase
 {
@@ -194,6 +228,8 @@ struct Nirvana_SpriteBase
 	wxString sprite_name;
 
 	sprite2D_obj object;
+
+	int unique_id = -1;
 };
 
 struct Nirvana_Tileset
@@ -211,15 +247,23 @@ struct Nirvana_Map_Sprite
 	std::string sprite_name;
 	int map_sprite_id = -1;
 	int layer_id = -1;
-	int sprite_base;
+	int sprite_base = -1;
+	int base_unique_id = -1;
+
+	int layer_sprite_unique_id = -1;
 
 	irr::core::vector2di position;
 	irr::core::vector2df scale;
 	float angle = 0;
+	irr::u8 alpha = 255;
+	bool visible = true;
+	int body_type = SPRITE_TYPE_DYNAMIC;
+	std::string animation_name = "SPRITE_BASE_ANIMATION";
 };
 
 struct Nirvana_Map_TileMap
 {
+	std::string nv_tileset_name;
 	int nv_tileset_index = -1;
 	int tile_map_index = -1;
 	tilemap_obj tile_map;
@@ -251,10 +295,12 @@ struct Nirvana_Map_Layer
 	bool visible = true;
 	Nirvana_Map_TileMap layer_map;
 	std::vector<Nirvana_Map_Sprite> layer_sprites;
-	std::vector<Nirvana_Map_CollisionShape> layer_shapes;
+	std::vector<sprite2D_physics_obj> layer_shapes;
 	Nirvana_Map_Background bkg;
 	irr::core::vector2df scroll_speed;
 	int layer_alpha = 255;
+
+	int ref_canvas = -1;
 };
 
 struct Nirvana_Stage

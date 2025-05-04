@@ -180,6 +180,8 @@ void NirvanaEditor_MainFrame::OnMapEdit_NewLayerClick( wxCommandEvent& event )
 
 	project->setLayerTileset(stage_index, layer_index, project->getTilesetIndex(dialog->selected_tileset.ToStdString()));
 
+	map_editor->getMapViewControl()->initLayer(layer_index);
+
 	updateMapEditor();
 
 	m_layerVisible_checkList->AppendAndEnsureVisible(wxString(project->getLayerName(stage_index, layer_index)));
@@ -273,6 +275,9 @@ void NirvanaEditor_MainFrame::OnProjectItemActivated( wxTreeEvent& event )
 	wxString item_label = m_project_treeCtrl->GetItemText(selected_item);
 	int stage_index = project->getStageIndex(item_label.ToStdString());
 
+	map_editor->getMapViewControl()->mapEdit_getContext();
+	map_editor->getMapViewControl()->clearStage();
+	map_editor->getMapViewControl()->mapEdit_selectTileTool_selection.clear();
 	map_editor->selectStage(stage_index);
 	map_editor->selectLayer(-1);
 
@@ -327,21 +332,28 @@ void NirvanaEditor_MainFrame::updateMapEditor()
 
 	if(stage_index >= 0 && stage_index < project->getStageCount())
 	{
-//		m_project_treeCtrl->SelectItem(stage_treeItem[stage_index], true);
-//
-//		m_layerVisible_checkList->Clear();
-//		m_activeLayer_comboBox->Clear();
-//
-//		for(int i = 0; i < project->getStageNumLayers(stage_index); i++)
-//		{
-//			m_layerVisible_checkList->AppendAndEnsureVisible(wxString(project->getLayerName(stage_index, i)));
-//			m_layerVisible_checkList->Check(i, project->getLayerVisible(stage_index, i));
-//
-//			m_activeLayer_comboBox->Append(project->getLayerName(stage_index, i));
-//		}
+		wxPGProperty * sprite_id = m_mapEdit_sprite_propertyGrid->GetProperty(_("sprite_id"));
+		wxPGProperty * sprite_body_type = m_mapEdit_sprite_propertyGrid->GetProperty(_("body_type"));
+		wxPGProperty * sprite_animation = m_mapEdit_sprite_propertyGrid->GetProperty(_("animation"));
+		wxPGProperty * sprite_pos_x = m_mapEdit_sprite_propertyGrid->GetProperty(_("position_x"));
+		wxPGProperty * sprite_pos_y = m_mapEdit_sprite_propertyGrid->GetProperty(_("position_y"));
+		wxPGProperty * sprite_angle = m_mapEdit_sprite_propertyGrid->GetProperty(_("angle"));
+		wxPGProperty * sprite_scale_x = m_mapEdit_sprite_propertyGrid->GetProperty(_("scale_x"));
+		wxPGProperty * sprite_scale_y = m_mapEdit_sprite_propertyGrid->GetProperty(_("scale_y"));
+		wxPGProperty * sprite_alpha = m_mapEdit_sprite_propertyGrid->GetProperty(_("alpha"));
+		wxPGProperty * sprite_visible = m_mapEdit_sprite_propertyGrid->GetProperty(_("visible"));
 
-//		if(layer_index >= 0 && layer_index < m_layerVisible_checkList->GetCount())
-//			m_layerVisible_checkList->SetSelection(layer_index);
+
+		sprite_id->SetValueFromString(_(""));
+		sprite_body_type->SetChoiceSelection(0);
+		sprite_animation->SetChoices(wxPGChoices());
+		sprite_pos_x->SetValue( 0 );
+		sprite_pos_y->SetValue( 0 );
+		sprite_angle->SetValue( 0 );
+		sprite_scale_x->SetValue( 0 );
+		sprite_scale_y->SetValue( 0 );
+		sprite_alpha->SetValueFromInt( 0 );
+		sprite_visible->SetValue( false );
 
 		map_editor->getTileSelectControl()->mapEdit_layerType = project->getLayerType(stage_index, layer_index);
 
@@ -367,6 +379,8 @@ void NirvanaEditor_MainFrame::updateMapEditor()
 				{
 					m_mapEdit_collisionShape_listBox->AppendAndEnsureVisible(wxString(current_layer.layer_shapes[i].shape_name));
 				}
+
+				reloadSpriteProperties();
 			}
 			break;
 
@@ -386,11 +400,13 @@ void NirvanaEditor_MainFrame::updateMapEditor()
 void NirvanaEditor_MainFrame::OnEnterMapView( wxMouseEvent& event )
 {
 	map_editor->getMapViewControl()->stage_window_isActive = true;
+	map_editor->getMapViewControl()->mapEdit_tile_selection = map_editor->getTileSelectControl()->mapEdit_tile_selection;
 }
 
 void NirvanaEditor_MainFrame::OnLeaveMapView( wxMouseEvent& event )
 {
 	map_editor->getMapViewControl()->stage_window_isActive = false;
+	map_editor->getMapViewControl()->mapEdit_lastAction_erase = false;
 }
 
 void NirvanaEditor_MainFrame::OnActiveLayerSelect( wxCommandEvent& event )
@@ -602,6 +618,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_LayerDeleteClick( wxCommandEvent& event 
 
 	bool active_layer_changed = (map_editor->getSelectedLayer() == layer_index);
 
+	map_editor->getMapViewControl()->canvasClose(project->stages[stage_index].layers[layer_index].ref_canvas);
+	map_editor->getMapViewControl()->mapEdit_selectTileTool_selection.clear();
+	project->stages[stage_index].layers[layer_index].ref_canvas = -1;
 	project->deleteLayer(stage_index, layer_index);
 
 	//SET LAYER COMBO AND CHECKLIST
@@ -625,4 +644,130 @@ void NirvanaEditor_MainFrame::OnMapEdit_LayerDeleteClick( wxCommandEvent& event 
 	m_mapEdit_layerHScroll_spinCtrlDouble->SetValue(0.0);
 	m_mapEdit_layerVScroll_spinCtrlDouble->SetValue(0.0);
 	m_mapEdit_layerAlpha_spinCtrl->SetValue(0);
+
+	refreshCurrentLayerUI();
+}
+
+void NirvanaEditor_MainFrame::refreshCurrentLayerUI()
+{
+	m_mapEdit_layerSprite_listBox->Clear();
+
+	wxPGProperty * sprite_id = m_mapEdit_sprite_propertyGrid->GetProperty(_("sprite_id"));
+	wxPGProperty * sprite_body_type = m_mapEdit_sprite_propertyGrid->GetProperty(_("body_type"));
+	wxPGProperty * sprite_animation = m_mapEdit_sprite_propertyGrid->GetProperty(_("animation"));
+	wxPGProperty * sprite_pos_x = m_mapEdit_sprite_propertyGrid->GetProperty(_("position_x"));
+	wxPGProperty * sprite_pos_y = m_mapEdit_sprite_propertyGrid->GetProperty(_("position_y"));
+	wxPGProperty * sprite_angle = m_mapEdit_sprite_propertyGrid->GetProperty(_("angle"));
+	wxPGProperty * sprite_scale_x = m_mapEdit_sprite_propertyGrid->GetProperty(_("scale_x"));
+	wxPGProperty * sprite_scale_y = m_mapEdit_sprite_propertyGrid->GetProperty(_("scale_y"));
+	wxPGProperty * sprite_alpha = m_mapEdit_sprite_propertyGrid->GetProperty(_("alpha"));
+	wxPGProperty * sprite_visible = m_mapEdit_sprite_propertyGrid->GetProperty(_("visible"));
+
+
+	sprite_id->SetValue(_(""));
+	sprite_body_type->SetChoiceSelection(0);
+	sprite_animation->SetChoices(wxPGChoices());
+	sprite_pos_x->SetValue( 0 );
+	sprite_pos_y->SetValue( 0 );
+	sprite_angle->SetValue( 0 );
+	sprite_scale_x->SetValue( 0 );
+	sprite_scale_y->SetValue( 0 );
+	sprite_alpha->SetValueFromInt( 0 );
+	sprite_visible->SetValue( false );
+
+	m_mapEdit_collisionShape_listBox->Clear();
+
+	m_mapEdit_canvasImage_comboBox->Clear();
+	//m_mapEdit_canvasRenderSetting_comboBox->SetSelection(0);
+
+	int active_stage = map_editor->getSelectedStage();
+	int active_layer = map_editor->getSelectedLayer();
+
+	if(active_stage < 0 || active_stage >= project->stages.size())
+		return;
+
+	if(active_layer < 0 || active_layer >= project->stages[active_stage].layers.size())
+		return;
+
+
+	switch(project->getLayerType(active_stage, active_layer))
+	{
+		case LAYER_TYPE_TILEMAP:
+		{
+		}
+		break;
+
+		case LAYER_TYPE_SPRITE:
+		{
+			reloadSpriteProperties();
+		}
+		break;
+
+		case LAYER_TYPE_CANVAS_2D:
+		{
+		}
+		break;
+
+		case LAYER_TYPE_CANVAS_3D:
+		{
+		}
+		break;
+	}
+}
+
+void NirvanaEditor_MainFrame::OnMapEdit_Map_UpdateUI( wxUpdateUIEvent& event )
+{
+	if(!project)
+		return;
+
+	int stage_index = map_editor->getSelectedStage();
+
+	if(stage_index < 0 || stage_index >= project->getStageCount())
+		return;
+
+	int layer_index = map_editor->getSelectedLayer();
+
+	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
+		return;
+
+	if(project->getLayerType(stage_index, layer_index)==LAYER_TYPE_SPRITE)
+	{
+		if(map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.size()==1)
+		{
+			if(map_editor->getMapViewControl()->map_sprite_selection_changed)
+			{
+				int selected_sprite = map_editor->getMapViewControl()->selected_sprite;
+				if(selected_sprite >= 0 && selected_sprite < project->stages[stage_index].layers[layer_index].layer_sprites.size())
+				{
+					wxString spr_name = wxString(project->stages[stage_index].layers[layer_index].layer_sprites[selected_sprite].sprite_name).Upper().Trim();
+
+					//std::cout << std::endl << "LOOKUP: " << spr_name.ToStdString() << std::endl;
+
+					for(int i = 0; i < m_mapEdit_layerSprite_listBox->GetCount(); i++)
+					{
+						wxString list_item = m_mapEdit_layerSprite_listBox->GetString(i).Upper().Trim();
+						if(list_item.compare(spr_name) == 0)
+						{
+							//std::cout << "Found: " << spr_name << " at " << i << std::endl;
+							m_mapEdit_layerSprite_listBox->SetSelection(i);
+							break;
+						}
+					}
+				}
+				else
+				{
+					m_mapEdit_layerSprite_listBox->DeselectAll();
+				}
+
+				reloadSpriteProperties();
+			}
+		}
+		else if(map_editor->getMapViewControl()->map_sprite_selection_changed)
+		{
+			m_mapEdit_layerSprite_listBox->DeselectAll();
+			reloadSpriteProperties();
+		}
+	}
+
+	map_editor->getMapViewControl()->map_sprite_selection_changed = false;
 }

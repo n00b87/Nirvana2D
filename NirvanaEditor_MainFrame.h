@@ -38,6 +38,15 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void UpdateSpriteEditor();
 
 		void updateMapEditor();
+		void reloadStage();
+
+		void reloadSpriteProperties();
+
+		void refreshCurrentLayerUI();
+
+		void refreshCurrentShapeUI();
+
+		int selected_map_tool = -1;
 
 		int main_page_index = 0; //TODO: CHANGE THIS AFTER TESTING IS DONE
 
@@ -73,6 +82,42 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnMapEdit_LayerHScroll( wxSpinDoubleEvent& event );
 		void OnMapEdit_LayerVScroll( wxSpinDoubleEvent& event );
 		void OnMapEdit_LayerAlpha( wxSpinEvent& event );
+
+		void OnMapEdit_TileTool_Select( wxCommandEvent& event );
+		void OnMapEdit_TileTool_BoxSelect( wxCommandEvent& event );
+		void OnMapEdit_TileTool_Move( wxCommandEvent& event );
+		void OnMapEdit_TileTool_SetTile( wxCommandEvent& event );
+		void OnMapEdit_TileTool_CopyTile( wxCommandEvent& event );
+		void OnMapEdit_TileTool_FillTile( wxCommandEvent& event );
+		void OnMapEdit_TileTool_DeleteSelected( wxCommandEvent& event );
+		void OnEnterMapEditTileSelect( wxMouseEvent& event );
+		void OnLeaveMapEditTileSelect( wxMouseEvent& event );
+		void OnUpdateMapEditTileSelect( wxUpdateUIEvent& event );
+
+		void OnMapEdit_SpriteTool_Select( wxCommandEvent& event );
+		void OnMapEdit_SpriteTool_BoxSelect( wxCommandEvent& event );
+		void OnMapEdit_SpriteTool_Move( wxCommandEvent& event );
+		void OnMapEdit_SpriteTool_Rotate( wxCommandEvent& event );
+		void OnMapEdit_SpriteTool_Scale( wxCommandEvent& event );
+		void OnMapEdit_SpriteTool_AddSprite( wxCommandEvent& event );
+		void OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent& event );
+		void OnMapEdit_SpriteTool_CopySprite( wxCommandEvent& event );
+		void OnMapEdit_SpriteTool_CenterOnSprite( wxCommandEvent& event );
+		void OnMapEdit_SpriteListSelect( wxCommandEvent& event );
+		void OnMapEdit_SpritePropertyGridChanged( wxPropertyGridEvent& event );
+
+		void OnMapEdit_ShapeTool_Select( wxCommandEvent& event );
+		void OnMapEdit_ShapeTool_BoxSelect( wxCommandEvent& event );
+		void OnMapEdit_ShapeTool_Move( wxCommandEvent& event );
+		void OnMapEdit_ShapeTool_Draw( wxCommandEvent& event );
+		void OnMapEdit_ShapeTool_NewBoxShape( wxCommandEvent& event );
+		void OnMapEdit_ShapeTool_NewPolygonShape( wxCommandEvent& event );
+		void OnMapEdit_ShapeTool_NewChainShape( wxCommandEvent& event );
+		void OnMapEdit_ShapeTool_NewCircleShape( wxCommandEvent& event );
+		void OnMapEdit_ShapeTool_DeleteShape( wxCommandEvent& event );
+		void OnMapEdit_shapeListSelect( wxCommandEvent& event );
+
+		void OnMapEdit_Map_UpdateUI( wxUpdateUIEvent& event );
 
 		void OnSpriteEditor_Edit_Changed( wxAuiNotebookEvent& event );
 
