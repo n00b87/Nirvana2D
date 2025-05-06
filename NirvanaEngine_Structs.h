@@ -99,6 +99,12 @@ struct tilemap_obj
 	std::vector<tilemap_row_obj> rows;
 };
 
+struct nv_editor_point
+{
+	irr::core::vector2di position;
+	bool selected = false;
+};
+
 struct sprite2D_physics_obj
 {
 	std::string shape_name;
@@ -110,11 +116,24 @@ struct sprite2D_physics_obj
 	int offset_x;
 	int offset_y;
 
+	//box points
+	bool ul_selected = false;
+	bool ll_selected = false;
+	bool ur_selected = false;
+	bool lr_selected = false;
+
+	//circle points
+	bool top_selected = false;
+	bool left_selected = false;
+	bool right_selected = false;
+	bool bottom_selected = false;
+
 	int box_width;
 	int box_height;
 
 	double radius;
 
+	irr::core::array<bool> point_selection;
 	irr::core::array<irr::core::vector2di> points;
 	irr::core::array<irr::core::vector2di> prev_points;
 	irr::core::array<irr::core::vector2di> next_points;

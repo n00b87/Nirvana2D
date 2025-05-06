@@ -172,7 +172,11 @@ void Nirvana_MapEditor::startEditor(int n, bool start_mapView)
 		break;
 
 		case 1:
-			//getSpritePreviewControl()->update_events = true;
+			//Sprite Panel
+		break;
+
+		case 2:
+			// Collision Shape panel
 		break;
 	}
 
@@ -311,17 +315,36 @@ void Nirvana_MapEditor::selectShape(int shape_index)
 	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
 		return;
 
-	if(shape_index < 0 || shape_index >= project->stages[selected_stage].layers[selected_layer].layer_shapes.size())
-		return;
-
 	selected_shape = shape_index;
 	getMapViewControl()->selected_shape = shape_index;
 
 
+	//getMapViewControl()->collision_poly_draw_flag = false;
 	getMapViewControl()->collision_physics_obj.points.clear();
 	getMapViewControl()->collision_physics_obj.next_points.clear();
 	getMapViewControl()->collision_physics_obj.prev_points.clear();
+
+	if(shape_index < 0 || shape_index >= project->stages[selected_stage].layers[selected_layer].layer_shapes.size())
+		return;
+
 	getMapViewControl()->collision_physics_obj.shape_type = project->stages[selected_stage].layers[selected_layer].layer_shapes[shape_index].shape_type;
+}
+
+void Nirvana_MapEditor::selectSprite(int sprite_index)
+{
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	selected_sprite = sprite_index;
+	getMapViewControl()->selected_sprite = sprite_index;
+
+
+	//getMapViewControl()->collision_poly_draw_flag = false;
+	getMapViewControl()->selected_sprite = -1;
+	getMapViewControl()->mapEdit_selectSpriteTool_selection.clear();
 }
 
 int Nirvana_MapEditor::getSelectedStage()

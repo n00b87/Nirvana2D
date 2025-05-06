@@ -226,6 +226,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShowAllLayersClick( wxCommandEvent& even
 	for(int i = 0; i < project->getStageNumLayers(stage_index); i++)
 	{
 		project->setLayerVisible(stage_index, i, true);
+
+		if(project->stages[stage_index].layers[i].ref_canvas >= 0 && project->stages[stage_index].layers[i].ref_canvas < map_editor->getMapViewControl()->canvas.size())
+			map_editor->getMapViewControl()->setCanvasVisible(project->stages[stage_index].layers[i].ref_canvas, true);
 	}
 
 	for(int i = 0; i < m_layerVisible_checkList->GetCount(); i++)
@@ -246,6 +249,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_HideAllLayersClick( wxCommandEvent& even
 	for(int i = 0; i < project->getStageNumLayers(stage_index); i++)
 	{
 		project->setLayerVisible(stage_index, i, false);
+
+		if(project->stages[stage_index].layers[i].ref_canvas >= 0 && project->stages[stage_index].layers[i].ref_canvas < map_editor->getMapViewControl()->canvas.size())
+			map_editor->getMapViewControl()->setCanvasVisible(project->stages[stage_index].layers[i].ref_canvas, false);
 	}
 
 	for(int i = 0; i < m_layerVisible_checkList->GetCount(); i++)
@@ -355,6 +361,13 @@ void NirvanaEditor_MainFrame::updateMapEditor()
 		sprite_alpha->SetValueFromInt( 0 );
 		sprite_visible->SetValue( false );
 
+		m_mapEdit_layerSprite_listBox->Clear();
+		m_mapEdit_collisionShape_listBox->Clear();
+
+		m_mapEdit_shapeName_textCtrl->SetValue(_(""));
+
+		m_mapEdit_shapeEdit_simplebook->SetSelection(0);
+
 		map_editor->getTileSelectControl()->mapEdit_layerType = project->getLayerType(stage_index, layer_index);
 
 		Nirvana_Map_Layer current_layer = project->getStageLayer(stage_index, layer_index);
@@ -428,6 +441,30 @@ void NirvanaEditor_MainFrame::OnLayerCheckListSelect( wxCommandEvent& event )
 
 	int alpha = project->getLayerAlpha(stage_index, layer_index);
 	m_mapEdit_layerAlpha_spinCtrl->SetValue(alpha);
+}
+
+void NirvanaEditor_MainFrame::OnLayerCheckList_Visible_Toggle( wxCommandEvent& event )
+{
+	int selected_item = m_layerVisible_checkList->GetSelection();
+	if(selected_item < 0 || selected_item >= m_layerVisible_checkList->GetCount())
+		return;
+
+	wxString layer_name = m_layerVisible_checkList->GetString(selected_item);
+
+	int stage_index = map_editor->getSelectedStage();
+	int layer_index = project->getLayerIndex(stage_index, layer_name.ToStdString());
+
+	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
+		return;
+
+	project->setLayerVisible(stage_index, layer_index, m_layerVisible_checkList->IsChecked(selected_item));
+
+	int canvas_id = project->stages[stage_index].layers[layer_index].ref_canvas;
+
+	if(canvas_id < 0 || canvas_id >= map_editor->getMapViewControl()->canvas.size())
+		return;
+
+	map_editor->getMapViewControl()->setCanvasVisible(canvas_id, project->getLayerVisible(stage_index, layer_index));
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_LayerNameChange( wxCommandEvent& event )
@@ -766,6 +803,12 @@ void NirvanaEditor_MainFrame::OnMapEdit_Map_UpdateUI( wxUpdateUIEvent& event )
 		{
 			m_mapEdit_layerSprite_listBox->DeselectAll();
 			reloadSpriteProperties();
+		}
+
+		if(map_editor->getMapViewControl()->pick_shape_update)
+		{
+			map_editor->getMapViewControl()->pick_shape_update = false;
+			refreshCurrentShapeUI();
 		}
 	}
 

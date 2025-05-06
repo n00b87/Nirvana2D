@@ -52,6 +52,7 @@ class Nirvana_MapEditor
 		void selectStage(int stage_index);
 		void selectLayer(int layer_index);
 		void selectShape(int shape_index);
+		void selectSprite(int sprite_index);
 
 		int getSelectedStage();
 		int getSelectedLayer();

@@ -535,7 +535,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_tile_panel->SetSizer( bSizer16 );
 	m_mapEdit_tile_panel->Layout();
 	bSizer16->Fit( m_mapEdit_tile_panel );
-	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_mapEdit_tile_panel, _("Tiles"), false, wxNullBitmap );
+	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_mapEdit_tile_panel, _("Tiles"), true, wxNullBitmap );
 	m_mapEdit_sprite_panel = new wxPanel( m_mapEdit_layerObjectTools_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer18;
 	bSizer18 = new wxBoxSizer( wxVERTICAL );
@@ -616,32 +616,32 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer251;
 	bSizer251 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_auiToolBar2 = new wxAuiToolBar( m_mapEdit_collision_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
-	m_mapEdit_shapeToolbar_select_tool = m_auiToolBar2->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeTools_auiToolBar = new wxAuiToolBar( m_mapEdit_collision_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
+	m_mapEdit_shapeToolbar_select_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_shapeToolbar_boxSelect_tool = m_auiToolBar2->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_boxSelect_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_shapeToolbar_move_tool = m_auiToolBar2->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_move_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_shapeToolbar_draw_tool = m_auiToolBar2->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/line.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_draw_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/line.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
 
-	m_auiToolBar2->AddSeparator();
+	m_mapEdit_shapeTools_auiToolBar->AddSeparator();
 
-	m_mapEdit_shapeToolbar_newBox_tool = m_auiToolBar2->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_newBox_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_shapeToolbar_newPolygon_tool = m_auiToolBar2->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/polygon.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_newPolygon_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/polygon.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_shapeToolbar_newChain_tool = m_auiToolBar2->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/chain.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_newChain_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/chain.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_shapeToolbar_newCircle_tool = m_auiToolBar2->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/circle.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_newCircle_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/circle.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_auiToolBar2->AddSeparator();
+	m_mapEdit_shapeTools_auiToolBar->AddSeparator();
 
-	m_mapEdit_shapeToolbar_deleteShape_tool = m_auiToolBar2->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_shape.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_deleteShape_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_shape.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_auiToolBar2->Realize();
+	m_mapEdit_shapeTools_auiToolBar->Realize();
 
-	bSizer251->Add( m_auiToolBar2, 1, wxALL, 5 );
+	bSizer251->Add( m_mapEdit_shapeTools_auiToolBar, 1, wxALL, 5 );
 
 
 	bSizer241->Add( bSizer251, 0, wxEXPAND, 5 );
@@ -662,8 +662,8 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_staticText86->Wrap( -1 );
 	bSizer162->Add( m_staticText86, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_textCtrl14 = new wxTextCtrl( m_mapEdit_collision_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer162->Add( m_textCtrl14, 3, wxALL, 5 );
+	m_mapEdit_shapeName_textCtrl = new wxTextCtrl( m_mapEdit_collision_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer162->Add( m_mapEdit_shapeName_textCtrl, 3, wxALL, 5 );
 
 
 	bSizer176->Add( bSizer162, 0, wxEXPAND, 5 );
@@ -673,6 +673,13 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 
 	m_mapEdit_shapeEdit_simplebook = new wxSimplebook( m_mapEdit_collision_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 	m_mapEdit_noShape_panel = new wxPanel( m_mapEdit_shapeEdit_simplebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer1711;
+	bSizer1711 = new wxBoxSizer( wxVERTICAL );
+
+
+	m_mapEdit_noShape_panel->SetSizer( bSizer1711 );
+	m_mapEdit_noShape_panel->Layout();
+	bSizer1711->Fit( m_mapEdit_noShape_panel );
 	m_mapEdit_shapeEdit_simplebook->AddPage( m_mapEdit_noShape_panel, _("a page"), false );
 	m_mapEdit_boxShape_panel = new wxPanel( m_mapEdit_shapeEdit_simplebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer161;
@@ -685,8 +692,8 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_staticText87->Wrap( -1 );
 	bSizer163->Add( m_staticText87, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_spinCtrl25 = new wxSpinCtrl( m_mapEdit_boxShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	bSizer163->Add( m_spinCtrl25, 3, wxALL, 5 );
+	m_mapEdit_boxShape_posX_spinCtrl = new wxSpinCtrl( m_mapEdit_boxShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000000, 0 );
+	bSizer163->Add( m_mapEdit_boxShape_posX_spinCtrl, 3, wxALL, 5 );
 
 
 	bSizer161->Add( bSizer163, 0, wxEXPAND, 5 );
@@ -698,8 +705,8 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_staticText871->Wrap( -1 );
 	bSizer1631->Add( m_staticText871, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_spinCtrl251 = new wxSpinCtrl( m_mapEdit_boxShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	bSizer1631->Add( m_spinCtrl251, 3, wxALL, 5 );
+	m_mapEdit_boxShape_posY_spinCtrl = new wxSpinCtrl( m_mapEdit_boxShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000000, 0 );
+	bSizer1631->Add( m_mapEdit_boxShape_posY_spinCtrl, 3, wxALL, 5 );
 
 
 	bSizer161->Add( bSizer1631, 0, wxEXPAND, 5 );
@@ -711,8 +718,8 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_staticText872->Wrap( -1 );
 	bSizer1632->Add( m_staticText872, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_spinCtrl252 = new wxSpinCtrl( m_mapEdit_boxShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	bSizer1632->Add( m_spinCtrl252, 3, wxALL, 5 );
+	m_mapEdit_boxShape_width_spinCtrl = new wxSpinCtrl( m_mapEdit_boxShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000000, 0 );
+	bSizer1632->Add( m_mapEdit_boxShape_width_spinCtrl, 3, wxALL, 5 );
 
 
 	bSizer161->Add( bSizer1632, 0, wxEXPAND, 5 );
@@ -724,8 +731,8 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_staticText861->Wrap( -1 );
 	bSizer1621->Add( m_staticText861, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_spinCtrl28 = new wxSpinCtrl( m_mapEdit_boxShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	bSizer1621->Add( m_spinCtrl28, 3, wxALL, 5 );
+	m_mapEdit_boxShape_height_spinCtrl = new wxSpinCtrl( m_mapEdit_boxShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000000, 0 );
+	bSizer1621->Add( m_mapEdit_boxShape_height_spinCtrl, 3, wxALL, 5 );
 
 
 	bSizer161->Add( bSizer1621, 0, wxEXPAND, 5 );
@@ -739,33 +746,33 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer171;
 	bSizer171 = new wxBoxSizer( wxVERTICAL );
 
-	m_grid2 = new wxGrid( m_mapEdit_polyShape_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_mapEdit_polyShape_grid = new wxGrid( m_mapEdit_polyShape_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
 
 	// Grid
-	m_grid2->CreateGrid( 5, 2 );
-	m_grid2->EnableEditing( true );
-	m_grid2->EnableGridLines( true );
-	m_grid2->EnableDragGridSize( false );
-	m_grid2->SetMargins( 0, 0 );
+	m_mapEdit_polyShape_grid->CreateGrid( 5, 2 );
+	m_mapEdit_polyShape_grid->EnableEditing( true );
+	m_mapEdit_polyShape_grid->EnableGridLines( true );
+	m_mapEdit_polyShape_grid->EnableDragGridSize( false );
+	m_mapEdit_polyShape_grid->SetMargins( 0, 0 );
 
 	// Columns
-	m_grid2->SetColSize( 0, 80 );
-	m_grid2->SetColSize( 1, 77 );
-	m_grid2->EnableDragColMove( false );
-	m_grid2->EnableDragColSize( true );
-	m_grid2->SetColLabelValue( 0, _("X") );
-	m_grid2->SetColLabelValue( 1, _("Y") );
-	m_grid2->SetColLabelAlignment( wxALIGN_CENTER, wxALIGN_CENTER );
+	m_mapEdit_polyShape_grid->SetColSize( 0, 80 );
+	m_mapEdit_polyShape_grid->SetColSize( 1, 77 );
+	m_mapEdit_polyShape_grid->EnableDragColMove( false );
+	m_mapEdit_polyShape_grid->EnableDragColSize( true );
+	m_mapEdit_polyShape_grid->SetColLabelValue( 0, _("X") );
+	m_mapEdit_polyShape_grid->SetColLabelValue( 1, _("Y") );
+	m_mapEdit_polyShape_grid->SetColLabelAlignment( wxALIGN_CENTER, wxALIGN_CENTER );
 
 	// Rows
-	m_grid2->EnableDragRowSize( true );
-	m_grid2->SetRowLabelAlignment( wxALIGN_CENTER, wxALIGN_CENTER );
+	m_mapEdit_polyShape_grid->EnableDragRowSize( true );
+	m_mapEdit_polyShape_grid->SetRowLabelAlignment( wxALIGN_CENTER, wxALIGN_CENTER );
 
 	// Label Appearance
 
 	// Cell Defaults
-	m_grid2->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
-	bSizer171->Add( m_grid2, 1, wxALL|wxEXPAND, 5 );
+	m_mapEdit_polyShape_grid->SetDefaultCellAlignment( wxALIGN_LEFT, wxALIGN_TOP );
+	bSizer171->Add( m_mapEdit_polyShape_grid, 1, wxALL|wxEXPAND, 5 );
 
 
 	m_mapEdit_polyShape_panel->SetSizer( bSizer171 );
@@ -783,8 +790,8 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_staticText873->Wrap( -1 );
 	bSizer1633->Add( m_staticText873, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_spinCtrl253 = new wxSpinCtrl( m_mapEdit_circleShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	bSizer1633->Add( m_spinCtrl253, 3, wxALL, 5 );
+	m_mapEdit_circleShape_centerX_spinCtrl = new wxSpinCtrl( m_mapEdit_circleShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000000, 0 );
+	bSizer1633->Add( m_mapEdit_circleShape_centerX_spinCtrl, 3, wxALL, 5 );
 
 
 	bSizer1611->Add( bSizer1633, 0, wxEXPAND, 5 );
@@ -796,8 +803,8 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_staticText8711->Wrap( -1 );
 	bSizer16311->Add( m_staticText8711, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_spinCtrl2511 = new wxSpinCtrl( m_mapEdit_circleShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	bSizer16311->Add( m_spinCtrl2511, 3, wxALL, 5 );
+	m_mapEdit_circleShape_centerY_spinCtrl = new wxSpinCtrl( m_mapEdit_circleShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000000, 0 );
+	bSizer16311->Add( m_mapEdit_circleShape_centerY_spinCtrl, 3, wxALL, 5 );
 
 
 	bSizer1611->Add( bSizer16311, 0, wxEXPAND, 5 );
@@ -809,8 +816,8 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_staticText8721->Wrap( -1 );
 	bSizer16321->Add( m_staticText8721, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_spinCtrl2521 = new wxSpinCtrl( m_mapEdit_circleShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
-	bSizer16321->Add( m_spinCtrl2521, 3, wxALL, 5 );
+	m_mapEdit_circleShape_radius_spinCtrl = new wxSpinCtrl( m_mapEdit_circleShape_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 1000000, 0 );
+	bSizer16321->Add( m_mapEdit_circleShape_radius_spinCtrl, 3, wxALL, 5 );
 
 
 	bSizer1611->Add( bSizer16321, 0, wxEXPAND, 5 );
@@ -833,7 +840,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_collision_panel->SetSizer( bSizer241 );
 	m_mapEdit_collision_panel->Layout();
 	bSizer241->Fit( m_mapEdit_collision_panel );
-	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_mapEdit_collision_panel, _("Collision"), true, wxNullBitmap );
+	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_mapEdit_collision_panel, _("Collision"), false, wxNullBitmap );
 	m_panel16 = new wxPanel( m_mapEdit_layerObjectTools_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer27;
 	bSizer27 = new wxBoxSizer( wxVERTICAL );
@@ -1650,6 +1657,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_bpButton21->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_LayerDownClick ), NULL, this );
 	m_bpButton22->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_LayerDeleteClick ), NULL, this );
 	m_layerVisible_checkList->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnLayerCheckListSelect ), NULL, this );
+	m_layerVisible_checkList->Connect( wxEVT_COMMAND_CHECKLISTBOX_TOGGLED, wxCommandEventHandler( Nirvana_MainFrame::OnLayerCheckList_Visible_Toggle ), NULL, this );
 	m_layerName_textCtrl->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_LayerNameChange ), NULL, this );
 	m_mapEdit_layerHScroll_spinCtrlDouble->Connect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( Nirvana_MainFrame::OnMapEdit_LayerHScroll ), NULL, this );
 	m_mapEdit_layerVScroll_spinCtrlDouble->Connect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( Nirvana_MainFrame::OnMapEdit_LayerVScroll ), NULL, this );
@@ -1686,6 +1694,15 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	this->Connect( m_mapEdit_shapeToolbar_newCircle_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_ShapeTool_NewCircleShape ) );
 	this->Connect( m_mapEdit_shapeToolbar_deleteShape_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_ShapeTool_DeleteShape ) );
 	m_mapEdit_collisionShape_listBox->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_shapeListSelect ), NULL, this );
+	m_mapEdit_shapeName_textCtrl->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_ShapeName ), NULL, this );
+	m_mapEdit_boxShape_posX_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnMapEdit_BoxShape_PosX ), NULL, this );
+	m_mapEdit_boxShape_posY_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnMapEdit_BoxShape_PosY ), NULL, this );
+	m_mapEdit_boxShape_width_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnMapEdit_BoxShape_Width ), NULL, this );
+	m_mapEdit_boxShape_height_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnMapEdit_BoxShape_Height ), NULL, this );
+	m_mapEdit_polyShape_grid->Connect( wxEVT_GRID_CELL_CHANGED, wxGridEventHandler( Nirvana_MainFrame::OnMapEdit_PolyShape_CellChange ), NULL, this );
+	m_mapEdit_circleShape_centerX_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnMapEdit_CircleShape_CenterX ), NULL, this );
+	m_mapEdit_circleShape_centerY_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnMapEdit_CircleShape_CenterY ), NULL, this );
+	m_mapEdit_circleShape_radius_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnMapEdit_CircleShape_Radius ), NULL, this );
 	m_newTileset_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnNewTilesetClick ), NULL, this );
 	m_button2->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnDeleteTilesetClick ), NULL, this );
 	m_tileEdit_tileset_listBox->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnTileEdit_TilesetSelected ), NULL, this );

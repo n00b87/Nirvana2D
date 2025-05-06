@@ -1455,9 +1455,15 @@ int Nirvana_Project::createShape(int stage_index, int layer_index, int shape_typ
 		}
 	}
 
-	std::cout << "NAME: " << shape_name.ToStdString() << std::endl;
+	//std::cout << "NAME: " << shape_name.ToStdString() << std::endl;
 	p_obj.shape_name = shape_name.ToStdString();
 	p_obj.shape_type = shape_type;
+
+	p_obj.offset_x = 0;
+	p_obj.offset_y = 0;
+	p_obj.box_width = 0;
+	p_obj.box_height = 0;
+	p_obj.radius = 0;
 
 	int shape_index = stages[stage_index].layers[layer_index].layer_shapes.size();
 	stages[stage_index].layers[layer_index].layer_shapes.push_back(p_obj);

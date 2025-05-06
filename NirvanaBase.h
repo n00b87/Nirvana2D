@@ -164,7 +164,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxPGProperty* m_propertyGridItem14;
 		wxPGProperty* m_propertyGridItem15;
 		wxPanel* m_mapEdit_collision_panel;
-		wxAuiToolBar* m_auiToolBar2;
+		wxAuiToolBar* m_mapEdit_shapeTools_auiToolBar;
 		wxAuiToolBarItem* m_mapEdit_shapeToolbar_select_tool;
 		wxAuiToolBarItem* m_mapEdit_shapeToolbar_boxSelect_tool;
 		wxAuiToolBarItem* m_mapEdit_shapeToolbar_move_tool;
@@ -176,28 +176,28 @@ class Nirvana_MainFrame : public wxFrame
 		wxAuiToolBarItem* m_mapEdit_shapeToolbar_deleteShape_tool;
 		wxListBox* m_mapEdit_collisionShape_listBox;
 		wxStaticText* m_staticText86;
-		wxTextCtrl* m_textCtrl14;
+		wxTextCtrl* m_mapEdit_shapeName_textCtrl;
 		wxStaticLine* m_staticline10;
 		wxSimplebook* m_mapEdit_shapeEdit_simplebook;
 		wxPanel* m_mapEdit_noShape_panel;
 		wxPanel* m_mapEdit_boxShape_panel;
 		wxStaticText* m_staticText87;
-		wxSpinCtrl* m_spinCtrl25;
+		wxSpinCtrl* m_mapEdit_boxShape_posX_spinCtrl;
 		wxStaticText* m_staticText871;
-		wxSpinCtrl* m_spinCtrl251;
+		wxSpinCtrl* m_mapEdit_boxShape_posY_spinCtrl;
 		wxStaticText* m_staticText872;
-		wxSpinCtrl* m_spinCtrl252;
+		wxSpinCtrl* m_mapEdit_boxShape_width_spinCtrl;
 		wxStaticText* m_staticText861;
-		wxSpinCtrl* m_spinCtrl28;
+		wxSpinCtrl* m_mapEdit_boxShape_height_spinCtrl;
 		wxPanel* m_mapEdit_polyShape_panel;
-		wxGrid* m_grid2;
+		wxGrid* m_mapEdit_polyShape_grid;
 		wxPanel* m_mapEdit_circleShape_panel;
 		wxStaticText* m_staticText873;
-		wxSpinCtrl* m_spinCtrl253;
+		wxSpinCtrl* m_mapEdit_circleShape_centerX_spinCtrl;
 		wxStaticText* m_staticText8711;
-		wxSpinCtrl* m_spinCtrl2511;
+		wxSpinCtrl* m_mapEdit_circleShape_centerY_spinCtrl;
 		wxStaticText* m_staticText8721;
-		wxSpinCtrl* m_spinCtrl2521;
+		wxSpinCtrl* m_mapEdit_circleShape_radius_spinCtrl;
 		wxPanel* m_panel16;
 		wxStaticText* m_staticText82;
 		wxComboBox* m_mapEdit_canvasImage_comboBox;
@@ -332,6 +332,7 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnMapEdit_LayerDownClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_LayerDeleteClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnLayerCheckListSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnLayerCheckList_Visible_Toggle( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_LayerNameChange( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_LayerHScroll( wxSpinDoubleEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_LayerVScroll( wxSpinDoubleEvent& event ) { event.Skip(); }
@@ -368,6 +369,15 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnMapEdit_ShapeTool_NewCircleShape( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_ShapeTool_DeleteShape( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_shapeListSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_ShapeName( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_BoxShape_PosX( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_BoxShape_PosY( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_BoxShape_Width( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_BoxShape_Height( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_PolyShape_CellChange( wxGridEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_CircleShape_CenterX( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_CircleShape_CenterY( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_CircleShape_Radius( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnNewTilesetClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnDeleteTilesetClick( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnTileEdit_TilesetSelected( wxCommandEvent& event ) { event.Skip(); }

@@ -73,6 +73,7 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnProjectItemActivated( wxTreeEvent& event );
 		void OnActiveLayerSelect( wxCommandEvent& event );
 		void OnLayerCheckListSelect( wxCommandEvent& event );
+		void OnLayerCheckList_Visible_Toggle( wxCommandEvent& event );
 		void OnMapEdit_LayerNameChange( wxCommandEvent& event );
 		void OnEnterMapView( wxMouseEvent& event );
 		void OnLeaveMapView( wxMouseEvent& event );
@@ -116,6 +117,16 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnMapEdit_ShapeTool_NewCircleShape( wxCommandEvent& event );
 		void OnMapEdit_ShapeTool_DeleteShape( wxCommandEvent& event );
 		void OnMapEdit_shapeListSelect( wxCommandEvent& event );
+
+		void OnMapEdit_ShapeName( wxCommandEvent& event );
+		void OnMapEdit_BoxShape_PosX( wxSpinEvent& event );
+		void OnMapEdit_BoxShape_PosY( wxSpinEvent& event );
+		void OnMapEdit_BoxShape_Width( wxSpinEvent& event );
+		void OnMapEdit_BoxShape_Height( wxSpinEvent& event );
+		void OnMapEdit_PolyShape_CellChange( wxGridEvent& event );
+		void OnMapEdit_CircleShape_CenterX( wxSpinEvent& event );
+		void OnMapEdit_CircleShape_CenterY( wxSpinEvent& event );
+		void OnMapEdit_CircleShape_Radius( wxSpinEvent& event );
 
 		void OnMapEdit_Map_UpdateUI( wxUpdateUIEvent& event );
 

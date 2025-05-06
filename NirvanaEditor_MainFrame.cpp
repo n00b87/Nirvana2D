@@ -91,6 +91,19 @@ Nirvana_MainFrame( parent )
 
 	map_editor->getMapViewControl()->m_screenAbsoluteX_staticText = m_screenAbsoluteX_staticText;
 	map_editor->getMapViewControl()->m_screenAbsoluteY_staticText = m_screenAbsoluteY_staticText;
+
+	map_editor->getMapViewControl()->m_mapEdit_boxShape_posX_spinCtrl = m_mapEdit_boxShape_posX_spinCtrl;
+	map_editor->getMapViewControl()->m_mapEdit_boxShape_posY_spinCtrl = m_mapEdit_boxShape_posY_spinCtrl;
+	map_editor->getMapViewControl()->m_mapEdit_boxShape_width_spinCtrl = m_mapEdit_boxShape_width_spinCtrl;
+	map_editor->getMapViewControl()->m_mapEdit_boxShape_height_spinCtrl = m_mapEdit_boxShape_height_spinCtrl;
+
+	map_editor->getMapViewControl()->m_mapEdit_polyShape_grid = m_mapEdit_polyShape_grid;
+
+	map_editor->getMapViewControl()->m_mapEdit_circleShape_centerX_spinCtrl = m_mapEdit_circleShape_centerX_spinCtrl;
+	map_editor->getMapViewControl()->m_mapEdit_circleShape_centerY_spinCtrl = m_mapEdit_circleShape_centerY_spinCtrl;
+	map_editor->getMapViewControl()->m_mapEdit_circleShape_radius_spinCtrl = m_mapEdit_circleShape_radius_spinCtrl;
+
+	map_editor->getMapViewControl()->m_mapEdit_collisionShape_listBox = m_mapEdit_collisionShape_listBox;
 }
 
 void NirvanaEditor_MainFrame::OnProjectPropertiesTabChanged( wxAuiNotebookEvent& event )
@@ -114,6 +127,30 @@ void NirvanaEditor_MainFrame::OnMapEditToolsTabChanged( wxAuiNotebookEvent& even
 	else if(new_panel == m_mapEdit_sprite_panel)
 	{
 		map_editor->startEditor(1);
+
+		//default to select tool
+		selected_map_tool = MAP_TOOL_SPRITE_SELECT;
+		map_editor->setMapTool(selected_map_tool);
+		m_mapEdit_spriteTools_auiToolBar->ToggleTool(m_mapEdit_spriteToolbar_select_tool->GetId(), true);
+		m_mapEdit_layerSprite_listBox->DeselectAll();
+		map_editor->selectSprite(-1);
+		map_editor->selectShape(-1);
+		map_editor->getMapViewControl()->selected_sprite = -1;
+		map_editor->getMapViewControl()->selected_shape = -1;
+	}
+	else if(new_panel == m_mapEdit_collision_panel)
+	{
+		map_editor->startEditor(2);
+
+		//default to select tool
+		selected_map_tool = MAP_TOOL_SHAPE_SELECT;
+		map_editor->setMapTool(selected_map_tool);
+		m_mapEdit_shapeTools_auiToolBar->ToggleTool(m_mapEdit_shapeToolbar_select_tool->GetId(), true);
+		m_mapEdit_collisionShape_listBox->DeselectAll();
+		map_editor->selectSprite(-1);
+		map_editor->selectShape(-1);
+		map_editor->getMapViewControl()->selected_sprite = -1;
+		map_editor->getMapViewControl()->selected_shape = -1;
 	}
 }
 

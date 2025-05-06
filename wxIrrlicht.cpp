@@ -296,6 +296,9 @@ void wxIrrlicht::OnRender() {
             if(canvas_id == back_buffer || canvas_id == ui_layer)
 				continue;
 
+			if(!canvas[canvas_id].visible)
+				continue;
+
             if(canvas[canvas_id].texture) // && canvas[canvas_id].visible)
             {
             	irr::core::dimension2d tst(this->GetSize().GetWidth(), this->GetSize().GetHeight());
@@ -4430,16 +4433,757 @@ float wxIrrlicht::getHeading(irr::core::vector2df a, irr::core::vector2df b)
 }
 
 
+void wxIrrlicht::pickShape(int start_x, int start_y, int end_x, int end_y)
+{
+	int min_x = start_x < end_x ? start_x : end_x;
+	int min_y = start_y < end_y ? start_y : end_y;
+
+	int max_x = start_x > end_x ? start_x : end_x;
+	int max_y = start_y > end_y ? start_y : end_y;
+
+	start_x = min_x;
+	start_y = min_y;
+
+	end_x = max_x;
+	end_y = max_y;
+
+	pick_points.clear();
+
+	int current_shape = selected_shape;
+
+	if(selected_points.size() == 0)
+		selected_shape = -1;
+
+	for(int i = selected_shape < 0 ? 0 : selected_shape; i < project->stages[selected_stage].layers[selected_layer].layer_shapes.size(); i++)
+	{
+		int shape_type = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].shape_type;
+
+		if(shape_type == SPRITE_SHAPE_BOX)
+		{
+			// UL - 0, LL - 1, UR - 2, LR - 3
+			int x = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].offset_x;
+			int y = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].offset_y;
+
+			int w = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].box_width;
+			int h = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].box_height;
+
+			int ul_x = x;
+			int ul_y = y;
+
+			int ll_x = x;
+			int ll_y = y+h;
+
+			int ur_x = x+w;
+			int ur_y = y;
+
+			int lr_x = x+w;
+			int lr_y = y+h;
+
+			//std::cout << "BOX DBG: " << start_x << ", " << start_y << ", " << end_x << ", " << end_y << " :: " << ul_x << ", " << ul_y << std::endl;
+
+			if(ul_x >= start_x && ul_x < end_x && ul_y >= start_y && ul_y < end_y)
+			{
+				selected_shape = i;
+				pick_points.push_back(0);
+			}
+
+			if(ll_x >= start_x && ll_x < end_x && ll_y >= start_y && ll_y < end_y)
+			{
+				selected_shape = i;
+				pick_points.push_back(1);
+			}
+
+			if(ur_x >= start_x && ur_x < end_x && ur_y >= start_y && ur_y < end_y)
+			{
+				selected_shape = i;
+				pick_points.push_back(2);
+			}
+
+			if(lr_x >= start_x && lr_x < end_x && lr_y >= start_y && lr_y < end_y)
+			{
+				selected_shape = i;
+				pick_points.push_back(3);
+			}
+		}
+		else if(shape_type == SPRITE_SHAPE_CIRCLE)
+		{
+			//TOP - 0, LEFT - 1, RIGHT - 2, BOTTOM - 3
+			int x = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].offset_x;
+			int y = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].offset_y;
+
+			int r = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].radius;
+
+			int top_x = x;
+			int top_y = y-r;
+
+			int left_x = x-r;
+			int left_y = y;
+
+			int right_x = x+r;
+			int right_y = y;
+
+			int bottom_x = x;
+			int bottom_y = y+r;
+
+			if(top_x >= start_x && top_x < end_x && top_y >= start_y && top_y < end_y)
+			{
+				selected_shape = i;
+				pick_points.push_back(0);
+			}
+
+			if(left_x >= start_x && left_x < end_x && left_y >= start_y && left_y < end_y)
+			{
+				selected_shape = i;
+				pick_points.push_back(1);
+			}
+
+			if(right_x >= start_x && right_x < end_x && right_y >= start_y && right_y < end_y)
+			{
+				selected_shape = i;
+				pick_points.push_back(2);
+			}
+
+			if(bottom_x >= start_x && bottom_x < end_x && bottom_y >= start_y && bottom_y < end_y)
+			{
+				selected_shape = i;
+				pick_points.push_back(3);
+			}
+		}
+		else if(shape_type == SPRITE_SHAPE_POLYGON || shape_type == SPRITE_SHAPE_CHAIN)
+		{
+			if(project->stages[selected_stage].layers[selected_layer].layer_shapes[i].point_selection.size() != project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points.size())
+			{
+				for(int n = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].point_selection.size(); n < project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points.size(); n++)
+				{
+					project->stages[selected_stage].layers[selected_layer].layer_shapes[i].point_selection.push_back(false);
+				}
+			}
+
+			for(int pt_index = 0; pt_index < project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points.size(); pt_index++)
+			{
+				int x = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points[pt_index].X;
+				int y = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points[pt_index].Y;
+
+				if(x >= start_x && x < end_x && y >= start_y && y < end_y)
+				{
+					selected_shape = i;
+					pick_points.push_back(pt_index);
+					//project->stages[selected_stage].layers[selected_layer].layer_shapes[i].point_selection[pt_index] = true;
+				}
+				else
+				{
+					//project->stages[selected_stage].layers[selected_layer].layer_shapes[i].point_selection[pt_index] = false;
+				}
+			}
+		}
+
+		if(selected_shape >= 0)
+			break;
+	}
+
+	if(selected_shape < 0)
+		selected_shape = current_shape;
+
+	if(selected_shape != current_shape && selected_shape >= 0 && m_mapEdit_collisionShape_listBox != NULL)
+	{
+		int list_item_index = -1;
+		wxString list_item_name = wxString(project->getShapeName(selected_stage, selected_layer, selected_shape)).Upper().Trim();
+
+		//find shape in list box by name
+		for(int i = 0; i < m_mapEdit_collisionShape_listBox->GetCount(); i++)
+		{
+			if(list_item_name.compare(m_mapEdit_collisionShape_listBox->GetString(i).Upper().Trim())==0)
+			{
+				list_item_index = i;
+				break;
+			}
+		}
+
+		if(list_item_index >= 0)
+		{
+			m_mapEdit_collisionShape_listBox->SetSelection(list_item_index);
+		}
+	}
+}
+
 void wxIrrlicht::stage_collisionEdit_select()
 {
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	if(project->getLayerType(selected_stage, selected_layer) != LAYER_TYPE_SPRITE)
+		return;
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx = px+adj_scroll_offset_x;
+	int by = py+adj_scroll_offset_y;
+
+	if(mouse_state.LeftIsDown())
+	{
+		bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				if(!VIEW_KEY_CTRL)
+				{
+					selected_points.clear();
+
+					if(selected_shape >= 0 && selected_shape < project->stages[selected_stage].layers[selected_layer].layer_shapes.size())
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].point_selection.clear();
+				}
+
+				pickShape(bx-5, by-5, bx+5, by+5);
+
+				//check for first point not in selected points already
+				for(int i = 0; i < pick_points.size(); i++)
+				{
+					bool point_selected = false;
+
+					for(int n = 0; n < selected_points.size(); n++)
+					{
+						if(selected_points[n] == pick_points[i])
+						{
+							point_selected = true;
+							break;
+						}
+					}
+
+					if(!point_selected)
+					{
+						selected_points.push_back(pick_points[i]);
+
+						if(selected_shape >= 0)
+						{
+							if(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_type == SPRITE_SHAPE_CHAIN ||
+							   project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_type == SPRITE_SHAPE_POLYGON)
+							{
+								if(pick_points[i] >= 0 && pick_points[i] < project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].point_selection.size())
+								{
+									project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].point_selection[pick_points[i]] = true;
+								}
+							}
+						}
+
+						break;
+					}
+				}
+
+				//std::cout << std::endl << "SELECTED: " << std::endl;
+				//for(int i = 0; i < selected_points.size(); i++)
+				//	std::cout << "point: " << selected_points[i] << std::endl;
+				//std::cout << "----------------" << std::endl << std::endl;
+
+				pick_shape_update = true;
+
+				//std::cout << "TEST: " << selected_layer << std::endl;
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
 }
 
 void wxIrrlicht::stage_collisionEdit_boxSelect()
 {
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	if(project->getLayerType(selected_stage, selected_layer) != LAYER_TYPE_SPRITE)
+		return;
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx = px+adj_scroll_offset_x;
+	int by = py+adj_scroll_offset_y;
+
+	if(mouse_state.LeftIsDown())
+	{
+		bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				drag_start.x = bx;
+				drag_start.y = by;
+				//std::cout << "TEST: " << selected_layer << std::endl;
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		if(!VIEW_KEY_CTRL)
+		{
+			selected_points.clear();
+
+			if(selected_shape >= 0 && selected_shape < project->stages[selected_stage].layers[selected_layer].layer_shapes.size())
+				project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].point_selection.clear();
+		}
+
+		pickShape(drag_start.x-2, drag_start.y-2, bx+2, by+2);
+
+		//check for first point not in selected points already
+		for(int i = 0; i < pick_points.size(); i++)
+		{
+			bool point_selected = false;
+
+			for(int n = 0; n < selected_points.size(); n++)
+			{
+				if(selected_points[n] == pick_points[i])
+				{
+					point_selected = true;
+					break;
+				}
+			}
+
+			if(!point_selected)
+			{
+				selected_points.push_back(pick_points[i]);
+
+				if(selected_shape >= 0)
+				{
+					if(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_type == SPRITE_SHAPE_CHAIN ||
+					   project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_type == SPRITE_SHAPE_POLYGON)
+					{
+						if(pick_points[i] >= 0 && pick_points[i] < project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].point_selection.size())
+						{
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].point_selection[pick_points[i]] = true;
+						}
+					}
+				}
+			}
+		}
+
+		pick_shape_update = true;
+
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
 }
 
 void wxIrrlicht::stage_collisionEdit_move()
 {
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	if(project->getLayerType(selected_stage, selected_layer) != LAYER_TYPE_SPRITE)
+		return;
+
+	if(selected_shape < 0 || selected_shape >= project->stages[selected_stage].layers[selected_layer].layer_shapes.size())
+		return;
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx = px+adj_scroll_offset_x;
+	int by = py+adj_scroll_offset_y;
+
+	irr::core::vector2di mouse_pos(px, py);
+
+	switch(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_type)
+	{
+		case SPRITE_SHAPE_BOX:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						drag_start = wxPoint(bx, by);
+						collision_move_start_offset.set(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x, project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
+						collision_move_start_size.set(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width, project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height);
+
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].ul_selected = false;
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].ll_selected = false;
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].ur_selected = false;
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].lr_selected = false;
+
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].top_selected = false;
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].left_selected = false;
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].right_selected = false;
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].bottom_selected = false;
+
+						int shape_type = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_type;
+
+						if(shape_type == SPRITE_SHAPE_BOX)
+						{
+							for(int i = 0; i < selected_points.size(); i++)
+							{
+								if(selected_points[i] == 0)
+								{
+									project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].ul_selected = true;
+								}
+								else if(selected_points[i] == 1)
+								{
+									project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].ll_selected = true;
+								}
+								else if(selected_points[i] == 2)
+								{
+									project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].ur_selected = true;
+								}
+								else if(selected_points[i] == 3)
+								{
+									project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].lr_selected = true;
+								}
+							}
+						}
+					}
+				}
+				else if(left_drag_init)
+				{
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						this->SetFocusFromKbd();
+
+						collision_boxShapeSelect_ul = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].ul_selected;
+						collision_boxShapeSelect_ll = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].ll_selected;
+						collision_boxShapeSelect_ur = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].ur_selected;
+						collision_boxShapeSelect_lr = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].lr_selected;
+
+						if(collision_boxShapeSelect_ul && collision_boxShapeSelect_ll && collision_boxShapeSelect_ur && collision_boxShapeSelect_lr)
+						{
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x = collision_move_start_offset.X + (bx - drag_start.x);
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y = collision_move_start_offset.Y + (by - drag_start.y);
+
+							if(m_mapEdit_boxShape_posX_spinCtrl)
+								m_mapEdit_boxShape_posX_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x);
+
+							if(m_mapEdit_boxShape_posY_spinCtrl)
+								m_mapEdit_boxShape_posY_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
+						}
+						else if(collision_boxShapeSelect_ul)
+						{
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x = collision_move_start_offset.X + (bx - drag_start.x);
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y = collision_move_start_offset.Y + (by - drag_start.y);
+
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width = collision_move_start_size.X - (bx - drag_start.x);
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height = collision_move_start_size.Y - (by - drag_start.y);
+
+							if(m_mapEdit_boxShape_posX_spinCtrl)
+								m_mapEdit_boxShape_posX_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x);
+
+							if(m_mapEdit_boxShape_posY_spinCtrl)
+								m_mapEdit_boxShape_posY_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
+
+							if(m_mapEdit_boxShape_width_spinCtrl)
+								m_mapEdit_boxShape_width_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width);
+
+							if(m_mapEdit_boxShape_height_spinCtrl)
+								m_mapEdit_boxShape_height_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height);
+						}
+						else if(collision_boxShapeSelect_ll)
+						{
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x = collision_move_start_offset.X + (bx - drag_start.x);
+							//collision_physics_obj.offset_y = collision_move_start_offset.Y + (py - drag_start.y)/img_scale;
+
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width = collision_move_start_size.X - (bx - drag_start.x);
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height = collision_move_start_size.Y + (by - drag_start.y);
+
+							if(m_mapEdit_boxShape_posX_spinCtrl)
+								m_mapEdit_boxShape_posX_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x);
+
+							if(m_mapEdit_boxShape_width_spinCtrl)
+								m_mapEdit_boxShape_width_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width);
+
+							if(m_mapEdit_boxShape_height_spinCtrl)
+								m_mapEdit_boxShape_height_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height);
+						}
+						else if(collision_boxShapeSelect_ur)
+						{
+							//collision_physics_obj.offset_x = collision_move_start_offset.X + (px - drag_start.x)/img_scale;
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y = collision_move_start_offset.Y + (by - drag_start.y);
+
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width = collision_move_start_size.X + (bx - drag_start.x);
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height = collision_move_start_size.Y - (by - drag_start.y);
+
+							if(m_mapEdit_boxShape_posY_spinCtrl)
+								m_mapEdit_boxShape_posY_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
+
+							if(m_mapEdit_boxShape_width_spinCtrl)
+								m_mapEdit_boxShape_width_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width);
+
+							if(m_mapEdit_boxShape_height_spinCtrl)
+								m_mapEdit_boxShape_height_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height);
+						}
+						else if(collision_boxShapeSelect_lr)
+						{
+							//collision_physics_obj.offset_x = collision_move_start_offset.X + (px - drag_start.x)/img_scale;
+							//collision_physics_obj.offset_y = collision_move_start_offset.Y + (py - drag_start.y)/img_scale;
+
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width = collision_move_start_size.X + (bx - drag_start.x);
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height = collision_move_start_size.Y + (by - drag_start.y);
+
+							if(m_mapEdit_boxShape_width_spinCtrl)
+								m_mapEdit_boxShape_width_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width);
+
+							if(m_mapEdit_boxShape_height_spinCtrl)
+								m_mapEdit_boxShape_height_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height);
+						}
+
+						collision_object_modified = true;
+						parent_window->UpdateWindowUI();
+					}
+				}
+			}
+		}
+		break;
+
+		case SPRITE_SHAPE_CIRCLE:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						drag_start = wxPoint(bx, by);
+						collision_move_start_offset.set(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x, project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
+						collision_move_start_radius = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius;
+
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].top_selected = false;
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].left_selected = false;
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].right_selected = false;
+						project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].bottom_selected = false;
+
+						for(int i = 0; i < selected_points.size(); i++)
+						{
+							if(selected_points[i] == 0)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].top_selected = true;
+							}
+							else if(selected_points[i] == 1)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].left_selected = true;
+							}
+							else if(selected_points[i] == 2)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].right_selected = true;
+							}
+							else if(selected_points[i] == 3)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].bottom_selected = true;
+							}
+						}
+					}
+				}
+				else if(left_drag_init)
+				{
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						this->SetFocusFromKbd();
+
+						collision_circleShapeSelect_u = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].top_selected;
+						collision_circleShapeSelect_l = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].left_selected;
+						collision_circleShapeSelect_r = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].right_selected;
+						collision_circleShapeSelect_d = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].bottom_selected;
+
+						if(collision_circleShapeSelect_u && collision_circleShapeSelect_d && collision_circleShapeSelect_l && collision_circleShapeSelect_r)
+						{
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x = collision_move_start_offset.X + (bx - drag_start.x);
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y = collision_move_start_offset.Y + (by - drag_start.y);
+
+							if(m_mapEdit_circleShape_centerX_spinCtrl)
+								m_mapEdit_circleShape_centerX_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x);
+
+							if(m_mapEdit_circleShape_centerY_spinCtrl)
+								m_mapEdit_circleShape_centerY_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
+						}
+						else if(collision_circleShapeSelect_u)
+						{
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = collision_move_start_radius - (by - drag_start.y);
+
+							if(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius < 0)
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius *= -1;
+
+							if(m_mapEdit_circleShape_radius_spinCtrl)
+								m_mapEdit_circleShape_radius_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius);
+						}
+						else if(collision_circleShapeSelect_d)
+						{
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = collision_move_start_radius + (by - drag_start.y);
+
+							if(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius < 0)
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius *= -1;
+
+							if(m_mapEdit_circleShape_radius_spinCtrl)
+								m_mapEdit_circleShape_radius_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius);
+						}
+						else if(collision_circleShapeSelect_l)
+						{
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = collision_move_start_radius - (bx - drag_start.x);
+
+							if(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius < 0)
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius *= -1;
+
+							if(m_mapEdit_circleShape_radius_spinCtrl)
+								m_mapEdit_circleShape_radius_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius);
+						}
+						else if(collision_circleShapeSelect_r)
+						{
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = collision_move_start_radius + (bx - drag_start.x);
+
+							if(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius < 0)
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius *= -1;
+
+							if(m_mapEdit_circleShape_radius_spinCtrl)
+								m_mapEdit_circleShape_radius_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius);
+						}
+
+						collision_object_modified = true;
+						parent_window->UpdateWindowUI();
+					}
+				}
+			}
+		}
+		break;
+
+		case SPRITE_SHAPE_CHAIN:
+		case SPRITE_SHAPE_POLYGON:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						drag_start = wxPoint(bx, by);
+						collision_move_start_offset.set(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x, project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
+						collision_move_start_points.clear();
+
+						for(int i = 0; i < project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points.size(); i++)
+						{
+							collision_move_start_points.push_back(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[i]);
+						}
+					}
+				}
+				else if(left_drag_init)
+				{
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						this->SetFocusFromKbd();
+
+						int mouse_move_x = (bx - drag_start.x);
+						int mouse_move_y = (by - drag_start.y);
+
+						for(int i = 0; i < selected_points.size(); i++)
+						{
+							int pt_index = selected_points[i];
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[pt_index].X = collision_move_start_points[pt_index].X + mouse_move_x;
+							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[pt_index].Y = collision_move_start_points[pt_index].Y + mouse_move_y;
+
+							if(m_mapEdit_polyShape_grid)
+							{
+								if(pt_index >= 0 && pt_index < m_mapEdit_polyShape_grid->GetNumberRows())
+								{
+									m_mapEdit_polyShape_grid->SetCellValue(pt_index, 0, wxString::Format(_("%i"), project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[pt_index].X));
+									m_mapEdit_polyShape_grid->SetCellValue(pt_index, 1, wxString::Format(_("%i"), project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[pt_index].Y));
+								}
+							}
+						}
+
+						collision_object_modified = true;
+						parent_window->UpdateWindowUI();
+					}
+				}
+			}
+		}
+		break;
+	}
 }
 
 void wxIrrlicht::stage_collisionEdit_draw()
@@ -4481,6 +5225,67 @@ void wxIrrlicht::stage_collisionEdit_draw()
 
 	switch(collision_physics_obj.shape_type)
 	{
+		case SPRITE_SHAPE_BOX:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						if(!collision_poly_draw_flag)
+						{
+							collision_physics_obj.offset_x = bx;
+							collision_physics_obj.offset_y = by;
+
+							if(m_mapEdit_boxShape_posX_spinCtrl)
+								m_mapEdit_boxShape_posX_spinCtrl->SetValue(collision_physics_obj.offset_x);
+
+							if(m_mapEdit_boxShape_posY_spinCtrl)
+								m_mapEdit_boxShape_posY_spinCtrl->SetValue(collision_physics_obj.offset_y);
+
+							collision_poly_draw_flag = true;
+						}
+
+						collision_object_modified = true;
+						//parent_window->UpdateWindowUI();
+					}
+				}
+				else
+				{
+					//collision_physics_obj.radius = irr::core::vector2di(bx,by).getDistanceFrom(irr::core::vector2di(collision_physics_obj.offset_x, collision_physics_obj.offset_y));
+					collision_physics_obj.box_width = bx - collision_physics_obj.offset_x;
+					collision_physics_obj.box_height = by - collision_physics_obj.offset_y;
+
+					if(m_mapEdit_boxShape_width_spinCtrl)
+						m_mapEdit_boxShape_width_spinCtrl->SetValue(collision_physics_obj.box_width);
+
+					if(m_mapEdit_boxShape_height_spinCtrl)
+						m_mapEdit_boxShape_height_spinCtrl->SetValue(collision_physics_obj.box_height);
+				}
+			}
+			else
+			{
+				//collision_object_modified = true;
+				if(collision_poly_draw_flag)
+				{
+					collision_poly_draw_flag = false;
+					collision_physics_obj.shape_name = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_name; //to keep shape name
+					project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape] = collision_physics_obj;
+					//std::cout << "test: " << project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_name << ", " << project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width << std::endl;
+				}
+			}
+		}
+		break;
+
+		case SPRITE_SHAPE_CHAIN:
 		case SPRITE_SHAPE_POLYGON:
 		{
 			if(mouse_state.LeftIsDown())
@@ -4503,9 +5308,25 @@ void wxIrrlicht::stage_collisionEdit_draw()
 							collision_physics_obj.points.clear();
 
 							collision_poly_draw_flag = true;
+
+							if(m_mapEdit_polyShape_grid)
+							{
+								if(m_mapEdit_polyShape_grid->GetNumberRows() > 0)
+								{
+									m_mapEdit_polyShape_grid->DeleteRows(0, m_mapEdit_polyShape_grid->GetNumberRows());
+								}
+							}
 						}
 
 						collision_physics_obj.points.push_back(irr::core::vector2di(bx, by));
+
+						if(m_mapEdit_polyShape_grid)
+						{
+							m_mapEdit_polyShape_grid->AppendRows();
+							m_mapEdit_polyShape_grid->SetCellValue(m_mapEdit_polyShape_grid->GetNumberRows()-1, 0, wxString::Format(_("%i"), bx));
+							m_mapEdit_polyShape_grid->SetCellValue(m_mapEdit_polyShape_grid->GetNumberRows()-1, 1, wxString::Format(_("%i"), by));
+						}
+
 
 						collision_object_modified = true;
 						//parent_window->UpdateWindowUI();
@@ -4522,6 +5343,13 @@ void wxIrrlicht::stage_collisionEdit_draw()
 					for(int i = collision_physics_obj.points.size(); i < 3; i++)
 					{
 						collision_physics_obj.points.push_back(irr::core::vector2di(0, 0));
+
+						if(m_mapEdit_polyShape_grid)
+						{
+							m_mapEdit_polyShape_grid->AppendRows();
+							m_mapEdit_polyShape_grid->SetCellValue(m_mapEdit_polyShape_grid->GetNumberRows()-1, 0, wxString::Format(_("%i"), 0));
+							m_mapEdit_polyShape_grid->SetCellValue(m_mapEdit_polyShape_grid->GetNumberRows()-1, 1, wxString::Format(_("%i"), 0));
+						}
 					}
 				}
 
@@ -4542,10 +5370,68 @@ void wxIrrlicht::stage_collisionEdit_draw()
 			}
 		}
 		break;
+
+
+		case SPRITE_SHAPE_CIRCLE:
+		{
+			if(mouse_state.LeftIsDown())
+			{
+				bool init_click = false;
+
+				if(!(middle_drag_init||left_drag_init||right_drag_init))
+				{
+
+					if( px >= 0 && px < pw && py >= 0 && py < ph )
+					{
+						left_drag_init = true;
+						this->SetFocusFromKbd();
+						init_click = true;
+
+						if(!collision_poly_draw_flag)
+						{
+							collision_physics_obj.offset_x = bx;
+							collision_physics_obj.offset_y = by;
+
+							collision_poly_draw_flag = true;
+
+							if(m_mapEdit_circleShape_centerX_spinCtrl)
+								m_mapEdit_circleShape_centerX_spinCtrl->SetValue(collision_physics_obj.offset_x);
+
+							if(m_mapEdit_circleShape_centerY_spinCtrl)
+								m_mapEdit_circleShape_centerY_spinCtrl->SetValue(collision_physics_obj.offset_y);
+
+						}
+
+						collision_object_modified = true;
+						//parent_window->UpdateWindowUI();
+					}
+				}
+				else
+				{
+					collision_physics_obj.radius = irr::core::vector2di(bx,by).getDistanceFrom(irr::core::vector2di(collision_physics_obj.offset_x, collision_physics_obj.offset_y));
+
+					if(m_mapEdit_circleShape_radius_spinCtrl)
+						m_mapEdit_circleShape_radius_spinCtrl->SetValue(collision_physics_obj.radius);
+				}
+			}
+			else
+			{
+				//collision_object_modified = true;
+				if(collision_poly_draw_flag)
+				{
+					collision_poly_draw_flag = false;
+					collision_physics_obj.shape_name = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_name; //to keep shape name
+					project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape] = collision_physics_obj;
+				}
+			}
+		}
+		break;
 	}
 
 	if(!mouse_state.LeftIsDown())
 	{
+		//collision_object_modified = true;
+		//collision_poly_draw_flag = false;
 		left_drag_init = false;
 	}
 
@@ -4675,6 +5561,23 @@ void wxIrrlicht::UpdateStageSheet()
 		}
 	}
 
+	if(!stage_window_isActive)
+	{
+		if(collision_poly_draw_flag && (collision_physics_obj.shape_type == SPRITE_SHAPE_POLYGON || collision_physics_obj.shape_type == SPRITE_SHAPE_CHAIN) &&
+		   selected_shape >= 0 && selected_shape < project->stages[selected_stage].layers[selected_layer].layer_shapes.size())
+		{
+			collision_physics_obj.shape_name = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_name; //to keep shape name
+			project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape] = collision_physics_obj;
+
+			collision_physics_obj.points.clear();
+
+			collision_object_modified = true;
+			parent_window->Refresh();
+		}
+
+		collision_poly_draw_flag = false;
+	}
+
 
 	for(int i = 0; i < project->getStageNumLayers(selected_stage); i++)
 	{
@@ -4729,6 +5632,12 @@ void wxIrrlicht::UpdateStageSheet()
 				StageSheet_RotateSpriteUpdate();
 			else if(map_tool == MAP_TOOL_SPRITE_SCALE)
 				StageSheet_ScaleSpriteUpdate();
+			else if(map_tool == MAP_TOOL_SHAPE_SELECT)
+				stage_collisionEdit_select();
+			else if(map_tool == MAP_TOOL_SHAPE_BOXSELECT)
+				stage_collisionEdit_boxSelect();
+			else if(map_tool == MAP_TOOL_SHAPE_MOVE)
+				stage_collisionEdit_move();
 			else if(map_tool == MAP_TOOL_SHAPE_DRAW)
 				stage_collisionEdit_draw();
 
@@ -7341,34 +8250,252 @@ void wxIrrlicht::util_drawSelectedSprites()
 	{
 		int shape_type = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].shape_type;
 
+		if(i == selected_shape && collision_poly_draw_flag)
+			continue;
+
 		if(shape_type == SPRITE_SHAPE_BOX)
 		{
+			if(i == selected_shape)
+				setColor(rgb(255,255,255));
+			else
+				setColor(non_selected_shape_color);
+
+			//std::cout << "cir: " << selected_shape << std::endl;
+			int box_width = (int)project->stages[selected_stage].layers[selected_layer].layer_shapes[i].box_width;
+			int box_height = (int)project->stages[selected_stage].layers[selected_layer].layer_shapes[i].box_height;
+			int box_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].offset_x-adj_scroll_offset_x;
+			int box_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].offset_y-adj_scroll_offset_y;
+
+			drawRect(box_x, box_y, box_width, box_height);
+
+			int ipx = 2;
+
+			bool ul_selected = false;
+			bool ll_selected = false;
+			bool ur_selected = false;
+			bool lr_selected = false;
+
+			for(int pt_index = 0; pt_index < selected_points.size(); pt_index++)
+			{
+				if(selected_points[pt_index] == 0)
+					ul_selected = true;
+				else if(selected_points[pt_index] == 1)
+					ll_selected = true;
+				else if(selected_points[pt_index] == 2)
+					ur_selected = true;
+				else if(selected_points[pt_index] == 3)
+					lr_selected = true;
+			}
+
+			// COME BACK TO THIS
+			if(i == selected_shape)
+			{
+				if(ul_selected)
+					setColor(rgb(0, 255, 0));
+				else
+					setColor(rgb(255,255,255));
+			}
+			else
+			{
+				setColor(non_selected_shape_color);
+			}
+
+			//setColor( collision_circleShapeSelect_u ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(box_x-ipx, box_y-ipx, ipx*2, ipx*2);
+
+
+			if(i == selected_shape)
+			{
+				if(ll_selected)
+					setColor(rgb(0, 255, 0));
+				else
+					setColor(rgb(255,255,255));
+			}
+			else
+			{
+				setColor(non_selected_shape_color);
+			}
+
+			//setColor( collision_circleShapeSelect_d ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(box_x-ipx, (box_y+box_height)-ipx, ipx*2, ipx*2);
+
+
+			if(i == selected_shape)
+			{
+				if(ur_selected)
+					setColor(rgb(0, 255, 0));
+				else
+					setColor(rgb(255,255,255));
+			}
+			else
+			{
+				setColor(non_selected_shape_color);
+			}
+			//setColor( collision_circleShapeSelect_l ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill((box_x+box_width)-ipx, box_y-ipx, ipx*2, ipx*2);
+
+
+			if(i == selected_shape)
+			{
+				if(lr_selected)
+					setColor(rgb(0, 255, 0));
+				else
+					setColor(rgb(255,255,255));
+			}
+			else
+			{
+				setColor(non_selected_shape_color);
+			}
+			//setColor( collision_circleShapeSelect_r ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill((box_x+box_width)-ipx, (box_y+box_height)-ipx, ipx*2, ipx*2);
 		}
 		else if(shape_type == SPRITE_SHAPE_CIRCLE)
 		{
-		}
-		else if(shape_type == SPRITE_SHAPE_CHAIN)
-		{
-		}
-		else if(shape_type == SPRITE_SHAPE_POLYGON)
-		{
-			if(i == selected_shape && collision_poly_draw_flag)
-				continue;
-
 			if(i == selected_shape)
-				setColor(rgb(255,0,0));
+				setColor(rgb(255,255,255));
 			else
 				setColor(non_selected_shape_color);
+
+			int circle_radius = (int)project->stages[selected_stage].layers[selected_layer].layer_shapes[i].radius;
+			int circle_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].offset_x-adj_scroll_offset_x;
+			int circle_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].offset_y-adj_scroll_offset_y;
+
+			//std::cout << "draw circle: " << i << " -> " << circle_x << ", " << circle_y << ", " << circle_radius << std::endl;
+
+			int pt_u_x = circle_x;
+			int pt_u_y = circle_y-circle_radius;
+
+			int pt_d_x = circle_x;
+			int pt_d_y = circle_y+circle_radius;
+
+			int pt_l_x = circle_x-circle_radius;
+			int pt_l_y = circle_y;
+
+			int pt_r_x = circle_x+circle_radius;
+			int pt_r_y = circle_y;
+
+			drawCircle(circle_x, circle_y, circle_radius);
+
+			int ipx = 2;
+
+
+			bool top_selected = false;
+			bool left_selected = false;
+			bool right_selected = false;
+			bool bottom_selected = false;
+
+			for(int pt_index = 0; pt_index < selected_points.size(); pt_index++)
+			{
+				if(selected_points[pt_index] == 0)
+					top_selected = true;
+				else if(selected_points[pt_index] == 1)
+					left_selected = true;
+				else if(selected_points[pt_index] == 2)
+					right_selected = true;
+				else if(selected_points[pt_index] == 3)
+					bottom_selected = true;
+			}
+
+			// COME BACK TO THIS
+			if(i == selected_shape)
+			{
+				if(top_selected)
+					setColor(rgb(0, 255, 0));
+				else
+					setColor(rgb(255,255,255));
+			}
+			else
+			{
+				setColor(non_selected_shape_color);
+			}
+			//setColor( collision_circleShapeSelect_u ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_u_x-ipx, pt_u_y-ipx, ipx*2, ipx*2);
+
+
+			if(i == selected_shape)
+			{
+				if(bottom_selected)
+					setColor(rgb(0, 255, 0));
+				else
+					setColor(rgb(255,255,255));
+			}
+			else
+			{
+				setColor(non_selected_shape_color);
+			}
+			//setColor( collision_circleShapeSelect_d ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_d_x-ipx, pt_d_y-ipx, ipx*2, ipx*2);
+
+			if(i == selected_shape)
+			{
+				if(left_selected)
+					setColor(rgb(0, 255, 0));
+				else
+					setColor(rgb(255,255,255));
+			}
+			else
+			{
+				setColor(non_selected_shape_color);
+			}
+			//setColor( collision_circleShapeSelect_l ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_l_x-ipx, pt_l_y-ipx, ipx*2, ipx*2);
+
+			if(i == selected_shape)
+			{
+				if(right_selected)
+					setColor(rgb(0, 255, 0));
+				else
+					setColor(rgb(255,255,255));
+			}
+			else
+			{
+				setColor(non_selected_shape_color);
+			}
+			//setColor( collision_circleShapeSelect_r ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_r_x-ipx, pt_r_y-ipx, ipx*2, ipx*2);
+		}
+		else if(shape_type == SPRITE_SHAPE_POLYGON || shape_type == SPRITE_SHAPE_CHAIN)
+		{
+			if(i == selected_shape)
+				setColor(rgb(255,255,255));
+			else
+				setColor(non_selected_shape_color);
+
+			if(project->stages[selected_stage].layers[selected_layer].layer_shapes[i].point_selection.size() != project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points.size())
+			{
+				for(int n = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].point_selection.size(); n < project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points.size(); n++)
+				{
+					project->stages[selected_stage].layers[selected_layer].layer_shapes[i].point_selection.push_back(false);
+				}
+			}
 
 			if(project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points.size() > 0)
 			{
 				shape_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points[0].X-adj_scroll_offset_x;
 				shape_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points[0].Y-adj_scroll_offset_y;
 
+				if(i == selected_shape)
+				{
+					if(project->stages[selected_stage].layers[selected_layer].layer_shapes[i].point_selection[0])
+						setColor(rgb(0, 255, 0));
+					else
+						setColor(rgb(255,255,255));
+				}
+				else
+				{
+					setColor(non_selected_shape_color);
+				}
+
 				drawRectFill(shape_x-2, shape_y-2, 4, 4);
 			}
+
 			for(int point_index = 1; point_index < project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points.size(); point_index++)
 			{
+				if(i == selected_shape)
+					setColor(rgb(255,255,255));
+				else
+					setColor(non_selected_shape_color);
+
 				drawLine(shape_x,
 						 shape_y,
 						 project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points[point_index].X-adj_scroll_offset_x,
@@ -7377,10 +8504,27 @@ void wxIrrlicht::util_drawSelectedSprites()
 				shape_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points[point_index].X-adj_scroll_offset_x;
 				shape_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points[point_index].Y-adj_scroll_offset_y;
 
+				if(i == selected_shape)
+				{
+					if(project->stages[selected_stage].layers[selected_layer].layer_shapes[i].point_selection[point_index])
+						setColor(rgb(0, 255, 0));
+					else
+						setColor(rgb(255,255,255));
+				}
+				else
+				{
+					setColor(non_selected_shape_color);
+				}
+
 				drawRectFill(shape_x-2, shape_y-2, 4, 4);
 			}
-			if(project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points.size() > 0)
+			if(project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points.size() > 0 && shape_type == SPRITE_SHAPE_POLYGON)
 			{
+				if(i == selected_shape)
+					setColor(rgb(255,255,255));
+				else
+					setColor(non_selected_shape_color);
+
 				int start_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points[0].X-adj_scroll_offset_x;
 				int start_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[i].points[0].Y-adj_scroll_offset_y;
 				drawLine(shape_x, shape_y, start_x, start_y);
@@ -7389,12 +8533,20 @@ void wxIrrlicht::util_drawSelectedSprites()
 		}
 	}
 
+	if(left_drag_init && map_tool == MAP_TOOL_SHAPE_BOXSELECT)
+	{
+		setColor(rgb(255,255,255));
+		int bselect_w = bx - drag_start.x;
+		int bselect_h = by - drag_start.y;
+		drawRect(drag_start.x-adj_scroll_offset_x, drag_start.y-adj_scroll_offset_y, bselect_w, bselect_h);
+	}
+
 	if(selected_shape >= 0 && selected_shape < project->stages[selected_stage].layers[selected_layer].layer_shapes.size())
 	{
 		int shape_type = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_type;
-		setColor(rgb(255, 255, 255));
+		setColor(rgb(0, 255, 0));
 
-		if(shape_type == SPRITE_SHAPE_POLYGON)
+		if(shape_type == SPRITE_SHAPE_POLYGON || shape_type == SPRITE_SHAPE_CHAIN)
 		{
 			if(collision_physics_obj.points.size() > 0)
 			{
@@ -7415,6 +8567,67 @@ void wxIrrlicht::util_drawSelectedSprites()
 				drawLine(shape_x, shape_y, px, py);
 				drawRectFill(px-2, py-2, 4, 4);
 			}
+		}
+		else if(shape_type == SPRITE_SHAPE_CIRCLE && collision_poly_draw_flag)
+		{
+			//std::cout << "cir: " << selected_shape << std::endl;
+			int circle_radius = (int)collision_physics_obj.radius;
+			int circle_x = collision_physics_obj.offset_x-adj_scroll_offset_x;
+			int circle_y = collision_physics_obj.offset_y-adj_scroll_offset_y;
+
+			int pt_u_x = circle_x;
+			int pt_u_y = circle_y-circle_radius;
+
+			int pt_d_x = circle_x;
+			int pt_d_y = circle_y+circle_radius;
+
+			int pt_l_x = circle_x-circle_radius;
+			int pt_l_y = circle_y;
+
+			int pt_r_x = circle_x+circle_radius;
+			int pt_r_y = circle_y;
+
+			drawCircle(circle_x, circle_y, circle_radius);
+
+			int ipx = 2;
+
+			//setColor( collision_circleShapeSelect_u ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_u_x-ipx, pt_u_y-ipx, ipx*2, ipx*2);
+
+			//setColor( collision_circleShapeSelect_d ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_d_x-ipx, pt_d_y-ipx, ipx*2, ipx*2);
+
+			//setColor( collision_circleShapeSelect_l ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_l_x-ipx, pt_l_y-ipx, ipx*2, ipx*2);
+
+			//setColor( collision_circleShapeSelect_r ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(pt_r_x-ipx, pt_r_y-ipx, ipx*2, ipx*2);
+
+		}
+		else if(shape_type == SPRITE_SHAPE_BOX && collision_poly_draw_flag)
+		{
+			//std::cout << "cir: " << selected_shape << std::endl;
+			int box_width = (int)collision_physics_obj.box_width;
+			int box_height = (int)collision_physics_obj.box_height;
+			int box_x = collision_physics_obj.offset_x-adj_scroll_offset_x;
+			int box_y = collision_physics_obj.offset_y-adj_scroll_offset_y;
+
+			drawRect(box_x, box_y, box_width, box_height);
+
+			int ipx = 2;
+
+			//setColor( collision_circleShapeSelect_u ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(box_x-ipx, box_y-ipx, ipx*2, ipx*2);
+
+			//setColor( collision_circleShapeSelect_d ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill(box_x-ipx, (box_y+box_height)-ipx, ipx*2, ipx*2);
+
+			//setColor( collision_circleShapeSelect_l ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill((box_x+box_width)-ipx, box_y-ipx, ipx*2, ipx*2);
+
+			//setColor( collision_circleShapeSelect_r ? rgb(0,255, 0) : rgb(0, 0, 0) );
+			drawRectFill((box_x+box_width)-ipx, (box_y+box_height)-ipx, ipx*2, ipx*2);
+
 		}
 	}
 }

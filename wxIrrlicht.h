@@ -44,6 +44,8 @@
 #include <irrlicht.h>
 #include <wx/wx.h>
 #include <wx/propgrid/property.h>
+#include <wx/spinctrl.h>
+#include <wx/grid.h>
 #include <wx/glcanvas.h>
 #include "gui_freetype_font.h"
 #include "NirvanaEngine_Structs.h"
@@ -475,16 +477,34 @@ class wxIrrlicht : public wxControl {
 		wxStaticText* m_screenAbsoluteX_staticText = NULL;
 		wxStaticText* m_screenAbsoluteY_staticText = NULL;
 
+		wxListBox* m_mapEdit_collisionShape_listBox = NULL;
+
 		void updateStageViewportInfo();
 
 
 		int selected_shape = -1;
+		std::vector<int> pick_points;
+		std::vector<int> selected_points;
 		std::vector<sprite2D_physics_obj> stage_physics_obj;
+
+        bool pick_shape_update = false;
+        void pickShape(int start_x, int start_y, int end_x, int end_y);
 
         void stage_collisionEdit_select();
         void stage_collisionEdit_boxSelect();
         void stage_collisionEdit_move();
         void stage_collisionEdit_draw();
+
+        wxSpinCtrl* m_mapEdit_boxShape_posX_spinCtrl = NULL;
+		wxSpinCtrl* m_mapEdit_boxShape_posY_spinCtrl = NULL;
+		wxSpinCtrl* m_mapEdit_boxShape_width_spinCtrl = NULL;
+		wxSpinCtrl* m_mapEdit_boxShape_height_spinCtrl = NULL;
+
+		wxGrid* m_mapEdit_polyShape_grid = NULL;
+
+		wxSpinCtrl* m_mapEdit_circleShape_centerX_spinCtrl = NULL;
+		wxSpinCtrl* m_mapEdit_circleShape_centerY_spinCtrl = NULL;
+		wxSpinCtrl* m_mapEdit_circleShape_radius_spinCtrl = NULL;
 
 
         void UpdateStageSheet();
