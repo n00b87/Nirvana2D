@@ -60,6 +60,10 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_AddSprite( wxCommandEvent& ev
 
 	NirvanaEditor_AddSpriteInstance_Dialog* dialog = new NirvanaEditor_AddSpriteInstance_Dialog(this);
 
+	dialog->stage_index = stage_index;
+	dialog->layer_index = layer_index;
+	dialog->project = project;
+
 	for(int i = 0; i < project->sprite_base.size(); i++)
 	{
 		if(project->sprite_base[i].sprite_name.Trim().length() > 0)
@@ -68,7 +72,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_AddSprite( wxCommandEvent& ev
 
 	dialog->refresh_list();
 
+	PreDialog();
 	dialog->ShowModal();
+	PostDialog();
 
 	if(!dialog->create_flag)
 		return;
@@ -130,8 +136,6 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent&
 		return;
 	}
 
-	std::cout << "DL 1" << std::endl;
-
 	if(map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.size() == 0)
 		return;
 
@@ -141,8 +145,6 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent&
 
 	int map_spr_id = map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection[0].layer_sprite_index;
 	int spr_index = map_editor->getMapViewControl()->sprite[map_spr_id].layer_sprite_index;
-
-	std::cout << "DL 2" << std::endl;
 
 	if(spr_index < 0 || spr_index >= project->getStageLayerNumSprites(stage_index, layer_index))
 		return;
@@ -159,7 +161,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent&
 	NirvanaEditor_DeleteSprite_Dialog* dialog = new NirvanaEditor_DeleteSprite_Dialog(this);
 	dialog->setSpriteName(spr_name);
 
+	PreDialog();
 	dialog->ShowModal();
+	PostDialog();
 
 	if(!dialog->delete_flag)
 		return;
@@ -171,7 +175,7 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent&
 		map_spr_id = map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection[i].layer_sprite_index;
 		spr_index = map_editor->getMapViewControl()->sprite[map_spr_id].layer_sprite_index;
 
-		std::cout << "delete: " << map_spr_id << ", " << spr_index << ", " << project->stages[stage_index].layers[layer_index].layer_sprites[spr_index].sprite_name << std::endl;
+		//std::cout << "delete: " << map_spr_id << ", " << spr_index << ", " << project->stages[stage_index].layers[layer_index].layer_sprites[spr_index].sprite_name << std::endl;
 
 		map_editor->getMapViewControl()->deleteSprite(map_spr_id);
 		layer_spr_array.push_back(spr_index);
@@ -184,7 +188,7 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent&
 		if(i < 0)
 			break;
 
-		std::cout << "array: " << layer_spr_array[i] << ", " << project->stages[stage_index].layers[layer_index].layer_sprites[layer_spr_array[i]].sprite_name << std::endl;
+		//std::cout << "array: " << layer_spr_array[i] << ", " << project->stages[stage_index].layers[layer_index].layer_sprites[layer_spr_array[i]].sprite_name << std::endl;
 
 		project->deleteLayerSprite(stage_index, layer_index, layer_spr_array[i]);
 	}
@@ -423,7 +427,7 @@ void NirvanaEditor_MainFrame::reloadSpriteProperties()
 	sprite_scale_x->SetValue( n_sprite.scale.X );
 	sprite_scale_y->SetValue( n_sprite.scale.Y );
 	sprite_alpha->SetValueFromInt( (int)n_sprite.alpha );
-	sprite_visible->SetValue( true );
+	sprite_visible->SetValue( n_sprite.visible );
 }
 
 
@@ -498,12 +502,46 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpritePropertyGridChanged( wxPropertyGri
 
 	if(event.GetProperty()->GetName().compare(_("sprite_id"))==0)
 	{
-		project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].sprite_name = sprite_id->GetValueAsString();
+		bool sprite_id_exists = false;
+		wxString test_id = sprite_id->GetValueAsString().Upper().Trim();
 
-		int list_item_index = m_mapEdit_layerSprite_listBox->GetSelection();
-		if(list_item_index >= 0 && list_item_index < m_mapEdit_layerSprite_listBox->GetCount())
+		for(int i = 0; i < project->stages[stage_index].layers[layer_index].layer_sprites.size(); i++)
 		{
-			m_mapEdit_layerSprite_listBox->SetString(list_item_index, sprite_id->GetValueAsString());
+			if(i == sprite_index)
+				continue;
+
+			wxString test_2 = wxString(project->stages[stage_index].layers[layer_index].layer_sprites[i].sprite_name).Upper().Trim();
+
+			//std::cout << "ID CMP[" << i << "]: " << test_id.ToStdString() << " ~ " << test_2.ToStdString() << std::endl;
+
+			if(test_2.compare(test_id)==0)
+			{
+				sprite_id_exists = true;
+				break;
+			}
+		}
+
+		if(!project->checkName(sprite_id->GetValueAsString().ToStdString()))
+		{
+			wxMessageBox(_("Illegal Character or Invalid Sprite ID"));
+			wxString sprite_actual_id = wxString(project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].sprite_name).Trim();
+			sprite_id->SetValueFromString(sprite_actual_id);
+		}
+		else if(sprite_id_exists)
+		{
+			wxMessageBox(_("Sprite ID already exists in current layer"));
+			wxString sprite_actual_id = wxString(project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].sprite_name).Trim();
+			sprite_id->SetValueFromString(sprite_actual_id);
+		}
+		else
+		{
+			project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].sprite_name = sprite_id->GetValueAsString().Trim();
+
+			int list_item_index = m_mapEdit_layerSprite_listBox->GetSelection();
+			if(list_item_index >= 0 && list_item_index < m_mapEdit_layerSprite_listBox->GetCount())
+			{
+				m_mapEdit_layerSprite_listBox->SetString(list_item_index, sprite_id->GetValueAsString());
+			}
 		}
 	}
 	else if(event.GetProperty()->GetName().compare(_("body_type"))==0)

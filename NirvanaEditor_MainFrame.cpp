@@ -44,6 +44,8 @@ Nirvana_MainFrame( parent )
 	map_editor->getMapViewControl()->mapEdit_hasContext = true;
 	map_editor->getMapViewControl()->project = project;
 
+	map_editor->getTileSelectControl()->update_events = true;
+
 	map_editor->setProject(project);
 
 
@@ -55,6 +57,8 @@ Nirvana_MainFrame( parent )
 
 	project_root_treeItem = m_project_treeCtrl->AddRoot(wxString::FromUTF8(_("NO PROJECT")), stage_tree_rootImage);
 
+
+	m_mapSet_auiToolBar->ToggleTool(m_mapSet_free_tool->GetId(), true);
 
 
 	wxPGChoices choices;
@@ -104,6 +108,135 @@ Nirvana_MainFrame( parent )
 	map_editor->getMapViewControl()->m_mapEdit_circleShape_radius_spinCtrl = m_mapEdit_circleShape_radius_spinCtrl;
 
 	map_editor->getMapViewControl()->m_mapEdit_collisionShape_listBox = m_mapEdit_collisionShape_listBox;
+
+	//load config
+	wxFileName fname(wxStandardPaths::Get().GetExecutablePath());
+	fname.AppendDir(_("config"));
+	fname.SetFullName(_("nirvana.config"));
+
+	if(fname.Exists())
+	{
+		wxFile cfg_file(fname.GetAbsolutePath());
+		wxString p_data = _("");
+
+		if(cfg_file.IsOpened())
+		{
+			cfg_file.ReadAll(&p_data);
+			cfg_file.Close();
+		}
+
+		std::vector<nirvana_project_file_obj> p_cmd = project->getParams(p_data);
+
+		for(int i = 0; i < p_cmd.size(); i++)
+		{
+			if(p_cmd[i].dict.size() == 0)
+				continue;
+
+			if(p_cmd[i].dict[0].key.compare(_("MAP_EDITOR_MAP_CONTROL"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToInt(&map_editor->getMapViewControl()->scroll_speed);
+					}
+				}
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("MAP_EDITOR_TILE_SELECT_CONTROL"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToInt(&map_editor->getTileSelectControl()->scroll_speed);
+					}
+				}
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("TILE_EDITOR_ANIMATION_SHEET_CONTROL"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToInt(&tile_editor->getAnimationSheetControl()->scroll_speed);
+					}
+				}
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("TILE_EDITOR_MASK_SHEET_CONTROL"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToInt(&tile_editor->getMaskSheetControl()->scroll_speed);
+					}
+				}
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("SPRITE_EDITOR_ANIMATION_SHEET_CONTROL"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToInt(&sprite_editor->getAnimationSheetControl()->scroll_speed);
+					}
+				}
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("SPRITE_EDITOR_SHAPE_SHEET_CONTROL"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToInt(&sprite_editor->getCollisionControl()->scroll_speed);
+					}
+				}
+			}
+		}
+	}
+}
+
+void NirvanaEditor_MainFrame::PreDialog()
+{
+	map_mapView_update = map_editor->getMapViewControl()->update_events;
+	map_tileSelect_update = map_editor->getTileSelectControl()->update_events;
+	tile_sheetSelect_update = tile_editor->getAnimationSheetControl()->update_events;
+	tile_frameSelect_update = tile_editor->getAnimationFrameControl()->update_events;
+	tile_maskSelect_update = tile_editor->getMaskSheetControl()->update_events;
+	sprite_sheetSelect_update = sprite_editor->getAnimationSheetControl()->update_events;
+	sprite_frameSelect_update = sprite_editor->getAnimationFrameControl()->update_events;
+	sprite_collisionSelect_update = sprite_editor->getCollisionControl()->update_events;
+
+	map_editor->getMapViewControl()->update_events = false;
+	map_editor->getTileSelectControl()->update_events = false;
+	tile_editor->getAnimationSheetControl()->update_events = false;
+	tile_editor->getAnimationFrameControl()->update_events = false;
+	tile_editor->getMaskSheetControl()->update_events = false;
+	sprite_editor->getAnimationSheetControl()->update_events = false;
+	sprite_editor->getAnimationFrameControl()->update_events = false;
+	sprite_editor->getCollisionControl()->update_events = false;
+}
+
+void NirvanaEditor_MainFrame::PostDialog()
+{
+	map_editor->getMapViewControl()->update_events = map_mapView_update;
+	map_editor->getTileSelectControl()->update_events = map_tileSelect_update;
+	tile_editor->getAnimationSheetControl()->update_events = tile_sheetSelect_update;
+	tile_editor->getAnimationFrameControl()->update_events = tile_frameSelect_update;
+	tile_editor->getMaskSheetControl()->update_events = tile_maskSelect_update;
+	sprite_editor->getAnimationSheetControl()->update_events = sprite_sheetSelect_update;
+	sprite_editor->getAnimationFrameControl()->update_events = sprite_frameSelect_update;
+	sprite_editor->getCollisionControl()->update_events = sprite_collisionSelect_update;
+}
+
+void NirvanaEditor_MainFrame::OnLayerComboClose( wxCommandEvent& event )
+{
+	PostDialog();
+}
+
+void NirvanaEditor_MainFrame::OnLayerComboOpen( wxCommandEvent& event )
+{
+	PreDialog();
 }
 
 void NirvanaEditor_MainFrame::OnProjectPropertiesTabChanged( wxAuiNotebookEvent& event )
@@ -115,6 +248,8 @@ void NirvanaEditor_MainFrame::OnMapEditToolsTabChanged( wxAuiNotebookEvent& even
 	int page_index = event.GetSelection();
 	wxPanel* new_panel = (wxPanel*)m_mapEdit_layerObjectTools_auinotebook->GetPage(page_index);
 
+	map_editor->getTileSelectControl()->update_events = false;
+
 	if(new_panel == m_mapEdit_tile_panel)
 	{
 		map_editor->startEditor(0);
@@ -123,6 +258,7 @@ void NirvanaEditor_MainFrame::OnMapEditToolsTabChanged( wxAuiNotebookEvent& even
 		selected_map_tool = MAP_TOOL_TILE_SELECT;
 		map_editor->setMapTool(selected_map_tool);
 		m_mapEdit_tileTools_auiToolBar->ToggleTool(m_mapEdit_tileToolbar_select_tool->GetId(), true);
+		map_editor->getTileSelectControl()->update_events = true;
 	}
 	else if(new_panel == m_mapEdit_sprite_panel)
 	{
@@ -157,6 +293,7 @@ void NirvanaEditor_MainFrame::OnMapEditToolsTabChanged( wxAuiNotebookEvent& even
 void NirvanaEditor_MainFrame::OnEnterMapEditTileSelect( wxMouseEvent& event )
 {
 	map_editor->getTileSelectControl()->stage_window_isActive = true;
+
 }
 
 void NirvanaEditor_MainFrame::OnLeaveMapEditTileSelect( wxMouseEvent& event )
@@ -240,8 +377,6 @@ void NirvanaEditor_MainFrame::OnMainTabChanged( wxAuiNotebookEvent& event )
 	{
 		main_page_index = NIRVANA_MAIN_PAGE_INDEX_MAP;
 
-		std::cout << "YOLO" << std::endl;
-
 		map_editor->startEditor(map_editor->getEditorPageIndex(), true);
 		map_editor->getMapViewControl()->clearStage();
 		reloadStage();
@@ -316,23 +451,66 @@ void NirvanaEditor_MainFrame::UpdateSpriteEditor()
 
 void NirvanaEditor_MainFrame::OnNewSpriteClicked( wxCommandEvent& event )
 {
-	sprite_editor->getAnimationSheetControl()->enable_update = false;
+	if(!project)
+		return;
+
+	if(!project->active)
+	{
+		wxMessageBox(_("You must have an open project."));
+		return;
+	}
+
 	NirvanaEditor_NewSprite_Dialog* dialog = new NirvanaEditor_NewSprite_Dialog(this);
 
 	wxFileName gfx_path(project->getDir());
-	gfx_path.AppendDir(_("gfx"));
+
+	if(project)
+		gfx_path.AppendDir(project->sprite_path);
+	else
+		gfx_path.AppendDir(_("gfx"));
 
 	dialog->files = getDirFileList(gfx_path.GetAbsolutePath());
 
 	dialog->refresh_list();
 
+	dialog->project = project;
+
+	for(int i = 0; i < project->getSpriteCount(); i++)
+	{
+		dialog->current_sprite_id.push_back(wxString(project->getSpriteBaseName(i)).Trim());
+	}
+
+	PreDialog();
 	dialog->ShowModal();
+	PostDialog();
 
-	sprite_editor->getAnimationSheetControl()->enable_update = true;
+	if(!dialog->create_flag)
+		return;
 
-	project->createSprite(dialog->id_name, dialog->selected_file, dialog->frame_width, dialog->frame_height);
+	wxFileName p_spr_def(project->getDir());
+	p_spr_def.AppendDir(project->sprite_path);
+	p_spr_def.SetFullName(dialog->selected_file + _(".sprite"));
 
-	m_spriteEdit_sprite_listBox->AppendAndEnsureVisible(dialog->id_name);
+	int spr_index = -1;
+
+	if(!p_spr_def.Exists())
+	{
+		if(!project->checkName(dialog->id_name.ToStdString()))
+			return;
+	}
+	else
+		spr_index = project->loadSpriteDefinition(dialog->selected_file);
+
+	if(spr_index < 0)
+	{
+		project->createSprite(dialog->id_name, dialog->selected_file, dialog->frame_width, dialog->frame_height);
+		m_spriteEdit_sprite_listBox->AppendAndEnsureVisible(dialog->id_name);
+	}
+	else
+	{
+		wxString spr_name = project->sprite_base[spr_index].sprite_name;
+		m_spriteEdit_sprite_listBox->AppendAndEnsureVisible(spr_name);
+	}
 }
 
 void NirvanaEditor_MainFrame::OnDeleteSpriteClicked( wxCommandEvent& event )
@@ -376,6 +554,9 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_Sprite_Selected( wxCommandEvent& even
 	int selected_index = event.GetSelection();
 	wxString sprite_name = m_spriteEdit_sprite_listBox->GetString(selected_index);
 
+	int spriteEdit_current_tab = m_spriteEdit_tools_auinotebook->GetSelection();
+	spriteEdit_current_tab = spriteEdit_current_tab < 0 ? 0 : spriteEdit_current_tab;
+
 	sprite_editor->selectSprite(sprite_name);
 
 	int spr_id = sprite_editor->getSelectedSprite();
@@ -384,6 +565,7 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_Sprite_Selected( wxCommandEvent& even
 
 	m_spriteEdit_spriteID_textCtrl->SetValue(sprite_name);
 
+	m_spriteEdit_animationID_textCtrl->SetValue(_(""));
 	m_spriteEdit_animation_listBox->Clear();
 
 	sprite2D_obj n_sprite = project->getSprite(spr_id).object;
@@ -406,6 +588,8 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_Sprite_Selected( wxCommandEvent& even
 		case SPRITE_SHAPE_BOX:
 			m_spriteEdit_collisionShape_comboBox->SetSelection(0);
 			m_spriteCollision_shape_simplebook->SetSelection(0);
+
+			//std::cout << "n_sprite physics = " << n_sprite.physics.offset_x << ", " << n_sprite.physics.offset_y << std::endl;
 
 			m_spriteEdit_collisionBox_X_spinCtrl->SetValue(n_sprite.physics.offset_x);
 			m_spriteEdit_collisionBox_Y_spinCtrl->SetValue(n_sprite.physics.offset_y);
@@ -437,6 +621,8 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_Sprite_Selected( wxCommandEvent& even
 			m_spriteEdit_collisionCircle_Radius_spinCtrl->SetValue(n_sprite.physics.radius);
 		break;
 	}
+
+	m_spriteEdit_tools_auinotebook->SetSelection(spriteEdit_current_tab);
 }
 
 void NirvanaEditor_MainFrame::OnSpriteEdit_Animation_Selected( wxCommandEvent& event )
@@ -508,8 +694,12 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_SpriteIDChanged( wxCommandEvent& even
 
 	wxString new_value = m_spriteEdit_spriteID_textCtrl->GetValue();
 
-	if(new_value.Trim().length() == 0)
-		new_value = _("WARNING: [MISSING ID]");
+	wxString test_id = new_value.Upper().Trim();
+	for(int i = 0; i < project->getSpriteCount(); i++)
+	{
+		if(wxString(project->getSpriteBaseName(i)).Upper().Trim().compare(test_id)==0)
+			return;
+	}
 
 	m_spriteEdit_sprite_listBox->SetString(list_index, new_value);
 	project->setSpriteName(spr_id, new_value.ToStdString());
@@ -527,10 +717,19 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_AnimationIDChanged( wxCommandEvent& e
 	if(spr_id < 0 || spr_id >= project->getSpriteCount())
 		return;
 
+	int ani_id = sprite_editor->getSelectedAnimation();
+
+	if(ani_id < 0 || ani_id >= project->getSpriteNumAnimations(spr_id))
+		return;
+
 	wxString new_value = m_spriteEdit_animationID_textCtrl->GetValue();
 
-	if(new_value.Trim().length() == 0)
-		new_value = _("WARNING: [MISSING ID]");
+	wxString test_id = new_value.Upper().Trim();
+	for(int i = 0; i < project->sprite_base[spr_id].object.animation.size(); i++)
+	{
+		if(wxString(project->sprite_base[spr_id].object.animation[i].name).Upper().Trim().compare(test_id)==0)
+			return;
+	}
 
 	m_spriteEdit_animation_listBox->SetString(list_index, new_value);
 	project->setSpriteAnimationName(spr_id, list_index, new_value.ToStdString());
@@ -628,6 +827,8 @@ void NirvanaEditor_MainFrame::OnUpdateSpriteAnimationUI( wxUpdateUIEvent& event 
 			sprite_editor->getCollisionControl()->collision_object_modified = false;
 
 			sprite2D_physics_obj physics = project->getSpritePhysics(spr_index);
+
+			//std::cout << "Physics Update: " << physics.offset_x << ", " << physics.offset_y << std::endl;
 
 			switch(physics.shape_type)
 			{
@@ -913,56 +1114,100 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_collisionPolygon_gridCellChange( wxGr
 //TILE EDITOR
 void NirvanaEditor_MainFrame::OnNewTilesetClick( wxCommandEvent& event )
 {
-	tile_editor->getAnimationSheetControl()->enable_update = false;
+	if(!project)
+		return;
+
+	if(!project->active)
+	{
+		wxMessageBox(_("You must have an open project."));
+		return;
+	}
+
 	NirvanaEditor_NewTileset_Dialog* dialog = new NirvanaEditor_NewTileset_Dialog(this);
 
 	wxFileName gfx_path(project->getDir());
-	gfx_path.AppendDir(_("gfx"));
+
+	if(project)
+		gfx_path.AppendDir(project->tile_path);
+	else
+		gfx_path.AppendDir(_("gfx"));
 
 	dialog->files = getDirFileList(gfx_path.GetAbsolutePath());
 
+	dialog->project = project;
+
+	for(int i = 0; i < project->getTilesetCount(); i++)
+	{
+		dialog->current_tset_id.push_back(wxString(project->getTilesetName(i)).Trim());
+	}
+
 	dialog->refresh_list();
 
+	PreDialog();
 	dialog->ShowModal();
+	PostDialog();
 
-	wxFileName img_file = gfx_path;
-	img_file.SetFullName(dialog->selected_file);
-	int tmp_image = tile_editor->getAnimationFrameControl()->loadImage(img_file.GetAbsolutePath().ToStdString());
-	if(tmp_image < 0)
-	{
-		wxMessageBox(_("Could not load image: ") + img_file.GetAbsolutePath().ToStdString());
+	if(!dialog->create_flag)
 		return;
-	}
 
-	int frame_tset_index = tile_editor->getAnimationFrameControl()->createTileSet(tmp_image, dialog->frame_width, dialog->frame_height);
+	wxFileName p_tset_def(project->getDir());
+	p_tset_def.AppendDir(project->tile_path);
+	p_tset_def.SetFullName(dialog->selected_file + _(".tset"));
 
-	if(frame_tset_index < 0)
+	int tset_index = -1;
+
+	if(!p_tset_def.Exists())
 	{
-		wxMessageBox(_("Failed to create tileset from [") + img_file.GetAbsolutePath().ToStdString());
-		return;
+		if(!project->checkName(dialog->id_name.ToStdString()))
+			return;
 	}
+	else
+		tset_index = project->loadTileset(dialog->selected_file);
 
-	tile_editor->getAnimationSheetControl()->enable_update = true;
-
-	project->createTileset(dialog->id_name, dialog->selected_file, dialog->frame_width, dialog->frame_height);
-
-	int project_tset_index = project->getTilesetIndex(dialog->id_name.ToStdString());
-
-	if(project_tset_index < 0)
+	if(tset_index < 0)
 	{
+		wxFileName img_file = gfx_path;
+		img_file.SetFullName(dialog->selected_file);
+		int tmp_image = tile_editor->getAnimationFrameControl()->loadImage(img_file.GetAbsolutePath().ToStdString());
+		if(tmp_image < 0)
+		{
+			wxMessageBox(_("Could not load image: ") + img_file.GetAbsolutePath().ToStdString());
+			return;
+		}
+
+		int frame_tset_index = tile_editor->getAnimationFrameControl()->createTileSet(tmp_image, dialog->frame_width, dialog->frame_height);
+
+		if(frame_tset_index < 0)
+		{
+			wxMessageBox(_("Failed to create tileset from [") + img_file.GetAbsolutePath().ToStdString());
+			return;
+		}
+
+		project->createTileset(dialog->id_name, dialog->selected_file, dialog->frame_width, dialog->frame_height);
+
+		int project_tset_index = project->getTilesetIndex(dialog->id_name.ToStdString());
+
+		if(project_tset_index < 0)
+		{
+			tile_editor->getAnimationFrameControl()->deleteTileSet(frame_tset_index);
+			tile_editor->getAnimationFrameControl()->deleteImage(tmp_image);
+			return;
+		}
+
+		//std::cout << "HOLLA: " << tile_editor->getAnimationFrameControl()->tileset[frame_tset_index].tiles[0].frames.size() << std::endl;
+		project->setTilesetObject(project_tset_index, tile_editor->getAnimationFrameControl()->tileset[frame_tset_index]);
+		project->tileset[project_tset_index].object.img_id = -1;
+
+		m_tileEdit_tileset_listBox->AppendAndEnsureVisible(dialog->id_name);
+
 		tile_editor->getAnimationFrameControl()->deleteTileSet(frame_tset_index);
 		tile_editor->getAnimationFrameControl()->deleteImage(tmp_image);
-		return;
 	}
-
-	//std::cout << "HOLLA: " << tile_editor->getAnimationFrameControl()->tileset[frame_tset_index].tiles[0].frames.size() << std::endl;
-	project->setTilesetObject(project_tset_index, tile_editor->getAnimationFrameControl()->tileset[frame_tset_index]);
-	project->tileset[project_tset_index].object.img_id = -1;
-
-	m_tileEdit_tileset_listBox->AppendAndEnsureVisible(dialog->id_name);
-
-	tile_editor->getAnimationFrameControl()->deleteTileSet(frame_tset_index);
-	tile_editor->getAnimationFrameControl()->deleteImage(tmp_image);
+	else
+	{
+		project->tileset[tset_index].object.img_id = -1;
+		m_tileEdit_tileset_listBox->AppendAndEnsureVisible(project->tileset[tset_index].tileset_name);
+	}
 }
 
 void NirvanaEditor_MainFrame::OnDeleteTilesetClick( wxCommandEvent& event )
@@ -1052,8 +1297,15 @@ void NirvanaEditor_MainFrame::OnTileEdit_TileIDChanged( wxCommandEvent& event )
 
 	wxString new_value = m_tileEdit_tilesetID_textCtrl->GetValue();
 
-	if(new_value.Trim().length() == 0)
-		new_value = _("WARNING: [MISSING ID]");
+	if(!project->checkName(new_value.ToStdString()))
+		return;
+
+	wxString test_id = new_value.Upper().Trim();
+	for(int i = 0; i < project->getTilesetCount(); i++)
+	{
+		if(wxString(project->getTilesetName(i)).Upper().Trim().compare(test_id)==0)
+			return;
+	}
 
 	m_tileEdit_tileset_listBox->SetString(list_index, new_value);
 	project->setTilesetName(tset_id, new_value.ToStdString());
@@ -1064,6 +1316,9 @@ void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event 
 	int selected_index = event.GetSelection();
 	wxString tileset_name = m_tileEdit_tileset_listBox->GetString(selected_index);
 
+	int tileEdit_current_tab = m_tileEdit_tools_auinotebook->GetSelection();
+	tileEdit_current_tab = tileEdit_current_tab < 0 ? 0 : tileEdit_current_tab;
+
 	tile_editor->selectTileset(tileset_name);
 
 	int tset_id = tile_editor->getSelectedTileset();
@@ -1071,6 +1326,8 @@ void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event 
 		return;
 
 	m_tileEdit_tilesetID_textCtrl->SetValue(tileset_name);
+
+	m_tileEdit_maskID_textCtrl->SetValue(_(""));
 
 	tileset_obj n_tile = project->getTileset(tset_id).object;
 
@@ -1097,6 +1354,8 @@ void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event 
 	tilemask_obj empty_mask;
 	empty_mask.active = false;
 	tile_editor->getMaskSheetControl()->tileEdit_tileMask = empty_mask;
+
+	m_tileEdit_tools_auinotebook->SetSelection(tileEdit_current_tab);
 }
 
 void NirvanaEditor_MainFrame::OnEnterTileAnimationSheet( wxMouseEvent& event )

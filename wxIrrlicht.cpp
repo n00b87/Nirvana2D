@@ -327,6 +327,60 @@ void wxIrrlicht::OnRender() {
 					m_pDriver->clearBuffers(true, true, true, irr::video::SColor(0,0,0,0));
 					drawTileMap(canvas[canvas_id].tilemap, 0, 0, vpw, vph, off_x, off_y);
 				}
+				else if(canvas[canvas_id].type == CANVAS_TYPE_2D && canvas[canvas_id].bkg_render_type >= 0)
+				{
+					setActiveCanvas(canvas_id);
+					clearCanvas();
+
+					int vpw = canvas[canvas_id].viewport.dimension.Width;
+					int vph = canvas[canvas_id].viewport.dimension.Height;
+					int off_x = canvas[canvas_id].offset.X;
+					int off_y = canvas[canvas_id].offset.Y;
+					int img_w = 0;
+					int img_h = 0;
+					int layer_index = canvas[canvas_id].layer_index;
+
+					float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, layer_index).X;
+					float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, layer_index).Y;
+
+					int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+					int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+					int tsx = -adj_scroll_offset_x;
+					int tsy = -adj_scroll_offset_y;
+
+					getImageSizeI(canvas[canvas_id].bkg_render_image_id, &img_w, &img_h);
+
+					if(canvas[canvas_id].bkg_render_type == IMG_RENDER_SETTING_NORMAL)
+					{
+						if(imageExists(canvas[canvas_id].bkg_render_image_id))
+						{
+							drawImage(canvas[canvas_id].bkg_render_image_id, 0, 0);
+						}
+					}
+					else if(canvas[canvas_id].bkg_render_type == IMG_RENDER_SETTING_STRETCHED)
+					{
+						if(imageExists(canvas[canvas_id].bkg_render_image_id))
+						{
+							drawImage_BlitEx(canvas[canvas_id].bkg_render_image_id, 0, 0, vpw, vph, 0, 0, img_w, img_h);
+						}
+					}
+					else if(canvas[canvas_id].bkg_render_type == IMG_RENDER_SETTING_TILED)
+					{
+						if(imageExists(canvas[canvas_id].bkg_render_image_id))
+						{
+							for(int it_y = tsy; it_y < vph; it_y+=img_h)
+							{
+								for(int  it_x = tsx; it_x < vpw; it_x+=img_w)
+								{
+									drawImage(canvas[canvas_id].bkg_render_image_id, it_x, it_y);
+								}
+							}
+						}
+					}
+
+					setActiveCanvas(back_buffer);
+				}
 
 				if(test_init)
 				{
@@ -671,53 +725,19 @@ void wxIrrlicht::OnUpdate()
 	}
 
 	return;
-	wxMouseState  mouse_state = wxGetMouseState();
 
-	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
-	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
-
-	int pw = this->GetSize().GetWidth();
-	int ph = this->GetSize().GetHeight();
-
-	if( px < 0 || px >= pw || py < 0 || py >= ph)
-		stage_window_isActive = false;
-	else
-		stage_window_isActive = true;
-
-
-	if(mouse_state.LeftIsDown())
-	{
-        bool init_click = false;
-
-		if(!(middle_drag_init||left_drag_init||right_drag_init))
-		{
-
-			if( px >= 0 && px < pw && py >= 0 && py < ph )
-			{
-				//wxMessageBox(debug_string);
-				left_drag_init = true;
-				//this->CaptureMouse();
-				this->SetFocusFromKbd();
-				HIDE_CURSOR;
-				//this->WarpPointer(px + (pw/2), py + (ph/2));
-				drag_start.x = px;// + (pw/2);
-				drag_start.y = py;// + (ph/2);
-				init_click = true;
-			}
-		}
-	}
-	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
-	{
-		SHOW_CURSOR;
-		//this->ReleaseMouse();
-		left_drag_init = false;
-		//wxMessageBox(_("RELEASE"));
-		return;
-	}
 }
 
 void wxIrrlicht::UpdateSpriteAnimationSheet()
 {
+	if(clear_flag)
+	{
+		setActiveCanvas(sheet_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
 
@@ -814,6 +834,8 @@ void wxIrrlicht::UpdateSpriteAnimationSheet()
 
 				//std::cout << "TEST: " << select_x << ", " << select_y << " --> " << selected_frame << std::endl;
 
+				parent_window->UpdateWindowUI();
+
 				left_drag_init = true;
 			}
 		}
@@ -830,6 +852,14 @@ void wxIrrlicht::UpdateSpriteAnimationSheet()
 
 void wxIrrlicht::UpdateSpriteAnimationFrame()
 {
+	if(clear_flag)
+	{
+		setActiveCanvas(frame_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
 
@@ -973,6 +1003,14 @@ void wxIrrlicht::UpdateSpriteAnimationFrame()
 
 void wxIrrlicht::UpdateSpriteAnimationPreview()
 {
+	if(clear_flag)
+	{
+		setActiveCanvas(preview_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
 
@@ -1732,6 +1770,14 @@ void wxIrrlicht::collisionEdit_draw()
 
 void wxIrrlicht::UpdateSpriteCollision()
 {
+	if(clear_flag)
+	{
+		setActiveCanvas(collision_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
 
@@ -1926,6 +1972,14 @@ void wxIrrlicht::UpdateSpriteCollision()
 
 void wxIrrlicht::UpdateTileAnimationSheet()
 {
+	if(clear_flag)
+	{
+		setActiveCanvas(sheet_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
 
@@ -2054,6 +2108,14 @@ void wxIrrlicht::UpdateTileAnimationSheet()
 
 void wxIrrlicht::UpdateTileAnimationFrame()
 {
+	if(clear_flag)
+	{
+		setActiveCanvas(frame_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
 
@@ -2203,6 +2265,14 @@ void wxIrrlicht::UpdateTileAnimationFrame()
 
 void wxIrrlicht::UpdateTileAnimationPreview()
 {
+	if(clear_flag)
+	{
+		setActiveCanvas(preview_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
 	if(tileEdit_preview_tilemap < 0 || tileEdit_preview_tilemap >= tilemap.size())
 		return;
 
@@ -2222,6 +2292,14 @@ void wxIrrlicht::UpdateTileAnimationPreview()
 
 void wxIrrlicht::UpdateTileMask()
 {
+	if(clear_flag)
+	{
+		setActiveCanvas(sheet_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
 
@@ -3322,7 +3400,7 @@ void wxIrrlicht::StageSheet_MoveTileUpdate()
 						Nirvana_SelectTool_TileSelection t_select;
 						t_select.tile_index = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x];
 						t_select.map_tile_pos.set(tmap_x, tmap_y);
-						t_select.box_start_pos.set(px+adj_scroll_offset_x, py+adj_scroll_offset_y);
+						t_select.box_start_pos.set(px+adj_scroll_offset_x-current_frame_width, py+adj_scroll_offset_y-current_frame_height);
 						mapEdit_selectTileTool_box.push_back(t_select);
 					}
 				}
@@ -4152,6 +4230,13 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 				int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
 				int spr_x = mapEdit_selectSpriteTool_selection[i].start_pos.X + move_x;
 				int spr_y = mapEdit_selectSpriteTool_selection[i].start_pos.Y + move_y;
+
+				if(tile_snap)
+				{
+					spr_x = (spr_x/current_frame_width)*current_frame_width;
+					spr_y = (spr_y/current_frame_height)*current_frame_height;
+				}
+
 				setSpritePosition(sprite_index, spr_x, spr_y);
 			}
 
@@ -4698,6 +4783,8 @@ void wxIrrlicht::stage_collisionEdit_select()
 
 				pick_shape_update = true;
 
+				parent_window->UpdateWindowUI();
+
 				//std::cout << "TEST: " << selected_layer << std::endl;
 
 				left_drag_init = true;
@@ -4808,6 +4895,8 @@ void wxIrrlicht::stage_collisionEdit_boxSelect()
 		}
 
 		pick_shape_update = true;
+
+		parent_window->UpdateWindowUI();
 
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
@@ -4927,6 +5016,12 @@ void wxIrrlicht::stage_collisionEdit_move()
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x = collision_move_start_offset.X + (bx - drag_start.x);
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y = collision_move_start_offset.Y + (by - drag_start.y);
 
+							if(tile_snap)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x / current_frame_width * current_frame_width;
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y / current_frame_height * current_frame_height;
+							}
+
 							if(m_mapEdit_boxShape_posX_spinCtrl)
 								m_mapEdit_boxShape_posX_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x);
 
@@ -4940,6 +5035,21 @@ void wxIrrlicht::stage_collisionEdit_move()
 
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width = collision_move_start_size.X - (bx - drag_start.x);
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height = collision_move_start_size.Y - (by - drag_start.y);
+
+							if(tile_snap)
+							{
+								int diff_off_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x;
+								int diff_off_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y;
+
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x / current_frame_width * current_frame_width;
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y / current_frame_height * current_frame_height;
+
+								diff_off_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x - diff_off_x;
+								diff_off_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y - diff_off_y;
+
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width -= diff_off_x;
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height -= diff_off_y;
+							}
 
 							if(m_mapEdit_boxShape_posX_spinCtrl)
 								m_mapEdit_boxShape_posX_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x);
@@ -4961,6 +5071,19 @@ void wxIrrlicht::stage_collisionEdit_move()
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width = collision_move_start_size.X - (bx - drag_start.x);
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height = collision_move_start_size.Y + (by - drag_start.y);
 
+							if(tile_snap)
+							{
+								int diff_off_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x;
+								int diff_off_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y;
+
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x / current_frame_width * current_frame_width;
+
+								diff_off_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x - diff_off_x;
+
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width -= diff_off_x;
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height / current_frame_height * current_frame_height;
+							}
+
 							if(m_mapEdit_boxShape_posX_spinCtrl)
 								m_mapEdit_boxShape_posX_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x);
 
@@ -4978,6 +5101,20 @@ void wxIrrlicht::stage_collisionEdit_move()
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width = collision_move_start_size.X + (bx - drag_start.x);
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height = collision_move_start_size.Y - (by - drag_start.y);
 
+							if(tile_snap)
+							{
+								int diff_off_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x;
+								int diff_off_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y;
+
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y / current_frame_height * current_frame_height;
+
+								diff_off_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x - diff_off_x;
+								diff_off_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y - diff_off_y;
+
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width / current_frame_width * current_frame_width;
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height -= diff_off_y;
+							}
+
 							if(m_mapEdit_boxShape_posY_spinCtrl)
 								m_mapEdit_boxShape_posY_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
 
@@ -4994,6 +5131,12 @@ void wxIrrlicht::stage_collisionEdit_move()
 
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width = collision_move_start_size.X + (bx - drag_start.x);
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height = collision_move_start_size.Y + (by - drag_start.y);
+
+							if(tile_snap)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width / current_frame_width * current_frame_width;
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height / current_frame_height * current_frame_height;
+							}
 
 							if(m_mapEdit_boxShape_width_spinCtrl)
 								m_mapEdit_boxShape_width_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width);
@@ -5071,6 +5214,12 @@ void wxIrrlicht::stage_collisionEdit_move()
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x = collision_move_start_offset.X + (bx - drag_start.x);
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y = collision_move_start_offset.Y + (by - drag_start.y);
 
+							if(tile_snap)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x / current_frame_width * current_frame_width;
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y / current_frame_height * current_frame_height;
+							}
+
 							if(m_mapEdit_circleShape_centerX_spinCtrl)
 								m_mapEdit_circleShape_centerX_spinCtrl->SetValue(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x);
 
@@ -5080,6 +5229,11 @@ void wxIrrlicht::stage_collisionEdit_move()
 						else if(collision_circleShapeSelect_u)
 						{
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = collision_move_start_radius - (by - drag_start.y);
+
+							if(tile_snap)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = ( (int)(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius / current_frame_height) * current_frame_height);
+							}
 
 							if(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius < 0)
 								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius *= -1;
@@ -5091,6 +5245,11 @@ void wxIrrlicht::stage_collisionEdit_move()
 						{
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = collision_move_start_radius + (by - drag_start.y);
 
+							if(tile_snap)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = ( (int)(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius / current_frame_height) * current_frame_height);
+							}
+
 							if(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius < 0)
 								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius *= -1;
 
@@ -5101,6 +5260,11 @@ void wxIrrlicht::stage_collisionEdit_move()
 						{
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = collision_move_start_radius - (bx - drag_start.x);
 
+							if(tile_snap)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = ( (int)(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius / current_frame_width) * current_frame_width);
+							}
+
 							if(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius < 0)
 								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius *= -1;
 
@@ -5110,6 +5274,11 @@ void wxIrrlicht::stage_collisionEdit_move()
 						else if(collision_circleShapeSelect_r)
 						{
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = collision_move_start_radius + (bx - drag_start.x);
+
+							if(tile_snap)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius = ( (int)(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius / current_frame_width) * current_frame_width);
+							}
 
 							if(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius < 0)
 								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius *= -1;
@@ -5165,6 +5334,12 @@ void wxIrrlicht::stage_collisionEdit_move()
 							int pt_index = selected_points[i];
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[pt_index].X = collision_move_start_points[pt_index].X + mouse_move_x;
 							project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[pt_index].Y = collision_move_start_points[pt_index].Y + mouse_move_y;
+
+							if(tile_snap)
+							{
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[pt_index].X = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[pt_index].X / current_frame_width * current_frame_width;
+								project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[pt_index].Y = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].points[pt_index].Y / current_frame_height * current_frame_height;
+							}
 
 							if(m_mapEdit_polyShape_grid)
 							{
@@ -5245,6 +5420,12 @@ void wxIrrlicht::stage_collisionEdit_draw()
 							collision_physics_obj.offset_x = bx;
 							collision_physics_obj.offset_y = by;
 
+							if(tile_snap)
+							{
+								collision_physics_obj.offset_x = collision_physics_obj.offset_x / current_frame_width * current_frame_width;
+								collision_physics_obj.offset_y = collision_physics_obj.offset_y / current_frame_height * current_frame_height;
+							}
+
 							if(m_mapEdit_boxShape_posX_spinCtrl)
 								m_mapEdit_boxShape_posX_spinCtrl->SetValue(collision_physics_obj.offset_x);
 
@@ -5263,6 +5444,12 @@ void wxIrrlicht::stage_collisionEdit_draw()
 					//collision_physics_obj.radius = irr::core::vector2di(bx,by).getDistanceFrom(irr::core::vector2di(collision_physics_obj.offset_x, collision_physics_obj.offset_y));
 					collision_physics_obj.box_width = bx - collision_physics_obj.offset_x;
 					collision_physics_obj.box_height = by - collision_physics_obj.offset_y;
+
+					if(tile_snap)
+					{
+						collision_physics_obj.box_width = collision_physics_obj.box_width / current_frame_width * current_frame_width;
+						collision_physics_obj.box_height = collision_physics_obj.box_height / current_frame_height * current_frame_height;
+					}
 
 					if(m_mapEdit_boxShape_width_spinCtrl)
 						m_mapEdit_boxShape_width_spinCtrl->SetValue(collision_physics_obj.box_width);
@@ -5316,6 +5503,12 @@ void wxIrrlicht::stage_collisionEdit_draw()
 									m_mapEdit_polyShape_grid->DeleteRows(0, m_mapEdit_polyShape_grid->GetNumberRows());
 								}
 							}
+						}
+
+						if(tile_snap)
+						{
+							bx = bx / current_frame_width * current_frame_width;
+							by = by / current_frame_height * current_frame_height;
 						}
 
 						collision_physics_obj.points.push_back(irr::core::vector2di(bx, by));
@@ -5392,6 +5585,12 @@ void wxIrrlicht::stage_collisionEdit_draw()
 							collision_physics_obj.offset_x = bx;
 							collision_physics_obj.offset_y = by;
 
+							if(tile_snap)
+							{
+								collision_physics_obj.offset_x = collision_physics_obj.offset_x / current_frame_width * current_frame_width;
+								collision_physics_obj.offset_y = collision_physics_obj.offset_y / current_frame_height * current_frame_height;
+							}
+
 							collision_poly_draw_flag = true;
 
 							if(m_mapEdit_circleShape_centerX_spinCtrl)
@@ -5409,6 +5608,11 @@ void wxIrrlicht::stage_collisionEdit_draw()
 				else
 				{
 					collision_physics_obj.radius = irr::core::vector2di(bx,by).getDistanceFrom(irr::core::vector2di(collision_physics_obj.offset_x, collision_physics_obj.offset_y));
+
+					if(tile_snap)
+					{
+						collision_physics_obj.radius = ( (int)(collision_physics_obj.radius / current_frame_width) * current_frame_width ); //If width and height are different this is going to be weird but I had to choose one
+					}
 
 					if(m_mapEdit_circleShape_radius_spinCtrl)
 						m_mapEdit_circleShape_radius_spinCtrl->SetValue(collision_physics_obj.radius);
@@ -5750,6 +5954,15 @@ void wxIrrlicht::mapEdit_getContext()
 
 void wxIrrlicht::UpdateStageTileSelect()
 {
+	if(clear_flag)
+	{
+		mapEdit_getContext();
+		setActiveCanvas(sheet_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
 	//std::cout << "DEBUG: " << mapEdit_layerType << ", " << current_sheet_image << std::endl;
 
 	if(mapEdit_layerType != LAYER_TYPE_TILEMAP)
@@ -5757,6 +5970,8 @@ void wxIrrlicht::UpdateStageTileSelect()
 
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
+
+	//std::cout << "DEB2" << std::endl;
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -5872,7 +6087,7 @@ void wxIrrlicht::UpdateStageTileSelect()
 	}
 
 
-	if(mouse_state.LeftIsDown())
+	if(mouse_state.LeftIsDown() && stage_window_isActive)
 	{
         bool init_click = false;
 
@@ -5919,7 +6134,7 @@ void wxIrrlicht::UpdateStageTileSelect()
 			}
 		}
 	}
-	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	else if( ((!mouse_state.LeftIsDown()) || (!stage_window_isActive)) && left_drag_init )
 	{
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
@@ -7307,6 +7522,7 @@ int wxIrrlicht::createSpriteAnimation(std::string name, int spr_id, int anim_len
 	else
 		sprite[spr_id].animation.push_back(animation);
 
+	//std::cout << "animation id = " << animation_id << std::endl;
 	return animation_id;
 }
 
@@ -8564,8 +8780,16 @@ void wxIrrlicht::util_drawSelectedSprites()
 
 			if(collision_poly_draw_flag && collision_physics_obj.points.size() > 0)
 			{
-				drawLine(shape_x, shape_y, px, py);
-				drawRectFill(px-2, py-2, 4, 4);
+				int poly_x = px;
+				int poly_y = py;
+				if(tile_snap)
+				{
+					poly_x = bx / current_frame_width * current_frame_width - adj_scroll_offset_x;
+					poly_y = by / current_frame_height * current_frame_height - adj_scroll_offset_y;
+				}
+
+				drawLine(shape_x, shape_y, poly_x, poly_y);
+				drawRectFill(poly_x-2, poly_y-2, 4, 4);
 			}
 		}
 		else if(shape_type == SPRITE_SHAPE_CIRCLE && collision_poly_draw_flag)
@@ -9416,8 +9640,8 @@ void wxIrrlicht::initStage(int stage_index)
 
 	selected_stage = stage_index;
 
-	wxFileName gfx_path(project->getDir());
-	gfx_path.AppendDir(_("gfx"));
+	//wxFileName gfx_path(project->getDir());
+	//gfx_path.AppendDir(_("gfx"));
 
 	//Load new stage stuff
 	for(int layer_index = 0; layer_index < project->stages[stage_index].layers.size(); layer_index++)
@@ -9441,7 +9665,13 @@ void wxIrrlicht::initLayer(int layer_index)
 
 
 	wxFileName gfx_path(project->getDir());
-	gfx_path.AppendDir(_("gfx"));
+
+	std::cout << "P_TEST: " << layer_index << ", " << project->getLayerType(selected_stage, layer_index) << ", " << project->tile_path << std::endl;
+
+	if(project)
+		gfx_path.AppendDir(project->tile_path);
+	else
+		gfx_path.AppendDir(_("gfx"));
 
 	if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP)
 	{
@@ -9461,6 +9691,7 @@ void wxIrrlicht::initLayer(int layer_index)
 		}
 		else
 		{
+			std::cout << "dbg tileset: " << project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name << " -> " << tset << std::endl;
 			wxFileName img_path = gfx_path;
 			img_path.SetFullName(project->tileset[tset].file);
 
@@ -9481,9 +9712,48 @@ void wxIrrlicht::initLayer(int layer_index)
 
 		for(int spr_index = 0; spr_index < project->stages[selected_stage].layers[layer_index].layer_sprites.size(); spr_index++)
 		{
-			std::cout << "add sprite: " << project->stages[selected_stage].layers[layer_index].layer_sprites[spr_index].map_sprite_id << std::endl;
+			//std::cout << "add sprite: " << project->stages[selected_stage].layers[layer_index].layer_sprites[spr_index].map_sprite_id << std::endl;
 			addLayerSprite(layer_index, spr_index);
 		}
+	}
+	else if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_CANVAS_2D)
+	{
+		int screen_width = m_pDevice->getVideoDriver()->getScreenSize().Width;
+		int screen_height = m_pDevice->getVideoDriver()->getScreenSize().Height;
+		int w = this->GetClientSize().GetWidth();
+		int h = this->GetClientSize().GetHeight();
+
+		project->stages[selected_stage].layers[layer_index].ref_canvas = createCanvas(screen_width, screen_height, 0, 0, w, h, CANVAS_TYPE_2D);
+
+		wxFileName fname(project->getDir());
+		fname.AppendDir(_("bkg"));
+		fname.SetFullName(wxString(project->stages[selected_stage].layers[layer_index].bkg.img_file).Trim());
+
+		if(fname.Exists() && wxString(project->stages[selected_stage].layers[layer_index].bkg.img_file).Trim().length()!=0)
+		{
+			if(!imageExists(project->stages[selected_stage].layers[layer_index].bkg.image_id))
+			{
+				project->stages[selected_stage].layers[layer_index].bkg.image_id = util_getImageID(fname.GetAbsolutePath().ToStdString());
+
+				if(!imageExists(project->stages[selected_stage].layers[layer_index].bkg.image_id))
+					project->stages[selected_stage].layers[layer_index].bkg.image_id = loadImage(fname.GetAbsolutePath().ToStdString());
+			}
+		}
+
+		int canvas_id = project->stages[selected_stage].layers[layer_index].ref_canvas;
+		canvas[canvas_id].bkg_render_image_id = -1;
+		if(canvas_id >= 0 && canvas_id < canvas.size())
+		{
+			canvas[canvas_id].bkg_render_image_id = project->stages[selected_stage].layers[layer_index].bkg.image_id;
+			canvas[canvas_id].bkg_render_type = project->stages[selected_stage].layers[layer_index].bkg.render_setting;
+		}
+	}
+
+	int canvas_id = project->stages[selected_stage].layers[layer_index].ref_canvas;
+	if(canvas_id >= 0 && canvas_id < canvas.size())
+	{
+		canvas[canvas_id].layer_index = layer_index;
+		canvas[canvas_id].visible = project->stages[selected_stage].layers[layer_index].visible;
 	}
 }
 
@@ -9499,7 +9769,14 @@ void wxIrrlicht::resizeLayers()
 
 	for(int layer_index = 0; layer_index < project->stages[selected_stage].layers.size(); layer_index++)
 	{
-		if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP)
+		if(project->stages[selected_stage].layers[layer_index].ref_canvas >= 0 && project->stages[selected_stage].layers[layer_index].ref_canvas < canvas.size())
+		{
+			int canvas_id = project->stages[selected_stage].layers[layer_index].ref_canvas;
+			canvas[canvas_id].bkg_render_image_id = -1;
+			canvas[canvas_id].bkg_render_type = -1;
+		}
+
+		if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP || project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_CANVAS_2D)
 		{
 			int screen_width = parent_window->GetClientSize().GetX();
 			int screen_height = parent_window->GetClientSize().GetY();
@@ -9512,6 +9789,47 @@ void wxIrrlicht::resizeLayers()
 			bool ref_is_active = (project->stages[selected_stage].layers[layer_index].ref_canvas == active_canvas);
 
 			project->stages[selected_stage].layers[layer_index].ref_canvas = createCanvas(screen_width, screen_height, 0, 0, w, h, CANVAS_TYPE_2D);
+
+
+			int canvas_id = project->stages[selected_stage].layers[layer_index].ref_canvas;
+
+			if(canvas_id >= 0 && canvas_id < canvas.size())
+				canvas[canvas_id].visible = project->stages[selected_stage].layers[layer_index].visible;
+
+			if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP)
+			{
+				project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_index = project->getTilesetIndex(project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name);
+				int tset = project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_index;
+				if(tset < 0 || tset >= project->tileset.size())
+				{
+					//std::cout << "TSET: " << tset << ", " << project->stages[selected_stage].layers[layer_index].layer_name << std::endl;
+					wxMessageBox(_("ERROR: Failed to load tileset [") + wxString(project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name));
+				}
+				else
+				{
+					wxFileName gfx_path(project->getDir());
+
+					if(project)
+						gfx_path.AppendDir(project->tile_path);
+					else
+						gfx_path.AppendDir(_("gfx"));
+
+					wxFileName img_path = gfx_path;
+					img_path.SetFullName(project->tileset[tset].file);
+
+					project->tileset[ tset ].object.img_id = util_getImageID(img_path.GetAbsolutePath().ToStdString());
+
+					if(!imageExists(project->tileset[ tset ].object.img_id))
+						project->tileset[ tset ].object.img_id = loadImage(img_path.GetAbsolutePath().ToStdString());
+				}
+			}
+			else
+			{
+				project->stages[selected_stage].layers[layer_index].bkg.image_id = util_getImageID(project->stages[selected_stage].layers[layer_index].bkg.img_file);
+				canvas[canvas_id].bkg_render_type = project->stages[selected_stage].layers[layer_index].bkg.render_setting;
+				canvas[canvas_id].bkg_render_image_id = project->stages[selected_stage].layers[layer_index].bkg.image_id;
+				canvas[canvas_id].layer_index = layer_index;
+			}
 
 			//std::cout << "Resize: " << project->stages[selected_stage].layers[layer_index].ref_canvas << " -> " << (canvas[project->stages[selected_stage].layers[layer_index].ref_canvas].texture == NULL ? "NULL" : "active") << std::endl;
 		}
@@ -9528,6 +9846,11 @@ void wxIrrlicht::resizeLayers()
 			bool ref_is_active = (project->stages[selected_stage].layers[layer_index].ref_canvas == active_canvas);
 
 			project->stages[selected_stage].layers[layer_index].ref_canvas = createCanvas(screen_width, screen_height, 0, 0, w, h, CANVAS_TYPE_SPRITE);
+
+			int canvas_id = project->stages[selected_stage].layers[layer_index].ref_canvas;
+
+			if(canvas_id >= 0 && canvas_id < canvas.size())
+				canvas[canvas_id].visible = project->stages[selected_stage].layers[layer_index].visible;
 
 			for(int spr_index = 0; spr_index < project->stages[selected_stage].layers[layer_index].layer_sprites.size(); spr_index++)
 			{
@@ -9577,6 +9900,12 @@ void wxIrrlicht::clearStage()
 	//Load new stage stuff
 	for(int layer_index = 0; layer_index < project->stages[selected_stage].layers.size(); layer_index++)
 	{
+		if(project->stages[selected_stage].layers[layer_index].ref_canvas >= 0 && project->stages[selected_stage].layers[layer_index].ref_canvas < canvas.size())
+		{
+			int canvas_id = project->stages[selected_stage].layers[layer_index].ref_canvas;
+			canvas[canvas_id].bkg_render_image_id = -1;
+			canvas[canvas_id].bkg_render_type = -1;
+		}
 		canvasClose(project->stages[selected_stage].layers[layer_index].ref_canvas);
 		project->stages[selected_stage].layers[layer_index].ref_canvas = -1;
 
@@ -9635,34 +9964,22 @@ void wxIrrlicht::addLayerSprite(int layer_index, int project_sprite)
 	if(!project)
 		return;
 
-	std::cout << "DBG 1" << std::endl;
-
 	if(selected_stage < 0 || selected_stage >= project->stages.size())
 		return;
-
-	std::cout << "DBG 2" << std::endl;
 
 	if(layer_index < 0 || layer_index >= project->stages[selected_stage].layers.size())
 		return;
 
-	std::cout << "DBG 3" << std::endl;
-
 	if(project->getLayerType(selected_stage, layer_index) != LAYER_TYPE_SPRITE)
 		return;
-
-	std::cout << "DBG 4" << std::endl;
 
 	if(project_sprite < 0 || project_sprite >= project->stages[selected_stage].layers[layer_index].layer_sprites.size())
 		return;
 
 	int base_index = project->stages[selected_stage].layers[layer_index].layer_sprites[project_sprite].sprite_base;
 
-	std::cout << "DBG 5: " << project->stages[selected_stage].layers[layer_index].layer_sprites[project_sprite].sprite_name << ", " << base_index << std::endl;
-
 	if(base_index < 0 || base_index >= project->sprite_base.size())
 		return;
-
-	std::cout << "LD DBG: " << project->sprite_base[base_index].object.image_id << std::endl;
 
 	mapEdit_getContext();
 	setActiveCanvas(project->stages[selected_stage].layers[layer_index].ref_canvas);
@@ -9672,10 +9989,15 @@ void wxIrrlicht::addLayerSprite(int layer_index, int project_sprite)
 	if(img_id < 0)
 	{
 		wxFileName img_path(project->getDir());
-		img_path.AppendDir(_("gfx"));
+
+		if(project)
+			img_path.AppendDir(project->sprite_path);
+		else
+			img_path.AppendDir(_("gfx"));
+
 		img_path.SetFullName(project->sprite_base[base_index].file);
 
-		std::cout << "Load: " << base_index << " :: " << img_path.GetAbsolutePath().ToStdString() << std::endl;
+		//std::cout << "Load: " << base_index << " :: " << img_path.GetAbsolutePath().ToStdString() << std::endl;
 
 		img_id = util_getImageID(img_path.GetAbsolutePath().ToStdString());
 

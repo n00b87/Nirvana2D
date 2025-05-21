@@ -24,6 +24,11 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 	private:
 		Nirvana_Project* project;
 
+		wxString default_tile_path = _("tiles");
+		wxString default_sprite_path = _("sprites");
+		wxString default_bkg_path = _("bkg");
+		wxString default_stage_path = _("stages");
+
 		wxTreeItemId project_root_treeItem;
 		std::vector<wxTreeItemId> stage_treeItem;
 
@@ -34,6 +39,15 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		Nirvana_SpriteEditor* sprite_editor;
 		Nirvana_TileEditor* tile_editor;
 		Nirvana_MapEditor* map_editor;
+
+		bool map_mapView_update;
+		bool map_tileSelect_update;
+		bool tile_sheetSelect_update;
+		bool tile_frameSelect_update;
+		bool tile_maskSelect_update;
+		bool sprite_sheetSelect_update;
+		bool sprite_frameSelect_update;
+		bool sprite_collisionSelect_update;
 
 		void UpdateSpriteEditor();
 
@@ -46,9 +60,20 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 
 		void refreshCurrentShapeUI();
 
+		void PreDialog();
+		void PostDialog();
+
+		wxFileName openFileDialog(wxString title, wxString default_wildcard, int flag);
+		void newProject(wxFileName project_path, wxString project_name, bool create_flag=true);
+		bool loadProject(wxFileName project_file);
+
 		int selected_map_tool = -1;
 
 		int main_page_index = 0; //TODO: CHANGE THIS AFTER TESTING IS DONE
+
+		bool generateSpriteDefinitions();
+		bool generateTilesets();
+		bool generateStages();
 
 	public:
 		/** Constructor */
@@ -59,6 +84,19 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 
 	protected:
 		void OnMainTabChanged( wxAuiNotebookEvent& event );
+
+		void OnNewProject( wxCommandEvent& event );
+		void OnOpenProject( wxCommandEvent& event );
+		void OnSaveProject( wxCommandEvent& event );
+		void OnGenerate( wxCommandEvent& event );
+
+		void OnMapSetFree( wxCommandEvent& event );
+		void OnMapSetTiled( wxCommandEvent& event );
+
+		void OnCameraToolClick( wxCommandEvent& event );
+
+		void OnLayerComboClose( wxCommandEvent& event );
+		void OnLayerComboOpen( wxCommandEvent& event );
 
 		void OnNewStage( wxCommandEvent& event );
 		void OnDeleteStage( wxCommandEvent& event );
@@ -127,6 +165,9 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnMapEdit_CircleShape_CenterX( wxSpinEvent& event );
 		void OnMapEdit_CircleShape_CenterY( wxSpinEvent& event );
 		void OnMapEdit_CircleShape_Radius( wxSpinEvent& event );
+
+		void OnBkg_RenderType( wxCommandEvent& event );
+		void OnBkg_LayerImage( wxCommandEvent& event );
 
 		void OnMapEdit_Map_UpdateUI( wxUpdateUIEvent& event );
 

@@ -7,8 +7,103 @@
 
 Nirvana_Project::Nirvana_Project()
 {
-	project_filename_obj = wxFileName(_("/home/n00b/Projects/Nirvana2D/test_project/test.nvprj"));
+	project_filename_obj = wxFileName(_(""));
+	this->active = false;
+}
 
+std::vector<nirvana_project_file_obj> Nirvana_Project::getParams(wxString p_data)
+{
+	std::vector<nirvana_project_file_obj> dlist;
+
+	nirvana_project_file_obj dlist_obj;
+
+	std::vector<nirvana_project_dict_obj> dict;
+	nirvana_project_dict_obj dict_obj;
+	dict_obj.key = _("");
+	dict_obj.val = _("");
+
+	p_data.Replace(_(";"), _(" ;"));
+	p_data.Replace(_("\n"), _(""));
+	p_data.Replace(_("\r"), _(""));
+	p_data.Replace(_("\t"), _(" "));
+
+	bool isKey = true;
+
+	bool in_quotes = false;
+
+	bool dbg_out = false;
+	int dbg_index = 0;
+
+
+	for(int i = 0; i < p_data.length(); i++)
+	{
+		if(p_data.substr(i, 1).compare(_(";"))==0)
+		{
+			dlist.push_back(dlist_obj);
+			dlist_obj.dict.clear();
+
+			//clear parameters
+			dict_obj.key = _("");
+			dict_obj.val = _("");
+			continue;
+		}
+
+		if( (in_quotes && p_data.substr(i, 1).compare(_("\""))==0) || ((!in_quotes) && p_data.substr(i, 1).compare(_(" "))==0) )
+		{
+			/*if(dict_obj.val.compare(_("sydney"))==0)
+			{
+				dbg_out = true;
+				dbg_index = dlist.size();
+			}*/
+
+			if(dict_obj.key.compare(_(""))!=0)
+				dlist_obj.dict.push_back(dict_obj);
+			dict_obj.key = _("");
+			dict_obj.val = _("");
+			isKey = true;
+			in_quotes = false;
+		}
+		else if(p_data.substr(i, 1).compare(_("="))==0)
+		{
+			isKey = false;
+		}
+		else if(p_data.substr(i, 1).compare(_("\""))==0)
+		{
+			in_quotes = true;
+		}
+		else if(isKey)
+		{
+			dict_obj.key.Append(p_data.substr(i,1));
+		}
+		else
+		{
+			dict_obj.val.Append(p_data.substr(i,1));
+		}
+	}
+
+	return dlist;
+}
+
+std::vector<wxString> Nirvana_Project::delimArgs(wxString args)
+{
+	args += _(",");
+	std::vector<wxString> arg_array;
+
+	wxString n_arg = _("");
+
+	for(int i = 0; i < args.length(); i++)
+	{
+		if(args.substr(i,1).compare(_(","))==0)
+		{
+			if(n_arg.Trim().compare(_(""))!=0)
+				arg_array.push_back(n_arg);
+			n_arg = _("");
+		}
+		else
+			n_arg += args.substr(i,1);
+	}
+
+	return arg_array;
 }
 
 wxString Nirvana_Project::getDir()
@@ -23,13 +118,47 @@ wxString Nirvana_Project::getFileName()
 	return project_filename_obj.GetFullName();
 }
 
+bool Nirvana_Project::checkName(std::string t_name)
+{
+	wxString test_name = wxString(t_name).Trim();
+
+	if(test_name.length()==0)
+		return false;
+
+	std::vector<std::string> restricted_char;
+	restricted_char.push_back("[");
+	restricted_char.push_back("]");
+	restricted_char.push_back("\n");
+	restricted_char.push_back("\r");
+
+	for(int i = 0; i < test_name.length(); i++)
+	{
+		for(int rc = 0; rc < restricted_char.size(); rc++)
+		{
+			if(restricted_char[rc].compare(test_name.substr(i,1))==0)
+				return false;
+		}
+	}
+
+	return true;
+}
+
+void Nirvana_Project::resetIncludeFlags()
+{
+	for(int i = 0; i < sprite_base.size(); i++)
+	{
+		sprite_base[i].include_flag = false;
+	}
+}
+
+
 bool Nirvana_Project::createSprite(wxString spr_id, wxString img_file, int frame_width, int frame_height)
 {
 	wxString check_id = spr_id.Lower().Trim();
 
 	for(int i = 0; i < sprite_base.size(); i++)
 	{
-		if(check_id.compare(sprite_base[i].sprite_name)==0)
+		if(check_id.compare(sprite_base[i].sprite_name.Lower().Trim())==0)
 			return false;
 	}
 
@@ -45,6 +174,194 @@ bool Nirvana_Project::createSprite(wxString spr_id, wxString img_file, int frame
 	sprite_base.push_back(obj);
 
 	return true;
+}
+
+int Nirvana_Project::loadSpriteDefinition(wxString spr_file)
+{
+	Nirvana_SpriteBase obj;
+	obj.sprite_name = _("sprite");
+	obj.file = spr_file;
+	obj.object.frame_size.set(32, 32); //32 is default for now
+	obj.object.active = true;
+	obj.object.image_id = -1;
+	obj.unique_id = obj_uid_counter;
+	obj_uid_counter++;
+
+
+	wxFileName fname(getDir());
+	fname.AppendDir(sprite_path);
+
+	wxFileName pfile_fname = fname;
+	pfile_fname.SetFullName(spr_file.Trim() + _(".sprite"));
+
+	wxFile pfile(pfile_fname.GetAbsolutePath(), wxFile::read);
+
+	if(pfile.IsOpened())
+	{
+		wxString p_data = _("");
+		pfile.ReadAll(&p_data);
+		pfile.Close();
+
+		std::vector<nirvana_project_file_obj> p_cmd = getParams(p_data);
+
+		for(int i = 0; i < p_cmd.size(); i++)
+		{
+			if(p_cmd[i].dict.size() == 0)
+				continue;
+
+			if(p_cmd[i].dict[0].key.compare(_("SPRITE"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("name"))==0)
+					{
+						obj.sprite_name = p_cmd[i].dict[obj_index].val;
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("frame_size"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+						obj.object.frame_size.set(32, 32); //default size
+
+						if(args.size() >= 2)
+						{
+							int frame_width = 0;
+							int frame_height = 0;
+							args[0].ToInt(&frame_width);
+							args[1].ToInt(&frame_height);
+							obj.object.frame_size.set(frame_width, frame_height);
+						}
+					}
+				}
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("SHAPE"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("type"))==0)
+					{
+						if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_SHAPE_BOX"))==0)
+						{
+							obj.object.physics.shape_type = SPRITE_SHAPE_BOX;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_SHAPE_CIRCLE"))==0)
+						{
+							obj.object.physics.shape_type = SPRITE_SHAPE_CIRCLE;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_SHAPE_CHAIN"))==0)
+						{
+							obj.object.physics.shape_type = SPRITE_SHAPE_CHAIN;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_SHAPE_POLYGON"))==0)
+						{
+							obj.object.physics.shape_type = SPRITE_SHAPE_POLYGON;
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("size"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						if(args.size() >= 2)
+						{
+							int b_width = 0;
+							int b_height = 0;
+							args[0].ToInt(&b_width);
+							args[1].ToInt(&b_height);
+							//std::cout << " sprite_shape: " << b_width << ", " << b_height << std::endl;
+							obj.object.physics.box_width = b_width;
+							obj.object.physics.box_height = b_height;
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("point"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						obj.object.physics.offset_x = 0;
+						obj.object.physics.offset_y = 0;
+
+						if(args.size() >= 2)
+						{
+							int x = 0;
+							int y = 0;
+							args[0].ToInt(&x);
+							args[1].ToInt(&y);
+
+							// offset is ignored for chain and polygon
+							obj.object.physics.offset_x = x;
+							obj.object.physics.offset_y = y;
+
+							// points are ignored for box and circle
+							obj.object.physics.points.push_back( irr::core::vector2di(x, y) );
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("radius"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToDouble(&obj.object.physics.radius);
+					}
+				}
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("ANIMATION"))==0)
+			{
+				sprite2D_animation_obj ani_obj;
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("name"))==0)
+					{
+						ani_obj.name = p_cmd[i].dict[obj_index].val.ToStdString();
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("frame_count"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToInt(&ani_obj.num_frames);
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("fps"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToDouble(&ani_obj.fps);
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("frame"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						ani_obj.frames.clear();
+						for(int arg_index = 0; arg_index < args.size(); arg_index++)
+						{
+							int frame_value = 0;
+							args[arg_index].ToInt(&frame_value);
+							ani_obj.frames.push_back(frame_value);
+						}
+					}
+				}
+
+				obj.object.animation.push_back(ani_obj);
+			}
+		}
+	}
+	else
+		return -1;
+
+	wxString check_id = obj.sprite_name.Trim();
+	int n = 1;
+
+	for(int i = 0; i < sprite_base.size(); i++)
+	{
+		if(i < 0)
+			continue;
+
+		if(check_id.Lower().Trim().compare(sprite_base[i].sprite_name.Lower().Trim())==0)
+		{
+			check_id = obj.sprite_name.Trim() + wxString::Format(_("%i"), n);
+			n++;
+			i = -1;
+		}
+	}
+
+	obj.sprite_name = check_id;
+	obj.object.physics.init = true;
+
+	//std::cout << "Physics check: " << obj.object.physics.offset_x << ", " << obj.object.physics.offset_y << std::endl;
+
+	int sprite_index = sprite_base.size();
+	sprite_base.push_back(obj);
+
+	return sprite_index;
 }
 
 Nirvana_SpriteBase Nirvana_Project::getSprite(int spr_index)
@@ -396,7 +713,7 @@ bool Nirvana_Project::createTileset(wxString tset_id, wxString img_file, int til
 
 	for(int i = 0; i < tileset.size(); i++)
 	{
-		if(check_id.compare(tileset[i].tileset_name)==0)
+		if(check_id.compare(tileset[i].tileset_name.Lower().Trim())==0)
 			return false;
 	}
 
@@ -411,6 +728,147 @@ bool Nirvana_Project::createTileset(wxString tset_id, wxString img_file, int til
 	tileset.push_back(obj);
 
 	return true;
+}
+
+int Nirvana_Project::loadTileset(wxString tset_file)
+{
+	Nirvana_Tileset obj;
+	obj.tileset_name = _("tileset");
+	obj.file = tset_file;
+	obj.object.tile_width = 32;
+	obj.object.tile_height = 32;
+	obj.object.active = true;
+	obj.object.img_id = -1;
+
+
+	wxFileName fname(getDir());
+	fname.AppendDir(tile_path);
+
+	wxFileName pfile_fname = fname;
+	pfile_fname.SetFullName(tset_file.Trim() + _(".tset"));
+
+	wxFile pfile(pfile_fname.GetAbsolutePath(), wxFile::read);
+
+	if(pfile.IsOpened())
+	{
+		wxString p_data = _("");
+		pfile.ReadAll(&p_data);
+		pfile.Close();
+
+		std::vector<nirvana_project_file_obj> p_cmd = getParams(p_data);
+
+		for(int i = 0; i < p_cmd.size(); i++)
+		{
+			if(p_cmd[i].dict.size() == 0)
+				continue;
+
+			if(p_cmd[i].dict[0].key.compare(_("TILESET"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("name"))==0)
+					{
+						obj.tileset_name = p_cmd[i].dict[obj_index].val;
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("frame_size"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						if(args.size() >= 2)
+						{
+							int frame_width = 0;
+							int frame_height = 0;
+							args[0].ToInt(&frame_width);
+							args[1].ToInt(&frame_height);
+							obj.object.tile_width = frame_width;
+							obj.object.tile_height = frame_height;
+						}
+					}
+				}
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("TILE"))==0)
+			{
+				tile_obj n_tile;
+
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("fps"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToDouble(&n_tile.fps);
+						n_tile.frame_swap_time = 1000/n_tile.fps;
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("frame"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						n_tile.frames.clear();
+						n_tile.num_frames = args.size();
+
+						for(int arg_index = 0; arg_index < args.size(); arg_index++)
+						{
+							int frame_value = 0;
+							args[arg_index].ToInt(&frame_value);
+							n_tile.frames.push_back(frame_value);
+						}
+					}
+				}
+
+				obj.object.tiles.push_back(n_tile);
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("MASK"))==0)
+			{
+				tilemask_obj n_mask;
+				n_mask.active = true;
+
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("name"))==0)
+					{
+						n_mask.mask_name = p_cmd[i].dict[obj_index].val.ToStdString();
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("value"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						n_mask.tiles.size();
+
+						for(int arg_index = 0; arg_index < args.size(); arg_index++)
+						{
+							int frame_value = 0;
+							args[arg_index].ToInt(&frame_value);
+							n_mask.tiles.push_back( (frame_value != 0 ? true : false) );
+						}
+					}
+				}
+
+				obj.mask.push_back(n_mask);
+			}
+		}
+	}
+
+	wxString check_id = obj.tileset_name.Trim();
+	int n = 1;
+
+	for(int i = 0; i < tileset.size(); i++)
+	{
+		if(i < 0)
+			continue;
+
+		if(check_id.Lower().Trim().compare(tileset[i].tileset_name.Lower().Trim())==0)
+		{
+			check_id = obj.tileset_name.Trim() + wxString::Format(_("%i"), n);
+			n++;
+			i = -1;
+			continue;
+		}
+	}
+
+	obj.tileset_name = check_id;
+
+	int tileset_index = tileset.size();
+	tileset.push_back(obj);
+
+	return tileset_index;
 }
 
 void Nirvana_Project::setTilesetObject(int tileset_index, tileset_obj obj)
@@ -734,6 +1192,411 @@ void Nirvana_Project::createStage(std::string stage_name, int tile_width, int ti
 	}
 
 	stages.push_back(new_stage);
+}
+
+int Nirvana_Project::loadStage(wxString stage_file)
+{
+	Nirvana_Stage obj;
+	obj.stage_name = _("stage");
+	obj.tile_width = 32;
+	obj.tile_height = 32;
+	obj.width_in_tiles = 0;
+	obj.height_in_tiles = 0;
+	obj.stage_id = 0;
+	obj.layers.clear();
+	obj.layer_order.clear();
+
+	for(int i = 0; i < stages.size(); i++)
+	{
+		if(stages[i].stage_id >= obj.stage_id)
+			obj.stage_id = stages[i].stage_id + 1;
+	}
+
+
+	wxFileName fname(getDir());
+	fname.AppendDir(stage_path);
+
+	wxFileName pfile_fname = fname;
+	pfile_fname.SetFullName(stage_file.Trim());
+
+	wxFile pfile(pfile_fname.GetAbsolutePath(), wxFile::read);
+
+	if(pfile.IsOpened())
+	{
+		wxString p_data = _("");
+		pfile.ReadAll(&p_data);
+		pfile.Close();
+
+		std::vector<nirvana_project_file_obj> p_cmd = getParams(p_data);
+
+		int layer_index = 0;
+
+		for(int i = 0; i < p_cmd.size(); i++)
+		{
+			if(p_cmd[i].dict.size() == 0)
+				continue;
+
+			if(p_cmd[i].dict[0].key.compare(_("STAGE"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("name"))==0)
+					{
+						obj.stage_name = p_cmd[i].dict[obj_index].val;
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("tile_size"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						if(args.size() >= 2)
+						{
+							int frame_width = 0;
+							int frame_height = 0;
+							args[0].ToInt(&frame_width);
+							args[1].ToInt(&frame_height);
+							obj.tile_width = frame_width;
+							obj.tile_height = frame_height;
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("stage_size"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						if(args.size() >= 2)
+						{
+							int t_width = 0;
+							int t_height = 0;
+							args[0].ToInt(&t_width);
+							args[1].ToInt(&t_height);
+							obj.width_in_tiles = t_width;
+							obj.height_in_tiles = t_height;
+						}
+					}
+				}
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("LAYER"))==0)
+			{
+				Nirvana_Map_Layer n_layer;
+				n_layer.ref_canvas = -1;
+				n_layer.layer_map.tile_map_index = -1;
+				n_layer.layer_map.tile_map.texture = NULL;
+				n_layer.layer_map.tile_map.tileset = -1;
+
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("name"))==0)
+					{
+						n_layer.layer_name = p_cmd[i].dict[obj_index].val.ToStdString();
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("type"))==0)
+					{
+						n_layer.layer_type = -7;
+						if(p_cmd[i].dict[obj_index].val.compare(_("LAYER_TYPE_CANVAS_2D"))==0)
+						{
+							n_layer.layer_type = LAYER_TYPE_CANVAS_2D;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("LAYER_TYPE_CANVAS_3D"))==0)
+						{
+							n_layer.layer_type = LAYER_TYPE_CANVAS_3D;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("LAYER_TYPE_TILEMAP"))==0)
+						{
+							n_layer.layer_type = LAYER_TYPE_TILEMAP;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("LAYER_TYPE_SPRITE"))==0)
+						{
+							n_layer.layer_type = LAYER_TYPE_SPRITE;
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("tileset"))==0)
+					{
+						n_layer.layer_map.nv_tileset_name = p_cmd[i].dict[obj_index].val.ToStdString();
+						n_layer.layer_map.nv_tileset_index = getTilesetIndex(n_layer.layer_map.nv_tileset_name);
+						//n_layer.layer_map.tile_map_index
+
+						//std::cout << "debug tilemap: " << n_layer.layer_map.nv_tileset_name << " -> " << n_layer.layer_map.nv_tileset_index << std::endl;
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						if(args.size() >= 2)
+						{
+							double scroll_x = 0;
+							double scroll_y = 0;
+							args[0].ToDouble(&scroll_x);
+							args[1].ToDouble(&scroll_y);
+							n_layer.scroll_speed.set(scroll_x, scroll_y);
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("alpha"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToInt(&n_layer.layer_alpha);
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("visible"))==0)
+					{
+						n_layer.visible = ( p_cmd[i].dict[obj_index].val.compare(_("TRUE"))==0 ? true : false );
+					}
+				}
+
+				layer_index = obj.layers.size();
+				obj.layers.push_back(n_layer);
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("BKG"))==0)
+			{
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("image"))==0)
+					{
+						obj.layers[layer_index].bkg.img_file = p_cmd[i].dict[obj_index].val.ToStdString();
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("render_setting"))==0)
+					{
+						obj.layers[layer_index].bkg.render_setting = -7;
+						if(p_cmd[i].dict[obj_index].val.compare(_("IMG_RENDER_SETTING_NORMAL"))==0)
+						{
+							obj.layers[layer_index].bkg.render_setting = IMG_RENDER_SETTING_NORMAL;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("IMG_RENDER_SETTING_STRETCHED"))==0)
+						{
+							obj.layers[layer_index].bkg.render_setting = IMG_RENDER_SETTING_STRETCHED;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("IMG_RENDER_SETTING_TILED"))==0)
+						{
+							obj.layers[layer_index].bkg.render_setting = IMG_RENDER_SETTING_TILED;
+						}
+					}
+				}
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("START_TILEMAP"))==0)
+			{
+				obj.layers[layer_index].layer_map.tile_map.rows.clear();
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("ROW"))==0)
+			{
+				tilemap_row_obj t_row;
+				t_row.tile.clear();
+
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("value"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						for(int arg_index = 0; arg_index < args.size(); arg_index++)
+						{
+							int tile_value = 0;
+							args[arg_index].ToInt(&tile_value);
+							t_row.tile.push_back(tile_value);
+						}
+
+						if(t_row.tile.size() >= obj.layers[layer_index].layer_map.tile_map.num_tiles_across)
+						{
+							obj.layers[layer_index].layer_map.tile_map.num_tiles_across = t_row.tile.size();
+						}
+					}
+				}
+
+				obj.layers[layer_index].layer_map.tile_map.rows.push_back(t_row);
+
+				obj.layers[layer_index].layer_map.tile_map.num_tiles_down = obj.layers[layer_index].layer_map.tile_map.rows.size();
+
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("END_TILEMAP"))==0)
+			{
+				// Don't need to do anything for this
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("SPRITE"))==0)
+			{
+				Nirvana_Map_Sprite n_sprite;
+				n_sprite.layer_id = layer_index;
+				n_sprite.layer_sprite_unique_id = obj_uid_counter;
+				obj_uid_counter++;
+
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("name"))==0)
+					{
+						n_sprite.sprite_name = p_cmd[i].dict[obj_index].val.ToStdString();
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("base"))==0)
+					{
+						std::string spr_base = p_cmd[i].dict[obj_index].val.ToStdString();
+						int base_index = getSpriteBaseIndex(spr_base);
+
+						if(base_index >= 0)
+						{
+							n_sprite.sprite_base = base_index;
+							n_sprite.base_unique_id = sprite_base[base_index].unique_id;
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("type"))==0)
+					{
+						if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_TYPE_STATIC"))==0)
+						{
+							n_sprite.body_type = SPRITE_TYPE_STATIC;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_TYPE_DYNAMIC"))==0)
+						{
+							n_sprite.body_type = SPRITE_TYPE_DYNAMIC;
+						}
+						if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_TYPE_KINEMATIC"))==0)
+						{
+							n_sprite.body_type = SPRITE_TYPE_KINEMATIC;
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("position"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						if(args.size() >= 2)
+						{
+							int pos_x = 0;
+							int pos_y = 0;
+							args[0].ToInt(&pos_x);
+							args[1].ToInt(&pos_y);
+							n_sprite.position.set(pos_x, pos_y);
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("scale"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						if(args.size() >= 2)
+						{
+							double scale_x = 0;
+							double scale_y = 0;
+							args[0].ToDouble(&scale_x);
+							args[1].ToDouble(&scale_y);
+							n_sprite.scale.set(scale_x, scale_y);
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("rotation"))==0)
+					{
+						double angle = 0;
+						p_cmd[i].dict[obj_index].val.ToDouble(&angle);
+						n_sprite.angle = angle;
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("alpha"))==0)
+					{
+						int n_alpha = 0;
+						p_cmd[i].dict[obj_index].val.ToInt(&n_alpha);
+						n_sprite.alpha = (irr::u8) n_alpha;
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("animation"))==0)
+					{
+						n_sprite.animation_name = p_cmd[i].dict[obj_index].val.ToStdString();
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("visible"))==0)
+					{
+						n_sprite.visible = ( p_cmd[i].dict[obj_index].val.compare(_("TRUE"))==0 ? true : false );
+					}
+				}
+
+				obj.layers[layer_index].layer_sprites.push_back(n_sprite);
+			}
+			else if(p_cmd[i].dict[0].key.compare(_("SHAPE"))==0)
+			{
+				sprite2D_physics_obj physics;
+
+				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
+				{
+					if(p_cmd[i].dict[obj_index].key.compare(_("name"))==0)
+					{
+						physics.shape_name = p_cmd[i].dict[obj_index].val.ToStdString();
+					}
+					if(p_cmd[i].dict[obj_index].key.compare(_("type"))==0)
+					{
+						if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_SHAPE_BOX"))==0)
+						{
+							physics.shape_type = SPRITE_SHAPE_BOX;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_SHAPE_CIRCLE"))==0)
+						{
+							physics.shape_type = SPRITE_SHAPE_CIRCLE;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_SHAPE_CHAIN"))==0)
+						{
+							physics.shape_type = SPRITE_SHAPE_CHAIN;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("SPRITE_SHAPE_POLYGON"))==0)
+						{
+							physics.shape_type = SPRITE_SHAPE_POLYGON;
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("size"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						if(args.size() >= 2)
+						{
+							int b_width = 0;
+							int b_height = 0;
+							args[0].ToInt(&b_width);
+							args[1].ToInt(&b_height);
+							//std::cout << " sprite_shape: " << b_width << ", " << b_height << std::endl;
+							physics.box_width = b_width;
+							physics.box_height = b_height;
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("point"))==0)
+					{
+						std::vector<wxString> args = delimArgs(p_cmd[i].dict[obj_index].val);
+
+						physics.offset_x = 0;
+						physics.offset_y = 0;
+
+						if(args.size() >= 2)
+						{
+							int x = 0;
+							int y = 0;
+							args[0].ToInt(&x);
+							args[1].ToInt(&y);
+
+							// offset is ignored for chain and polygon
+							physics.offset_x = x;
+							physics.offset_y = y;
+
+							// points are ignored for box and circle
+							physics.points.push_back( irr::core::vector2di(x, y) );
+						}
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("radius"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToDouble(&physics.radius);
+					}
+				}
+
+				obj.layers[layer_index].layer_shapes.push_back(physics);
+			}
+		}
+	}
+
+	wxString check_id = wxString(obj.stage_name).Trim();
+	int n = 1;
+
+	for(int i = 0; i < stages.size(); i++)
+	{
+		if(i < 0)
+			continue;
+
+		if(check_id.Lower().Trim().compare(wxString(stages[i].stage_name).Lower().Trim())==0)
+		{
+			check_id = wxString(obj.stage_name).Trim() + wxString::Format(_("%i"), n);
+			n++;
+			i = -1;
+			continue;
+		}
+	}
+
+	obj.stage_name = check_id.ToStdString();
+
+	int stage_index = stages.size();
+	stages.push_back(obj);
+
+	setStageSize(stage_index, obj.width_in_tiles, obj.height_in_tiles);
+
+	return stage_index;
 }
 
 void Nirvana_Project::deleteStage(int stage_index)
@@ -1426,6 +2289,12 @@ int Nirvana_Project::createShape(int stage_index, int layer_index, int shape_typ
 	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
 		return -1;
 
+	if(stages[stage_index].layers[layer_index].layer_type != LAYER_TYPE_SPRITE)
+	{
+		wxMessageBox(_("Must be in sprite layer to add collision shape"));
+		return -1;
+	}
+
 	sprite2D_physics_obj p_obj;
 
 	int n = 1;
@@ -1541,4 +2410,18 @@ int Nirvana_Project::getShapeType(int stage_index, int layer_index, int shape_in
 		return -1;
 
 	return stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_type;
+}
+
+void Nirvana_Project::deleteShape(int stage_index, int layer_index, int shape_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	if(shape_index < 0 || shape_index >= stages[stage_index].layers[layer_index].layer_shapes.size())
+		return;
+
+	stages[stage_index].layers[layer_index].layer_shapes.erase( stages[stage_index].layers[layer_index].layer_shapes.begin() + shape_index );
 }

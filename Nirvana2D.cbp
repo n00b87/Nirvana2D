@@ -57,12 +57,16 @@
 		<Unit filename="NirvanaEditor_MainFrame.h" />
 		<Unit filename="NirvanaEditor_NewLayer_Dialog.cpp" />
 		<Unit filename="NirvanaEditor_NewLayer_Dialog.h" />
+		<Unit filename="NirvanaEditor_NewProject_Dialog.cpp" />
+		<Unit filename="NirvanaEditor_NewProject_Dialog.h" />
 		<Unit filename="NirvanaEditor_NewSprite_Dialog.cpp" />
 		<Unit filename="NirvanaEditor_NewSprite_Dialog.h" />
 		<Unit filename="NirvanaEditor_NewStage_Dialog.cpp" />
 		<Unit filename="NirvanaEditor_NewStage_Dialog.h" />
 		<Unit filename="NirvanaEditor_NewTileset_Dialog.cpp" />
 		<Unit filename="NirvanaEditor_NewTileset_Dialog.h" />
+		<Unit filename="NirvanaEditor_SetCamera_Dialog.cpp" />
+		<Unit filename="NirvanaEditor_SetCamera_Dialog.h" />
 		<Unit filename="NirvanaEditor_StageProperties_Dialog.cpp" />
 		<Unit filename="NirvanaEditor_StageProperties_Dialog.h" />
 		<Unit filename="NirvanaEngine_Structs.h" />

@@ -349,6 +349,10 @@ class wxIrrlicht : public wxControl {
         int collision_canvas = -1;
         sprite2D_physics_obj collision_physics_obj;
 
+        bool clear_flag = false;
+
+        bool tile_snap = false;
+
         //Collision Stuff
         int collision_tool = -1;
         bool collision_object_modified = false;
@@ -541,8 +545,6 @@ class wxIrrlicht : public wxControl {
         bool middle_drag_init = false;
         bool left_drag_init = false;
         bool right_drag_init = false;
-
-        double cam_move_speed = 5;
 
         bool VIEW_KEY_W = false;
         bool VIEW_KEY_A = false;

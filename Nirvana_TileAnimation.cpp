@@ -275,6 +275,7 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 	bool tileset_found = false;
 
 	selected_tile = -1;
+	selected_mask = -1;
 
 	for(int i = 0; i < project->getTilesetCount(); i++)
 	{
@@ -365,7 +366,10 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 	//std::cout << "NSP TEST: " << n_sprite.object.physics.offset_x << std::endl;
 
 	wxFileName fname(project->getDir());
-	fname.AppendDir(_("gfx"));
+	if(project)
+		fname.AppendDir(project->tile_path);
+	else
+		fname.AppendDir(_("gfx"));
 	fname.SetFullName(n_tileset.file);
 
 	std::string tile_sheet_file = fname.GetAbsolutePath().ToStdString();
@@ -405,7 +409,7 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 	if(tileFrame_target->imageExists(tileFrame_target->current_sheet_image))
 		tileFrame_target->deleteImage(tileFrame_target->current_sheet_image);
 
-	tileFrame_target->current_sheet_image = tileFrame_target->loadImage(tile_sheet_file);
+	tileFrame_target->current_sheet_image = tileFrame_target->loadImage(tile_sheet_file); std::cout << "IMG DBG: " << tile_sheet_file << " -> " << tileFrame_target->current_sheet_image << std::endl;
 	tileFrame_target->current_frame_width = n_tileset.object.tile_width;
 	tileFrame_target->current_frame_height = n_tileset.object.tile_height;
 	tileSheet_target->getImageSizeI(tileSheet_target->current_sheet_image,
@@ -420,7 +424,7 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 																					  n_tileset.object.tile_width,
 																					  n_tileset.object.tile_height);
 
-	for(int i = 1; i < n_tileset.object.tiles.size(); i++)
+	for(int i = 0; i < n_tileset.object.tiles.size(); i++)
 	{
 		tileFrame_target->setTileAnimationLength(tileFrame_target->tileEdit_selected_tileset,
 												  i,
@@ -441,6 +445,7 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 
 	//YOP
 	int tileset_index = tileFrame_target->tileEdit_selected_tileset;
+	std::cout << "tileset_index = " << tileset_index << std::endl;
 	project->setTilesetObject(selected_tileset, tileFrame_target->tileset[tileset_index]);
 
 

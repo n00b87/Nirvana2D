@@ -451,7 +451,12 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	//std::cout << "NSP TEST: " << n_sprite.object.physics.offset_x << std::endl;
 
 	wxFileName fname(project->getDir());
-	fname.AppendDir(_("gfx"));
+
+	if(project)
+		fname.AppendDir(project->sprite_path);
+	else
+		fname.AppendDir(_("gfx"));
+
 	fname.SetFullName(n_sprite.file);
 
 	std::string sprite_sheet_file = fname.GetAbsolutePath().ToStdString();
@@ -488,6 +493,9 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	startEditor(editor_page_num);
 
 
+	spriteFrame_target->clear_flag = true;
+	spriteFrame_target->spriteEdit_selected_animation = -1;
+
 	if(spriteFrame_target->imageExists(spriteFrame_target->current_sheet_image))
 		spriteFrame_target->deleteImage(spriteFrame_target->current_sheet_image);
 
@@ -516,6 +524,7 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 
 		for(int a_frame = 0; a_frame < n_sprite.object.animation[i].frames.size(); a_frame++)
 		{
+			//std::cout << "Set frame_tgt" << std::endl;
 			spriteFrame_target->setSpriteAnimationFrame(spriteFrame_target->spriteEdit_selected_sprite, i, a_frame, n_sprite.object.animation[i].frames[a_frame]);
 		}
 	}
@@ -524,6 +533,9 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	project->setSpriteObject(selected_sprite, spriteFrame_target->sprite[spr_index]);
 
 	spriteCollision_target->collision_physics_obj = project->getSpritePhysics(selected_sprite);
+
+	spritePreview_target->clear_flag = true;
+	spritePreview_target->spriteEdit_selected_animation = -1;
 
 	if(spritePreview_target->imageExists(spritePreview_target->current_sheet_image))
 		spritePreview_target->deleteImage(spritePreview_target->current_sheet_image);
@@ -546,8 +558,9 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 
 	//std::cout << "Preview Sprite Check = " << spritePreview_target->spriteEdit_selected_sprite << std::endl;
 
-	for(int i = 0; i < n_sprite.object.animation.size(); i++)
+	for(int i = 1; i < n_sprite.object.animation.size(); i++)
 	{
+		//std::cout << "Animation: " << n_sprite.object.animation[i].name << " :: " << n_sprite.object.animation[i].num_frames << std::endl;
 		spritePreview_target->createSpriteAnimation(n_sprite.object.animation[i].name,
 													spritePreview_target->spriteEdit_selected_sprite,
 												    n_sprite.object.animation[i].num_frames,
@@ -626,7 +639,7 @@ void Nirvana_SpriteEditor::updateSpriteAnimation()
 
 	for(int i = 0; i < project->getSpriteNumAnimationFrames(selected_sprite, selected_animation); i++)
 	{
-		std::cout << "Frame[" << i << "] = " << project->getSpriteAnimationFrame(selected_sprite, selected_animation, i) << std::endl;
+		//std::cout << "Frame[" << i << "] = " << project->getSpriteAnimationFrame(selected_sprite, selected_animation, i) << std::endl;
 
 		spriteFrame_target->setSpriteAnimationFrame(frame_spr_id, selected_animation, i, project->getSpriteAnimationFrame(selected_sprite,
 																														  selected_animation,

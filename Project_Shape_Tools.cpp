@@ -172,6 +172,19 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_DeleteShape( wxCommandEvent& e
 
 	if(shape_index < 0 || shape_index >= project->stages[stage_index].layers[layer_index].layer_shapes.size())
 		return;
+
+	project->deleteShape(stage_index, layer_index, shape_index);
+	map_editor->selectShape(-1);
+
+	m_mapEdit_collisionShape_listBox->DeselectAll();
+	m_mapEdit_collisionShape_listBox->Clear();
+	for(int i = 0; i < project->stages[stage_index].layers[layer_index].layer_shapes.size(); i++)
+	{
+		m_mapEdit_collisionShape_listBox->AppendAndEnsureVisible(wxString(project->stages[stage_index].layers[layer_index].layer_shapes[i].shape_name));
+	}
+
+	m_mapEdit_shapeEdit_simplebook->SetSelection(0);
+	refreshCurrentShapeUI();
 }
 
 

@@ -14,8 +14,34 @@ void NirvanaEditor_AddSpriteInstance_Dialog::OnSearch( wxCommandEvent& event )
 
 void NirvanaEditor_AddSpriteInstance_Dialog::OnCreate( wxCommandEvent& event )
 {
+	wxString test_id = m_spriteID_textCtrl->GetValue().Upper().Trim();
+	if(project)
+	{
+		if(!project->checkName(test_id.ToStdString()))
+		{
+			wxMessageBox(_("Illegal Character in Sprite ID"));
+			return;
+		}
+
+
+		if(stage_index >= 0 && stage_index < project->stages.size())
+		{
+			if(layer_index >= 0 && layer_index < project->stages[stage_index].layers.size())
+			{
+				for(int i = 0; i < project->getStageLayerNumSprites(stage_index, layer_index); i++)
+				{
+					if(wxString(project->stages[stage_index].layers[layer_index].layer_sprites[i].sprite_name).Upper().Trim().compare(test_id)==0)
+					{
+						wxMessageBox(_("Sprite ID already exists in current layer"));
+						return;
+					}
+				}
+			}
+		}
+	}
+
 	create_flag = true;
-	id_name = m_spriteID_textCtrl->GetValue();
+	id_name = m_spriteID_textCtrl->GetValue().Trim();
 
 	if(m_baseSpriteList_listBox->GetSelection() >= 0 && m_baseSpriteList_listBox->GetSelection() < m_baseSpriteList_listBox->GetCount())
 		selected_base = m_baseSpriteList_listBox->GetString( m_baseSpriteList_listBox->GetSelection() );

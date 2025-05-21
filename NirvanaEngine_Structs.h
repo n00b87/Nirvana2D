@@ -30,6 +30,10 @@ struct canvas_obj
 
     irr::core::array<irr::s32> sprite_id;
 
+    int bkg_render_type = -1;
+    int bkg_render_image_id = -1;
+    int layer_index = -1;
+
     int tilemap;
 };
 
@@ -72,6 +76,9 @@ struct tileset_obj
 	int tile_height;
 
 	std::vector<tile_obj> tiles;
+
+	//specifically for export purposes
+	int mask_start_index = -1;
 };
 
 struct tilemap_row_obj
@@ -192,6 +199,9 @@ struct sprite2D_obj
 	int parent_canvas = -1;
 
 	double z;
+
+	//specifically for export purposes
+	int animation_list_start_index = -1;
 };
 
 struct render_cmd_arg_obj
@@ -249,6 +259,8 @@ struct Nirvana_SpriteBase
 	sprite2D_obj object;
 
 	int unique_id = -1;
+
+	bool include_flag = false;
 };
 
 struct Nirvana_Tileset
@@ -293,6 +305,7 @@ struct Nirvana_Map_Background
 	int image_id = -1;
 	std::string img_file;
 	image_obj image;
+	int render_setting = 0;
 };
 
 struct Nirvana_Map_CollisionShape
@@ -332,6 +345,17 @@ struct Nirvana_Stage
 	int height_in_tiles = 0;
 	std::vector<int> layer_order;
 	std::vector<Nirvana_Map_Layer> layers;
+};
+
+struct nirvana_project_dict_obj
+{
+	wxString key;
+	wxString val;
+};
+
+struct nirvana_project_file_obj
+{
+	std::vector<nirvana_project_dict_obj> dict;
 };
 
 #endif // NIRVANAENGINE_STRUCTS_H_INCLUDED

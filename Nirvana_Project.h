@@ -11,9 +11,24 @@
 class Nirvana_Project
 {
 	public:
+		wxString tile_path = _("tiles");
+		wxString sprite_path = _("sprites");
+		wxString bkg_path = _("bkg");
+		wxString stage_path = _("stages");
+
+		std::string project_name = "UNTITLED";
+
+		bool active = false;
+
+		bool checkName(std::string t_name);
+		std::vector<nirvana_project_file_obj> getParams(wxString p_data);
+		std::vector<wxString> delimArgs(wxString args);
+		void resetIncludeFlags();
+
 		std::vector<Nirvana_Stage> stages;
 
 		void createStage(std::string stage_name, int tile_width, int tile_height);
+		int loadStage(wxString stage_file);
 		void deleteStage(int stage_index);
 		int copyStage(int stage_index);
 		int getStageCount();
@@ -62,6 +77,7 @@ class Nirvana_Project
 		std::string getShapeName(int stage_index, int layer_index, int shape_index);
 		int getShapeIndex(int stage_index, int layer_index, std::string shape_name);
 		int getShapeType(int stage_index, int layer_index, int shape_index);
+		void deleteShape(int stage_index, int layer_index, int shape_index);
 
 		wxFileName project_filename_obj;
 
@@ -79,6 +95,7 @@ class Nirvana_Project
 		bool isValidName(wxString test_name);
 
 		bool createSprite(wxString spr_id, wxString img_file, int frame_width, int frame_height);
+		int loadSpriteDefinition(wxString spr_file);
 		void setSpriteObject(int spr_index, sprite2D_obj obj);
 		void setSpritePhysics(int spr_index, sprite2D_physics_obj obj);
 		sprite2D_physics_obj getSpritePhysics(int spr_index);
@@ -121,6 +138,7 @@ class Nirvana_Project
 
 		//--------TILESETS------------
 		bool createTileset(wxString tset_id, wxString img_file, int tile_width, int tile_height);
+		int loadTileset(wxString tset_file);
 		void setTilesetObject(int tileset_index, tileset_obj obj);
 		void setTilesetName(int  tileset_index, std::string tileset_name);
 		std::string getTilesetName(int tileset_index);

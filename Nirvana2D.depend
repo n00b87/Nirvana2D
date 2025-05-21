@@ -1,8 +1,8 @@
 # depslib dependency file v1.0
-1746502296 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
+1747615318 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
 	"NirvanaBase.h"
 
-1746494960 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
+1747615318 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
 	<wx/artprov.h>
 	<wx/xrc/xmlres.h>
 	<wx/intl.h>
@@ -39,6 +39,7 @@
 	<wx/frame.h>
 	<wx/dialog.h>
 	<wx/srchctrl.h>
+	<wx/filepicker.h>
 
 1699484035 /usr/include/wx-3.2/wx/artprov.h
 	"wx/string.h"
@@ -1601,7 +1602,7 @@
 
 1699484035 /usr/include/wx-3.2/wx/gtk/toolbar.h
 
-1746495073 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
+1747418008 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
 	"NirvanaBase.h"
 	"wxIrrlicht.h"
 	"Nirvana_SpriteAnimation.h"
@@ -1649,7 +1650,7 @@
 
 1699484035 /usr/include/wx-3.2/wx/gtk/dialog.h
 
-1746503929 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
+1747618554 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -2837,7 +2838,7 @@
 
 1699484035 /usr/include/wx-3.2/wx/gtk/dirdlg.h
 
-1746497029 /home/n00b/Projects/Nirvana2D/wxIrrlicht.h
+1747354701 /home/n00b/Projects/Nirvana2D/wxIrrlicht.h
 	<windows.h>
 	<irrlicht.h>
 	<wx/wx.h>
@@ -3193,7 +3194,7 @@
 	"Nirvana_Project.h"
 	"rc_defines.h"
 
-1746503902 source:/home/n00b/Projects/Nirvana2D/wxIrrlicht.cpp
+1747613594 source:/home/n00b/Projects/Nirvana2D/wxIrrlicht.cpp
 	<wx/wx.h>
 	<wx/stdpaths.h>
 	<wx/filename.h>
@@ -6411,7 +6412,7 @@
 
 1720630994 /usr/include/gtk-3.0/gtk/gtk-autocleanups.h
 
-1746245120 /home/n00b/Projects/Nirvana2D/rc_defines.h
+1747001307 /home/n00b/Projects/Nirvana2D/rc_defines.h
 
 1735254737 /home/n00b/Projects/Nirvana2D/rc_utf8.h
 	<string>
@@ -6419,7 +6420,7 @@
 	<codecvt>
 	<locale>
 
-1746159897 source:/home/n00b/Projects/Nirvana2D/Nirvana_SpriteAnimation.cpp
+1747267341 source:/home/n00b/Projects/Nirvana2D/Nirvana_SpriteAnimation.cpp
 	"Nirvana_SpriteAnimation.h"
 	<wx/display.h>
 	<irrlicht.h>
@@ -6446,19 +6447,20 @@
 1699484035 /usr/include/wx-3.2/wx/generic/srchctlg.h
 	"wx/bitmap.h"
 
-1744072853 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewSprite_Dialog.cpp
+1747616505 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewSprite_Dialog.cpp
 	"NirvanaEditor_NewSprite_Dialog.h"
 
-1744072775 /home/n00b/Projects/Nirvana2D/NirvanaEditor_NewSprite_Dialog.h
+1746990468 /home/n00b/Projects/Nirvana2D/NirvanaEditor_NewSprite_Dialog.h
 	"NirvanaBase.h"
-	"wx/arrstr.h"
+	"Nirvana_Project.h"
+	<wx/arrstr.h>
 
 1699484035 /usr/include/wx-3.2/wx/dir.h
 	"wx/longlong.h"
 	"wx/string.h"
 	"wx/filefn.h"
 
-1746302575 /home/n00b/Projects/Nirvana2D/Nirvana_Project.h
+1747614098 /home/n00b/Projects/Nirvana2D/Nirvana_Project.h
 	<wx/wx.h>
 	<wx/filename.h>
 	<vector>
@@ -6466,12 +6468,12 @@
 	"NirvanaEngine_Structs.h"
 	"rc_defines.h"
 
-1746482834 /home/n00b/Projects/Nirvana2D/NirvanaEngine_Structs.h
+1747437306 /home/n00b/Projects/Nirvana2D/NirvanaEngine_Structs.h
 	<irrlicht.h>
 	<vector>
 	"rc_defines.h"
 
-1746412290 source:/home/n00b/Projects/Nirvana2D/Nirvana_Project.cpp
+1747614513 source:/home/n00b/Projects/Nirvana2D/Nirvana_Project.cpp
 	"Nirvana_Project.h"
 	<wx/wx.h>
 	<wx/filename.h>
@@ -6486,19 +6488,21 @@
 	"Nirvana_Project.h"
 	"rc_defines.h"
 
-1745706890 source:/home/n00b/Projects/Nirvana2D/Nirvana_TileAnimation.cpp
+1747284795 source:/home/n00b/Projects/Nirvana2D/Nirvana_TileAnimation.cpp
 	"Nirvana_TileAnimation.h"
 	<wx/display.h>
 	<irrlicht.h>
 
-1745014078 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewTileset_Dialog.cpp
+1747618763 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewTileset_Dialog.cpp
 	"NirvanaEditor_NewTileset_Dialog.h"
+	<wx/wx.h>
 
-1745013808 /home/n00b/Projects/Nirvana2D/NirvanaEditor_NewTileset_Dialog.h
+1746990616 /home/n00b/Projects/Nirvana2D/NirvanaEditor_NewTileset_Dialog.h
 	"NirvanaBase.h"
-	"wx/arrstr.h"
+	"Nirvana_Project.h"
+	<wx/arrstr.h>
 
-1746503411 source:/home/n00b/Projects/Nirvana2D/Nirvana_MapEditor.cpp
+1747287175 source:/home/n00b/Projects/Nirvana2D/Nirvana_MapEditor.cpp
 	"Nirvana_MapEditor.h"
 	<wx/display.h>
 	<irrlicht.h>
@@ -6510,13 +6514,14 @@
 	"Nirvana_Project.h"
 	"rc_defines.h"
 
-1745547705 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewStage_Dialog.cpp
+1746991282 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewStage_Dialog.cpp
 	"NirvanaEditor_NewStage_Dialog.h"
 
-1745547649 /home/n00b/Projects/Nirvana2D/NirvanaEditor_NewStage_Dialog.h
+1746991082 /home/n00b/Projects/Nirvana2D/NirvanaEditor_NewStage_Dialog.h
 	"NirvanaBase.h"
+	"Nirvana_Project.h"
 
-1746501882 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
+1747614907 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -6525,13 +6530,17 @@
 	"NirvanaEditor_NewLayer_Dialog.h"
 	"NirvanaEditor_DeleteStage_Dialog.h"
 	"NirvanaEditor_StageProperties_Dialog.h"
+	"NirvanaEditor_SetCamera_Dialog.h"
+	"NirvanaEditor_NewProject_Dialog.h"
 	"Nirvana_Project.h"
 
-1745437312 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewLayer_Dialog.cpp
+1746993802 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewLayer_Dialog.cpp
 	"NirvanaEditor_NewLayer_Dialog.h"
+	"rc_defines.h"
 
-1745437185 /home/n00b/Projects/Nirvana2D/NirvanaEditor_NewLayer_Dialog.h
+1746992936 /home/n00b/Projects/Nirvana2D/NirvanaEditor_NewLayer_Dialog.h
 	"NirvanaBase.h"
+	"Nirvana_Project.h"
 	<wx/arrstr.h>
 
 1745540010 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_DeleteStage_Dialog.cpp
@@ -6626,13 +6635,14 @@
 	"wx/defs.h"
 	"wx/window.h"
 
-1745891558 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_AddSpriteInstance_Dialog.cpp
+1746995405 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_AddSpriteInstance_Dialog.cpp
 	"NirvanaEditor_AddSpriteInstance_Dialog.h"
 
-1745891160 /home/n00b/Projects/Nirvana2D/NirvanaEditor_AddSpriteInstance_Dialog.h
+1746995152 /home/n00b/Projects/Nirvana2D/NirvanaEditor_AddSpriteInstance_Dialog.h
 	"NirvanaBase.h"
+	"Nirvana_Project.h"
 
-1746231766 source:/home/n00b/Projects/Nirvana2D/Project_Sprite_Tools.cpp
+1747289377 source:/home/n00b/Projects/Nirvana2D/Project_Sprite_Tools.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -6649,10 +6659,23 @@
 1746141762 /home/n00b/Projects/Nirvana2D/NirvanaEditor_DeleteSprite_Dialog.h
 	"NirvanaBase.h"
 
-1746496346 source:/home/n00b/Projects/Nirvana2D/Project_Shape_Tools.cpp
+1746980965 source:/home/n00b/Projects/Nirvana2D/Project_Shape_Tools.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
 	<wx/arrstr.h>
 	"Nirvana_Project.h"
+
+1747022772 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_SetCamera_Dialog.cpp
+	"NirvanaEditor_SetCamera_Dialog.h"
+
+1747022627 /home/n00b/Projects/Nirvana2D/NirvanaEditor_SetCamera_Dialog.h
+	"NirvanaBase.h"
+
+1747058414 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewProject_Dialog.cpp
+	"NirvanaEditor_NewProject_Dialog.h"
+	<wx/wx.h>
+
+1747058386 /home/n00b/Projects/Nirvana2D/NirvanaEditor_NewProject_Dialog.h
+	"NirvanaBase.h"
 
