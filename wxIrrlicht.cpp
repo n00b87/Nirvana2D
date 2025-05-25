@@ -7041,6 +7041,9 @@ void wxIrrlicht::getImageBuffer(int img_id, irr::u32 * pdata)
 
 void wxIrrlicht::drawImage(int img_id, int x, int y)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
 	if(active_canvas == back_buffer || active_canvas == ui_layer)
 		return;
 
@@ -7077,6 +7080,9 @@ void wxIrrlicht::drawImage(int img_id, int x, int y)
 
 void wxIrrlicht::drawImage_Rotate(int img_id, int x, int y, double angle)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 
@@ -7106,6 +7112,9 @@ void wxIrrlicht::drawImage_Rotate(int img_id, int x, int y, double angle)
 
 void wxIrrlicht::drawImage_Zoom(int img_id, int x, int y, double zx, double zy)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 
@@ -7135,6 +7144,9 @@ void wxIrrlicht::drawImage_Zoom(int img_id, int x, int y, double zx, double zy)
 
 void wxIrrlicht::drawImage_ZoomEx(int img_id, int x, int y, int src_x, int src_y, int src_w, int src_h, double zx, double zy)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 
@@ -7164,6 +7176,9 @@ void wxIrrlicht::drawImage_ZoomEx(int img_id, int x, int y, int src_x, int src_y
 
 void wxIrrlicht::drawImage_Rotozoom(int img_id, int x, int y, double angle, double zx, double zy)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 
@@ -7193,6 +7208,9 @@ void wxIrrlicht::drawImage_Rotozoom(int img_id, int x, int y, double angle, doub
 
 void wxIrrlicht::drawImage_RotozoomEx(int img_id, int x, int y, int src_x, int src_y, int src_w, int src_h, double angle, double zx, double zy)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 
@@ -7223,6 +7241,9 @@ void wxIrrlicht::drawImage_RotozoomEx(int img_id, int x, int y, int src_x, int s
 
 void wxIrrlicht::drawImage_Flip(int img_id, int x, int y, bool h, bool v)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 
@@ -7253,6 +7274,9 @@ void wxIrrlicht::drawImage_Flip(int img_id, int x, int y, bool h, bool v)
 
 void wxIrrlicht::drawImage_FlipEx(int img_id, int x, int y, int src_x, int src_y, int src_w, int src_h, bool h, bool v)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 
@@ -7284,6 +7308,9 @@ void wxIrrlicht::drawImage_FlipEx(int img_id, int x, int y, int src_x, int src_y
 
 void wxIrrlicht::drawImage_Blit(int img_id, int x, int y, int src_x, int src_y, int src_w, int src_h)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 
@@ -7317,6 +7344,9 @@ void wxIrrlicht::drawImage_Blit(int img_id, int x, int y, int src_x, int src_y, 
 
 void wxIrrlicht::drawImage_RotateEx(int img_id, int x, int y, int src_x, int src_y, int src_w, int src_h, int angle)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 
@@ -7348,6 +7378,9 @@ void wxIrrlicht::drawImage_RotateEx(int img_id, int x, int y, int src_x, int src
 
 void wxIrrlicht::drawImage_BlitEx(int img_id, int x, int y, int w, int h, int src_x, int src_y, int src_w, int src_h)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 
@@ -7379,6 +7412,9 @@ void wxIrrlicht::drawImage_BlitEx(int img_id, int x, int y, int w, int h, int sr
 
 void wxIrrlicht::drawImage_BlitEx_SW(int img_id, int x, int y, int w, int h, int src_x, int src_y, int src_w, int src_h)
 {
+	if(active_canvas < 0 || active_canvas >= canvas.size())
+		return;
+
     if(img_id < 0 || img_id >= image.size())
         return;
 

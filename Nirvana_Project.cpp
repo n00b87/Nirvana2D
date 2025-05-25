@@ -2277,6 +2277,8 @@ int Nirvana_Project::copyLayer(int stage_index, int layer_index)
 
 	stages[stage_index].layers.push_back(tmp);
 
+	stages[stage_index].layers[new_index].ref_canvas = -1;
+
 	return new_index;
 }
 

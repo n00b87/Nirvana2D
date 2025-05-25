@@ -1458,7 +1458,7 @@ bool NirvanaEditor_MainFrame::generateStages()
 					wxString pos_x_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].position.X);
 					wxString pos_y_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].position.Y);
 					wxString scale_x_str = wxString::FromDouble((double)project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].scale.X);
-					wxString scale_y_str = wxString::FromDouble((double)project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].scale.X);
+					wxString scale_y_str = wxString::FromDouble((double)project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].scale.Y);
 					wxString angle_str = wxString::FromDouble((double)(360-project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].angle));
 					fn_str += _("\t\'Shape\n");
 					if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_BOX)
@@ -2166,6 +2166,10 @@ void NirvanaEditor_MainFrame::OnMapEdit_CopyLayerClick( wxCommandEvent& event )
 
 	if(copy_index < 0)
 		return;
+
+	map_editor->getMapViewControl()->initLayer(copy_index);
+
+	updateMapEditor();
 
 	wxString copy_name = wxString(project->getLayerName(stage_index, copy_index));
 	m_layerVisible_checkList->AppendAndEnsureVisible(copy_name);
