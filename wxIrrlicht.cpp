@@ -8943,18 +8943,21 @@ void wxIrrlicht::util_drawSprites(int canvas_id)
 		x = n_sprite->position.X - offset_x;
 		y = n_sprite->position.Y - offset_y;
 
-		int xf = x + n_sprite->frame_size.Width;
-		int yf = y + n_sprite->frame_size.Height;
+		int xf = x + (n_sprite->frame_size.Width * n_sprite->scale.X);
+		int yf = y + (n_sprite->frame_size.Height * n_sprite->scale.Y);
 
 		//std::cout << "sprite info[" << spr_index << "]: (" << x << ", " << y << ") (" << xf << ", " << yf << ")" << std::endl;
 
-		if( (xf < 0) || (x > ((int)canvas[canvas_id].viewport.dimension.Width)) )
+		int post_x = x - (n_sprite->frame_size.Width * n_sprite->scale.X);
+		int post_y = y - (n_sprite->frame_size.Height * n_sprite->scale.Y);
+
+		if( (xf < 0) || (post_x > ((int)canvas[canvas_id].viewport.dimension.Width)) )
 		{
 			//std::cout << "skip draw[X]: " << spr_index << std::endl;
 			continue;
 		}
 
-		if( (yf < 0) || (y > ((int)canvas[canvas_id].viewport.dimension.Height)) )
+		if( (yf < 0) || (post_y > ((int)canvas[canvas_id].viewport.dimension.Height)) )
 		{
 			//std::cout << "skip draw[Y]: " << spr_index << std::endl;
 			continue;
