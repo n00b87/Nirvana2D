@@ -1475,7 +1475,7 @@ int Nirvana_Project::loadStage(wxString stage_file)
 					{
 						double angle = 0;
 						p_cmd[i].dict[obj_index].val.ToDouble(&angle);
-						n_sprite.angle = angle;
+						n_sprite.angle = 360-angle;
 					}
 					else if(p_cmd[i].dict[obj_index].key.compare(_("alpha"))==0)
 					{

@@ -1567,6 +1567,7 @@ bool NirvanaEditor_MainFrame::generateStages()
 
 					wxString body_type_str = _("SPRITE_TYPE_STATIC");
 					fn_str += _("\tSetSpriteType(") + spr_id_str + _(", ") + body_type_str + _(")\n");
+					fn_str += _("\tSetSpriteSolid(") + spr_id_str + _(", TRUE)\n");
 
 					fn_str += _("\t\'Shape\n");
 					if(project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_type == SPRITE_SHAPE_BOX)
@@ -1919,16 +1920,6 @@ void NirvanaEditor_MainFrame::OnGenerate( wxCommandEvent& event )
 
 	constant_file.Close();
 
-	//Main Include
-	wxFileName src_inc_fname(wxStandardPaths::Get().GetExecutablePath());
-	src_inc_fname.AppendDir(_("export"));
-	src_inc_fname.SetFullName(_("nirvana.bas"));
-
-	wxFileName dst_inc_fname(project->getDir());
-	dst_inc_fname.SetFullName(_("nirvana.bas"));
-
-	wxCopyFile(src_inc_fname.GetAbsolutePath(), dst_inc_fname.GetAbsolutePath());
-
 
 	if(!generateSpriteDefinitions())
 	{
@@ -1947,6 +1938,16 @@ void NirvanaEditor_MainFrame::OnGenerate( wxCommandEvent& event )
 		wxMessageBox(_("Generate ERROR: Failed to generate stages"));
 		return;
 	}
+
+	//Main Include
+	wxFileName src_inc_fname(wxStandardPaths::Get().GetExecutablePath());
+	src_inc_fname.AppendDir(_("export"));
+	src_inc_fname.SetFullName(_("nirvana.bas"));
+
+	wxFileName dst_inc_fname(project->getDir());
+	dst_inc_fname.SetFullName(_("nirvana.bas"));
+
+	wxCopyFile(src_inc_fname.GetAbsolutePath(), dst_inc_fname.GetAbsolutePath());
 }
 
 void NirvanaEditor_MainFrame::OnNewStage( wxCommandEvent& event )
