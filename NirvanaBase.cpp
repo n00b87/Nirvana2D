@@ -608,7 +608,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 
 	bSizer182->Add( m_staticText102, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_mapEdit_cameraSpeed_spinCtrl = new wxSpinCtrl( m_panel58, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
+	m_mapEdit_cameraSpeed_spinCtrl = new wxSpinCtrl( m_panel58, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1000, 1 );
 	m_mapEdit_cameraSpeed_spinCtrl->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
 
 	bSizer182->Add( m_mapEdit_cameraSpeed_spinCtrl, 2, wxALL, 5 );
@@ -1807,6 +1807,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	this->Centre( wxBOTH );
 
 	// Connect Events
+	this->Connect( wxEVT_CLOSE_WINDOW, wxCloseEventHandler( Nirvana_MainFrame::OnNirvanaClose ) );
 	m_editorMainTab_auinotebook->Connect( wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED, wxAuiNotebookEventHandler( Nirvana_MainFrame::OnMainTabChanged ), NULL, this );
 	m_activeLayer_comboBox->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnActiveLayerSelect ), NULL, this );
 	m_activeLayer_comboBox->Connect( wxEVT_COMBOBOX_CLOSEUP, wxCommandEventHandler( Nirvana_MainFrame::OnLayerComboClose ), NULL, this );

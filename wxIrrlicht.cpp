@@ -397,22 +397,31 @@ void wxIrrlicht::OnRender() {
         }
 
         //Draw shapes in other layer
-        if(selected_stage >= 0 && selected_stage < project->stages.size() && show_shapes_all)
+        if(selected_stage >= 0 && selected_stage < project->stages.size())
 		{
-			for(int i = 0; i < project->stages[selected_stage].layers.size(); i++)
+			if(show_grid)
 			{
-				if(project->stages[selected_stage].layers[i].layer_type != LAYER_TYPE_SPRITE)
-					continue;
-
-				if(i == selected_layer)
-					continue;
-
-				if(!project->stages[selected_stage].layers[i].ref_canvas)
-					continue;
-
-				//std::cout << "Draw Shapes in Layer " << i << std::endl;
-				util_drawShapes(i);
+				util_drawGrid();
 			}
+
+			if(show_shapes_all)
+			{
+				for(int i = 0; i < project->stages[selected_stage].layers.size(); i++)
+				{
+					if(project->stages[selected_stage].layers[i].layer_type != LAYER_TYPE_SPRITE)
+						continue;
+
+					if(i == selected_layer)
+						continue;
+
+					if(!project->stages[selected_stage].layers[i].ref_canvas)
+						continue;
+
+					//std::cout << "Draw Shapes in Layer " << i << std::endl;
+					util_drawShapes(i);
+				}
+			}
+
 		}
 
 		//Set Target to back buffer
@@ -748,6 +757,47 @@ void wxIrrlicht::OnUpdate()
 
 	return;
 
+}
+
+void wxIrrlicht::util_drawGrid()
+{
+	if(!project)
+		return;
+
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	mapEdit_getContext();
+	setActiveCanvas(ui_layer);
+
+	setColor(grid_color.color);
+
+	int adj_scroll_offset_x = project->stages[selected_stage].layers[selected_layer].scroll_speed.X * scroll_offset_x;
+	int adj_scroll_offset_y = project->stages[selected_stage].layers[selected_layer].scroll_speed.Y * scroll_offset_y;
+
+	int start_x = adj_scroll_offset_x;
+	int start_y = adj_scroll_offset_y;
+
+	//std::cout << "offset debug: " << start_x << " ~ " << ((start_x + (start_x*32)) % project->stages[selected_stage].tile_width) << std::endl;
+
+	start_x = (project->stages[selected_stage].tile_width - (start_x % project->stages[selected_stage].tile_width)) - project->stages[selected_stage].tile_width;
+	start_y = (project->stages[selected_stage].tile_height - (start_y % project->stages[selected_stage].tile_height)) - project->stages[selected_stage].tile_height;
+
+	int pw = this->GetClientSize().GetWidth();
+	int ph = this->GetClientSize().GetHeight();
+
+	for(int y = start_y; y < ph+1; y += project->stages[selected_stage].tile_height)
+	{
+		drawLine(-1, y, pw+1, y);
+		for(int x = start_x; x < pw+1; x += project->stages[selected_stage].tile_width)
+		{
+			drawLine(x, -1, x, ph+1);
+		}
+	}
 }
 
 void wxIrrlicht::UpdateSpriteAnimationSheet()

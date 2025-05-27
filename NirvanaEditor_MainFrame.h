@@ -85,6 +85,8 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 	protected:
 		void OnMainTabChanged( wxAuiNotebookEvent& event );
 
+		void OnNirvanaClose( wxCloseEvent& event );
+
 		void OnNewProject( wxCommandEvent& event );
 		void OnOpenProject( wxCommandEvent& event );
 		void OnSaveProject( wxCommandEvent& event );

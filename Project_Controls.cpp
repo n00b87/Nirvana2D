@@ -2970,12 +2970,16 @@ void NirvanaEditor_MainFrame::OnMapEditSettings_ShowShapes_Checked( wxCommandEve
 
 void NirvanaEditor_MainFrame::OnMapEditSettings_ShowGrid_Checked( wxCommandEvent& event )
 {
+	map_editor->getMapViewControl()->show_grid = event.IsChecked();
 }
 
 void NirvanaEditor_MainFrame::OnMapEditSettings_GridColor_Change( wxColourPickerEvent& event )
 {
+	wxColour grid_color = event.GetColour();
+	map_editor->getMapViewControl()->grid_color.set(255, grid_color.GetRed(), grid_color.GetGreen(), grid_color.GetBlue());
 }
 
 void NirvanaEditor_MainFrame::OnMapEditSettings_CameraSpeed_SpinCtrl( wxSpinEvent& event )
 {
+	map_editor->getMapViewControl()->scroll_speed = event.GetValue();
 }

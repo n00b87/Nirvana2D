@@ -100,6 +100,11 @@ class wxIrrlicht : public wxControl {
 
         int stage_edit_tool = -1;
 
+        bool show_grid = false;
+        irr::video::SColor grid_color;
+
+        void util_drawGrid();
+
         bool debug_flag = true;
         wxString debug_string = _("");
 
