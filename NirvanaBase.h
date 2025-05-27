@@ -31,6 +31,8 @@
 #include <wx/checklst.h>
 #include <wx/textctrl.h>
 #include <wx/spinctrl.h>
+#include <wx/checkbox.h>
+#include <wx/clrpicker.h>
 #include <wx/aui/auibook.h>
 #include <wx/listbox.h>
 #include <wx/propgrid/propgrid.h>
@@ -129,6 +131,19 @@ class Nirvana_MainFrame : public wxFrame
 		wxSpinCtrlDouble* m_mapEdit_layerVScroll_spinCtrlDouble;
 		wxStaticText* m_staticText5611;
 		wxSpinCtrl* m_mapEdit_layerAlpha_spinCtrl;
+		wxPanel* m_panel56;
+		wxPanel* m_panel57;
+		wxStaticText* m_staticText991;
+		wxStaticText* m_staticText104;
+		wxCheckBox* m_mapEdit_showShapes_checkBox;
+		wxStaticText* m_staticText105;
+		wxCheckBox* m_mapEdit_showGrid_checkBox;
+		wxStaticText* m_staticText103;
+		wxColourPickerCtrl* m_mapEdit_gridColor_colourPicker;
+		wxPanel* m_panel58;
+		wxStaticText* m_staticText101;
+		wxStaticText* m_staticText102;
+		wxSpinCtrl* m_mapEdit_cameraSpeed_spinCtrl;
 		wxPanel* m_panel14;
 		wxAuiNotebook* m_mapEdit_layerObjectTools_auinotebook;
 		wxPanel* m_mapEdit_tile_panel;
@@ -352,6 +367,10 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnMapEdit_LayerHScroll( wxSpinDoubleEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_LayerVScroll( wxSpinDoubleEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_LayerAlpha( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnMapEditSettings_ShowShapes_Checked( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEditSettings_ShowGrid_Checked( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEditSettings_GridColor_Change( wxColourPickerEvent& event ) { event.Skip(); }
+		virtual void OnMapEditSettings_CameraSpeed_SpinCtrl( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnMapEditToolsTabChanged( wxAuiNotebookEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_TileTool_Select( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_TileTool_BoxSelect( wxCommandEvent& event ) { event.Skip(); }
@@ -464,7 +483,7 @@ class Nirvana_MainFrame : public wxFrame
 
 		void m_splitter1OnIdle( wxIdleEvent& )
 		{
-			m_splitter1->SetSashPosition( 668 );
+			m_splitter1->SetSashPosition( 662 );
 			m_splitter1->Disconnect( wxEVT_IDLE, wxIdleEventHandler( Nirvana_MainFrame::m_splitter1OnIdle ), NULL, this );
 		}
 

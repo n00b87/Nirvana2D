@@ -2958,3 +2958,24 @@ void NirvanaEditor_MainFrame::OnMapSetTiled( wxCommandEvent& event )
 {
 	map_editor->getMapViewControl()->tile_snap = true;
 }
+
+
+void NirvanaEditor_MainFrame::OnMapEditSettings_ShowShapes_Checked( wxCommandEvent& event )
+{
+	map_editor->getMapViewControl()->show_shapes_all = event.IsChecked();
+
+	//if(map_editor->getMapViewControl()->show_shapes_all)
+	//	wxMessageBox(_("Show Shapes"));
+}
+
+void NirvanaEditor_MainFrame::OnMapEditSettings_ShowGrid_Checked( wxCommandEvent& event )
+{
+}
+
+void NirvanaEditor_MainFrame::OnMapEditSettings_GridColor_Change( wxColourPickerEvent& event )
+{
+}
+
+void NirvanaEditor_MainFrame::OnMapEditSettings_CameraSpeed_SpinCtrl( wxSpinEvent& event )
+{
+}

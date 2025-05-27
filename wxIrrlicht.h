@@ -254,6 +254,7 @@ class wxIrrlicht : public wxControl {
 		irr::u32 getSpriteAlpha(int spr_id);
 		void util_drawSprites(int canvas_id);
 		void util_drawSelectedSprites();
+		void util_drawShapes(int layer_index);
 
 
 		// TILES
@@ -491,6 +492,7 @@ class wxIrrlicht : public wxControl {
 		std::vector<int> selected_points;
 		std::vector<sprite2D_physics_obj> stage_physics_obj;
 
+        bool show_shapes_all = false;
         bool pick_shape_update = false;
         void pickShape(int start_x, int start_y, int end_x, int end_y);
 

@@ -396,6 +396,28 @@ void wxIrrlicht::OnRender() {
             }
         }
 
+        //Draw shapes in other layer
+        if(selected_stage >= 0 && selected_stage < project->stages.size() && show_shapes_all)
+		{
+			for(int i = 0; i < project->stages[selected_stage].layers.size(); i++)
+			{
+				if(project->stages[selected_stage].layers[i].layer_type != LAYER_TYPE_SPRITE)
+					continue;
+
+				if(i == selected_layer)
+					continue;
+
+				if(!project->stages[selected_stage].layers[i].ref_canvas)
+					continue;
+
+				//std::cout << "Draw Shapes in Layer " << i << std::endl;
+				util_drawShapes(i);
+			}
+		}
+
+		//Set Target to back buffer
+		m_pDriver->setRenderTarget(canvas[back_buffer].texture, false, false);
+
         test_init = false;
 
         //UI LAYER
@@ -8414,6 +8436,125 @@ void wxIrrlicht::util_setSpriteLayerOffset(int layer)
 	int layer_offset_y = project->stages[selected_stage].layers[layer].scroll_speed.Y * scroll_offset_y;
 	setCanvasOffset(canvas_id, layer_offset_x, layer_offset_y);
 }
+
+
+void wxIrrlicht::util_drawShapes(int layer_index)
+{
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(project->stages[selected_stage].layers[layer_index].layer_type != LAYER_TYPE_SPRITE)
+		return;
+
+	int ref_canvas = project->stages[selected_stage].layers[layer_index].ref_canvas;
+
+	if(ref_canvas < 0 || ref_canvas >= canvas.size())
+		return;
+
+	mapEdit_getContext();
+	setActiveCanvas(ui_layer);
+
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, layer_index).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, layer_index).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+
+	setColor(rgb(255, 255, 255));
+
+	double canvas_offset_x = 0;
+	double canvas_offset_y = 0;
+	getCanvasOffset(ref_canvas, &canvas_offset_x, &canvas_offset_y);
+
+	int off_x = (int)canvas_offset_x;
+	int off_y = (int)canvas_offset_y;
+
+	//draw shapes
+	int shape_x = 0;
+	int shape_y = 0;
+
+	int non_selected_shape_color = rgb(255,0,255);
+
+	//std::cout << "shape count: " << project->stages[selected_stage].layers[selected_layer].layer_shapes.size() << std::endl;
+
+	for(int i = 0; i < project->stages[selected_stage].layers[layer_index].layer_shapes.size(); i++)
+	{
+		int shape_type = project->stages[selected_stage].layers[layer_index].layer_shapes[i].shape_type;
+
+
+		if(shape_type == SPRITE_SHAPE_BOX)
+		{
+			setColor(non_selected_shape_color);
+
+			//std::cout << "cir: " << selected_shape << std::endl;
+			int box_width = (int)project->stages[selected_stage].layers[layer_index].layer_shapes[i].box_width;
+			int box_height = (int)project->stages[selected_stage].layers[layer_index].layer_shapes[i].box_height;
+			int box_x = project->stages[selected_stage].layers[layer_index].layer_shapes[i].offset_x-adj_scroll_offset_x;
+			int box_y = project->stages[selected_stage].layers[layer_index].layer_shapes[i].offset_y-adj_scroll_offset_y;
+
+			drawRect(box_x, box_y, box_width, box_height);
+		}
+		else if(shape_type == SPRITE_SHAPE_CIRCLE)
+		{
+			setColor(non_selected_shape_color);
+
+			int circle_radius = (int)project->stages[selected_stage].layers[layer_index].layer_shapes[i].radius;
+			int circle_x = project->stages[selected_stage].layers[layer_index].layer_shapes[i].offset_x-adj_scroll_offset_x;
+			int circle_y = project->stages[selected_stage].layers[layer_index].layer_shapes[i].offset_y-adj_scroll_offset_y;
+
+
+			drawCircle(circle_x, circle_y, circle_radius);
+		}
+		else if(shape_type == SPRITE_SHAPE_POLYGON || shape_type == SPRITE_SHAPE_CHAIN)
+		{
+			setColor(non_selected_shape_color);
+
+			if(project->stages[selected_stage].layers[layer_index].layer_shapes[i].points.size() >= 3)
+			{
+				shape_x = project->stages[selected_stage].layers[layer_index].layer_shapes[i].points[0].X-adj_scroll_offset_x;
+				shape_y = project->stages[selected_stage].layers[layer_index].layer_shapes[i].points[0].Y-adj_scroll_offset_y;
+
+				//std::string shape_name = project->stages[selected_stage].layers[layer_index].layer_shapes[i].shape_name;
+				//std::cout << "SHAPE[" << shape_name << "] =" << shape_x << ", " << shape_y << std::endl;
+			}
+			else
+				continue;
+
+			for(int point_index = 1; point_index < project->stages[selected_stage].layers[layer_index].layer_shapes[i].points.size(); point_index++)
+			{
+				setColor(non_selected_shape_color);
+
+				drawLine(shape_x,
+						 shape_y,
+						 project->stages[selected_stage].layers[layer_index].layer_shapes[i].points[point_index].X-adj_scroll_offset_x,
+						 project->stages[selected_stage].layers[layer_index].layer_shapes[i].points[point_index].Y-adj_scroll_offset_y);
+
+				shape_x = project->stages[selected_stage].layers[layer_index].layer_shapes[i].points[point_index].X-adj_scroll_offset_x;
+				shape_y = project->stages[selected_stage].layers[layer_index].layer_shapes[i].points[point_index].Y-adj_scroll_offset_y;
+			}
+			if(project->stages[selected_stage].layers[layer_index].layer_shapes[i].points.size() > 0 && shape_type == SPRITE_SHAPE_POLYGON)
+			{
+				setColor(non_selected_shape_color);
+
+				int start_x = project->stages[selected_stage].layers[layer_index].layer_shapes[i].points[0].X-adj_scroll_offset_x;
+				int start_y = project->stages[selected_stage].layers[layer_index].layer_shapes[i].points[0].Y-adj_scroll_offset_y;
+				drawLine(shape_x, shape_y, start_x, start_y);
+			}
+
+			shape_x = 0;
+			shape_y = 0;
+		}
+	}
+}
+
 
 void wxIrrlicht::util_drawSelectedSprites()
 {

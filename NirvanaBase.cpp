@@ -514,6 +514,119 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_panel40->Layout();
 	bSizer871->Fit( m_panel40 );
 	m_projectManager_auinotebook->AddPage( m_panel40, _("Layers"), false, wxNullBitmap );
+	m_panel56 = new wxPanel( m_projectManager_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer1762;
+	bSizer1762 = new wxBoxSizer( wxVERTICAL );
+
+	m_panel57 = new wxPanel( m_panel56, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE|wxTAB_TRAVERSAL );
+	m_panel57->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_GRAYTEXT ) );
+
+	wxBoxSizer* bSizer177;
+	bSizer177 = new wxBoxSizer( wxVERTICAL );
+
+	m_staticText991 = new wxStaticText( m_panel57, wxID_ANY, _("Viewport"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText991->Wrap( -1 );
+	m_staticText991->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, true, wxEmptyString ) );
+	m_staticText991->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer177->Add( m_staticText991, 0, wxALL, 5 );
+
+	wxBoxSizer* bSizer178;
+	bSizer178 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText104 = new wxStaticText( m_panel57, wxID_ANY, _("Show Shapes"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText104->Wrap( -1 );
+	m_staticText104->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer178->Add( m_staticText104, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_mapEdit_showShapes_checkBox = new wxCheckBox( m_panel57, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_mapEdit_showShapes_checkBox->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer178->Add( m_mapEdit_showShapes_checkBox, 2, wxALL, 5 );
+
+
+	bSizer177->Add( bSizer178, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer180;
+	bSizer180 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText105 = new wxStaticText( m_panel57, wxID_ANY, _("Show Grid"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText105->Wrap( -1 );
+	m_staticText105->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer180->Add( m_staticText105, 1, wxALL, 5 );
+
+	m_mapEdit_showGrid_checkBox = new wxCheckBox( m_panel57, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_mapEdit_showGrid_checkBox->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer180->Add( m_mapEdit_showGrid_checkBox, 2, wxALL, 5 );
+
+
+	bSizer177->Add( bSizer180, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer183;
+	bSizer183 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText103 = new wxStaticText( m_panel57, wxID_ANY, _("Grid Color"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText103->Wrap( -1 );
+	m_staticText103->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer183->Add( m_staticText103, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_mapEdit_gridColor_colourPicker = new wxColourPickerCtrl( m_panel57, wxID_ANY, *wxBLACK, wxDefaultPosition, wxDefaultSize, wxCLRP_DEFAULT_STYLE );
+	bSizer183->Add( m_mapEdit_gridColor_colourPicker, 2, wxALL, 5 );
+
+
+	bSizer177->Add( bSizer183, 1, wxEXPAND, 5 );
+
+
+	m_panel57->SetSizer( bSizer177 );
+	m_panel57->Layout();
+	bSizer177->Fit( m_panel57 );
+	bSizer1762->Add( m_panel57, 0, wxEXPAND | wxALL, 5 );
+
+	m_panel58 = new wxPanel( m_panel56, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE|wxTAB_TRAVERSAL );
+	m_panel58->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_GRAYTEXT ) );
+
+	wxBoxSizer* bSizer181;
+	bSizer181 = new wxBoxSizer( wxVERTICAL );
+
+	m_staticText101 = new wxStaticText( m_panel58, wxID_ANY, _("Camera"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText101->Wrap( -1 );
+	m_staticText101->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, true, wxEmptyString ) );
+	m_staticText101->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer181->Add( m_staticText101, 0, wxALL, 5 );
+
+	wxBoxSizer* bSizer182;
+	bSizer182 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText102 = new wxStaticText( m_panel58, wxID_ANY, _("Move Speed"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText102->Wrap( -1 );
+	m_staticText102->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer182->Add( m_staticText102, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_mapEdit_cameraSpeed_spinCtrl = new wxSpinCtrl( m_panel58, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10, 0 );
+	m_mapEdit_cameraSpeed_spinCtrl->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer182->Add( m_mapEdit_cameraSpeed_spinCtrl, 2, wxALL, 5 );
+
+
+	bSizer181->Add( bSizer182, 0, wxEXPAND, 5 );
+
+
+	m_panel58->SetSizer( bSizer181 );
+	m_panel58->Layout();
+	bSizer181->Fit( m_panel58 );
+	bSizer1762->Add( m_panel58, 0, wxEXPAND | wxALL, 5 );
+
+
+	m_panel56->SetSizer( bSizer1762 );
+	m_panel56->Layout();
+	bSizer1762->Fit( m_panel56 );
+	m_projectManager_auinotebook->AddPage( m_panel56, _("Settings"), false, wxNullBitmap );
 
 	bSizer13->Add( m_projectManager_auinotebook, 1, wxEXPAND | wxALL, 5 );
 
@@ -946,7 +1059,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_panel2->SetSizer( bSizer7 );
 	m_panel2->Layout();
 	bSizer7->Fit( m_panel2 );
-	m_splitter1->SplitVertically( m_panel1, m_panel2, 668 );
+	m_splitter1->SplitVertically( m_panel1, m_panel2, 662 );
 	bSizer12->Add( m_splitter1, 1, wxEXPAND, 5 );
 
 
@@ -1723,6 +1836,10 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_layerHScroll_spinCtrlDouble->Connect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( Nirvana_MainFrame::OnMapEdit_LayerHScroll ), NULL, this );
 	m_mapEdit_layerVScroll_spinCtrlDouble->Connect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( Nirvana_MainFrame::OnMapEdit_LayerVScroll ), NULL, this );
 	m_mapEdit_layerAlpha_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnMapEdit_LayerAlpha ), NULL, this );
+	m_mapEdit_showShapes_checkBox->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEditSettings_ShowShapes_Checked ), NULL, this );
+	m_mapEdit_showGrid_checkBox->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEditSettings_ShowGrid_Checked ), NULL, this );
+	m_mapEdit_gridColor_colourPicker->Connect( wxEVT_COMMAND_COLOURPICKER_CHANGED, wxColourPickerEventHandler( Nirvana_MainFrame::OnMapEditSettings_GridColor_Change ), NULL, this );
+	m_mapEdit_cameraSpeed_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnMapEditSettings_CameraSpeed_SpinCtrl ), NULL, this );
 	m_mapEdit_layerObjectTools_auinotebook->Connect( wxEVT_COMMAND_AUINOTEBOOK_PAGE_CHANGED, wxAuiNotebookEventHandler( Nirvana_MainFrame::OnMapEditToolsTabChanged ), NULL, this );
 	this->Connect( m_mapEdit_tileToolbar_select_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_TileTool_Select ) );
 	this->Connect( m_mapEdit_tileToolbar_boxSelect_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_TileTool_BoxSelect ) );
