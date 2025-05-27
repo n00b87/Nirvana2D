@@ -109,10 +109,34 @@ Nirvana_MainFrame( parent )
 
 	map_editor->getMapViewControl()->m_mapEdit_collisionShape_listBox = m_mapEdit_collisionShape_listBox;
 
+
+	//Default settings
+	map_editor->getMapViewControl()->show_grid = false;
+	map_editor->getMapViewControl()->show_shapes_all = false;
+
+
 	//load config
 	wxFileName fname(wxStandardPaths::Get().GetExecutablePath());
 	fname.AppendDir(_("config"));
 	fname.SetFullName(_("nirvana.config"));
+
+	if(!fname.Exists())
+	{
+		//Create config file if it doesn't exists
+		wxFile cfg_file(fname.GetAbsolutePath(), wxFile::write);
+
+		if(cfg_file.IsOpened())
+		{
+			cfg_file.Write(_("MAP_EDITOR_MAP_CONTROL scroll_speed=3 show_grid=true grid_color=4291348680 show_shapes=true;") + _("\n"));
+			cfg_file.Write(_("MAP_EDITOR_TILE_SELECT_CONTROL scroll_speed=3;") + _("\n"));
+			cfg_file.Write(_("TILE_EDITOR_ANIMATION_SHEET_CONTROL scroll_speed=3;") + _("\n"));
+			cfg_file.Write(_("TILE_EDITOR_MASK_SHEET_CONTROL scroll_speed=3;") + _("\n"));
+			cfg_file.Write(_("SPRITE_EDITOR_ANIMATION_SHEET_CONTROL scroll_speed=3;") + _("\n"));
+			cfg_file.Write(_("SPRITE_EDITOR_SHAPE_SHEET_CONTROL scroll_speed=3;") + _("\n"));
+
+			cfg_file.Close();
+		}
+	}
 
 	if(fname.Exists())
 	{
@@ -139,6 +163,20 @@ Nirvana_MainFrame( parent )
 					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
 					{
 						p_cmd[i].dict[obj_index].val.ToInt(&map_editor->getMapViewControl()->scroll_speed);
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("show_grid"))==0)
+					{
+						map_editor->getMapViewControl()->show_grid = ( (p_cmd[i].dict[obj_index].val.Lower().Trim().compare(_("true"))==0) ? true : false );
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("grid_color"))==0)
+					{
+						unsigned int g_color = 0;
+						p_cmd[i].dict[obj_index].val.ToUInt(&g_color);
+						map_editor->getMapViewControl()->grid_color.set(g_color);
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("show_shapes"))==0)
+					{
+						map_editor->getMapViewControl()->show_shapes_all = ( (p_cmd[i].dict[obj_index].val.Lower().Trim().compare(_("true"))==0) ? true : false );
 					}
 				}
 			}
@@ -194,6 +232,59 @@ Nirvana_MainFrame( parent )
 			}
 		}
 	}
+
+	m_mapEdit_showShapes_checkBox->SetValue( map_editor->getMapViewControl()->show_shapes_all );
+	m_mapEdit_showGrid_checkBox->SetValue( map_editor->getMapViewControl()->show_grid );
+	m_mapEdit_gridColor_colourPicker->SetColour( wxColour( map_editor->getMapViewControl()->grid_color.getRed(),
+														   map_editor->getMapViewControl()->grid_color.getGreen(),
+														   map_editor->getMapViewControl()->grid_color.getBlue(),
+														   255 ) );
+	m_mapEdit_cameraSpeed_spinCtrl->SetValue( map_editor->getMapViewControl()->scroll_speed );
+}
+
+void NirvanaEditor_MainFrame::OnNirvanaClose( wxCloseEvent& event )
+{
+	wxFileName fname(wxStandardPaths::Get().GetExecutablePath());
+	fname.AppendDir(_("config"));
+	fname.SetFullName(_("nirvana.config"));
+
+	//Create config file if it doesn't exists
+	wxFile cfg_file(fname.GetAbsolutePath(), wxFile::write);
+
+	if(cfg_file.IsOpened())
+	{
+		wxString map_control_config = _("MAP_EDITOR_MAP_CONTROL ");
+		map_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getMapViewControl()->scroll_speed) + _(" ");
+		map_control_config += _("show_grid=") + (map_editor->getMapViewControl()->show_grid ? _("true") : _("false")) + _(" ");
+		map_control_config += _("grid_color=") + wxString::Format(_("%u"), map_editor->getMapViewControl()->grid_color.color) + _(" ");
+		map_control_config += _("show_shapes=") + (map_editor->getMapViewControl()->show_shapes_all ? _("true") : _("false")) + _(";");
+
+		wxString map_tileSelect_control_config = _("MAP_EDITOR_TILE_SELECT_CONTROL ");
+		map_tileSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getTileSelectControl()->scroll_speed) + _(";");
+
+		wxString tile_animation_control_config = _("TILE_EDITOR_ANIMATION_SHEET_CONTROL ");
+		tile_animation_control_config += _("scroll_speed=") + wxString::Format(_("%i"), tile_editor->getAnimationSheetControl()->scroll_speed) + _(";");
+
+		wxString tile_mask_control_config = _("TILE_EDITOR_MASK_SHEET_CONTROL ");
+		tile_mask_control_config += _("scroll_speed=") + wxString::Format(_("%i"), tile_editor->getMaskSheetControl()->scroll_speed) + _(";");
+
+		wxString sprite_animation_control_config = _("SPRITE_EDITOR_ANIMATION_SHEET_CONTROL ");
+		sprite_animation_control_config += _("scroll_speed=") + wxString::Format(_("%i"), sprite_editor->getAnimationSheetControl()->scroll_speed) + _(";");
+
+		wxString sprite_shape_control_config = _("SPRITE_EDITOR_SHAPE_SHEET_CONTROL ");
+		sprite_shape_control_config += _("scroll_speed=") + wxString::Format(_("%i"), sprite_editor->getCollisionControl()->scroll_speed) + _(";");
+
+		cfg_file.Write(map_control_config + _("\n"));
+		cfg_file.Write(map_tileSelect_control_config + _("\n"));
+		cfg_file.Write(tile_animation_control_config + _("\n"));
+		cfg_file.Write(tile_mask_control_config + _("\n"));
+		cfg_file.Write(sprite_animation_control_config + _("\n"));
+		cfg_file.Write(sprite_shape_control_config + _("\n"));
+
+		cfg_file.Close();
+	}
+
+	Close();
 }
 
 void NirvanaEditor_MainFrame::PreDialog()

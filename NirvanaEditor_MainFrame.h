@@ -85,6 +85,8 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 	protected:
 		void OnMainTabChanged( wxAuiNotebookEvent& event );
 
+		void OnNirvanaClose( wxCloseEvent& event );
+
 		void OnNewProject( wxCommandEvent& event );
 		void OnOpenProject( wxCommandEvent& event );
 		void OnSaveProject( wxCommandEvent& event );
@@ -107,6 +109,11 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnMapEdit_CopyLayerClick( wxCommandEvent& event );
 		void OnMapEdit_ShowAllLayersClick( wxCommandEvent& event );
 		void OnMapEdit_HideAllLayersClick( wxCommandEvent& event );
+
+		void OnMapEditSettings_ShowShapes_Checked( wxCommandEvent& event );
+		void OnMapEditSettings_ShowGrid_Checked( wxCommandEvent& event );
+		void OnMapEditSettings_GridColor_Change( wxColourPickerEvent& event );
+		void OnMapEditSettings_CameraSpeed_SpinCtrl( wxSpinEvent& event );
 
 		void OnProjectItemActivated( wxTreeEvent& event );
 		void OnActiveLayerSelect( wxCommandEvent& event );
