@@ -301,7 +301,7 @@ void wxIrrlicht::OnRender() {
 
             if(canvas[canvas_id].texture) // && canvas[canvas_id].visible)
             {
-            	irr::core::dimension2d tst(this->GetSize().GetWidth(), this->GetSize().GetHeight());
+            	irr::core::dimension2du tst(this->GetSize().GetWidth(), this->GetSize().GetHeight());
             	//irr::core::vector2d<f32> bb_size(canvas[back_buffer].viewport.dimension.Width, canvas[back_buffer].viewport.dimension.Height);
             	irr::core::vector2d<f32> bb_size(canvas[back_buffer].dimension.Width, canvas[back_buffer].dimension.Height);
                 irr::core::rect<s32> dest(canvas[canvas_id].viewport.position, canvas[canvas_id].viewport.dimension);
