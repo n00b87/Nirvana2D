@@ -82,7 +82,7 @@ void Nirvana_TileEditor::initAnimationSheet()
 
 	irr::SIrrlichtCreationParameters params;
     params.DriverType = irr::video::EDT_OPENGL;
-    params.WindowSize = irr::core::dimension2d(t_size, t_size);
+    params.WindowSize = irr::core::dimension2du(t_size, t_size);
 
 	tileSheet_target->InitIrr(&params);
 	tileSheet_target->StartRendering();
@@ -120,7 +120,7 @@ void Nirvana_TileEditor::initAnimationFrame()
 
 	irr::SIrrlichtCreationParameters params;
     params.DriverType = irr::video::EDT_BURNINGSVIDEO;
-    params.WindowSize = irr::core::dimension2d(t_size, 96);
+    params.WindowSize = irr::core::dimension2du(t_size, 96);
 
 	tileFrame_target->InitIrr(&params);
 	tileFrame_target->StartRendering();
@@ -160,7 +160,7 @@ void Nirvana_TileEditor::initAnimationPreview()
 
 	irr::SIrrlichtCreationParameters params;
     params.DriverType = irr::video::EDT_BURNINGSVIDEO;
-    params.WindowSize = irr::core::dimension2d(t_size, t_size);
+    params.WindowSize = irr::core::dimension2du(t_size, t_size);
 
 	tilePreview_target->InitIrr(&params);
 	tilePreview_target->StartRendering();
@@ -200,7 +200,7 @@ void Nirvana_TileEditor::initMaskSheet()
 
 	irr::SIrrlichtCreationParameters params;
     params.DriverType = irr::video::EDT_OPENGL;
-    params.WindowSize = irr::core::dimension2d(t_size, t_size);
+    params.WindowSize = irr::core::dimension2du(t_size, t_size);
 
 	tileMask_target->InitIrr(&params);
 	tileMask_target->StartRendering();

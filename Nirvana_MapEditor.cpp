@@ -77,7 +77,7 @@ void Nirvana_MapEditor::initMapView()
 
 	irr::SIrrlichtCreationParameters params;
     params.DriverType = irr::video::EDT_OPENGL;
-    params.WindowSize = irr::core::dimension2d(t_size, t_size);
+    params.WindowSize = irr::core::dimension2du(t_size, t_size);
 
 	map_target->InitIrr(&params);
 	map_target->StartRendering();
@@ -119,7 +119,7 @@ void Nirvana_MapEditor::initTileSelect()
 
 	irr::SIrrlichtCreationParameters params;
     params.DriverType = irr::video::EDT_OPENGL;
-    params.WindowSize = irr::core::dimension2d(t_size, t_size);
+    params.WindowSize = irr::core::dimension2du(t_size, t_size);
 
 	tileSelect_target->InitIrr(&params);
 	tileSelect_target->StartRendering();

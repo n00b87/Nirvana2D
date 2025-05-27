@@ -82,7 +82,7 @@ void Nirvana_SpriteEditor::initCollision()
 
 	irr::SIrrlichtCreationParameters params;
     params.DriverType = irr::video::EDT_OPENGL;
-    params.WindowSize = irr::core::dimension2d(t_size, t_size);
+    params.WindowSize = irr::core::dimension2du(t_size, t_size);
 
 	spriteCollision_target->InitIrr(&params);
 	spriteCollision_target->StartRendering();
@@ -122,7 +122,7 @@ void Nirvana_SpriteEditor::initAnimationSheet()
 
 	irr::SIrrlichtCreationParameters params;
     params.DriverType = irr::video::EDT_OPENGL;
-    params.WindowSize = irr::core::dimension2d(t_size, t_size);
+    params.WindowSize = irr::core::dimension2du(t_size, t_size);
 
 	spriteSheet_target->InitIrr(&params);
 	spriteSheet_target->StartRendering();
@@ -160,7 +160,7 @@ void Nirvana_SpriteEditor::initAnimationFrame()
 
 	irr::SIrrlichtCreationParameters params;
     params.DriverType = irr::video::EDT_BURNINGSVIDEO;
-    params.WindowSize = irr::core::dimension2d(t_size, 96);
+    params.WindowSize = irr::core::dimension2du(t_size, 96);
 
 	spriteFrame_target->InitIrr(&params);
 	spriteFrame_target->StartRendering();
@@ -200,7 +200,7 @@ void Nirvana_SpriteEditor::initAnimationPreview()
 
 	irr::SIrrlichtCreationParameters params;
     params.DriverType = irr::video::EDT_BURNINGSVIDEO;
-    params.WindowSize = irr::core::dimension2d(t_size, t_size);
+    params.WindowSize = irr::core::dimension2du(t_size, t_size);
 
 	spritePreview_target->InitIrr(&params);
 	spritePreview_target->StartRendering();
