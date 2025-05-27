@@ -290,7 +290,7 @@ void Nirvana_MapEditor::selectLayer(int layer_index)
 
 			getTileSelectControl()->current_sheet_image = getTileSelectControl()->loadImage(gfx_dir.GetAbsolutePath().ToStdString());
 
-			std::cout << "CURRENT SHEET: " << getTileSelectControl()->current_sheet_image << std::endl;
+			//std::cout << "CURRENT SHEET: " << getTileSelectControl()->current_sheet_image << std::endl;
 
 			//getTileSelectControl()->setActiveCanvas(getTileSelectControl()->sheet_canvas);
 			//getTileSelectControl()->drawImage_BlitEx(getTileSelectControl()->current_sheet_image, 0, 0, 4, 256, 0, 0, 512, 256);

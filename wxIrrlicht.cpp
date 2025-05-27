@@ -9896,7 +9896,7 @@ void wxIrrlicht::initLayer(int layer_index)
 
 	wxFileName gfx_path(project->getDir());
 
-	std::cout << "P_TEST: " << layer_index << ", " << project->getLayerType(selected_stage, layer_index) << ", " << project->tile_path << std::endl;
+	//std::cout << "P_TEST: " << layer_index << ", " << project->getLayerType(selected_stage, layer_index) << ", " << project->tile_path << std::endl;
 
 	if(project)
 		gfx_path.AppendDir(project->tile_path);
@@ -9921,7 +9921,7 @@ void wxIrrlicht::initLayer(int layer_index)
 		}
 		else
 		{
-			std::cout << "dbg tileset: " << project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name << " -> " << tset << std::endl;
+			//std::cout << "dbg tileset: " << project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name << " -> " << tset << std::endl;
 			wxFileName img_path = gfx_path;
 			img_path.SetFullName(project->tileset[tset].file);
 
