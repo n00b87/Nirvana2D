@@ -1,0 +1,4 @@
+SPRITE name="chr" frame_size=128,196;
+SHAPE type=SPRITE_SHAPE_BOX point=8,138 size=87,57 ;
+ANIMATION name="SPRITE_BASE_ANIMATION" frame_count=1 fps=0 frame=0 ;
+ANIMATION name="hover" frame_count=3 fps=6 frame=0,1,2 ;

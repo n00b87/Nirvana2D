@@ -1,0 +1,5 @@
+SPRITE name="grz" frame_size=64,64;
+SHAPE type=SPRITE_SHAPE_BOX point=20,0 size=23,64 ;
+ANIMATION name="SPRITE_BASE_ANIMATION" frame_count=1 fps=0 frame=0 ;
+ANIMATION name="Walk_Right" frame_count=4 fps=6 frame=0,1,0,3 ;
+ANIMATION name="Walk_Left" frame_count=4 fps=7 frame=28,29,30,31 ;

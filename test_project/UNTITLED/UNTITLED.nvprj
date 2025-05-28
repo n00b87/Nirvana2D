@@ -1,0 +1,21 @@
+NIRVANA version=1.0;
+PROJECT name="UNTITLED";
+MEDIA_PATH bkg="bkg" tile="tiles" stage="stages" sprite="sprites";
+
+---------------- SPRITES ---------------------;
+
+SPRITE file="graizor.png";
+SPRITE file="chronos.png";
+SPRITE file="grenguy.png";
+
+
+---------------- TILESETS ---------------------;
+
+TILESET file="tiles2.png";
+TILESET file="tilesheet.png";
+
+
+---------------- STAGES ---------------------;
+
+STAGE file="st1.stage";
+STAGE file="st2.stage";
