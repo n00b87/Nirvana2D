@@ -13,6 +13,9 @@
 
 void NirvanaEditor_MainFrame::newProject(wxFileName project_path, wxString project_name, bool create_flag)
 {
+	if(!editor_init)
+		return;
+
 	int current_main_tab = m_editorMainTab_auinotebook->GetSelection();
 	int current_project_tab = m_projectManager_auinotebook->GetSelection();
 	int current_mapEditTools_tab = m_mapEdit_layerObjectTools_auinotebook->GetSelection();
@@ -307,6 +310,9 @@ void NirvanaEditor_MainFrame::newProject(wxFileName project_path, wxString proje
 
 void NirvanaEditor_MainFrame::OnNewProject( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	NirvanaEditor_NewProject_Dialog* dialog = new NirvanaEditor_NewProject_Dialog(this);
 
 	dialog->ShowModal();
@@ -322,7 +328,7 @@ void NirvanaEditor_MainFrame::OnNewProject( wxCommandEvent& event )
 
 wxFileName NirvanaEditor_MainFrame::openFileDialog(wxString title, wxString default_wildcard, int flag)
 {
-    wxFileDialog openFileDialog(this, title, "", "", default_wildcard, flag);
+	wxFileDialog openFileDialog(this, title, "", "", default_wildcard, flag);
     if (openFileDialog.ShowModal() == wxID_CANCEL)
         return wxFileName();     // the user changed idea...
 
@@ -332,6 +338,9 @@ wxFileName NirvanaEditor_MainFrame::openFileDialog(wxString title, wxString defa
 
 bool NirvanaEditor_MainFrame::loadProject(wxFileName project_file)
 {
+	if(!editor_init)
+		return false;
+
 	wxFile pfile(project_file.GetAbsolutePath(), wxFile::read);
 	wxString p_data = _("");
 
@@ -438,6 +447,9 @@ bool NirvanaEditor_MainFrame::loadProject(wxFileName project_file)
 
 void NirvanaEditor_MainFrame::OnOpenProject( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	PreDialog();
 	wxFileName project_fname = openFileDialog(_("Open Project"), _("Nirvana2D Project (*.nvprj)|*.nvprj"), wxFD_OPEN | wxFD_FILE_MUST_EXIST);
 	PostDialog();
@@ -465,6 +477,9 @@ void NirvanaEditor_MainFrame::OnOpenProject( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -1897,6 +1912,9 @@ bool NirvanaEditor_MainFrame::generateStages()
 
 void NirvanaEditor_MainFrame::OnGenerate( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -1952,6 +1970,9 @@ void NirvanaEditor_MainFrame::OnGenerate( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnNewStage( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -1988,6 +2009,9 @@ void NirvanaEditor_MainFrame::OnNewStage( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnDeleteStage( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2040,6 +2064,9 @@ void NirvanaEditor_MainFrame::OnDeleteStage( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_StageSettingsClick( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2081,6 +2108,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_StageSettingsClick( wxCommandEvent& even
 
 void NirvanaEditor_MainFrame::OnMapEdit_CopyStageClick( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2099,6 +2129,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_CopyStageClick( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_NewLayerClick( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2151,6 +2184,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_NewLayerClick( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_CopyLayerClick( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2180,6 +2216,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_CopyLayerClick( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShowAllLayersClick( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2203,6 +2242,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShowAllLayersClick( wxCommandEvent& even
 
 void NirvanaEditor_MainFrame::OnMapEdit_HideAllLayersClick( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2227,6 +2269,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_HideAllLayersClick( wxCommandEvent& even
 
 void NirvanaEditor_MainFrame::OnProjectItemActivated( wxTreeEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	wxTreeItemId selected_item = event.GetItem();
 	bool is_stage = false;
 
@@ -2288,6 +2333,9 @@ void NirvanaEditor_MainFrame::OnProjectItemActivated( wxTreeEvent& event )
 
 void NirvanaEditor_MainFrame::updateMapEditor()
 {
+	if(!editor_init)
+		return;
+
 	//Clear All Canvases
 
 	if(!project)
@@ -2415,24 +2463,36 @@ void NirvanaEditor_MainFrame::updateMapEditor()
 
 void NirvanaEditor_MainFrame::OnEnterMapView( wxMouseEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	map_editor->getMapViewControl()->stage_window_isActive = true;
 	map_editor->getMapViewControl()->mapEdit_tile_selection = map_editor->getTileSelectControl()->mapEdit_tile_selection;
 }
 
 void NirvanaEditor_MainFrame::OnLeaveMapView( wxMouseEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	map_editor->getMapViewControl()->stage_window_isActive = false;
 	map_editor->getMapViewControl()->mapEdit_lastAction_erase = false;
 }
 
 void NirvanaEditor_MainFrame::OnActiveLayerSelect( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	map_editor->selectLayer(event.GetSelection());
 	updateMapEditor();
 }
 
 void NirvanaEditor_MainFrame::OnLayerCheckListSelect( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	wxString layer_name = event.GetString();
 	m_layerName_textCtrl->SetValue(layer_name);
 
@@ -2481,6 +2541,9 @@ void NirvanaEditor_MainFrame::OnLayerCheckListSelect( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnLayerCheckList_Visible_Toggle( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	int selected_item = event.GetSelection();
 	if(selected_item < 0 || selected_item >= m_layerVisible_checkList->GetCount())
 		return;
@@ -2506,6 +2569,9 @@ void NirvanaEditor_MainFrame::OnLayerCheckList_Visible_Toggle( wxCommandEvent& e
 
 void NirvanaEditor_MainFrame::OnMapEdit_LayerNameChange( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(event.GetString().Trim().length()==0)
 		return;
 
@@ -2531,6 +2597,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_LayerNameChange( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_LayerHScroll( wxSpinDoubleEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2550,6 +2619,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_LayerHScroll( wxSpinDoubleEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_LayerVScroll( wxSpinDoubleEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2569,6 +2641,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_LayerVScroll( wxSpinDoubleEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_LayerAlpha( wxSpinEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2587,6 +2662,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_LayerAlpha( wxSpinEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_LayerUpClick( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2631,6 +2709,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_LayerUpClick( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_LayerDownClick( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2675,6 +2756,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_LayerDownClick( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_LayerDeleteClick( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2724,6 +2808,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_LayerDeleteClick( wxCommandEvent& event 
 
 void NirvanaEditor_MainFrame::refreshCurrentLayerUI()
 {
+	if(!editor_init)
+		return;
+
 	m_mapEdit_layerSprite_listBox->Clear();
 
 	wxPGProperty * sprite_id = m_mapEdit_sprite_propertyGrid->GetProperty(_("sprite_id"));
@@ -2791,6 +2878,9 @@ void NirvanaEditor_MainFrame::refreshCurrentLayerUI()
 
 void NirvanaEditor_MainFrame::OnBkg_RenderType( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2814,6 +2904,9 @@ void NirvanaEditor_MainFrame::OnBkg_RenderType( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnBkg_LayerImage( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2856,6 +2949,9 @@ void NirvanaEditor_MainFrame::OnBkg_LayerImage( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_Map_UpdateUI( wxUpdateUIEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2926,6 +3022,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_Map_UpdateUI( wxUpdateUIEvent& event )
 
 void NirvanaEditor_MainFrame::OnCameraToolClick( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -2951,17 +3050,26 @@ void NirvanaEditor_MainFrame::OnCameraToolClick( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapSetFree( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	map_editor->getMapViewControl()->tile_snap = false;
 }
 
 void NirvanaEditor_MainFrame::OnMapSetTiled( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	map_editor->getMapViewControl()->tile_snap = true;
 }
 
 
 void NirvanaEditor_MainFrame::OnMapEditSettings_ShowShapes_Checked( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	map_editor->getMapViewControl()->show_shapes_all = event.IsChecked();
 
 	//if(map_editor->getMapViewControl()->show_shapes_all)
@@ -2970,16 +3078,25 @@ void NirvanaEditor_MainFrame::OnMapEditSettings_ShowShapes_Checked( wxCommandEve
 
 void NirvanaEditor_MainFrame::OnMapEditSettings_ShowGrid_Checked( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	map_editor->getMapViewControl()->show_grid = event.IsChecked();
 }
 
 void NirvanaEditor_MainFrame::OnMapEditSettings_GridColor_Change( wxColourPickerEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	wxColour grid_color = event.GetColour();
 	map_editor->getMapViewControl()->grid_color.set(255, grid_color.GetRed(), grid_color.GetGreen(), grid_color.GetBlue());
 }
 
 void NirvanaEditor_MainFrame::OnMapEditSettings_CameraSpeed_SpinCtrl( wxSpinEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	map_editor->getMapViewControl()->scroll_speed = event.GetValue();
 }

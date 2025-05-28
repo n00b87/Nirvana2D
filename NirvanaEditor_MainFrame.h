@@ -24,6 +24,8 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 	private:
 		Nirvana_Project* project;
 
+		bool editor_init = false;
+
 		wxString default_tile_path = _("tiles");
 		wxString default_sprite_path = _("sprites");
 		wxString default_bkg_path = _("bkg");
@@ -36,9 +38,9 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		int stage_tree_rootImage;
 		int stage_tree_stageImage;
 
-		Nirvana_SpriteEditor* sprite_editor;
-		Nirvana_TileEditor* tile_editor;
-		Nirvana_MapEditor* map_editor;
+		Nirvana_SpriteEditor* sprite_editor = NULL;
+		Nirvana_TileEditor* tile_editor = NULL;
+		Nirvana_MapEditor* map_editor = NULL;
 
 		bool map_mapView_update;
 		bool map_tileSelect_update;

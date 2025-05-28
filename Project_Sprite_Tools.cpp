@@ -11,36 +11,54 @@
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_Select( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	selected_map_tool = MAP_TOOL_SPRITE_SELECT;
 	map_editor->setMapTool(selected_map_tool);
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_BoxSelect( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	selected_map_tool = MAP_TOOL_SPRITE_BOXSELECT;
 	map_editor->setMapTool(selected_map_tool);
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_Move( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	selected_map_tool = MAP_TOOL_SPRITE_MOVE;
 	map_editor->setMapTool(selected_map_tool);
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_Rotate( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	selected_map_tool = MAP_TOOL_SPRITE_ROTATE;
 	map_editor->setMapTool(selected_map_tool);
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_Scale( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	selected_map_tool = MAP_TOOL_SPRITE_SCALE;
 	map_editor->setMapTool(selected_map_tool);
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_AddSprite( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -120,6 +138,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_AddSprite( wxCommandEvent& ev
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -234,6 +255,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent&
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_CopySprite( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -301,6 +325,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_CopySprite( wxCommandEvent& e
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_CenterOnSprite( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -345,6 +372,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_CenterOnSprite( wxCommandEven
 
 void NirvanaEditor_MainFrame::reloadSpriteProperties()
 {
+	if(!editor_init)
+		return;
+
 	wxPGProperty * sprite_id = m_mapEdit_sprite_propertyGrid->GetProperty(_("sprite_id"));
 	wxPGProperty * sprite_body_type = m_mapEdit_sprite_propertyGrid->GetProperty(_("body_type"));
 	wxPGProperty * sprite_animation = m_mapEdit_sprite_propertyGrid->GetProperty(_("animation"));
@@ -433,6 +463,9 @@ void NirvanaEditor_MainFrame::reloadSpriteProperties()
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteListSelect( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	reloadSpriteProperties();
 	map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.clear();
 
@@ -470,6 +503,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteListSelect( wxCommandEvent& event 
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpritePropertyGridChanged( wxPropertyGridEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 

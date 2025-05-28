@@ -8,30 +8,45 @@
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_Select( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	selected_map_tool = MAP_TOOL_SHAPE_SELECT;
 	map_editor->setMapTool(selected_map_tool);
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_BoxSelect( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	selected_map_tool = MAP_TOOL_SHAPE_BOXSELECT;
 	map_editor->setMapTool(selected_map_tool);
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_Move( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	selected_map_tool = MAP_TOOL_SHAPE_MOVE;
 	map_editor->setMapTool(selected_map_tool);
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_Draw( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	selected_map_tool = MAP_TOOL_SHAPE_DRAW;
 	map_editor->setMapTool(selected_map_tool);
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewBoxShape( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -63,6 +78,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewBoxShape( wxCommandEvent& e
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewPolygonShape( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -94,6 +112,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewPolygonShape( wxCommandEven
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewChainShape( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -125,6 +146,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewChainShape( wxCommandEvent&
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewCircleShape( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -156,6 +180,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewCircleShape( wxCommandEvent
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_DeleteShape( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -190,6 +217,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_DeleteShape( wxCommandEvent& e
 
 void NirvanaEditor_MainFrame::refreshCurrentShapeUI()
 {
+	if(!editor_init)
+		return;
+
 	m_mapEdit_shapeName_textCtrl->SetValue(_(""));
 
 	m_mapEdit_boxShape_posX_spinCtrl->SetValue(0);
@@ -286,6 +316,9 @@ void NirvanaEditor_MainFrame::refreshCurrentShapeUI()
 
 void NirvanaEditor_MainFrame::OnMapEdit_shapeListSelect( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -321,6 +354,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_shapeListSelect( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeName( wxCommandEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(event.GetString().Trim().length()==0)
 		return;
 
@@ -350,6 +386,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeName( wxCommandEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_BoxShape_PosX( wxSpinEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -372,6 +411,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_BoxShape_PosX( wxSpinEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_BoxShape_PosY( wxSpinEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -394,6 +436,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_BoxShape_PosY( wxSpinEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_BoxShape_Width( wxSpinEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -416,6 +461,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_BoxShape_Width( wxSpinEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_BoxShape_Height( wxSpinEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -438,6 +486,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_BoxShape_Height( wxSpinEvent& event )
 
 void NirvanaEditor_MainFrame::OnMapEdit_PolyShape_CellChange( wxGridEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -475,6 +526,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_PolyShape_CellChange( wxGridEvent& event
 
 void NirvanaEditor_MainFrame::OnMapEdit_CircleShape_CenterX( wxSpinEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -497,6 +551,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_CircleShape_CenterX( wxSpinEvent& event 
 
 void NirvanaEditor_MainFrame::OnMapEdit_CircleShape_CenterY( wxSpinEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
@@ -519,6 +576,9 @@ void NirvanaEditor_MainFrame::OnMapEdit_CircleShape_CenterY( wxSpinEvent& event 
 
 void NirvanaEditor_MainFrame::OnMapEdit_CircleShape_Radius( wxSpinEvent& event )
 {
+	if(!editor_init)
+		return;
+
 	if(!project)
 		return;
 
