@@ -1552,7 +1552,7 @@ void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event 
 
 	m_tileSize_staticText->SetLabel(wxString::Format(_("%i"), n_tile.tile_width)  + _(" x ") + wxString::Format(_("%i"), n_tile.tile_height));
 
-	tile_editor->getAnimationSheetControl()->setActiveCanvas(tile_editor->getMaskSheetControl()->sheet_canvas);
+	tile_editor->getAnimationSheetControl()->setActiveCanvas(tile_editor->getAnimationSheetControl()->sheet_canvas);
 	tile_editor->getAnimationSheetControl()->clearCanvas();
 
 	tile_editor->getMaskSheetControl()->setActiveCanvas(tile_editor->getMaskSheetControl()->sheet_canvas);
