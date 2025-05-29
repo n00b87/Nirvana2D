@@ -1307,7 +1307,8 @@
 
 1699484035 /usr/include/wx-3.2/wx/gtk/frame.h
 
-1743811792 source:/home/n00b/Projects/Nirvana2D/Nirvana2DApp.cpp
+1748482058 source:/home/n00b/Projects/Nirvana2D/Nirvana2DApp.cpp
+	<wx/stdpaths.h>
 	"wx_pch.h"
 	"Nirvana2DApp.h"
 	"NirvanaEditor_MainFrame.h"

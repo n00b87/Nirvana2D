@@ -320,9 +320,47 @@ void NirvanaEditor_MainFrame::OnNewProject( wxCommandEvent& event )
 	if(!dialog->create_flag)
 		return;
 
+
 	newProject(dialog->project_path, dialog->project_name);
 
 	this->SetTitle(wxString(project->project_name) + _(" - Nirvana2D"));
+
+
+	wxFileName studio_project_path = dialog->project_path;
+	studio_project_path.AppendDir(dialog->project_name);
+	studio_project_path.SetFullName(dialog->project_name + _(".rcprj"));
+
+	if(!studio_project_path.Exists())
+	{
+		wxFile pfile(studio_project_path.GetAbsolutePath(), wxFile::write);
+
+		if(pfile.IsOpened())
+		{
+			pfile.Write(_("RCBASIC_STUDIO:2.0\n"));
+			pfile.Write(_("PROJECT_NAME:") + dialog->project_name + _("\n"));
+			pfile.Write(_("PROJECT_MAIN:main.bas\n"));
+			pfile.Write(_("AUTHOR:Nirvana2D\n"));
+			pfile.Write(_("WEBSITE:http://www.rcbasic.com\n"));
+			pfile.Write(_("DESCRIPTION:Nirvana2D Project\n"));
+			pfile.Write(_("SOURCE_REL:main.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_constants.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_spriteDef.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_stage.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_tileset.bas\n"));
+			pfile.Close();
+		}
+
+		wxFileName template_path(wxStandardPaths::Get().GetExecutablePath());
+		template_path.AppendDir(_("export"));
+		template_path.SetFullName(_("template.bas"));
+
+		wxFileName template_tgt_path = dialog->project_path;
+		template_tgt_path.AppendDir(dialog->project_name);
+		template_tgt_path.SetFullName(_("main.bas"));
+
+		wxCopyFile(template_path.GetAbsolutePath(), template_tgt_path.GetAbsolutePath());
+	}
 }
 
 
