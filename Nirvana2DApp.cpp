@@ -7,6 +7,8 @@
  * License:
  **************************************************************/
 
+#include <wx/stdpaths.h>
+
 #ifdef WX_PRECOMP
 #include "wx_pch.h"
 #endif
@@ -23,6 +25,11 @@ bool Nirvana2DApp::OnInit()
 
     #ifdef _WIN32
     frame->SetIcon(wxICON(aaaa));
+    #else
+    wxFileName icon_path(wxStandardPaths::Get().GetExecutablePath());
+    icon_path.AppendDir(_("icons"));
+    icon_path.SetFullName(_("nirvana.ico"));
+    frame->SetIcon(wxIcon(icon_path.GetAbsolutePath()));
     #endif // _WIN32
 
     frame->Show();
