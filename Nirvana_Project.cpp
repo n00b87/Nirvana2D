@@ -1957,7 +1957,7 @@ void Nirvana_Project::setLayerTile(int stage_index, int layer_index, int x_in_ti
 	if(x_in_tiles < 0 || x_in_tiles >= stages[stage_index].layers[layer_index].layer_map.tile_map.rows[y_in_tiles].tile.size())
 		return;
 
-	std::cout << "SETLAYERTILE" << std::endl;
+	//std::cout << "SETLAYERTILE" << std::endl;
 	stages[stage_index].layers[layer_index].layer_map.tile_map.rows[y_in_tiles].tile[x_in_tiles] = tile_index;
 }
 

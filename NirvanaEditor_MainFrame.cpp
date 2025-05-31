@@ -1584,7 +1584,7 @@ void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event 
 	if(!editor_init)
 		return;
 
-    std::cout << "TSET DEBUG 1" << std::endl;
+    //std::cout << "TSET DEBUG 1" << std::endl;
 
 	int selected_index = event.GetSelection();
 	wxString tileset_name = m_tileEdit_tileset_listBox->GetString(selected_index);
@@ -1598,7 +1598,7 @@ void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event 
 	if(tset_id < 0)
 		return;
 
-    std::cout << "TSET DEBUG 2" << std::endl;
+    //std::cout << "TSET DEBUG 2" << std::endl;
 
 	m_tileEdit_tilesetID_textCtrl->SetValue(tileset_name);
 
@@ -1611,8 +1611,8 @@ void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event 
 	tile_editor->getAnimationSheetControl()->setActiveCanvas(tile_editor->getAnimationSheetControl()->sheet_canvas);
 	tile_editor->getAnimationSheetControl()->clearCanvas();
 
-	tile_editor->getAnimationSheetControl()->setColor(tile_editor->getAnimationSheetControl()->rgb(255,0,0));
-	tile_editor->getAnimationSheetControl()->drawRect(10, 10, 100, 100);
+	//tile_editor->getAnimationSheetControl()->setColor(tile_editor->getAnimationSheetControl()->rgb(255,0,0));
+	//tile_editor->getAnimationSheetControl()->drawRect(10, 10, 100, 100);
 
 	tile_editor->getAnimationSheetControl()->force_refresh();
 
