@@ -1370,6 +1370,7 @@ int Nirvana_Project::loadStage(wxString stage_file)
 			}
 			else if(p_cmd[i].dict[0].key.compare(_("START_TILEMAP"))==0)
 			{
+			    obj.layers[layer_index].layer_map.nv_tileset_index = -1;
 				obj.layers[layer_index].layer_map.tile_map.rows.clear();
 			}
 			else if(p_cmd[i].dict[0].key.compare(_("ROW"))==0)
@@ -1387,6 +1388,8 @@ int Nirvana_Project::loadStage(wxString stage_file)
 						{
 							int tile_value = 0;
 							args[arg_index].ToInt(&tile_value);
+							//if(tile_value == 16)
+                            //    std::cout << "TILE CHECK: " << obj.layers[layer_index].layer_map.tile_map.rows.size() << ", " << t_row.tile.size() << std::endl;
 							t_row.tile.push_back(tile_value);
 						}
 
@@ -1594,7 +1597,9 @@ int Nirvana_Project::loadStage(wxString stage_file)
 	int stage_index = stages.size();
 	stages.push_back(obj);
 
-	setStageSize(stage_index, obj.width_in_tiles, obj.height_in_tiles);
+	//std::cout << "FINAL CHECK: " << stages[0].layers[1].layer_map.tile_map.rows[9].tile[3] << std::endl;
+
+	//setStageSize(stage_index, obj.width_in_tiles, obj.height_in_tiles);
 
 	return stage_index;
 }
@@ -1683,6 +1688,8 @@ void Nirvana_Project::setStageSize(int stage_index, int width, int height)
 {
 	if(stage_index < 0 || stage_index >= stages.size())
 		return;
+
+    //std::cout << "SET STAGE SIZE" << std::endl;
 
 	stages[stage_index].width_in_tiles = width;
 	stages[stage_index].height_in_tiles = height;
@@ -1948,6 +1955,7 @@ void Nirvana_Project::setLayerTile(int stage_index, int layer_index, int x_in_ti
 	if(x_in_tiles < 0 || x_in_tiles >= stages[stage_index].layers[layer_index].layer_map.tile_map.rows[y_in_tiles].tile.size())
 		return;
 
+	std::cout << "SETLAYERTILE" << std::endl;
 	stages[stage_index].layers[layer_index].layer_map.tile_map.rows[y_in_tiles].tile[x_in_tiles] = tile_index;
 }
 

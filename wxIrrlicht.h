@@ -522,7 +522,8 @@ class wxIrrlicht : public wxControl {
         void UpdateStageTileSelect();
         void UpdateStageSpritePreview();
 
-        wxIrrlicht* shared_control;
+        std::vector<wxIrrlicht*> shared_control;
+        wxIrrlicht* stage_edit_control = NULL;
         bool mapEdit_hasContext = false;
 
         void util_draw_cursor(int tile_x, int tile_y, irr::video::SColor cursor_color);

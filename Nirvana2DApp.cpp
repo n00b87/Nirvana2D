@@ -18,8 +18,13 @@ IMPLEMENT_APP(Nirvana2DApp);
 
 bool Nirvana2DApp::OnInit()
 {
+    wxInitAllImageHandlers();
 
     NirvanaEditor_MainFrame* frame = new NirvanaEditor_MainFrame(0);
+
+    #ifdef _WIN32
+    frame->SetIcon(wxICON(aaaa));
+    #endif // _WIN32
 
     frame->Show();
     return true;

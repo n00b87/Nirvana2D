@@ -214,7 +214,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteBox(Nirvana_Stage_Sprites[0].Sprite_ID, 23, 64)
 
 	'Transform
-	SetSpritePosition(Nirvana_Stage_Sprites[0].Sprite_ID, 108, 417)
+	SetSpritePosition(Nirvana_Stage_Sprites[0].Sprite_ID, 169, 219)
 	SetSpriteScale(Nirvana_Stage_Sprites[0].Sprite_ID, 1, 1)
 	SetSpriteRotation(Nirvana_Stage_Sprites[0].Sprite_ID, 228.829)
 

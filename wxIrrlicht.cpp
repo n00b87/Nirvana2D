@@ -181,6 +181,8 @@ actual_params->WindowId = (HWND)this->GetHandle();
 
 	view2D_texture = NULL;
 
+	grid_color.set(255, 200, 200, 200);
+
 	m_init = true;
 
 	wxString editor_path = wxStandardPaths::Get().GetExecutablePath();
@@ -280,6 +282,8 @@ void wxIrrlicht::OnRender() {
 		if(back_buffer < 0 || ui_layer < 0)
 			return;
 
+        mapEdit_getContext();
+
 		m_pDriver->beginScene(false, false, SColor(255,170,170,170));
 
 		setActiveCanvas(back_buffer);
@@ -324,7 +328,7 @@ void wxIrrlicht::OnRender() {
 					int off_x = canvas[canvas_id].offset.X;
 					int off_y = canvas[canvas_id].offset.Y;
 					m_pDriver->setRenderTarget(canvas[canvas_id].texture, true, true);
-					m_pDriver->clearBuffers(true, true, true, irr::video::SColor(0,0,0,0));
+					//m_pDriver->clearBuffers(true, true, true, irr::video::SColor(0,0,0,0));
 					drawTileMap(canvas[canvas_id].tilemap, 0, 0, vpw, vph, off_x, off_y);
 				}
 				else if(canvas[canvas_id].type == CANVAS_TYPE_2D && canvas[canvas_id].bkg_render_type >= 0)
@@ -489,6 +493,8 @@ void wxIrrlicht::OnParentSize(wxSizeEvent& event)
     s32 w;
     s32 h;
 
+    mapEdit_getContext();
+
     wxWindow* parent = (wxWindow*)event.GetEventObject();
 
     parent->GetClientSize(&w, &h);
@@ -532,10 +538,17 @@ void wxIrrlicht::OnTimer(wxTimerEvent& event) {
     m_pDevice->getTimer()->tick();
 
     OnUpdate();
+
+    #ifdef _WIN32
+	m_forceWindowActive = true;
+	//parent->Refresh();
+	Refresh();
+	#endif // _WIN32
 }
 
 void wxIrrlicht::OnMouse(wxMouseEvent& event) {
 
+	event.Skip();
 	return;
 
 	if(!m_init)
@@ -623,6 +636,8 @@ void wxIrrlicht::OnKey(wxKeyEvent& event) {
 	else if(event.GetKeyCode() == irr::KEY_KEY_D)
 	{
 		VIEW_KEY_D = sevt.KeyInput.PressedDown;
+
+		//std::cout << "KEY_D = " << (VIEW_KEY_D ? "TRUE" : "FALSE") << std::endl;
 		//wxMessageBox(_("KEY EVENT2: ") + wxString::Format(_("%d"), VIEW_KEY_W));
 	}
 	else if(event.GetKeyCode() == irr::KEY_KEY_R)
@@ -645,6 +660,8 @@ void wxIrrlicht::force_refresh()
     if (!m_pDriver) {
         return;
 	}//if
+
+    mapEdit_getContext();
 
     s32 w;
     s32 h;
@@ -673,6 +690,8 @@ void wxIrrlicht::rc_setDriverMaterial()
 	if(!m_pDriver)
 		return;
 
+    mapEdit_getContext();
+
 	irr::video::SMaterial material;
     material.Lighting = false;
     material.ZWriteEnable = irr::video::EZW_OFF;
@@ -696,6 +715,26 @@ void wxIrrlicht::OnUpdate()
 
 	if((!update_events) && m_pDriver->getDriverType() == irr::video::EDT_OPENGL)
 		return;
+
+    if(m_pDriver->getDriverType() == irr::video::EDT_OPENGL)
+        mapEdit_getContext();
+
+    wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+	if( px >= 0 && px < pw && py >= 0 && py < ph )
+    {
+        stage_window_isActive = true;
+    }
+    else
+    {
+        stage_window_isActive = false;
+    }
 
 	if(!stage_window_isActive)
 	{
@@ -774,7 +813,7 @@ void wxIrrlicht::util_drawGrid()
 	mapEdit_getContext();
 	setActiveCanvas(ui_layer);
 
-	setColor(grid_color.color);
+	setColor(rgb(grid_color.getRed(),grid_color.getGreen(),grid_color.getBlue()));
 
 	int adj_scroll_offset_x = project->stages[selected_stage].layers[selected_layer].scroll_speed.X * scroll_offset_x;
 	int adj_scroll_offset_y = project->stages[selected_stage].layers[selected_layer].scroll_speed.Y * scroll_offset_y;
@@ -787,8 +826,11 @@ void wxIrrlicht::util_drawGrid()
 	start_x = (project->stages[selected_stage].tile_width - (start_x % project->stages[selected_stage].tile_width)) - project->stages[selected_stage].tile_width;
 	start_y = (project->stages[selected_stage].tile_height - (start_y % project->stages[selected_stage].tile_height)) - project->stages[selected_stage].tile_height;
 
-	int pw = this->GetClientSize().GetWidth();
-	int ph = this->GetClientSize().GetHeight();
+	wxSize sz = GetClientSize();
+	int pw = sz.GetWidth();
+	int ph = sz.GetHeight();
+
+	//std::cout << "GRID DBG: " << start_x << ", " << start_y << ", " << pw << ", " << ph << ", " << project->stages[selected_stage].tile_width << ", " << project->stages[selected_stage].tile_height << std::endl;
 
 	for(int y = start_y; y < ph+1; y += project->stages[selected_stage].tile_height)
 	{
@@ -804,6 +846,7 @@ void wxIrrlicht::UpdateSpriteAnimationSheet()
 {
 	if(clear_flag)
 	{
+	    mapEdit_getContext();
 		setActiveCanvas(sheet_canvas);
 		clearCanvas();
 		clear_flag = false;
@@ -812,6 +855,8 @@ void wxIrrlicht::UpdateSpriteAnimationSheet()
 
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -926,6 +971,7 @@ void wxIrrlicht::UpdateSpriteAnimationFrame()
 {
 	if(clear_flag)
 	{
+	    mapEdit_getContext();
 		setActiveCanvas(frame_canvas);
 		clearCanvas();
 		clear_flag = false;
@@ -934,6 +980,8 @@ void wxIrrlicht::UpdateSpriteAnimationFrame()
 
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -1077,6 +1125,7 @@ void wxIrrlicht::UpdateSpriteAnimationPreview()
 {
 	if(clear_flag)
 	{
+	    mapEdit_getContext();
 		setActiveCanvas(preview_canvas);
 		clearCanvas();
 		clear_flag = false;
@@ -1085,6 +1134,8 @@ void wxIrrlicht::UpdateSpriteAnimationPreview()
 
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
+
+    mapEdit_getContext();
 
 
 	setActiveCanvas(preview_canvas);
@@ -1114,6 +1165,7 @@ bool wxIrrlicht::collisionPointIsSelected(int pt_index)
 
 void wxIrrlicht::collisionEdit_select()
 {
+    mapEdit_getContext();
 	wxMouseState  mouse_state = wxGetMouseState();
 
 	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
@@ -1298,6 +1350,8 @@ void wxIrrlicht::collisionEdit_select()
 
 void wxIrrlicht::collisionEdit_boxSelect()
 {
+    mapEdit_getContext();
+
 	wxMouseState  mouse_state = wxGetMouseState();
 
 	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
@@ -1844,6 +1898,7 @@ void wxIrrlicht::UpdateSpriteCollision()
 {
 	if(clear_flag)
 	{
+	    mapEdit_getContext();
 		setActiveCanvas(collision_canvas);
 		clearCanvas();
 		clear_flag = false;
@@ -1852,6 +1907,8 @@ void wxIrrlicht::UpdateSpriteCollision()
 
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -2046,6 +2103,8 @@ void wxIrrlicht::UpdateTileAnimationSheet()
 {
 	if(clear_flag)
 	{
+	    std::cout << "Clear Flag" << std::endl;
+	    mapEdit_getContext();
 		setActiveCanvas(sheet_canvas);
 		clearCanvas();
 		clear_flag = false;
@@ -2054,6 +2113,8 @@ void wxIrrlicht::UpdateTileAnimationSheet()
 
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -2182,6 +2243,7 @@ void wxIrrlicht::UpdateTileAnimationFrame()
 {
 	if(clear_flag)
 	{
+	    mapEdit_getContext();
 		setActiveCanvas(frame_canvas);
 		clearCanvas();
 		clear_flag = false;
@@ -2190,6 +2252,8 @@ void wxIrrlicht::UpdateTileAnimationFrame()
 
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -2339,6 +2403,7 @@ void wxIrrlicht::UpdateTileAnimationPreview()
 {
 	if(clear_flag)
 	{
+	    mapEdit_getContext();
 		setActiveCanvas(preview_canvas);
 		clearCanvas();
 		clear_flag = false;
@@ -2347,6 +2412,8 @@ void wxIrrlicht::UpdateTileAnimationPreview()
 
 	if(tileEdit_preview_tilemap < 0 || tileEdit_preview_tilemap >= tilemap.size())
 		return;
+
+    mapEdit_getContext();
 
 	setActiveCanvas(preview_canvas);
 	clearCanvas();
@@ -2366,11 +2433,14 @@ void wxIrrlicht::UpdateTileMask()
 {
 	if(clear_flag)
 	{
+	    mapEdit_getContext();
 		setActiveCanvas(sheet_canvas);
 		clearCanvas();
 		clear_flag = false;
 		return;
 	}
+
+	mapEdit_getContext();
 
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
 		return;
@@ -2572,6 +2642,8 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
 
+    mapEdit_getContext();
+
 	wxMouseState  mouse_state = wxGetMouseState();
 
 	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
@@ -2615,10 +2687,14 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 		return;
 
 	int num_rows = mapEdit_tile_selection.row.size();
+
+	//std::cout << "SetTILE: rows=" << num_rows << std::endl;
 	int num_cols = 0;
 
 	if(num_rows > 0)
 		num_cols = mapEdit_tile_selection.row[0].data.size();
+
+    //std::cout << "SetTILE: rows=" << num_cols << std::endl;
 
 
 	//util_drawTileLayer(selected_layer);
@@ -2754,6 +2830,7 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 		{
 			if(tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile.size())
 			{
+			    //std::cout << "YEET" << std::endl;
 				project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x] = -1;
 			}
 		}
@@ -2813,6 +2890,8 @@ void wxIrrlicht::StageSheet_FillTileUpdate()
 
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -3014,6 +3093,8 @@ void wxIrrlicht::StageSheet_SelectTileUpdate()
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
 
+    mapEdit_getContext();
+
 	wxMouseState  mouse_state = wxGetMouseState();
 
 	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
@@ -3166,6 +3247,8 @@ void wxIrrlicht::StageSheet_BoxSelectTileUpdate()
 
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -3381,6 +3464,8 @@ void wxIrrlicht::StageSheet_MoveTileUpdate()
 
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -3629,6 +3714,8 @@ void wxIrrlicht::StageSheet_CopyTileUpdate()
 
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -3894,6 +3981,8 @@ void wxIrrlicht::util_drawSelectedTiles()
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
 
+    mapEdit_getContext();
+
 	setActiveCanvas(canvas_index);
 
 	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
@@ -4026,6 +4115,8 @@ void wxIrrlicht::StageSheet_SelectSpriteUpdate()
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
 
+    mapEdit_getContext();
+
 	wxMouseState  mouse_state = wxGetMouseState();
 
 	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
@@ -4117,6 +4208,8 @@ void wxIrrlicht::StageSheet_BoxSelectSpriteUpdate()
 
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -4231,6 +4324,8 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
 
+    mapEdit_getContext();
+
 	wxMouseState  mouse_state = wxGetMouseState();
 
 	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
@@ -4259,6 +4354,8 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 	int select_y = by - off_y_i;
 
 
+	//std::cout << "DBG1" << std::endl;
+
 	if(!stage_window_isActive)
 	{
 		left_drag_init = false;
@@ -4266,9 +4363,12 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 		return;
 	}
 
+	//std::cout << "DBG2" << std::endl;
+
 
 	if(mouse_state.LeftIsDown())
 	{
+	    //std::cout << "YOLO: " << px << ", " << py << std::endl;
 		bool init_click = false;
 
 		if(!(middle_drag_init||left_drag_init||right_drag_init))
@@ -4342,6 +4442,8 @@ void wxIrrlicht::StageSheet_RotateSpriteUpdate()
 
 	if(canvas_index < 0 || canvas_index >= canvas.size())
 		return;
+
+    mapEdit_getContext();
 
 	wxMouseState  mouse_state = wxGetMouseState();
 
@@ -5720,6 +5822,8 @@ void wxIrrlicht::stage_collisionEdit_draw()
 
 void wxIrrlicht::updateStageViewportInfo()
 {
+    mapEdit_getContext();
+
 	if(!stage_window_isActive)
 	{
 		return;
@@ -5820,6 +5924,7 @@ void wxIrrlicht::UpdateStageSheet()
 
 	if(VIEW_KEY_D)
 	{
+	    //std::cout << "MOVE FORWARD" << std::endl;
 		scroll_offset_x += scroll_speed;
 	}
 
@@ -5980,6 +6085,8 @@ void wxIrrlicht::UpdateStageSheet()
 
 void wxIrrlicht::util_draw_cursor(int tile_x, int tile_y, irr::video::SColor cursor_color)
 {
+    mapEdit_getContext();
+
 	irr::core::dimension2du img_size = image[current_sheet_image].image->getSize();
 	irr::core::dimension2du img_og_size = image[current_sheet_image].image->getOriginalSize();
 	int t_across = img_og_size.Width / current_frame_width;
@@ -6009,18 +6116,30 @@ void wxIrrlicht::util_draw_cursor(int tile_x, int tile_y, irr::video::SColor cur
 
 void wxIrrlicht::mapEdit_getContext()
 {
-	if(control_id == NV_MAP_EDIT_MAP_SHEET || control_id == NV_MAP_EDIT_TILE_SHEET)
+    if(m_pDriver->getDriverType() != irr::video::EDT_OPENGL)
+        return;
+
+
+    for(int i = 0; i < shared_control.size(); i++)
 	{
-		if(shared_control)
-		{
-			if(shared_control->mapEdit_hasContext)
-			{
-				shared_control->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
-				shared_control->mapEdit_hasContext = false;
-				GetDevice()->getContextManager()->activateContext(GetDevice()->getVideoDriver()->getExposedVideoData());
-				mapEdit_hasContext = true;
-			}
-		}
+	    if(shared_control[i])
+        {
+            if(shared_control[i]->mapEdit_hasContext)
+            {
+                shared_control[i]->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+                shared_control[i]->mapEdit_hasContext = false;
+            }
+        }
+	}
+
+	for(int i = 0; i < 10; i++)
+	{
+	    if(GetDevice()->getContextManager()->activateContext(GetDevice()->getVideoDriver()->getExposedVideoData()))
+        {
+            mapEdit_hasContext = true;
+            break;
+        }
+        std::cout << "NO GO: " << i << std::endl;
 	}
 }
 
@@ -6034,6 +6153,8 @@ void wxIrrlicht::UpdateStageTileSelect()
 		clear_flag = false;
 		return;
 	}
+
+	mapEdit_getContext();
 
 	//std::cout << "DEBUG: " << mapEdit_layerType << ", " << current_sheet_image << std::endl;
 
@@ -6282,6 +6403,9 @@ void wxIrrlicht::UpdateStageTileSelect()
 			mapEdit_tile_selection.width_in_tiles = num_cols;
 			mapEdit_tile_selection.height_in_tiles = num_rows;
 
+			if(stage_edit_control)
+                stage_edit_control->mapEdit_tile_selection = mapEdit_tile_selection;
+
 			//std::cout << std::endl;
 
 			//std::cout << "START_POS: " << start_x << ", " << start_y << std::endl;
@@ -6312,6 +6436,8 @@ int wxIrrlicht::irr_LoadFont(std::string fnt_file, int font_size)
 
     if(font_id < 0)
 		return -1;
+
+    mapEdit_getContext();
 
     CGUITTFace* Face;
     CGUIFreetypeFont* dfont;
@@ -6376,6 +6502,8 @@ void wxIrrlicht::irr_DrawText(std::string txt, int x, int y, irr::video::SColor 
     if(!font[active_font].active)
         return;
 
+    mapEdit_getContext();
+
 	if(camera_index < 0)
 		m_pDriver->setRenderTarget(canvas[ui_layer].texture, false, false);
 
@@ -6415,6 +6543,8 @@ int wxIrrlicht::createCanvas(int w, int h, int vx, int vy, int vw, int vh, int c
 {
 	if(!m_pDriver)
         return -1;
+
+    mapEdit_getContext();
 
     canvas_obj n_canvas;
 
@@ -6485,6 +6615,8 @@ void wxIrrlicht::canvasClose(int canvas_id)
     if(canvas_id <= 0 || canvas_id >= canvas.size()) //canvas 0 is being excluded because its the back buffer
         return;
 
+    mapEdit_getContext();
+
     if(canvas[canvas_id].texture != NULL)
         m_pDriver->removeTexture(canvas[canvas_id].texture);
 
@@ -6517,12 +6649,14 @@ void wxIrrlicht::setActiveCanvas(int canvas_id)
 {
 	if(canvas.size() == 0)
 	{
+	    std::cout << "AC: -1" << std::endl;
 		active_canvas = -1;
 	}
 	else if(canvas_id < canvas.size())
 	{
+	    mapEdit_getContext();
 		active_canvas = canvas_id;
-		m_pDriver->setRenderTarget(canvas[active_canvas].texture, false, false, irr::video::SColor(255, 255, 0, 0));
+		m_pDriver->setRenderTarget(canvas[active_canvas].texture, false, false, irr::video::SColor(255, 0, 0, 0));
 	}
 }
 
@@ -6530,6 +6664,7 @@ void wxIrrlicht::clearCanvas()
 {
     if(active_canvas >= 0 && active_canvas < canvas.size())
     {
+        mapEdit_getContext();
         m_pDriver->clearBuffers(true, true, true, clear_color);
     }
 }
@@ -6714,6 +6849,7 @@ void wxIrrlicht::setColor(irr::u32 color)
 
 void wxIrrlicht::drawRect(int x, int y, int w, int h)
 {
+    mapEdit_getContext();
     irr::core::vector2d<s32> r_pos(x,y);
     irr::core::dimension2d<s32> r_dim(w,h);
     irr::core::rect<s32> r(r_pos, r_dim);
@@ -6722,6 +6858,7 @@ void wxIrrlicht::drawRect(int x, int y, int w, int h)
 
 void wxIrrlicht::drawRectFill(int x, int y, int w, int h)
 {
+    mapEdit_getContext();
     irr::core::vector2d<s32> r_pos(x,y);
     irr::core::dimension2d<s32> r_dim(w,h);
     irr::core::rect<s32> r(r_pos, r_dim);
@@ -6733,6 +6870,7 @@ void wxIrrlicht::drawRectFill(int x, int y, int w, int h)
 
 void wxIrrlicht::drawLine(int x1, int y1, int x2, int y2)
 {
+    mapEdit_getContext();
     irr::core::vector2d<s32> r_pos_start(x1,y1);
     irr::core::vector2d<s32> r_pos_end(x2,y2);
 
@@ -6742,6 +6880,7 @@ void wxIrrlicht::drawLine(int x1, int y1, int x2, int y2)
 
 void wxIrrlicht::drawPixel(int x, int y)
 {
+    mapEdit_getContext();
     m_pDriver->drawPixel(x, y, active_color);
 }
 
@@ -6775,6 +6914,7 @@ void wxIrrlicht::makeEllipse(irr::core::array<irr::video::S3DVertex>& vertices, 
 
 void wxIrrlicht::drawEllipse(int x, int y, int rx, int ry)
 {
+    mapEdit_getContext();
     irr::core::vector2d<s32> r_pos(x,y);
 
     // create the circle
@@ -6801,6 +6941,7 @@ void wxIrrlicht::drawEllipse(int x, int y, int rx, int ry)
 
 void wxIrrlicht::drawEllipseFill(int x, int y, int rx, int ry)
 {
+    mapEdit_getContext();
     irr::core::vector2d<s32> r_pos(x,y);
 
     // create the circle
@@ -6821,11 +6962,13 @@ void wxIrrlicht::drawEllipseFill(int x, int y, int rx, int ry)
 
 void wxIrrlicht::drawCircle(int x, int y, double r)
 {
+    mapEdit_getContext();
     drawEllipse(x, y, r, r);
 }
 
 void wxIrrlicht::drawCircleFill(int x, int y, double r)
 {
+    mapEdit_getContext();
 	drawEllipseFill(x, y, r, r);
 }
 
@@ -6835,6 +6978,8 @@ void wxIrrlicht::util_draw2DImage(irr::video::IVideoDriver *driver, irr::video::
 {
     if(active_canvas < 0 || active_canvas >= canvas.size())
         return;
+
+    mapEdit_getContext();
 
     // Store and clear the projection matrix
     irr::core::matrix4 oldProjMat = driver->getTransform(irr::video::ETS_PROJECTION);
@@ -6929,6 +7074,8 @@ void wxIrrlicht::util_draw2DImage2(irr::video::IVideoDriver *driver, irr::video:
     if(active_canvas < 0 || active_canvas >= canvas.size())
         return;
 
+    mapEdit_getContext();
+
     // Store and clear the projection matrix
     irr::core::matrix4 oldProjMat = driver->getTransform(irr::video::ETS_PROJECTION);
     driver->setTransform(irr::video::ETS_PROJECTION,irr::core::matrix4());
@@ -7020,6 +7167,7 @@ void wxIrrlicht::util_draw2DImage2(irr::video::IVideoDriver *driver, irr::video:
 
 int wxIrrlicht::loadImageEx(std::string img_file, irr::u32 color_key, bool use_color_key)
 {
+    mapEdit_getContext();
     image_obj img;
     img.image = m_pDriver->getTexture(img_file.c_str());
     img.alpha = 255;
@@ -7071,6 +7219,8 @@ void wxIrrlicht::deleteImage(int img_id)
     if(img_id < 0 || img_id >= image.size())
         return;
 
+    mapEdit_getContext();
+
 	irr::video::ITexture* texture = image[img_id].image;
 
 	for(int i = 0; i < image.size(); i++)
@@ -7095,6 +7245,8 @@ void wxIrrlicht::getImageBuffer(int img_id, irr::u32 * pdata)
 
     if(!image[img_id].image)
         return;
+
+    mapEdit_getContext();
 
     irr::u32* img_pixels = (irr::u32*)image[img_id].image->lock();
 
@@ -7124,6 +7276,8 @@ void wxIrrlicht::drawImage(int img_id, int x, int y)
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getOriginalSize();
         irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(0, 0), src_size);
 
@@ -7160,6 +7314,8 @@ void wxIrrlicht::drawImage_Rotate(int img_id, int x, int y, double angle)
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getOriginalSize();
         irr::core::rect<irr::s32> sourceRect(0, 0, src_size.Width, src_size.Height);
 
@@ -7192,6 +7348,8 @@ void wxIrrlicht::drawImage_Zoom(int img_id, int x, int y, double zx, double zy)
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getOriginalSize();
         irr::core::rect<irr::s32> sourceRect(0, 0, src_size.Width, src_size.Height);
 
@@ -7224,6 +7382,8 @@ void wxIrrlicht::drawImage_ZoomEx(int img_id, int x, int y, int src_x, int src_y
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         //irr::core::dimension2d<irr::u32> src_size = rc_image[img_id].image->getSize();
         irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(src_x, src_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
@@ -7256,6 +7416,8 @@ void wxIrrlicht::drawImage_Rotozoom(int img_id, int x, int y, double angle, doub
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getOriginalSize();
         irr::core::rect<irr::s32> sourceRect(0, 0, src_size.Width, src_size.Height);
 
@@ -7288,6 +7450,8 @@ void wxIrrlicht::drawImage_RotozoomEx(int img_id, int x, int y, int src_x, int s
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         //irr::core::dimension2d<irr::u32> src_size = rc_image[img_id].image->getSize();
         irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(src_x, src_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
@@ -7321,6 +7485,8 @@ void wxIrrlicht::drawImage_Flip(int img_id, int x, int y, bool h, bool v)
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         irr::core::dimension2d<irr::u32> src_size = image[img_id].image->getOriginalSize();
         irr::core::rect<irr::s32> sourceRect(0, 0, src_size.Width, src_size.Height);
 
@@ -7354,6 +7520,8 @@ void wxIrrlicht::drawImage_FlipEx(int img_id, int x, int y, int src_x, int src_y
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         //irr::core::dimension2d<irr::u32> src_size = rc_image[img_id].image->getSize();
         irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(src_x, src_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
@@ -7388,6 +7556,8 @@ void wxIrrlicht::drawImage_Blit(int img_id, int x, int y, int src_x, int src_y, 
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         //irr::core::dimension2d<irr::u32> src_size = rc_image[img_id].image->getSize();
         irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(src_x, src_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
@@ -7424,6 +7594,8 @@ void wxIrrlicht::drawImage_RotateEx(int img_id, int x, int y, int src_x, int src
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         //irr::core::dimension2d<irr::u32> src_size = rc_image[img_id].image->getSize();
         irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(src_x, src_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
@@ -7458,6 +7630,8 @@ void wxIrrlicht::drawImage_BlitEx(int img_id, int x, int y, int w, int h, int sr
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         //irr::core::dimension2d<irr::u32> src_size = rc_image[img_id].image->getSize();
         irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(src_x, src_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
@@ -7492,6 +7666,8 @@ void wxIrrlicht::drawImage_BlitEx_SW(int img_id, int x, int y, int w, int h, int
 
     if(image[img_id].image)
     {
+        mapEdit_getContext();
+
         //irr::core::dimension2d<irr::u32> src_size = rc_image[img_id].image->getSize();
         irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(src_x, src_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
@@ -7582,6 +7758,8 @@ void wxIrrlicht::setColorKey(int img_id, irr::u32 colorkey)
 {
     if(!imageExists(img_id))
         return;
+
+    mapEdit_getContext();
 
     if(colorkey == -1)
 	{
@@ -9087,6 +9265,8 @@ void wxIrrlicht::util_drawSelectedSprites()
 //This function is called on each canvas on update
 void wxIrrlicht::util_drawSprites(int canvas_id)
 {
+    mapEdit_getContext();
+
 	//Setting the render target to the current canvas.  NOTE: I might change this target to a separate sprite layer later.
 	m_pDriver->setRenderTarget(canvas[canvas_id].texture, true, true);
 	m_pDriver->clearBuffers(true, true, true, irr::video::SColor(0,0,0,0));
@@ -9602,6 +9782,8 @@ void wxIrrlicht::drawTileMap(int tmap, int x, int y, int w, int h, int offset_x,
 	if(!canvas[active_canvas].texture)
 		return;
 
+    mapEdit_getContext();
+
 	tilemap[tmap].texture = m_pDriver->addRenderTargetTexture(irr::core::dimension2d<u32>(w,h), "rt", ECF_A8R8G8B8);
 	m_pDriver->setRenderTarget(tilemap[tmap].texture, true, true, irr::video::SColor(0,0,0,0));
 
@@ -9733,6 +9915,8 @@ void wxIrrlicht::util_getTileInTileset(int project_tset, int tile, int* x, int* 
 
 void wxIrrlicht::util_drawTileLayer(int layer)
 {
+    //std::cout << "\n\nDRAWING TILE LAYER: " << layer << std::endl;
+
 	if(selected_stage < 0 || selected_stage >= project->getStageCount())
 		return;
 
@@ -9746,6 +9930,10 @@ void wxIrrlicht::util_drawTileLayer(int layer)
 
 	if(!canvas[ref_canvas].texture)
 		return;
+
+		//std::cout << "EXECUTE 1, " << std::endl;
+
+    mapEdit_getContext();
 
 	int x = 0;
 	int y = 0;
@@ -9764,6 +9952,8 @@ void wxIrrlicht::util_drawTileLayer(int layer)
 
 	if(tset < 0 || tset >= project->tileset.size())
 		return;
+
+    //std::cout << "EXECUTE 2, " << std::endl << std::endl;
 
 	util_updateTileset(tset);
 
@@ -9790,14 +9980,22 @@ void wxIrrlicht::util_drawTileLayer(int layer)
 			int map_x = tile_offset_x + ix;
 			int map_y = tile_offset_y + iy;
 
+
 			if(map_x < 0 || map_x >= project->stages[selected_stage].layers[layer].layer_map.tile_map.num_tiles_across ||
 			   map_y < 0 || map_y >= project->stages[selected_stage].layers[layer].layer_map.tile_map.num_tiles_down)
 				continue;
 
+
+
 			int tile = project->stages[selected_stage].layers[layer].layer_map.tile_map.rows[map_y].tile[map_x];
+
+			//if(tile == 16)
+            //    std::cout << "DB16: " << layer << " ";
 
 			if(tile < 0 || tile >= num_tiles_in_tset)
 				continue;
+
+            //std::cout << "DB 2" << std::endl;
 
 			//std::cout << "Tile = " << tile << " < " << project->tileset[ tset ].object.tiles.size() << std::endl;
 
@@ -9823,9 +10021,12 @@ void wxIrrlicht::util_drawTileLayer(int layer)
 			irr::core::rect<irr::s32> dest( irr::core::vector2d<irr::s32>(dst_x, dst_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
 
 
+			//std::cout << "TILE DRAW " << std::endl << std::endl;
 			m_pDriver->draw2DImage(image[tset_img_id].image, dest, sourceRect, 0, 0, true);
 		}
 	}
+
+	//std::cout << std::endl << std::endl;
 
 	m_pDriver->setRenderTarget(canvas[ref_canvas].texture, false, false);
 
@@ -10093,6 +10294,8 @@ void wxIrrlicht::resizeLayers()
 
 void wxIrrlicht::clearStage()
 {
+    mapEdit_getContext();
+
 	mapEdit_selectTileTool_selection.clear();
 	mapEdit_selectSpriteTool_selection.clear();
 
@@ -10125,7 +10328,6 @@ void wxIrrlicht::clearStage()
 	if(selected_stage < 0 || selected_stage >= project->stages.size())
 		return;
 
-	mapEdit_getContext();
 
 	//Load new stage stuff
 	for(int layer_index = 0; layer_index < project->stages[selected_stage].layers.size(); layer_index++)

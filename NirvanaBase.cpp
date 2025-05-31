@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 4.2.1-0-g80c4cb6-dirty)
+// C++ code generated with wxFormBuilder (version 4.2.1-0-g80c4cb6)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -1059,7 +1059,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_panel2->SetSizer( bSizer7 );
 	m_panel2->Layout();
 	bSizer7->Fit( m_panel2 );
-	m_splitter1->SplitVertically( m_panel1, m_panel2, 662 );
+	m_splitter1->SplitVertically( m_panel1, m_panel2, 719 );
 	bSizer12->Add( m_splitter1, 1, wxEXPAND, 5 );
 
 

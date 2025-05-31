@@ -16,6 +16,7 @@ void NirvanaEditor_MainFrame::newProject(wxFileName project_path, wxString proje
 	if(!editor_init)
 		return;
 
+	editor_init = false;
 	int current_main_tab = m_editorMainTab_auinotebook->GetSelection();
 	int current_project_tab = m_projectManager_auinotebook->GetSelection();
 	int current_mapEditTools_tab = m_mapEdit_layerObjectTools_auinotebook->GetSelection();
@@ -99,8 +100,11 @@ void NirvanaEditor_MainFrame::newProject(wxFileName project_path, wxString proje
 
 
 	map_editor->selectStage(-1);
+
 	map_editor->selectLayer(-1);
+
 	map_editor->selectShape(-1);
+
 	map_editor->selectSprite(-1);
 
 	if(project)
@@ -110,6 +114,7 @@ void NirvanaEditor_MainFrame::newProject(wxFileName project_path, wxString proje
 	}
 
 	project = new Nirvana_Project();
+
 	project->active = true;
 
 	project->project_filename_obj = pfile_path;
@@ -280,6 +285,7 @@ void NirvanaEditor_MainFrame::newProject(wxFileName project_path, wxString proje
 	if(sprite_editor->getAnimationPreviewControl()->spriteExists(sprite_editor->getAnimationPreviewControl()->spriteEdit_selected_sprite))
 		sprite_editor->getAnimationPreviewControl()->deleteSprite(sprite_editor->getAnimationPreviewControl()->spriteEdit_selected_sprite);
 
+
 	sprite_editor->getAnimationPreviewControl()->clear_flag = true;
 	sprite_editor->getAnimationPreviewControl()->current_sheet_image = -1;
 	sprite_editor->getAnimationPreviewControl()->spriteEdit_selected_animation = -1;
@@ -301,11 +307,17 @@ void NirvanaEditor_MainFrame::newProject(wxFileName project_path, wxString proje
 
 
 	m_projectManager_auinotebook->SetSelection(current_project_tab);
+
 	m_mapEdit_layerObjectTools_auinotebook->SetSelection(current_mapEditTools_tab);
+
 	m_tileEdit_tools_auinotebook->SetSelection(current_tileEdit_tab);
+
 	m_spriteEdit_tools_auinotebook->SetSelection(current_spriteEdit_tab);
 
 	m_editorMainTab_auinotebook->SetSelection(current_main_tab);
+
+
+	editor_init = true;
 }
 
 void NirvanaEditor_MainFrame::OnNewProject( wxCommandEvent& event )
@@ -323,6 +335,52 @@ void NirvanaEditor_MainFrame::OnNewProject( wxCommandEvent& event )
 	newProject(dialog->project_path, dialog->project_name);
 
 	this->SetTitle(wxString(project->project_name) + _(" - Nirvana2D"));
+
+	wxFileName studio_project_path = dialog->project_path;
+
+
+	studio_project_path.AppendDir(dialog->project_name);
+
+
+	studio_project_path.SetFullName(dialog->project_name + _(".rcprj"));
+
+
+
+
+
+	if(!studio_project_path.Exists())
+	{
+		wxFile pfile(studio_project_path.GetAbsolutePath(), wxFile::write);
+
+		if(pfile.IsOpened())
+		{
+			pfile.Write(_("RCBASIC_STUDIO:2.0\n"));
+			pfile.Write(_("PROJECT_NAME:") + dialog->project_name + _("\n"));
+			pfile.Write(_("PROJECT_MAIN:main.bas\n"));
+			pfile.Write(_("AUTHOR:Nirvana2D\n"));
+			pfile.Write(_("WEBSITE:http://www.rcbasic.com\n"));
+			pfile.Write(_("DESCRIPTION:Nirvana2D Project\n"));
+			pfile.Write(_("SOURCE_REL:main.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_constants.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_spriteDef.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_stage.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_tileset.bas\n"));
+
+			pfile.Close();
+		}
+
+		wxFileName template_path(wxStandardPaths::Get().GetExecutablePath());
+		template_path.AppendDir(_("export"));
+		template_path.SetFullName(_("template.bas"));
+
+		wxFileName template_tgt_path = dialog->project_path;
+		template_tgt_path.AppendDir(dialog->project_name);
+		template_tgt_path.SetFullName(_("main.bas"));
+
+		if(!template_tgt_path.Exists())
+            wxCopyFile(template_path.GetAbsolutePath(), template_tgt_path.GetAbsolutePath());
+	}
 }
 
 
@@ -441,6 +499,29 @@ bool NirvanaEditor_MainFrame::loadProject(wxFileName project_file)
 
 	}
 
+	#ifdef _WIN32
+	for(int stage_index = 0; stage_index < project->stages.size(); stage_index++)
+	{
+	    for(int layer_index = 0; layer_index < project->stages[stage_index].layers.size(); layer_index++)
+        {
+            for(int t_row = 0; t_row < project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows.size(); t_row++)
+            {
+                bool t_check = false;
+                for(int t_col = 0; t_col < project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[t_row].tile.size(); t_col++)
+                {
+                    if(project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[t_row].tile[t_col] >= 0)
+                    {
+                        std::cout << "TILE CHECK: " << project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[t_row].tile[t_col] << std::endl; // I have to touch the array once because of MinGW's bullshit
+                        return true;
+                    }
+                }
+            }
+        }
+	}
+	#endif // _WIN32
+
+	//std::cout << "ABSOLUTE CHECK: " << project->stages[0].layers[1].layer_map.tile_map.rows[9].tile[3] << std::endl;
+
 
 	return true;
 }
@@ -462,6 +543,7 @@ void NirvanaEditor_MainFrame::OnOpenProject( wxCommandEvent& event )
 
 	wxString project_name = project_fname.GetName();
 
+
 	newProject(project_path, project_name, false); // Needed to clear all the UI stuff and create empty project
 
 	if(!loadProject(project_fname))
@@ -469,6 +551,7 @@ void NirvanaEditor_MainFrame::OnOpenProject( wxCommandEvent& event )
 		wxMessageBox(_("Could not load project"));
 		return;
 	}
+
 
 	this->SetTitle(wxString(project->project_name) + _(" - Nirvana2D"));
 
@@ -2466,6 +2549,8 @@ void NirvanaEditor_MainFrame::OnEnterMapView( wxMouseEvent& event )
 	if(!editor_init)
 		return;
 
+    //std::cout << "ENTER" << std::endl;
+
 	map_editor->getMapViewControl()->stage_window_isActive = true;
 	map_editor->getMapViewControl()->mapEdit_tile_selection = map_editor->getTileSelectControl()->mapEdit_tile_selection;
 }
@@ -2474,6 +2559,8 @@ void NirvanaEditor_MainFrame::OnLeaveMapView( wxMouseEvent& event )
 {
 	if(!editor_init)
 		return;
+
+    //std::cout << "EXIT" << std::endl;
 
 	map_editor->getMapViewControl()->stage_window_isActive = false;
 	map_editor->getMapViewControl()->mapEdit_lastAction_erase = false;

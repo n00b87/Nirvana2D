@@ -1,9 +1,5 @@
 Include "nirvana.bas"
 
-Print "Color: "; RGBA(200, 200, 200, 255)
-
-End
-
 title$ = "Nirvana Template"
 w = 640
 h = 480
@@ -20,7 +16,7 @@ Nirvana_LoadStage("st1", 0, 0, w, h)
 Dim camera_position As Nirvana_Vector2D
 
 'Variable for storing camera move speed
-cam_speed = 4
+cam_speed = 0.25
 
 layer_index = Nirvana_GetLayerIndex("sprite_layer1")
 c_id = Nirvana_GetLayerCanvasID(layer_index)

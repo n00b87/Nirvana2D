@@ -246,7 +246,7 @@
                           <property name="pos"></property>
                           <property name="resize">Resizable</property>
                           <property name="sashgravity">0.9</property>
-                          <property name="sashpos">662</property>
+                          <property name="sashpos">719</property>
                           <property name="sashsize">-1</property>
                           <property name="show">1</property>
                           <property name="size"></property>
