@@ -48,6 +48,52 @@ Nirvana_MainFrame( parent )
 
 	map_editor->setProject(project);
 
+	sprite_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getMapViewControl());
+	sprite_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getTileSelectControl());
+	sprite_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
+	sprite_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
+	sprite_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
+	sprite_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getCollisionControl());
+
+	sprite_editor->getCollisionControl()->shared_control.push_back(map_editor->getMapViewControl());
+	sprite_editor->getCollisionControl()->shared_control.push_back(map_editor->getTileSelectControl());
+	sprite_editor->getCollisionControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
+	sprite_editor->getCollisionControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
+	sprite_editor->getCollisionControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
+	sprite_editor->getCollisionControl()->shared_control.push_back(sprite_editor->getCollisionControl());
+
+	tile_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getMapViewControl());
+	tile_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getTileSelectControl());
+	tile_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
+	tile_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
+	tile_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
+	tile_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getCollisionControl());
+
+	tile_editor->getMaskSheetControl()->shared_control.push_back(map_editor->getMapViewControl());
+	tile_editor->getMaskSheetControl()->shared_control.push_back(map_editor->getTileSelectControl());
+	tile_editor->getMaskSheetControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
+	tile_editor->getMaskSheetControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
+	tile_editor->getMaskSheetControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
+	tile_editor->getMaskSheetControl()->shared_control.push_back(sprite_editor->getCollisionControl());
+
+	map_editor->getMapViewControl()->shared_control.push_back(map_editor->getMapViewControl());
+	map_editor->getMapViewControl()->shared_control.push_back(map_editor->getTileSelectControl());
+	map_editor->getMapViewControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
+	map_editor->getMapViewControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
+	map_editor->getMapViewControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
+	map_editor->getMapViewControl()->shared_control.push_back(sprite_editor->getCollisionControl());
+
+	map_editor->getTileSelectControl()->shared_control.push_back(map_editor->getMapViewControl());
+	map_editor->getTileSelectControl()->shared_control.push_back(map_editor->getTileSelectControl());
+	map_editor->getTileSelectControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
+	map_editor->getTileSelectControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
+	map_editor->getTileSelectControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
+	map_editor->getTileSelectControl()->shared_control.push_back(sprite_editor->getCollisionControl());
+
+	map_editor->getTileSelectControl()->stage_edit_control = map_editor->getMapViewControl();
+
+	editor_init = true;
+
 
 	stage_tree_imageList = new wxImageList(16,16,true);
     stage_tree_rootImage = stage_tree_imageList->Add(wxArtProvider::GetBitmap( wxART_FOLDER, wxART_MENU ));
@@ -127,7 +173,7 @@ Nirvana_MainFrame( parent )
 
 		if(cfg_file.IsOpened())
 		{
-			cfg_file.Write(_("MAP_EDITOR_MAP_CONTROL scroll_speed=3 show_grid=true grid_color=4291348680 show_shapes=true;") + _("\n"));
+			cfg_file.Write(_("MAP_EDITOR_MAP_CONTROL scroll_speed=3 show_grid=true grid_color=") + wxString::Format(_("%u"), irr::video::SColor(255,100,100,100).color) + _(" show_shapes=true;") + _("\n"));
 			cfg_file.Write(_("MAP_EDITOR_TILE_SELECT_CONTROL scroll_speed=3;") + _("\n"));
 			cfg_file.Write(_("TILE_EDITOR_ANIMATION_SHEET_CONTROL scroll_speed=3;") + _("\n"));
 			cfg_file.Write(_("TILE_EDITOR_MASK_SHEET_CONTROL scroll_speed=3;") + _("\n"));
@@ -242,11 +288,17 @@ Nirvana_MainFrame( parent )
 	m_mapEdit_cameraSpeed_spinCtrl->SetValue( map_editor->getMapViewControl()->scroll_speed );
 
 
-	editor_init = true;
+
+	map_editor->getMapViewControl()->force_refresh();
 }
 
 void NirvanaEditor_MainFrame::OnNirvanaClose( wxCloseEvent& event )
 {
+    //On Windows, writing the config file on close doesn't seem to work
+    #ifdef _WIN32
+    Close();
+    #endif // _WIN32
+
 	wxFileName fname(wxStandardPaths::Get().GetExecutablePath());
 	fname.AppendDir(_("config"));
 	fname.SetFullName(_("nirvana.config"));
@@ -1532,6 +1584,8 @@ void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event 
 	if(!editor_init)
 		return;
 
+    //std::cout << "TSET DEBUG 1" << std::endl;
+
 	int selected_index = event.GetSelection();
 	wxString tileset_name = m_tileEdit_tileset_listBox->GetString(selected_index);
 
@@ -1544,6 +1598,8 @@ void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event 
 	if(tset_id < 0)
 		return;
 
+    //std::cout << "TSET DEBUG 2" << std::endl;
+
 	m_tileEdit_tilesetID_textCtrl->SetValue(tileset_name);
 
 	m_tileEdit_maskID_textCtrl->SetValue(_(""));
@@ -1555,8 +1611,14 @@ void NirvanaEditor_MainFrame::OnTileEdit_TilesetSelected( wxCommandEvent& event 
 	tile_editor->getAnimationSheetControl()->setActiveCanvas(tile_editor->getAnimationSheetControl()->sheet_canvas);
 	tile_editor->getAnimationSheetControl()->clearCanvas();
 
+	//tile_editor->getAnimationSheetControl()->setColor(tile_editor->getAnimationSheetControl()->rgb(255,0,0));
+	//tile_editor->getAnimationSheetControl()->drawRect(10, 10, 100, 100);
+
+	tile_editor->getAnimationSheetControl()->force_refresh();
+
 	tile_editor->getMaskSheetControl()->setActiveCanvas(tile_editor->getMaskSheetControl()->sheet_canvas);
 	tile_editor->getMaskSheetControl()->clearCanvas();
+	tile_editor->getAnimationSheetControl()->force_refresh();
 
 	tile_editor->getAnimationSheetControl()->scroll_offset_x = 0;
 	tile_editor->getAnimationSheetControl()->scroll_offset_y = 0;

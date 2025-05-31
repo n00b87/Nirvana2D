@@ -251,11 +251,15 @@ void Nirvana_SpriteEditor::startEditor(int n)
 			getAnimationSheetControl()->update_events = true;
 			getAnimationFrameControl()->update_events = true;
 			getAnimationPreviewControl()->update_events = true;
+
+			getAnimationSheetControl()->force_refresh();
 		break;
 
 		case 1:
 			getCollisionControl()->GetDevice()->getContextManager()->activateContext(getCollisionControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 			getCollisionControl()->update_events = true;
+
+			getCollisionControl()->force_refresh();
 		break;
 	}
 
