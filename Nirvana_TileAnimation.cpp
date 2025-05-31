@@ -249,11 +249,15 @@ void Nirvana_TileEditor::startEditor(int n)
 			getAnimationSheetControl()->update_events = true;
 			getAnimationFrameControl()->update_events = true;
 			getAnimationPreviewControl()->update_events = true;
+
+			getAnimationSheetControl()->force_refresh();
 		break;
 
 		case 1:
 			getMaskSheetControl()->GetDevice()->getContextManager()->activateContext(getMaskSheetControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 			getMaskSheetControl()->update_events = true;
+
+			getMaskSheetControl()->force_refresh();
 		break;
 	}
 

@@ -22,8 +22,8 @@ Nirvana_MapEditor::Nirvana_MapEditor(wxWindow* parent, wxPanel* map_panel, wxPan
 
 	//initSpritePreview();
 
-	getMapViewControl()->shared_control = getTileSelectControl();
-	getTileSelectControl()->shared_control = getMapViewControl();
+	//getMapViewControl()->shared_control = getTileSelectControl();
+	//getTileSelectControl()->shared_control = getMapViewControl();
 
 	project = NULL;
 }

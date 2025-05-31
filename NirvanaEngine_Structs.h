@@ -70,7 +70,7 @@ struct tileset_obj
 {
 	bool active;
 
-	int img_id;
+	int img_id = -1;
 
 	int tile_width;
 	int tile_height;
@@ -97,8 +97,8 @@ struct tilemap_obj
 {
 	bool active;
 
-	int tileset;
-	irr::video::ITexture* texture;
+	int tileset = -1;
+	irr::video::ITexture* texture = NULL;
 
 	int num_tiles_across;
 	int num_tiles_down;
