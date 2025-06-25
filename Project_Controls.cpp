@@ -1361,6 +1361,7 @@ bool NirvanaEditor_MainFrame::generateStages()
 	pfile.Write(_("\n"));
 
 	pfile.Write(_("Type Nirvana_Shape\n"));
+	pfile.Write(_("Dim Name$\n"));
 	pfile.Write(_("Dim Sprite_ID\n"));
 	pfile.Write(_("Dim ShapeType\n"));
 	pfile.Write(_("End Type\n"));
@@ -1657,6 +1658,7 @@ bool NirvanaEditor_MainFrame::generateStages()
 					wxString shape_name = wxString(project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_name);
 
 					fn_str += _("\t\'------- SHAPE (\"") + shape_name + _("\") -------\n");
+					fn_str += _("\tNirvana_Stage_Shapes[") + shape_index_str + _("].Name$ = \"") + shape_name + _("\"\n");
 					fn_str += _("\tNirvana_Stage_Shapes[") + shape_index_str + _("].Sprite_ID = CreateSprite(-1, 1, 1)\n");
 					fn_str += _("\n");
 
