@@ -192,6 +192,9 @@ Function Nirvana_GetLayerMaskHit(layer_index, mask_index, x, y)
 	tile_x = Int(x / Nirvana_ActiveStage.Tile_Size.Width)
 	tile_y = Int(y / Nirvana_ActiveStage.Tile_Size.Height)
 	tile = GetTile(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, tile_x, tile_y)
+	If tile < 0 Then
+		Return False
+	End If
 	Return MatrixValue(Nirvana_TileMask_Matrix[mask_index], 0, tile)
 End Function
 
@@ -237,6 +240,18 @@ Function Nirvana_GetSpriteAnimationName$(sprite_index, animation_num)
 		Return ""
 	End If
 	Return Nirvana_SpriteAnimationNames$[animation_index]
+End Function
+
+Function Nirvana_GetSpriteAnimationIndex(sprite_index, animation_name$)
+	If sprite_index < 0 Or sprite_index >= ArraySize(Nirvana_Stage_Sprites, 1) Then
+		Return -1
+	End If
+	For i = 0 To Nirvana_GetSpriteAnimationCount(sprite_index)-1
+		If Nirvana_SpriteAnimationNames$[i] = animation_name$ Then
+			Return i+1
+		End If
+	Next
+	Return -1
 End Function
 
 
