@@ -760,6 +760,8 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_Sprite_Selected( wxCommandEvent& even
 	sprite_editor->getAnimationSheetControl()->scroll_offset_x = 0;
 	sprite_editor->getAnimationSheetControl()->scroll_offset_y = 0;
 
+	m_spriteEdit_detachShape_checkBox->SetValue(n_sprite.physics.detached);
+
 	//Set Physics Stuff
 	switch(n_sprite.physics.shape_type)
 	{
@@ -1131,6 +1133,18 @@ void NirvanaEditor_MainFrame::OnSpriteAnimationSheetSize( wxSizeEvent& event )
 
 
 // SPRITE COLLISION
+void NirvanaEditor_MainFrame::OnSpriteEdit_CollisionShapeDetached_Check( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	int spr_id = sprite_editor->getSelectedSprite();
+	if(spr_id < 0)
+		return;
+
+    project->setSpriteCollision_Detach(spr_id, event.IsChecked());
+}
+
 void NirvanaEditor_MainFrame::OnSpriteEdit_ShapeSelect( wxCommandEvent& event )
 {
 	if(!editor_init)

@@ -118,6 +118,9 @@ class Nirvana_Project
 		void setSpriteCollision_Shape(int spr_index, int shape);
 		int getSpriteCollision_Shape(int spr_index);
 
+		void setSpriteCollision_Detach(int spr_index, bool flag);
+		bool getSpriteCollision_Detach(int spr_index);
+
 		void setSpriteCollision_OffsetX(int spr_index, int x);
 		int getSpriteCollision_OffsetX(int spr_index);
 

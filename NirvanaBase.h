@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 4.2.1-0-g80c4cb6-dirty)
+// C++ code generated with wxFormBuilder (version 4.2.1-0-g80c4cb6)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -310,6 +310,8 @@ class Nirvana_MainFrame : public wxFrame
 		wxAuiToolBarItem* m_spriteEdit_collisionDraw_tool;
 		wxStaticText* m_staticText27;
 		wxComboBox* m_spriteEdit_collisionShape_comboBox;
+		wxStaticText* m_staticText1051;
+		wxCheckBox* m_spriteEdit_detachShape_checkBox;
 		wxStaticLine* m_staticline2;
 		wxSimplebook* m_spriteCollision_shape_simplebook;
 		wxPanel* m_spriteShape_rect_panel;
@@ -462,6 +464,7 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnSpriteEdit_Collision_Move_Click( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_Collision_Draw_Click( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_ShapeSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSpriteEdit_CollisionShapeDetached_Check( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_collisionBox_X_spinCtrl( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_collisionBox_Y_spinCtrl( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_collisionBox_Width_spinCtrl( wxSpinEvent& event ) { event.Skip(); }
@@ -478,13 +481,13 @@ class Nirvana_MainFrame : public wxFrame
 
 	public:
 
-		Nirvana_MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Nirvana2D"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1280,720 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		Nirvana_MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Nirvana2D"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1219,720 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~Nirvana_MainFrame();
 
 		void m_splitter1OnIdle( wxIdleEvent& )
 		{
-			m_splitter1->SetSashPosition( 662 );
+			m_splitter1->SetSashPosition( 593 );
 			m_splitter1->Disconnect( wxEVT_IDLE, wxIdleEventHandler( Nirvana_MainFrame::m_splitter1OnIdle ), NULL, this );
 		}
 

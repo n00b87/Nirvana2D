@@ -200,6 +200,7 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnSpriteEdit_StopPreviewClick( wxCommandEvent& event );
 
 		void OnSpriteEdit_ShapeSelect( wxCommandEvent& event );
+		void OnSpriteEdit_CollisionShapeDetached_Check( wxCommandEvent& event );
 
 		void OnSpriteEdit_Collision_Select_Click( wxCommandEvent& event );
 		void OnSpriteEdit_Collision_BoxSelect_Click( wxCommandEvent& event );

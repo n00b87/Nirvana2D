@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// C++ code generated with wxFormBuilder (version 4.2.1-0-g80c4cb6-dirty)
+// C++ code generated with wxFormBuilder (version 4.2.1-0-g80c4cb6)
 // http://www.wxformbuilder.org/
 //
 // PLEASE DO *NOT* EDIT THIS FILE!
@@ -1059,7 +1059,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_panel2->SetSizer( bSizer7 );
 	m_panel2->Layout();
 	bSizer7->Fit( m_panel2 );
-	m_splitter1->SplitVertically( m_panel1, m_panel2, 662 );
+	m_splitter1->SplitVertically( m_panel1, m_panel2, 593 );
 	bSizer12->Add( m_splitter1, 1, wxEXPAND, 5 );
 
 
@@ -1069,7 +1069,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_panel->SetSizer( bSizer3 );
 	m_mapEdit_panel->Layout();
 	bSizer3->Fit( m_mapEdit_panel );
-	m_editorMainTab_auinotebook->AddPage( m_mapEdit_panel, _("Map Editor"), true, wxNullBitmap );
+	m_editorMainTab_auinotebook->AddPage( m_mapEdit_panel, _("Map Editor"), false, wxNullBitmap );
 	m_tileEdit_panel = new wxPanel( m_editorMainTab_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer351;
 	bSizer351 = new wxBoxSizer( wxVERTICAL );
@@ -1561,7 +1561,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_spriteAnimation_panel->SetSizer( bSizer60 );
 	m_spriteEdit_spriteAnimation_panel->Layout();
 	bSizer60->Fit( m_spriteEdit_spriteAnimation_panel );
-	m_spriteEdit_tools_auinotebook->AddPage( m_spriteEdit_spriteAnimation_panel, _("Animation"), true, wxNullBitmap );
+	m_spriteEdit_tools_auinotebook->AddPage( m_spriteEdit_spriteAnimation_panel, _("Animation"), false, wxNullBitmap );
 	m_spriteEdit_spriteCollision_panel = new wxPanel( m_spriteEdit_tools_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer671;
 	bSizer671 = new wxBoxSizer( wxHORIZONTAL );
@@ -1606,6 +1606,19 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 
 
 	bSizer691->Add( bSizer681, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer1831;
+	bSizer1831 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText1051 = new wxStaticText( m_spriteEdit_spriteCollision_panel, wxID_ANY, _("Detached"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText1051->Wrap( -1 );
+	bSizer1831->Add( m_staticText1051, 1, wxALL, 5 );
+
+	m_spriteEdit_detachShape_checkBox = new wxCheckBox( m_spriteEdit_spriteCollision_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer1831->Add( m_spriteEdit_detachShape_checkBox, 4, wxALL, 5 );
+
+
+	bSizer691->Add( bSizer1831, 0, wxEXPAND, 5 );
 
 	m_staticline2 = new wxStaticLine( m_spriteEdit_spriteCollision_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLI_HORIZONTAL );
 	bSizer691->Add( m_staticline2, 0, wxEXPAND | wxALL, 5 );
@@ -1765,7 +1778,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_spriteCollision_panel->SetSizer( bSizer671 );
 	m_spriteEdit_spriteCollision_panel->Layout();
 	bSizer671->Fit( m_spriteEdit_spriteCollision_panel );
-	m_spriteEdit_tools_auinotebook->AddPage( m_spriteEdit_spriteCollision_panel, _("Collision"), false, wxNullBitmap );
+	m_spriteEdit_tools_auinotebook->AddPage( m_spriteEdit_spriteCollision_panel, _("Collision"), true, wxNullBitmap );
 
 	bSizer611->Add( m_spriteEdit_tools_auinotebook, 1, wxEXPAND | wxALL, 5 );
 
@@ -1780,7 +1793,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_panel->SetSizer( bSizer57 );
 	m_spriteEdit_panel->Layout();
 	bSizer57->Fit( m_spriteEdit_panel );
-	m_editorMainTab_auinotebook->AddPage( m_spriteEdit_panel, _("Sprite Editor"), false, wxNullBitmap );
+	m_editorMainTab_auinotebook->AddPage( m_spriteEdit_panel, _("Sprite Editor"), true, wxNullBitmap );
 
 	bSizer1->Add( m_editorMainTab_auinotebook, 1, wxEXPAND | wxALL, 5 );
 
@@ -1932,6 +1945,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	this->Connect( m_spriteEdit_collisionMove_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnSpriteEdit_Collision_Move_Click ) );
 	this->Connect( m_spriteEdit_collisionDraw_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnSpriteEdit_Collision_Draw_Click ) );
 	m_spriteEdit_collisionShape_comboBox->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnSpriteEdit_ShapeSelect ), NULL, this );
+	m_spriteEdit_detachShape_checkBox->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnSpriteEdit_CollisionShapeDetached_Check ), NULL, this );
 	m_spriteEdit_collisionBox_X_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnSpriteEdit_collisionBox_X_spinCtrl ), NULL, this );
 	m_spriteEdit_collisionBox_Y_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnSpriteEdit_collisionBox_Y_spinCtrl ), NULL, this );
 	m_spriteEdit_collisionBox_Width_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnSpriteEdit_collisionBox_Width_spinCtrl ), NULL, this );

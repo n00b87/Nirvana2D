@@ -117,6 +117,9 @@ struct sprite2D_physics_obj
 	std::string shape_name;
 
 	bool init = false; //specifically to prevent project from overriding default values on creation
+
+	bool detached = false;
+
 	int body_type;
 	int shape_type;
 

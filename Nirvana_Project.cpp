@@ -231,6 +231,10 @@ int Nirvana_Project::loadSpriteDefinition(wxString spr_file)
 							obj.object.frame_size.set(frame_width, frame_height);
 						}
 					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("detached_shape"))==0)
+					{
+						obj.object.physics.detached = p_cmd[i].dict[obj_index].val.Upper().compare(_("TRUE"))==0 ? true : false;
+					}
 				}
 			}
 			else if(p_cmd[i].dict[0].key.compare(_("SHAPE"))==0)
@@ -618,6 +622,22 @@ int Nirvana_Project::getSpriteCollision_Shape(int spr_index)
 		return 0;
 
 	return sprite_base[spr_index].object.physics.shape_type;
+}
+
+void Nirvana_Project::setSpriteCollision_Detach(int spr_index, bool flag)
+{
+    if(spr_index < 0 || spr_index >= sprite_base.size())
+		return;
+
+	sprite_base[spr_index].object.physics.detached = flag;
+}
+
+bool Nirvana_Project::getSpriteCollision_Detach(int spr_index)
+{
+    if(spr_index < 0 || spr_index >= sprite_base.size())
+		return false;
+
+	return sprite_base[spr_index].object.physics.detached;
 }
 
 void Nirvana_Project::setSpriteCollision_OffsetX(int spr_index, int x)

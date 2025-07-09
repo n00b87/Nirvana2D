@@ -613,7 +613,8 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 			sp_file.Write(_("SPRITE "));
 			sp_file.Write(_("name=\"") + project->sprite_base[i].sprite_name + _("\" "));
 			sp_file.Write(_("frame_size=") + wxString::Format(_("%i"), project->sprite_base[i].object.frame_size.Width) + _(",") +
-											 wxString::Format(_("%i"), project->sprite_base[i].object.frame_size.Height) + _(";\n"));
+											 wxString::Format(_("%i"), project->sprite_base[i].object.frame_size.Height) + _(" ") +
+                          _("detached_shape=") + (project->sprite_base[i].object.physics.detached ? _("TRUE") : _("FALSE")) + _(";\n"));
 
 			//Collision Shape
 			if(project->sprite_base[i].object.physics.shape_type == SPRITE_SHAPE_BOX)
@@ -919,6 +920,8 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 	pfile.Write(_("Dim Name$\n"));
 	pfile.Write(_("Dim BaseName$\n"));
 	pfile.Write(_("Dim Sprite_ID\n"));
+	pfile.Write(_("Dim Detached_Sprite_ID\n"));
+	pfile.Write(_("Dim IsDetached\n"));
 	pfile.Write(_("Dim Animation_Name_Index\n")); //This is to save memory since RC currently can't resize fields in a UDT
 	pfile.Write(_("Dim Animation_Count\n"));
 	pfile.Write(_("End Type\n"));
@@ -938,7 +941,7 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 	//Sprite Definitions
 	for(int base_index = 0; base_index < project->sprite_base.size(); base_index++)
 	{
-		wxString fn_name = _("Nirvana_SpriteDef_") + wxString::Format(_("%i"), base_index) + _("()");
+		wxString fn_name = _("Nirvana_SpriteDef_") + wxString::Format(_("%i"), base_index) + _("(ByRef detached_spr_id)");
 		sprite_build_fn.push_back(fn_name);
 
 		wxString spr_img = _("Nirvana_Sprite_Image_") + wxString::Format(_("%i"), base_index);
@@ -995,6 +998,19 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 
 		fn_str += _("\n");
 		fn_str += _("\t\'-------SHAPE-------\n");
+
+		wxString collision_spr_id = _("spr_id");
+
+		if(project->sprite_base[base_index].object.physics.detached)
+        {
+            fn_str += _("detached_spr_id = CreateSprite(-1, ") + frame_width_str + _(", ") + frame_height_str + _(")\n\n");
+            collision_spr_id = _("detached_spr_id");
+        }
+        else
+        {
+            fn_str += _("detached_spr_id = -1") + _("\n\n");
+        }
+
 		if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_BOX)
 		{
 			wxString shape_x_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.offset_x);
@@ -1002,9 +1018,9 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 			wxString shape_w_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.box_width);
 			wxString shape_h_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.box_height);
 
-			fn_str += _("\tSetSpriteShape(spr_id, SPRITE_SHAPE_BOX)\n");
-			fn_str += _("\tSetSpriteShapeOffset(spr_id, ") + shape_x_str + _(", ") + shape_y_str + _(")\n");
-			fn_str += _("\tSetSpriteBox(spr_id, ") + shape_w_str + _(", ") + shape_h_str + _(")\n");
+			fn_str += _("\tSetSpriteShape(") + collision_spr_id + _(", SPRITE_SHAPE_BOX)\n");
+			fn_str += _("\tSetSpriteShapeOffset(") + collision_spr_id + _(", ") + shape_x_str + _(", ") + shape_y_str + _(")\n");
+			fn_str += _("\tSetSpriteBox(") + collision_spr_id + _(", ") + shape_w_str + _(", ") + shape_h_str + _(")\n");
 		}
 		else if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_CIRCLE)
 		{
@@ -1012,18 +1028,18 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 			wxString shape_y_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.offset_y);
 			wxString shape_radius_str = wxString::FromDouble( project->sprite_base[base_index].object.physics.radius);
 
-			fn_str += _("\tSetSpriteShape(spr_id, SPRITE_SHAPE_CIRCLE)\n");
-			fn_str += _("\tSetSpriteShapeOffset(spr_id, ") + shape_x_str + _(", ") + shape_y_str + _(")\n");
-			fn_str += _("\tSetSpriteRadius(spr_id, ") + shape_radius_str + _(")\n");
+			fn_str += _("\tSetSpriteShape(") + collision_spr_id + _(", SPRITE_SHAPE_CIRCLE)\n");
+			fn_str += _("\tSetSpriteShapeOffset(") + collision_spr_id + _(", ") + shape_x_str + _(", ") + shape_y_str + _(")\n");
+			fn_str += _("\tSetSpriteRadius(") + collision_spr_id + _(", ") + shape_radius_str + _(")\n");
 		}
 		else if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_CHAIN || project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_POLYGON)
 		{
 			wxString shape_pt_count_str = wxString::Format(_("%i"), (int)project->sprite_base[base_index].object.physics.points.size());
 
 			if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_CHAIN)
-				fn_str += _("\tSetSpriteShape(spr_id, SPRITE_SHAPE_CHAIN)\n");
+				fn_str += _("\tSetSpriteShape(") + collision_spr_id + _(", SPRITE_SHAPE_CHAIN)\n");
 			else
-				fn_str += _("\tSetSpriteShape(spr_id, SPRITE_SHAPE_POLYGON)\n");
+				fn_str += _("\tSetSpriteShape(") + collision_spr_id + _(", SPRITE_SHAPE_POLYGON)\n");
 
 			fn_str += _("\tDim shape_point_x[") + shape_pt_count_str + _("]\n");
 			fn_str += _("\tDim shape_point_y[") + shape_pt_count_str + _("]\n");
@@ -1054,9 +1070,9 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 			}
 
 			if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_CHAIN)
-				fn_str += _("\tSetSpriteChain(spr_id, shape_point_x, shape_point_y, ") + shape_pt_count_str + _(", ") + prev_x_str + _(", ") + prev_y_str + _(", ") + next_x_str + _(", ") + next_y_str + _(")\n");
+				fn_str += _("\tSetSpriteChain(") + collision_spr_id + _(", shape_point_x, shape_point_y, ") + shape_pt_count_str + _(", ") + prev_x_str + _(", ") + prev_y_str + _(", ") + next_x_str + _(", ") + next_y_str + _(")\n");
 			else
-				fn_str += _("\tSetSpritePolygon(spr_id, shape_point_x, shape_point_y, ") + shape_pt_count_str + _(")\n");
+				fn_str += _("\tSetSpritePolygon(") + collision_spr_id + _(", shape_point_x, shape_point_y, ") + shape_pt_count_str + _(")\n");
 		}
 
 		fn_str += _("\n");
@@ -1106,7 +1122,10 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 	for(int base_index = 0; base_index < project->sprite_base.size(); base_index++)
 	{
 		pfile.Write(_("\tCase \"") + project->sprite_base[base_index].sprite_name + _("\"\n"));
-		pfile.Write(_("\t\tnv_sprite.Sprite_ID = ") + sprite_build_fn[base_index] + _("\n"));
+		wxString nv_build_fn = sprite_build_fn[base_index];
+		nv_build_fn.Replace(_("ByRef detached_spr_id"), _("nv_sprite.Detached_Sprite_ID"));
+		pfile.Write(_("\t\tnv_sprite.Sprite_ID = ") + nv_build_fn + _("\n"));
+		pfile.Write(_("\t\tnv_sprite.IsDetached = ") + (project->sprite_base[base_index].object.physics.detached ? _("TRUE") : _("FALSE")) + _("\n"));
 		pfile.Write(_("\t\tnv_sprite.Animation_Name_Index = ") + wxString::Format(_("%i"), project->sprite_base[base_index].object.animation_list_start_index) + _("\n"));
 		pfile.Write(_("\t\tnv_sprite.Animation_Count = ") + wxString::Format(_("%i"), (int)project->sprite_base[base_index].object.animation.size()) + _("\n"));
 		pfile.Write(_("\n"));
@@ -1528,6 +1547,14 @@ bool NirvanaEditor_MainFrame::generateStages()
 					fn_str += _("\n");
 
 					wxString spr_id_str = spr_var_str + _(".Sprite_ID");
+
+					wxString collision_spr_id = spr_id_str;
+
+					if(project->sprite_base[base_index].object.physics.detached)
+                    {
+                        collision_spr_id = spr_var_str + _(".Detached_Sprite_ID");
+                    }
+
 					fn_str += _("\t\'Base Settings\n");
 
 					wxString body_type_str = _("SPRITE_TYPE_STATIC");
@@ -1536,7 +1563,7 @@ bool NirvanaEditor_MainFrame::generateStages()
 					else if(project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].body_type == SPRITE_TYPE_KINEMATIC)
 						body_type_str = _("SPRITE_TYPE_KINEMATIC");
 
-					fn_str += _("\tSetSpriteType(") + spr_id_str + _(", ") + body_type_str + _(")\n");
+					fn_str += _("\tSetSpriteType(") + collision_spr_id + _(", ") + body_type_str + _(")\n");
 
 					wxString sprite_animation_name = wxString(project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].animation_name).Upper().Trim();
 					int sprite_animation_index = -1;
@@ -1560,33 +1587,34 @@ bool NirvanaEditor_MainFrame::generateStages()
 					wxString scale_y_str = wxString::FromDouble((double)project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].scale.Y);
 					wxString angle_str = wxString::FromDouble((double)(360-project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].angle));
 					fn_str += _("\t\'Shape\n");
+
 					if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_BOX)
 					{
-						fn_str += _("\t") + _("SetSpriteShape(") + spr_id_str + _(", SPRITE_SHAPE_BOX)\n");
+						fn_str += _("\t") + _("SetSpriteShape(") + collision_spr_id + _(", SPRITE_SHAPE_BOX)\n");
 
 						wxString off_x_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.offset_x);
 						wxString off_y_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.offset_y);
 						wxString box_width_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.box_width);
 						wxString box_height_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.box_height);
-						fn_str += _("\t") + _("SetSpriteShapeOffset(") + spr_id_str + _(", ") + off_x_str + _(", ") + off_y_str + _(")\n");
-						fn_str += _("\t") + _("SetSpriteBox(") + spr_id_str + _(", ") + box_width_str + _(", ") + box_height_str + _(")\n");
+						fn_str += _("\t") + _("SetSpriteShapeOffset(") + collision_spr_id + _(", ") + off_x_str + _(", ") + off_y_str + _(")\n");
+						fn_str += _("\t") + _("SetSpriteBox(") + collision_spr_id + _(", ") + box_width_str + _(", ") + box_height_str + _(")\n");
 					}
 					else if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_CIRCLE)
 					{
-						fn_str += _("\t") + _("SetSpriteShape(") + spr_id_str + _(", SPRITE_SHAPE_CIRCLE)\n");
+						fn_str += _("\t") + _("SetSpriteShape(") + collision_spr_id + _(", SPRITE_SHAPE_CIRCLE)\n");
 
 						wxString off_x_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.offset_x);
 						wxString off_y_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.offset_y);
 						wxString radius_str = wxString::FromDouble(project->sprite_base[base_index].object.physics.radius);
-						fn_str += _("\t") + _("SetSpriteShapeOffset(") + spr_id_str + _(", ") + off_x_str + _(", ") + off_y_str + _(")\n");
-						fn_str += _("\t") + _("SetSpriteRadius(") + spr_id_str + _(", ") + radius_str + _(")\n");
+						fn_str += _("\t") + _("SetSpriteShapeOffset(") + collision_spr_id + _(", ") + off_x_str + _(", ") + off_y_str + _(")\n");
+						fn_str += _("\t") + _("SetSpriteRadius(") + collision_spr_id + _(", ") + radius_str + _(")\n");
 					}
 					else if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_CHAIN || project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_POLYGON)
 					{
 						if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_CHAIN)
-							fn_str += _("\t") + _("SetSpriteShape(") + spr_id_str + _(", SPRITE_SHAPE_CHAIN)\n");
+							fn_str += _("\t") + _("SetSpriteShape(") + collision_spr_id + _(", SPRITE_SHAPE_CHAIN)\n");
 						else
-							fn_str += _("\t") + _("SetSpriteShape(") + spr_id_str + _(", SPRITE_SHAPE_POLYGON)\n");
+							fn_str += _("\t") + _("SetSpriteShape(") + collision_spr_id + _(", SPRITE_SHAPE_POLYGON)\n");
 
 						wxString shape_x_str = _("sprite_shape_x_") + wxString::Format(_("%i"), sprite_layer_start_index);
 						wxString shape_y_str = _("sprite_shape_y_") + wxString::Format(_("%i"), sprite_layer_start_index);
@@ -1622,21 +1650,21 @@ bool NirvanaEditor_MainFrame::generateStages()
 								next_y_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.physics.points[shape_size-1].Y -1);
 							}
 
-							fn_str += _("\t") + _("SetSpriteChain(") + spr_id_str + _(", ") + shape_x_str + _(", ") + shape_y_str + _(", ") + wxString::Format(_("%i"), shape_size) + _(", ") +
+							fn_str += _("\t") + _("SetSpriteChain(") + collision_spr_id + _(", ") + shape_x_str + _(", ") + shape_y_str + _(", ") + wxString::Format(_("%i"), shape_size) + _(", ") +
 																							  prev_x_str + _(", ") + prev_y_str + _(", ") + next_x_str + _(", ") + next_y_str + _(")\n");
 						}
 						else
 						{
-							fn_str += _("\t") + _("SetSpritePolygon(") + spr_id_str + _(", ") + shape_x_str + _(", ") + shape_y_str + _(", ") + wxString::Format(_("%i"), shape_size) + _(")\n");
+							fn_str += _("\t") + _("SetSpritePolygon(") + collision_spr_id + _(", ") + shape_x_str + _(", ") + shape_y_str + _(", ") + wxString::Format(_("%i"), shape_size) + _(")\n");
 						}
 					}
 
 					fn_str += _("\n");
 
 					fn_str +=_("\t\'Transform\n");
-					fn_str += _("\tSetSpritePosition(") + spr_id_str + _(", ") + pos_x_str + _(", ") + pos_y_str + _(")\n");
-					fn_str += _("\tSetSpriteScale(") + spr_id_str + _(", ") + scale_x_str + _(", ") + scale_y_str + _(")\n");
-					fn_str += _("\tSetSpriteRotation(") + spr_id_str + _(", ") + angle_str + _(")\n");
+					fn_str += _("\tSetSpritePosition(") + collision_spr_id + _(", ") + pos_x_str + _(", ") + pos_y_str + _(")\n");
+					fn_str += _("\tSetSpriteScale(") + collision_spr_id + _(", ") + scale_x_str + _(", ") + scale_y_str + _(")\n");
+					fn_str += _("\tSetSpriteRotation(") + collision_spr_id + _(", ") + angle_str + _(")\n");
 					fn_str += _("\n");
 
 					fn_str +=_("\t\'Render Settings\n");
@@ -1950,45 +1978,6 @@ bool NirvanaEditor_MainFrame::generateStages()
 	pfile.Write(_("\tReturn TRUE\n"));
 	pfile.Write(_("End Function\n"));
 	pfile.Write(_("\n\n"));
-
-	pfile.Write(_("Sub Nirvana_Update()\n"));
-	pfile.Write(_("\tFor layer_index = 0 To Nirvana_ActiveStage.Layer_Count-1\n"));
-	pfile.Write(_("\t\t") + _("Canvas(Nirvana_Stage_Layers[layer_index].Ref_Canvas)\n"));
-	pfile.Write(_("\t\t") + _("SetCanvasZ(Nirvana_Stage_Layers[layer_index].Ref_Canvas, Nirvana_ActiveStage.Layer_Count-layer_index)\n"));
-	pfile.Write(_("\t\t") + _("offset_x = Nirvana_ActiveStage.Stage_Offset.X * Nirvana_Stage_Layers[layer_index].Scroll_Speed.X\n"));
-	pfile.Write(_("\t\t") + _("offset_y = Nirvana_ActiveStage.Stage_Offset.Y * Nirvana_Stage_Layers[layer_index].Scroll_Speed.Y\n"));
-	pfile.Write(_("\t\t") + _("Select Case Nirvana_Stage_Layers[layer_index].LayerType\n"));
-	pfile.Write(_("\t\t") + _("Case NIRVANA_LAYER_TYPE_SPRITE\n"));
-	pfile.Write(_("\t\t\t") + _("SetCanvasOffset(Nirvana_Stage_Layers[layer_index].Ref_Canvas, offset_x, offset_y)\n"));
-	pfile.Write(_("\t\t") + _("Case NIRVANA_LAYER_TYPE_CANVAS_2D\n"));
-	pfile.Write(_("\t\t\t") + _("ClearCanvas()\n"));
-	pfile.Write(_("\t\t\t") + _("If ImageExists(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID) Then\n"));
-	pfile.Write(_("\t\t\t\t") + _("Select Case Nirvana_Stage_Layers[layer_index].Bkg.RenderSetting\n"));
-	pfile.Write(_("\t\t\t\t") + _("Case NIRVANA_IMG_RENDER_SETTING_NORMAL\n"));
-	pfile.Write(_("\t\t\t\t\t") + _("DrawImage(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, 0, 0)\n"));
-	pfile.Write(_("\t\t\t\t") + _("Case NIRVANA_IMG_RENDER_SETTING_STRETCHED\n"));
-	pfile.Write(_("\t\t\t\t\t") + _("Dim img_w, img_h\n"));
-	pfile.Write(_("\t\t\t\t\t") + _("GetImageSize(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, img_w, img_h)\n"));
-	pfile.Write(_("\t\t\t\t\t") + _("DrawImage_BlitEx(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, 0, 0, img_w, img_h) \n"));
-	pfile.Write(_("\t\t\t\t") + _("Case NIRVANA_IMG_RENDER_SETTING_TILED\n"));
-	pfile.Write(_("\t\t\t\t\t") + _("Dim img_w, img_h\n"));
-	pfile.Write(_("\t\t\t\t\t") + _("GetImageSize(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, img_w, img_h)\n"));
-	pfile.Write(_("\t\t\t\t\t") + _("tile_off_x = offset_x MOD img_w\n"));
-	pfile.Write(_("\t\t\t\t\t") + _("tile_off_y = offset_y MOD img_h\n"));
-	pfile.Write(_("\t\t\t\t\t") + _("For y = -1*tile_off_y To Nirvana_ActiveStage.Viewport_Size.Height-1 Step img_h\n"));
-	pfile.Write(_("\t\t\t\t\t\t") + _("For x = -1*tile_off_x To Nirvana_ActiveStage.Viewport_Size.Width-1 Step img_w\n"));
-	pfile.Write(_("\t\t\t\t\t\t\t") + _("DrawImage(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, x, y)\n"));
-	pfile.Write(_("\t\t\t\t\t\t") + _("Next\n"));
-	pfile.Write(_("\t\t\t\t\t") + _("Next\n"));
-	pfile.Write(_("\t\t\t\t") + _("End Select\n"));
-	pfile.Write(_("\t\t\t") + _("End If\n"));
-	pfile.Write(_("\t\t") + _("Case NIRVANA_LAYER_TYPE_TILEMAP\n"));
-	pfile.Write(_("\t\t\t") + _("ClearCanvas()\n"));
-	pfile.Write(_("\t\t\t") + _("DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, offset_x, offset_y)\n"));
-	pfile.Write(_("\t\t") + _("End Select\n"));
-	pfile.Write(_("\t") + _("Next\n"));
-	pfile.Write(_("\tUpdate()\n"));
-	pfile.Write(_("End Sub\n"));
 
 	pfile.Close();
 
