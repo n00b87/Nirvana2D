@@ -1069,7 +1069,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_panel->SetSizer( bSizer3 );
 	m_mapEdit_panel->Layout();
 	bSizer3->Fit( m_mapEdit_panel );
-	m_editorMainTab_auinotebook->AddPage( m_mapEdit_panel, _("Map Editor"), false, wxNullBitmap );
+	m_editorMainTab_auinotebook->AddPage( m_mapEdit_panel, _("Map Editor"), true, wxNullBitmap );
 	m_tileEdit_panel = new wxPanel( m_editorMainTab_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer351;
 	bSizer351 = new wxBoxSizer( wxVERTICAL );
@@ -1561,7 +1561,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_spriteAnimation_panel->SetSizer( bSizer60 );
 	m_spriteEdit_spriteAnimation_panel->Layout();
 	bSizer60->Fit( m_spriteEdit_spriteAnimation_panel );
-	m_spriteEdit_tools_auinotebook->AddPage( m_spriteEdit_spriteAnimation_panel, _("Animation"), false, wxNullBitmap );
+	m_spriteEdit_tools_auinotebook->AddPage( m_spriteEdit_spriteAnimation_panel, _("Animation"), true, wxNullBitmap );
 	m_spriteEdit_spriteCollision_panel = new wxPanel( m_spriteEdit_tools_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer671;
 	bSizer671 = new wxBoxSizer( wxHORIZONTAL );
@@ -1778,7 +1778,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_spriteCollision_panel->SetSizer( bSizer671 );
 	m_spriteEdit_spriteCollision_panel->Layout();
 	bSizer671->Fit( m_spriteEdit_spriteCollision_panel );
-	m_spriteEdit_tools_auinotebook->AddPage( m_spriteEdit_spriteCollision_panel, _("Collision"), true, wxNullBitmap );
+	m_spriteEdit_tools_auinotebook->AddPage( m_spriteEdit_spriteCollision_panel, _("Collision"), false, wxNullBitmap );
 
 	bSizer611->Add( m_spriteEdit_tools_auinotebook, 1, wxEXPAND | wxALL, 5 );
 
@@ -1793,7 +1793,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_panel->SetSizer( bSizer57 );
 	m_spriteEdit_panel->Layout();
 	bSizer57->Fit( m_spriteEdit_panel );
-	m_editorMainTab_auinotebook->AddPage( m_spriteEdit_panel, _("Sprite Editor"), true, wxNullBitmap );
+	m_editorMainTab_auinotebook->AddPage( m_spriteEdit_panel, _("Sprite Editor"), false, wxNullBitmap );
 
 	bSizer1->Add( m_editorMainTab_auinotebook, 1, wxEXPAND | wxALL, 5 );
 
