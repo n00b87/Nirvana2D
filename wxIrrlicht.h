@@ -167,6 +167,7 @@ class wxIrrlicht : public wxControl {
 		void drawRect(int x, int y, int w, int h);
 		void drawRectFill(int x, int y, int w, int h);
 		void drawLine(int x1, int y1, int x2, int y2);
+		void drawLine_opt(int x1, int y1, int x2, int y2);
 		void drawPixel(int x, int y);
 		void makeEllipse(irr::core::array<irr::video::S3DVertex>& vertices, irr::core::array<irr::u16>& indices, const CircleSettings& settings);
 		void drawEllipse(int x, int y, int rx, int ry);

@@ -840,10 +840,10 @@ void wxIrrlicht::util_drawGrid()
 
 	for(int y = start_y; y < ph+1; y += project->stages[selected_stage].tile_height)
 	{
-		drawLine(-1, y, pw+1, y);
+		drawLine_opt(-1, y, pw+1, y);
 		for(int x = start_x; x < pw+1; x += project->stages[selected_stage].tile_width)
 		{
-			drawLine(x, -1, x, ph+1);
+			drawLine_opt(x, -1, x, ph+1);
 		}
 	}
 }
@@ -6877,6 +6877,14 @@ void wxIrrlicht::drawRectFill(int x, int y, int w, int h)
 void wxIrrlicht::drawLine(int x1, int y1, int x2, int y2)
 {
     mapEdit_getContext();
+    irr::core::vector2d<s32> r_pos_start(x1,y1);
+    irr::core::vector2d<s32> r_pos_end(x2,y2);
+
+    m_pDriver->draw2DLine(r_pos_start, r_pos_end, active_color);
+}
+
+void wxIrrlicht::drawLine_opt(int x1, int y1, int x2, int y2)
+{
     irr::core::vector2d<s32> r_pos_start(x1,y1);
     irr::core::vector2d<s32> r_pos_end(x2,y2);
 
