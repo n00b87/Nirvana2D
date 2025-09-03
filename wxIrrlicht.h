@@ -451,6 +451,25 @@ class wxIrrlicht : public wxControl {
         void updateTileSelectionTilemap();
 
 
+
+        //ISO Tiles
+        void StageSheet_SetTileUpdate_ISO();
+        void util_fillTile_ISO(int base_tile, int fill_tile, int x, int y, bool use_map2);
+        void StageSheet_FillTileUpdate_ISO();
+
+        //void util_drawSelectedTiles_ISO();
+        void StageSheet_SelectTileUpdate_ISO();
+        //void StageSheet_BoxSelectTileUpdate_ISO();
+
+        //void StageSheet_MoveTileUpdate_ISO();
+        //void StageSheet_CopyTileUpdate_ISO();
+
+        //void StageSheet_DeleteSelectedTileUpdate_ISO();
+        //----------------------------------------------------
+
+
+
+
         std::vector<int> pick_sprites;
         void pickSprites(int start_x, int start_y, int end_x, int end_y, bool current_canvas_only=true);
 
@@ -518,9 +537,12 @@ class wxIrrlicht : public wxControl {
 		wxSpinCtrl* m_mapEdit_circleShape_centerY_spinCtrl = NULL;
 		wxSpinCtrl* m_mapEdit_circleShape_radius_spinCtrl = NULL;
 
+		int pointInQuad(double x, double y, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
+
 
         void UpdateStageSheet();
         void UpdateStageTileSelect();
+        void UpdateStageISOTileSelect();
         void UpdateStageSpritePreview();
 
         std::vector<wxIrrlicht*> shared_control;

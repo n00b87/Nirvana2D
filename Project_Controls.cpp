@@ -762,10 +762,12 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 					stage_file.Write(_("LAYER_TYPE_SPRITE"));
 				else if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP)
 					stage_file.Write(_("LAYER_TYPE_TILEMAP"));
+                else if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
+					stage_file.Write(_("LAYER_TYPE_ISO_TILEMAP"));
 
 				stage_file.Write(_(" "));
 
-				if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP)
+				if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP || project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
 					stage_file.Write(_("tileset=\"") + wxString( project->stages[i].layers[layer_index].layer_map.nv_tileset_name ) + _("\" "));
 
 				stage_file.Write(_("scroll_speed=") + wxString::FromDouble((double)project->stages[i].layers[layer_index].scroll_speed.X) + _(",") +
@@ -869,7 +871,7 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 						stage_file.Write(_(";\n"));
 					}
 				}
-				else if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP)
+				else if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP || project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
 				{
 					stage_file.Write(_("START_TILEMAP;\n"));
 
@@ -885,6 +887,24 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 					}
 
 					stage_file.Write(_("END_TILEMAP;\n"));
+
+					if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
+                    {
+                        stage_file.Write(_("START_TILEMAP;\n"));
+
+                        for(int t_row = 0; t_row < project->stages[i].layers[layer_index].layer_map.tile_map2.rows.size(); t_row++)
+                        {
+                            stage_file.Write(_("ROW value="));
+                            for(int tile_index = 0; tile_index < project->stages[i].layers[layer_index].layer_map.tile_map2.rows[t_row].tile.size(); tile_index++)
+                            {
+                                stage_file.Write( wxString::Format(_("%i"), project->stages[i].layers[layer_index].layer_map.tile_map2.rows[t_row].tile[tile_index]) +
+                                                    ( ((tile_index+1) < project->stages[i].layers[layer_index].layer_map.tile_map2.rows[t_row].tile.size()) ? _(",") : _("") ) );
+                            }
+                            stage_file.Write(_(";\n"));
+                        }
+
+                        stage_file.Write(_("END_TILEMAP;\n"));
+                    }
 				}
 
 				stage_file.Write(_("\n"));
@@ -2175,6 +2195,7 @@ void NirvanaEditor_MainFrame::OnMapEdit_StageSettingsClick( wxCommandEvent& even
 
 	project->setStageName(stage_index, dialog->stage_name.ToStdString());
 	project->setStageSize(stage_index, dialog->tiles_across, dialog->tiles_down);
+	project->setStageSizeISO(stage_index, dialog->tiles_across, dialog->tiles_down);
 
 	m_project_treeCtrl->SetItemText( stage_treeItem[stage_index], dialog->stage_name );
 
@@ -2472,6 +2493,7 @@ void NirvanaEditor_MainFrame::updateMapEditor()
 
 		switch(project->getLayerType(stage_index, layer_index))
 		{
+		    case LAYER_TYPE_ISO_TILEMAP:
 			case LAYER_TYPE_TILEMAP:
 			{
 				m_mapEdit_layerTileset_staticText->SetLabelText( wxString(project->getTilesetName( project->getLayerTileset(stage_index, layer_index) )));

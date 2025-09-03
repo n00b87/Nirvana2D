@@ -8,6 +8,7 @@ NewLayer_Dialog( parent )
 	create_flag = false;
 
 	m_layerType_comboBox->Append(_("TILEMAP"));
+	m_layerType_comboBox->Append(_("ISO TILEMAP"));
 	m_layerType_comboBox->Append(_("SPRITE"));
 	m_layerType_comboBox->Append(_("CANVAS 2D"));
 	m_layerType_comboBox->Append(_("CANVAS 3D"));
@@ -45,7 +46,7 @@ void NirvanaEditor_NewLayer_Dialog::OnCreate( wxCommandEvent& event )
 	if(selected_list_item >= 0 && selected_list_item < m_tileset_listBox->GetCount())
 		selected_tileset = m_tileset_listBox->GetString(selected_list_item);
 
-	if(selected_type == LAYER_TYPE_TILEMAP && selected_tileset.Trim().compare(_(""))==0)
+	if( (selected_type == LAYER_TYPE_TILEMAP || selected_type == LAYER_TYPE_ISO_TILEMAP) && selected_tileset.Trim().compare(_(""))==0)
 	{
 		wxMessageBox(_("A tileset must be selected for TILEMAP layer"));
 		return;
@@ -63,7 +64,7 @@ void NirvanaEditor_NewLayer_Dialog::OnCancel( wxCommandEvent& event )
 
 void NirvanaEditor_NewLayer_Dialog::OnLayerTypeSelect( wxCommandEvent& event )
 {
-	if(event.GetSelection() == 0)
+	if(event.GetSelection() == 0 || event.GetSelection() == 1)
 	{
 		m_layerType_simplebook->SetSelection(1);
 	}

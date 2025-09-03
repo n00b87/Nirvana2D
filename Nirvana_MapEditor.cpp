@@ -272,6 +272,7 @@ void Nirvana_MapEditor::selectLayer(int layer_index)
 
 	switch(n_layer.layer_type)
 	{
+	    case LAYER_TYPE_ISO_TILEMAP:
 		case LAYER_TYPE_TILEMAP:
 		{
 			getTileSelectControl()->mapEdit_getContext();

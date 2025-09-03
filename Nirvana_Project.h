@@ -36,6 +36,7 @@ class Nirvana_Project
 		std::string getStageName(int stage_index);
 		void setStageName(int stage_index, std::string stage_name);
 		void setStageSize(int stage_index, int width, int height);
+		void setStageSizeISO(int stage_index, int width, int height);
 		irr::core::vector2di getStageSize(int stage_index);
 		irr::core::vector2di getStageTileSize(int stage_index);
 

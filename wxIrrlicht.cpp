@@ -838,13 +838,53 @@ void wxIrrlicht::util_drawGrid()
 
 	//std::cout << "GRID DBG: " << start_x << ", " << start_y << ", " << pw << ", " << ph << ", " << project->stages[selected_stage].tile_width << ", " << project->stages[selected_stage].tile_height << std::endl;
 
-	for(int y = start_y; y < ph+1; y += project->stages[selected_stage].tile_height)
+	if(project->stages[selected_stage].layers[selected_layer].layer_type == LAYER_TYPE_ISO_TILEMAP)
+    {
+        int tile_w = project->stages[selected_stage].tile_width;
+        int tile_h = project->stages[selected_stage].tile_height;
+        int line_length = pw + ph;
+        float line_angle = getHeading(irr::core::vector2df(0,0), irr::core::vector2df(tile_w, tile_h));
+        float line_angle2 = getHeading(irr::core::vector2df(tile_w, 0), irr::core::vector2df(0,tile_h));
+
+        irr::core::vector2df g_line(line_length, 0);
+        g_line.rotateBy(line_angle, irr::core::vector2df(0,0));
+
+        irr::core::vector2df g_line2(line_length, 0);
+        g_line2.rotateBy(line_angle2, irr::core::vector2df(0,0));
+
+        for(int y = start_y; y < ph+1; y += project->stages[selected_stage].tile_height)
+        {
+            for(int x = start_x; x < (pw+1) + tile_w; x += project->stages[selected_stage].tile_width)
+            {
+                int lx_a1 = x - tile_w;
+                int ly_a1 = y - tile_h + (tile_h/2);
+
+                int lx_a2 = g_line.X + lx_a1;
+                int ly_a2 = g_line.Y + ly_a1;
+
+
+                int lx_c1 = x + (tile_w/2);
+                int ly_c1 = y - tile_h;
+
+                int lx_c2 = g_line2.X + lx_c1;
+                int ly_c2 = g_line2.Y + ly_c1;
+
+
+                drawLine_opt(lx_a1, ly_a1, lx_a2, ly_a2);
+                drawLine_opt(lx_c1, ly_c1, lx_c2, ly_c2);
+            }
+        }
+    }
+    else
 	{
-		drawLine_opt(-1, y, pw+1, y);
-		for(int x = start_x; x < pw+1; x += project->stages[selected_stage].tile_width)
-		{
-			drawLine_opt(x, -1, x, ph+1);
-		}
+	    for(int y = start_y; y < ph+1; y += project->stages[selected_stage].tile_height)
+        {
+            drawLine_opt(-1, y, pw+1, y);
+            for(int x = start_x; x < pw+1; x += project->stages[selected_stage].tile_width)
+            {
+                drawLine_opt(x, -1, x, ph+1);
+            }
+        }
 	}
 }
 
@@ -2860,6 +2900,398 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 	}
 }
 
+
+void wxIrrlicht::StageSheet_SetTileUpdate_ISO()
+{
+    //std::cout << "ISO SET" << std::endl;
+
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	int canvas_index = project->stages[selected_stage].layers[selected_layer].ref_canvas;
+
+	if(canvas_index < 0 || canvas_index >= canvas.size())
+		return;
+
+    mapEdit_getContext();
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	setActiveCanvas(canvas_index);
+	//clearCanvas();
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx = ( (px+adj_scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+adj_scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)adj_scroll_offset_x;
+	int off_y_i = (int)adj_scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+	int img_x = -adj_scroll_offset_x;
+	int img_y = -adj_scroll_offset_y;
+	int img_w = 0;
+	int img_h = 0;
+
+
+	int iso_x = ((px+adj_scroll_offset_x) % current_frame_width);
+	int iso_y = ((py+adj_scroll_offset_y) % current_frame_height);
+
+	bool in_tl = pointInQuad(iso_x, iso_y,
+                          -1 * (current_frame_width/2), 0,
+                          0, -1 *(current_frame_height/2),
+                          (current_frame_width/2), 0,
+                          0, (current_frame_height/2) );
+
+    bool in_tr = pointInQuad(iso_x, iso_y,
+                          (current_frame_width/2), 0,
+                          current_frame_width, -1 *(current_frame_height/2),
+                          current_frame_width + (current_frame_width/2), 0,
+                          current_frame_width, (current_frame_height/2));
+
+    bool in_bl = pointInQuad(iso_x, iso_y,
+                          -1 * (current_frame_width/2), current_frame_height,
+                          0, (current_frame_height/2),
+                          (current_frame_width/2), current_frame_height,
+                          0, current_frame_height + (current_frame_height/2) );
+
+    bool in_br = pointInQuad(iso_x, iso_y,
+                          (current_frame_width/2), current_frame_height,
+                          current_frame_width, (current_frame_height/2),
+                          current_frame_width + (current_frame_width/2), current_frame_height,
+                          current_frame_width, current_frame_height + (current_frame_height/2));
+
+    /*if(mouse_state.LeftIsDown())
+    {
+        if(in_br)
+            std::cout << "BOTTOM RIGHT: " << iso_x << ", " << iso_y << std::endl;
+        else if(in_bl)
+            std::cout << "BOTTOM LEFT: " << iso_x << ", " << iso_y << std::endl;
+        else if(in_tr)
+            std::cout << "TOP RIGHT: " << iso_x << ", " << iso_y << std::endl;
+        else if(in_tl)
+            std::cout << "TOP LEFT: " << iso_x << ", " << iso_y << std::endl;
+        else
+            std::cout << "MOUSE: " << iso_x << ", " << iso_y << std::endl;
+    }*/
+
+    bool use_map2 = (in_bl || in_br || in_tl || in_tr);
+
+	int tset = project->stages[selected_stage].layers[selected_layer].layer_map.nv_tileset_index;
+
+	if(tset < 0 || tset >= project->tileset.size())
+		return;
+
+	int img_id = project->tileset[tset].object.img_id;
+
+	if(img_id < 0 || img_id >= image.size())
+		return;
+
+	int num_rows = mapEdit_tile_selection.row.size();
+
+	//std::cout << "SetTILE: rows=" << num_rows << std::endl;
+	int num_cols = 0;
+
+	if(num_rows > 0)
+		num_cols = mapEdit_tile_selection.row[0].data.size();
+
+    //std::cout << "SetTILE: rows=" << num_cols << std::endl;
+
+
+	//util_drawTileLayer(selected_layer);
+
+	int demo_off_x = 0;
+	int demo_off_y = 0;
+
+	demo_off_x += (in_tl ? -1*(current_frame_width/2) : 0);
+    demo_off_y += (in_tl ? -1*(current_frame_height/2) : 0);
+
+    demo_off_x += (in_tr ? (current_frame_width/2) : 0);
+    demo_off_y += (in_tr ? -1*(current_frame_height/2) : 0);
+
+    demo_off_x += (in_bl ? -1*(current_frame_width/2) : 0);
+    demo_off_y += (in_bl ? (current_frame_height/2) : 0);
+
+    demo_off_x += (in_br ? (current_frame_width/2) : 0);
+    demo_off_y += (in_br ? (current_frame_height/2) : 0);
+
+	if(stage_window_isActive && num_cols > 0 && (!mapEdit_lastAction_erase))
+	{
+		int src_x = 0;
+		int src_y = 0;
+		int dst_x = 0;
+		int dst_y = 0;
+
+		for(int tr = 0; tr < num_rows; tr++)
+		{
+			for(int tc = 0; tc < num_cols; tc++)
+			{
+				util_getTileInTileset(tset, mapEdit_tile_selection.row[tr].data[tc], &src_x, &src_y);
+
+				dst_x = select_x + (tc*current_frame_width) + demo_off_x;
+				dst_y = select_y + (tr*current_frame_height) + demo_off_y;
+
+				drawImage_Blit(img_id, dst_x, dst_y, src_x, src_y, current_frame_width, current_frame_height);
+			}
+		}
+
+		setColor(rgb(255, 0, 0));
+
+		int outline_x1 = select_x + demo_off_x;
+		int outline_y1 = select_y + (current_frame_height/2) + demo_off_y;
+
+		int outline_x2 = select_x + (current_frame_width/2) + demo_off_x;
+		int outline_y2 = select_y + demo_off_y;
+
+		int outline_x3 = select_x + current_frame_width + demo_off_x;
+		int outline_y3 = select_y + (current_frame_height/2) + demo_off_y;
+
+		int outline_x4 = select_x + (current_frame_width/2) + demo_off_x;
+		int outline_y4 = select_y + current_frame_height + demo_off_y;
+
+		drawLine(outline_x1, outline_y1, outline_x2, outline_y2);
+		drawLine(outline_x2, outline_y2, outline_x3, outline_y3);
+		drawLine(outline_x3, outline_y3, outline_x4, outline_y4);
+		drawLine(outline_x4, outline_y4, outline_x1, outline_y1);
+
+		//drawRect(select_x, select_y, num_cols*current_frame_width, num_rows*current_frame_height);
+
+	}
+
+	if(mapEdit_lastAction_erase)
+	{
+		setColor(rgb(255, 0, 0));
+		//drawRect(select_x, select_y, current_frame_width, current_frame_height);
+
+		int outline_x1 = select_x + demo_off_x;
+		int outline_y1 = select_y + (current_frame_height/2) + demo_off_y;
+
+		int outline_x2 = select_x + (current_frame_width/2) + demo_off_x;
+		int outline_y2 = select_y + demo_off_y;
+
+		int outline_x3 = select_x + current_frame_width + demo_off_x;
+		int outline_y3 = select_y + (current_frame_height/2) + demo_off_y;
+
+		int outline_x4 = select_x + (current_frame_width/2) + demo_off_x;
+		int outline_y4 = select_y + current_frame_height + demo_off_y;
+
+		drawLine(outline_x1, outline_y1, outline_x2, outline_y2);
+		drawLine(outline_x2, outline_y2, outline_x3, outline_y3);
+		drawLine(outline_x3, outline_y3, outline_x4, outline_y4);
+		drawLine(outline_x4, outline_y4, outline_x1, outline_y1);
+	}
+
+	if(!stage_window_isActive)
+	{
+		left_drag_init = false;
+		right_drag_init = false;
+		mapEdit_lastAction_erase = false;
+		return;
+	}
+
+
+	if(mouse_state.LeftIsDown())
+	{
+		mapEdit_lastAction_erase = false;
+        bool init_click = false;
+
+        int src_x = 0;
+		int src_y = 0;
+		int dst_x = 0;
+		int dst_y = 0;
+
+		for(int tr = 0; tr < num_rows; tr++)
+		{
+			for(int tc = 0; tc < num_cols; tc++)
+			{
+				util_getTileInTileset(tset, mapEdit_tile_selection.row[tr].data[tc], &src_x, &src_y);
+				dst_x = select_x + (tc*current_frame_width);
+				dst_y = select_y + (tr*current_frame_height);
+
+				int tbx = ( (px+adj_scroll_offset_x) / current_frame_width);
+				int tby = ( (py+adj_scroll_offset_y) / current_frame_height);
+
+				int tmap_x = tbx + tc;
+				int tmap_y = tby + tr;
+
+				if(in_tl)
+                {
+                    //do nothing for top left since it will be the same coordinate as tmap 1
+                }
+                else if(in_tr)
+                {
+                    tmap_x += 1;
+                }
+                else if(in_bl)
+                {
+                    tmap_y += 1;
+                }
+                else if(in_br)
+                {
+                    tmap_x += 1;
+                    tmap_y += 1;
+                }
+
+                if(in_tl || in_tr || in_bl || in_br)
+                {
+                    if(tmap_y < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows.size())
+                    {
+                        if(tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile.size())
+                        {
+                            project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile[tmap_x] = mapEdit_tile_selection.row[tr].data[tc];
+                        }
+                    }
+                }
+                else
+				{
+				    if(tmap_y < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows.size())
+                    {
+                        if(tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile.size())
+                        {
+                            project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x] = mapEdit_tile_selection.row[tr].data[tc];
+                        }
+                    }
+				}
+				//drawImage_Blit(img_id, dst_x, dst_y, src_x, src_y, current_frame_width, current_frame_height);
+			}
+		}
+
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				int fx = select_x + scroll_offset_x;
+				int fy = select_y + scroll_offset_y;
+				int fw = img_w;
+				int fh = img_h;
+
+				if(stage_window_isActive)
+				{
+					if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+						selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+					else
+						selected_frame = -1;
+				}
+				else
+					selected_frame = -1;
+
+				if(selected_frame >= 0)
+				{
+					//tileEdit_selected_sheet_frame = selected_frame;
+					//tileEdit_mask_set = true;
+					//tileEdit_Sheet_Update = true;
+					//parent_window->UpdateWindowUI();
+				}
+
+				//std::cout << "TEST: " << selected_layer << std::endl;
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+
+	if(mouse_state.RightIsDown())
+	{
+        bool init_click = false;
+        mapEdit_lastAction_erase = true;
+
+		int tbx = ( (px+adj_scroll_offset_x) / current_frame_width);
+		int tby = ( (py+adj_scroll_offset_y) / current_frame_height);
+
+		int tmap_x = tbx;
+		int tmap_y = tby;
+
+		if(in_tl)
+        {
+            //do nothing for top left since it will be the same coordinate as tmap 1
+        }
+        else if(in_tr)
+        {
+            tmap_x += 1;
+        }
+        else if(in_bl)
+        {
+            tmap_y += 1;
+        }
+        else if(in_br)
+        {
+            tmap_x += 1;
+            tmap_y += 1;
+        }
+
+		if(in_tl || in_tr || in_bl || in_br)
+        {
+            if(tmap_y < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows.size())
+            {
+                if(tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile.size())
+                {
+                    //std::cout << "YEET" << std::endl;
+                    project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile[tmap_x] = -1;
+                }
+            }
+        }
+        else
+		{
+		    if(tmap_y < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows.size())
+            {
+                if(tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile.size())
+                {
+                    //std::cout << "YEET" << std::endl;
+                    project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x] = -1;
+                }
+            }
+		}
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				right_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.RightIsDown()) && right_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		right_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
+
 void wxIrrlicht::util_fillTile(int base_tile, int fill_tile, int x, int y)
 {
 	//std::cout << "test: " << x << ", " << y << std::endl;
@@ -3083,6 +3515,443 @@ void wxIrrlicht::StageSheet_FillTileUpdate()
 	}
 }
 
+
+void wxIrrlicht::util_fillTile_ISO(int base_tile, int fill_tile, int x, int y, bool use_map2)
+{
+	//std::cout << "test: " << x << ", " << y << std::endl;
+
+	int num_rows = 0;
+
+	if(use_map2)
+    {
+        num_rows = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows.size();
+    }
+    else
+	{
+	    num_rows = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows.size();
+	}
+
+	int num_cols = 0;
+
+	if(use_map2)
+    {
+        num_cols = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[y].tile.size();
+    }
+    else
+    {
+        num_cols = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[y].tile.size();
+    }
+
+
+	if(y < 0 || y >= num_rows)
+		return;
+
+	if(x < 0 || x >= num_cols)
+		return;
+
+	int tgt_tile = -1;
+
+	if(use_map2) //use_map2 means we need to check map 1 and set use_map2 flag to false
+    {
+        tgt_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[y].tile[x];
+
+        if(tgt_tile == base_tile)
+        {
+            project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[y].tile[x] = fill_tile;
+            this->util_fillTile_ISO(base_tile, fill_tile, x-1, y-1, false);
+            this->util_fillTile_ISO(base_tile, fill_tile, x-1, y, false);
+            this->util_fillTile_ISO(base_tile, fill_tile, x, y, false);
+            this->util_fillTile_ISO(base_tile, fill_tile, x, y-1, false);
+        }
+    }
+    else
+    {
+        tgt_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[y].tile[x];
+
+        if(tgt_tile == base_tile)
+        {
+            project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[y].tile[x] = fill_tile;
+            this->util_fillTile_ISO(base_tile, fill_tile, x, y, true);
+            this->util_fillTile_ISO(base_tile, fill_tile, x, y+1, true);
+            this->util_fillTile_ISO(base_tile, fill_tile, x+1, y, true);
+            this->util_fillTile_ISO(base_tile, fill_tile, x+1, y+1, true);
+        }
+    }
+
+
+}
+
+void wxIrrlicht::StageSheet_FillTileUpdate_ISO()
+{
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	int canvas_index = project->stages[selected_stage].layers[selected_layer].ref_canvas;
+
+	if(canvas_index < 0 || canvas_index >= canvas.size())
+		return;
+
+    mapEdit_getContext();
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	setActiveCanvas(canvas_index);
+	//clearCanvas();
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx = ( (px+adj_scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+adj_scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)adj_scroll_offset_x;
+	int off_y_i = (int)adj_scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+	int img_x = -adj_scroll_offset_x;
+	int img_y = -adj_scroll_offset_y;
+	int img_w = 0;
+	int img_h = 0;
+
+
+	int iso_x = ((px+adj_scroll_offset_x) % current_frame_width);
+	int iso_y = ((py+adj_scroll_offset_y) % current_frame_height);
+
+	bool in_tl = pointInQuad(iso_x, iso_y,
+                          -1 * (current_frame_width/2), 0,
+                          0, -1 *(current_frame_height/2),
+                          (current_frame_width/2), 0,
+                          0, (current_frame_height/2) );
+
+    bool in_tr = pointInQuad(iso_x, iso_y,
+                          (current_frame_width/2), 0,
+                          current_frame_width, -1 *(current_frame_height/2),
+                          current_frame_width + (current_frame_width/2), 0,
+                          current_frame_width, (current_frame_height/2));
+
+    bool in_bl = pointInQuad(iso_x, iso_y,
+                          -1 * (current_frame_width/2), current_frame_height,
+                          0, (current_frame_height/2),
+                          (current_frame_width/2), current_frame_height,
+                          0, current_frame_height + (current_frame_height/2) );
+
+    bool in_br = pointInQuad(iso_x, iso_y,
+                          (current_frame_width/2), current_frame_height,
+                          current_frame_width, (current_frame_height/2),
+                          current_frame_width + (current_frame_width/2), current_frame_height,
+                          current_frame_width, current_frame_height + (current_frame_height/2));
+
+    bool use_map2 = (in_bl || in_br || in_tl || in_tr);
+
+    int demo_off_x = 0;
+	int demo_off_y = 0;
+
+	demo_off_x += (in_tl ? -1*(current_frame_width/2) : 0);
+    demo_off_y += (in_tl ? -1*(current_frame_height/2) : 0);
+
+    demo_off_x += (in_tr ? (current_frame_width/2) : 0);
+    demo_off_y += (in_tr ? -1*(current_frame_height/2) : 0);
+
+    demo_off_x += (in_bl ? -1*(current_frame_width/2) : 0);
+    demo_off_y += (in_bl ? (current_frame_height/2) : 0);
+
+    demo_off_x += (in_br ? (current_frame_width/2) : 0);
+    demo_off_y += (in_br ? (current_frame_height/2) : 0);
+
+
+	int tset = project->stages[selected_stage].layers[selected_layer].layer_map.nv_tileset_index;
+
+	if(tset < 0 || tset >= project->tileset.size())
+		return;
+
+	int img_id = project->tileset[tset].object.img_id;
+
+	if(img_id < 0 || img_id >= image.size())
+		return;
+
+	int num_rows = mapEdit_tile_selection.row.size();
+	int num_cols = 0;
+
+	if(num_rows > 0)
+		num_cols = mapEdit_tile_selection.row[0].data.size();
+
+	int fill_tile = -1;
+
+	if(num_cols > 0)
+		fill_tile = mapEdit_tile_selection.row[0].data[0];
+
+	if(mapEdit_lastAction_erase)
+	{
+		setColor(rgb(255, 0, 0));
+		//drawRect(select_x, select_y, current_frame_width, current_frame_height);
+
+		int outline_x1 = select_x + demo_off_x;
+		int outline_y1 = select_y + (current_frame_height/2) + demo_off_y;
+
+		int outline_x2 = select_x + (current_frame_width/2) + demo_off_x;
+		int outline_y2 = select_y + demo_off_y;
+
+		int outline_x3 = select_x + current_frame_width + demo_off_x;
+		int outline_y3 = select_y + (current_frame_height/2) + demo_off_y;
+
+		int outline_x4 = select_x + (current_frame_width/2) + demo_off_x;
+		int outline_y4 = select_y + current_frame_height + demo_off_y;
+
+		drawLine(outline_x1, outline_y1, outline_x2, outline_y2);
+		drawLine(outline_x2, outline_y2, outline_x3, outline_y3);
+		drawLine(outline_x3, outline_y3, outline_x4, outline_y4);
+		drawLine(outline_x4, outline_y4, outline_x1, outline_y1);
+	}
+	else
+	{
+		if(num_cols > 0)
+		{
+			int src_x = 0;
+			int src_y = 0;
+
+			util_getTileInTileset(tset, mapEdit_tile_selection.row[0].data[0], &src_x, &src_y);
+			int dst_x = select_x + demo_off_x;
+			int dst_y = select_y + demo_off_y;
+
+			drawImage_Blit(img_id, dst_x, dst_y, src_x, src_y, current_frame_width, current_frame_height);
+
+		}
+
+		setColor(rgb(255, 0, 0));
+		//drawRect(select_x, select_y, current_frame_width, current_frame_height);
+
+		int outline_x1 = select_x + demo_off_x;
+		int outline_y1 = select_y + (current_frame_height/2) + demo_off_y;
+
+		int outline_x2 = select_x + (current_frame_width/2) + demo_off_x;
+		int outline_y2 = select_y + demo_off_y;
+
+		int outline_x3 = select_x + current_frame_width + demo_off_x;
+		int outline_y3 = select_y + (current_frame_height/2) + demo_off_y;
+
+		int outline_x4 = select_x + (current_frame_width/2) + demo_off_x;
+		int outline_y4 = select_y + current_frame_height + demo_off_y;
+
+		drawLine(outline_x1, outline_y1, outline_x2, outline_y2);
+		drawLine(outline_x2, outline_y2, outline_x3, outline_y3);
+		drawLine(outline_x3, outline_y3, outline_x4, outline_y4);
+		drawLine(outline_x4, outline_y4, outline_x1, outline_y1);
+	}
+
+	if(!stage_window_isActive)
+	{
+		left_drag_init = false;
+		right_drag_init = false;
+		mapEdit_lastAction_erase = false;
+		return;
+	}
+
+	//return; //START HERE
+
+
+	if(mouse_state.LeftIsDown() && fill_tile >= 0)
+	{
+		mapEdit_lastAction_erase = false;
+        bool init_click = false;
+
+		int tbx = ( (px+adj_scroll_offset_x) / current_frame_width);
+		int tby = ( (py+adj_scroll_offset_y) / current_frame_height);
+
+		int tmap_x = tbx;
+		int tmap_y = tby;
+
+		if(in_tl)
+        {
+            //do nothing for top left since it will be the same coordinate as tmap 1
+        }
+        else if(in_tr)
+        {
+            tmap_x += 1;
+        }
+        else if(in_bl)
+        {
+            tmap_y += 1;
+        }
+        else if(in_br)
+        {
+            tmap_x += 1;
+            tmap_y += 1;
+        }
+
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+			//std::cout << "t_map: " << tmap_x << ", " << tmap_y << std::endl;
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				if(stage_window_isActive)
+				{
+					if(mapEdit_tile_selection.row.size() > 0)
+					{
+						if(mapEdit_tile_selection.row[0].data.size() > 0)
+						{
+						    int num_rows = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows.size();
+
+						    if(use_map2)
+                                num_rows = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows.size();
+
+							if(tmap_y < num_rows)
+							{
+							    int num_cols = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile.size();
+
+                                if(use_map2)
+                                    num_cols = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile.size();
+
+								if(tmap_x < num_cols)
+								{
+								    int base_tile = fill_tile;
+
+								    if(use_map2)
+                                        base_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile[tmap_x];
+                                    else
+                                        base_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x];
+
+									if(base_tile != fill_tile)
+                                    {
+                                        //std::cout << (use_map2 ? "USE ISO: " : "NA: ") << tmap_x << ", " << tmap_y << std::endl;
+                                        util_fillTile_ISO(base_tile, fill_tile, tmap_x, tmap_y, use_map2);
+                                    }
+                                    else
+                                    {
+                                        //std::cout << (use_map2 ? "$ USE ISO: " : "NA: ") << tmap_x << ", " << tmap_y << " [" << base_tile << "]" << std::endl;
+                                    }
+								}
+							}
+						}
+					}
+				}
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+
+
+	if(mouse_state.RightIsDown())
+	{
+		mapEdit_lastAction_erase = false;
+        bool init_click = false;
+
+		int tbx = ( (px+adj_scroll_offset_x) / current_frame_width);
+		int tby = ( (py+adj_scroll_offset_y) / current_frame_height);
+
+		int tmap_x = tbx;
+		int tmap_y = tby;
+
+		if(in_tl)
+        {
+            //do nothing for top left since it will be the same coordinate as tmap 1
+        }
+        else if(in_tr)
+        {
+            tmap_x += 1;
+        }
+        else if(in_bl)
+        {
+            tmap_y += 1;
+        }
+        else if(in_br)
+        {
+            tmap_x += 1;
+            tmap_y += 1;
+        }
+
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+			//std::cout << "t_map: " << tmap_x << ", " << tmap_y << std::endl;
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				if(stage_window_isActive)
+				{
+					if(mapEdit_tile_selection.row.size() > 0)
+					{
+						if(mapEdit_tile_selection.row[0].data.size() > 0)
+						{
+						    int num_rows = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows.size();
+
+						    if(use_map2)
+                                num_rows = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows.size();
+
+							if(tmap_y < num_rows)
+							{
+							    int num_cols = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile.size();
+
+                                if(use_map2)
+                                    num_cols = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile.size();
+
+								if(tmap_x < num_cols)
+								{
+								    int base_tile = -1;
+
+								    if(use_map2)
+                                        base_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile[tmap_x];
+                                    else
+                                        base_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x];
+
+									if(base_tile != -1)
+                                    {
+                                        //std::cout << (use_map2 ? "USE ISO: " : "NA: ") << tmap_x << ", " << tmap_y << std::endl;
+                                        util_fillTile_ISO(base_tile, -1, tmap_x, tmap_y, use_map2);
+                                    }
+                                    else
+                                    {
+                                        //std::cout << (use_map2 ? "$ USE ISO: " : "NA: ") << tmap_x << ", " << tmap_y << " [" << base_tile << "]" << std::endl;
+                                    }
+								}
+							}
+						}
+					}
+				}
+
+				right_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.RightIsDown()) && right_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		right_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
+
 void wxIrrlicht::StageSheet_SelectTileUpdate()
 {
 	if(!project)
@@ -3237,6 +4106,270 @@ void wxIrrlicht::StageSheet_SelectTileUpdate()
 		return;
 	}
 }
+
+
+void wxIrrlicht::StageSheet_SelectTileUpdate_ISO()
+{
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	int canvas_index = project->stages[selected_stage].layers[selected_layer].ref_canvas;
+
+	if(canvas_index < 0 || canvas_index >= canvas.size())
+		return;
+
+    mapEdit_getContext();
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	setActiveCanvas(canvas_index);
+	//clearCanvas();
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx = ( (px+adj_scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+adj_scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)adj_scroll_offset_x;
+	int off_y_i = (int)adj_scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+	int img_x = -adj_scroll_offset_x;
+	int img_y = -adj_scroll_offset_y;
+	int img_w = 0;
+	int img_h = 0;
+
+
+	int iso_x = ((px+adj_scroll_offset_x) % current_frame_width);
+	int iso_y = ((py+adj_scroll_offset_y) % current_frame_height);
+
+	bool in_tl = pointInQuad(iso_x, iso_y,
+                          -1 * (current_frame_width/2), 0,
+                          0, -1 *(current_frame_height/2),
+                          (current_frame_width/2), 0,
+                          0, (current_frame_height/2) );
+
+    bool in_tr = pointInQuad(iso_x, iso_y,
+                          (current_frame_width/2), 0,
+                          current_frame_width, -1 *(current_frame_height/2),
+                          current_frame_width + (current_frame_width/2), 0,
+                          current_frame_width, (current_frame_height/2));
+
+    bool in_bl = pointInQuad(iso_x, iso_y,
+                          -1 * (current_frame_width/2), current_frame_height,
+                          0, (current_frame_height/2),
+                          (current_frame_width/2), current_frame_height,
+                          0, current_frame_height + (current_frame_height/2) );
+
+    bool in_br = pointInQuad(iso_x, iso_y,
+                          (current_frame_width/2), current_frame_height,
+                          current_frame_width, (current_frame_height/2),
+                          current_frame_width + (current_frame_width/2), current_frame_height,
+                          current_frame_width, current_frame_height + (current_frame_height/2));
+
+    bool use_map2 = (in_bl || in_br || in_tl || in_tr);
+
+
+	int tset = project->stages[selected_stage].layers[selected_layer].layer_map.nv_tileset_index;
+
+	if(tset < 0 || tset >= project->tileset.size())
+		return;
+
+	int img_id = project->tileset[tset].object.img_id;
+
+	if(img_id < 0 || img_id >= image.size())
+		return;
+
+
+    int demo_off_x = 0;
+	int demo_off_y = 0;
+
+	demo_off_x += (in_tl ? -1*(current_frame_width/2) : 0);
+    demo_off_y += (in_tl ? -1*(current_frame_height/2) : 0);
+
+    demo_off_x += (in_tr ? (current_frame_width/2) : 0);
+    demo_off_y += (in_tr ? -1*(current_frame_height/2) : 0);
+
+    demo_off_x += (in_bl ? -1*(current_frame_width/2) : 0);
+    demo_off_y += (in_bl ? (current_frame_height/2) : 0);
+
+    demo_off_x += (in_br ? (current_frame_width/2) : 0);
+    demo_off_y += (in_br ? (current_frame_height/2) : 0);
+
+
+	if(stage_window_isActive)
+	{
+		setColor(rgb(255, 0, 0));
+		//drawRect(select_x, select_y, current_frame_width, current_frame_height);
+
+		int outline_x1 = select_x + demo_off_x;
+		int outline_y1 = select_y + (current_frame_height/2) + demo_off_y;
+
+		int outline_x2 = select_x + (current_frame_width/2) + demo_off_x;
+		int outline_y2 = select_y + demo_off_y;
+
+		int outline_x3 = select_x + current_frame_width + demo_off_x;
+		int outline_y3 = select_y + (current_frame_height/2) + demo_off_y;
+
+		int outline_x4 = select_x + (current_frame_width/2) + demo_off_x;
+		int outline_y4 = select_y + current_frame_height + demo_off_y;
+
+		drawLine(outline_x1, outline_y1, outline_x2, outline_y2);
+		drawLine(outline_x2, outline_y2, outline_x3, outline_y3);
+		drawLine(outline_x3, outline_y3, outline_x4, outline_y4);
+		drawLine(outline_x4, outline_y4, outline_x1, outline_y1);
+	}
+
+	if(!stage_window_isActive)
+	{
+		left_drag_init = false;
+		right_drag_init = false;
+		mapEdit_lastAction_erase = false;
+		return;
+	}
+
+
+	if(mouse_state.LeftIsDown())
+	{
+		mapEdit_lastAction_erase = false;
+        bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				if(!VIEW_KEY_CTRL)
+					mapEdit_selectTileTool_selection.clear();
+
+				int fx = select_x + adj_scroll_offset_x;
+				int fy = select_y + adj_scroll_offset_x;
+				int fw = img_w;
+				int fh = img_h;
+
+				int tbx = ( (px+adj_scroll_offset_x) / current_frame_width);
+				int tby = ( (py+adj_scroll_offset_y) / current_frame_height);
+
+				int tmap_x = tbx;
+				int tmap_y = tby;
+
+				if(in_tl)
+                {
+                    //do nothing for top left since it will be the same coordinate as tmap 1
+                }
+                else if(in_tr)
+                {
+                    tmap_x += 1;
+                }
+                else if(in_bl)
+                {
+                    tmap_y += 1;
+                }
+                else if(in_br)
+                {
+                    tmap_x += 1;
+                    tmap_y += 1;
+                }
+
+                if(in_tl || in_tr || in_bl || in_br)
+                {
+                    if(tmap_y < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows.size())
+                    {
+                        if(tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile.size())
+                        {
+                            Nirvana_SelectTool_TileSelection t_select;
+                            t_select.tile_index = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile[tmap_x];
+                            t_select.map_tile_pos.set(tmap_x, tmap_y);
+                            t_select.use_map2 = true;
+
+                            //std::cout << "SELECT: UM2 -> " << tmap_x << ", " << tmap_y << std::endl;
+
+                            if(t_select.tile_index >= 0)
+                                mapEdit_selectTileTool_selection.push_back(t_select);
+                        }
+                    }
+                }
+                else
+				{
+				    if(tmap_y < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows.size())
+                    {
+                        if(tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile.size())
+                        {
+                            Nirvana_SelectTool_TileSelection t_select;
+                            t_select.tile_index = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x];
+                            t_select.map_tile_pos.set(tmap_x, tmap_y);
+                            t_select.use_map2 = false;
+
+                            //std::cout << "SELECT: UM1 -> " << tmap_x << ", " << tmap_y << std::endl;
+
+                            if(t_select.tile_index >= 0)
+                                mapEdit_selectTileTool_selection.push_back(t_select);
+                        }
+                    }
+				}
+
+				//std::cout << "TEST: " << selected_layer << std::endl;
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+
+	if(mouse_state.RightIsDown())
+	{
+		mapEdit_lastAction_erase = false;
+        bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				mapEdit_selectTileTool_selection.clear();
+
+				//std::cout << "TEST: " << selected_layer << std::endl;
+
+				right_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.RightIsDown()) && right_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		right_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
 
 void wxIrrlicht::StageSheet_BoxSelectTileUpdate()
 {
@@ -4001,13 +5134,51 @@ void wxIrrlicht::util_drawSelectedTiles()
 	int off_y_i = (int)adj_scroll_offset_y;
 
 	setColor(rgb(255,255,255));
-	for(int i = 0; i < mapEdit_selectTileTool_selection.size(); i++)
+	if(project->stages[selected_stage].layers[selected_layer].layer_type == LAYER_TYPE_ISO_TILEMAP)
+    {
+        for(int i = 0; i < mapEdit_selectTileTool_selection.size(); i++)
+        {
+            int tile_x = mapEdit_selectTileTool_selection[i].map_tile_pos.X;
+            int tile_y = mapEdit_selectTileTool_selection[i].map_tile_pos.Y;
+            int select_x = (tile_x*current_frame_width) - off_x_i;
+            int select_y = (tile_y*current_frame_height) - off_y_i;
+
+            if(mapEdit_selectTileTool_selection[i].use_map2)
+            {
+                select_x -= current_frame_width/2;
+                select_y -= current_frame_height/2;
+            }
+
+            int outline_x1 = select_x;
+            int outline_y1 = select_y + (current_frame_height/2);
+
+            int outline_x2 = select_x + (current_frame_width/2);
+            int outline_y2 = select_y;
+
+            int outline_x3 = select_x + current_frame_width;
+            int outline_y3 = select_y + (current_frame_height/2);
+
+            int outline_x4 = select_x + (current_frame_width/2);
+            int outline_y4 = select_y + current_frame_height;
+
+            drawLine(outline_x1, outline_y1, outline_x2, outline_y2);
+            drawLine(outline_x2, outline_y2, outline_x3, outline_y3);
+            drawLine(outline_x3, outline_y3, outline_x4, outline_y4);
+            drawLine(outline_x4, outline_y4, outline_x1, outline_y1);
+
+            //drawRect(select_x, select_y, current_frame_width, current_frame_height);
+        }
+    }
+	else
 	{
-		int tile_x = mapEdit_selectTileTool_selection[i].map_tile_pos.X;
-		int tile_y = mapEdit_selectTileTool_selection[i].map_tile_pos.Y;
-		int select_x = (tile_x*current_frame_width) - off_x_i;
-		int select_y = (tile_y*current_frame_height) - off_y_i;
-		drawRect(select_x, select_y, current_frame_width, current_frame_height);
+	    for(int i = 0; i < mapEdit_selectTileTool_selection.size(); i++)
+        {
+            int tile_x = mapEdit_selectTileTool_selection[i].map_tile_pos.X;
+            int tile_y = mapEdit_selectTileTool_selection[i].map_tile_pos.Y;
+            int select_x = (tile_x*current_frame_width) - off_x_i;
+            int select_y = (tile_y*current_frame_height) - off_y_i;
+            drawRect(select_x, select_y, current_frame_width, current_frame_height);
+        }
 	}
 }
 
@@ -5939,7 +7110,7 @@ void wxIrrlicht::UpdateStageSheet()
 
 	if(mouse_state.LeftIsDown() && stage_window_isActive)
 	{
-		if(mapEdit_layerType != LAYER_TYPE_TILEMAP)
+		if(mapEdit_layerType != LAYER_TYPE_TILEMAP && mapEdit_layerType != LAYER_TYPE_ISO_TILEMAP)
 			mapEdit_selectTileTool_selection.clear();
 		else
 		{
@@ -5978,6 +7149,10 @@ void wxIrrlicht::UpdateStageSheet()
 		{
 			util_drawTileLayer(i);
 		}
+		else if(project->getLayerType(selected_stage, i) == LAYER_TYPE_ISO_TILEMAP)
+		{
+		    util_drawTileLayer(i);
+		}
 		else if(project->getLayerType(selected_stage, i) == LAYER_TYPE_SPRITE)
 		{
 			util_setSpriteLayerOffset(i);
@@ -5986,6 +7161,25 @@ void wxIrrlicht::UpdateStageSheet()
 
 	switch(mapEdit_layerType)
 	{
+	    case LAYER_TYPE_ISO_TILEMAP:
+        {
+            if(map_tool == MAP_TOOL_TILE_SET)
+				StageSheet_SetTileUpdate_ISO();
+			else if(map_tool == MAP_TOOL_TILE_FILL)
+				StageSheet_FillTileUpdate_ISO();
+			else if(map_tool == MAP_TOOL_TILE_SELECT)
+				StageSheet_SelectTileUpdate_ISO();
+			/*else if(map_tool == MAP_TOOL_TILE_BOXSELECT)
+				StageSheet_BoxSelectTileUpdate_ISO();
+			else if(map_tool == MAP_TOOL_TILE_MOVE)
+				StageSheet_MoveTileUpdate_ISO();
+			else if(map_tool == MAP_TOOL_TILE_COPY)
+				StageSheet_CopyTileUpdate_ISO();
+			else if(map_tool == MAP_TOOL_TILE_DELETE)
+				StageSheet_DeleteSelectedTileUpdate_ISO();*/
+        }
+        break;
+
 		case LAYER_TYPE_TILEMAP:
 		{
 			if(map_tool == MAP_TOOL_TILE_SET)
@@ -6164,7 +7358,303 @@ void wxIrrlicht::UpdateStageTileSelect()
 
 	//std::cout << "DEBUG: " << mapEdit_layerType << ", " << current_sheet_image << std::endl;
 
-	if(mapEdit_layerType != LAYER_TYPE_TILEMAP)
+	if( (mapEdit_layerType != LAYER_TYPE_TILEMAP) && (mapEdit_layerType != LAYER_TYPE_ISO_TILEMAP) )
+    {
+		return;
+    }
+
+	if(current_sheet_image < 0 || current_sheet_image >= image.size())
+		return;
+
+	//std::cout << "DEB2" << std::endl;
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+	if(stage_window_isActive)
+	{
+		this->SetFocusFromKbd();
+	}
+
+
+	//setActiveCanvas(sheet_canvas);
+	//clearCanvas();
+
+	if(VIEW_KEY_W)
+	{
+		scroll_offset_y -= scroll_speed;
+	}
+
+	if(VIEW_KEY_A)
+	{
+		scroll_offset_x -= scroll_speed;
+	}
+
+	if(VIEW_KEY_S)
+	{
+		scroll_offset_y += scroll_speed;
+	}
+
+	if(VIEW_KEY_D)
+	{
+		scroll_offset_x += scroll_speed;
+	}
+
+	int bx = ( (px+scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)scroll_offset_x;
+	int off_y_i = (int)scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+	int img_x = -scroll_offset_x;
+	int img_y = -scroll_offset_y;
+	int img_w = 0;
+	int img_h = 0;
+
+	mapEdit_getContext();
+
+	if(!mapEdit_hasContext)
+		return;
+
+	if(imageExists(current_sheet_image))
+	{
+		setActiveCanvas(sheet_canvas);
+		clearCanvas();
+
+		getImageSizeI(current_sheet_image, &img_w, &img_h);
+		irr::core::dimension2du t_size = image[current_sheet_image].image->getSize();
+
+		//m_pDriver->draw2DImage(image[current_sheet_image].image, irr::core::vector2di(0,0));
+		drawImage_BlitEx_SW(current_sheet_image, img_x, img_y, img_w, img_h, 0, 0, img_w, img_h);
+		//drawImage_Rotozoom(current_sheet_image, 0, 0, 0, 1, 1);
+	}
+
+	setActiveCanvas(overlay_canvas);
+	clearCanvas();
+
+	if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+	{
+		setColor(rgb(255, 0, 0));
+
+		int dw = px - drag_start.x;
+		int dh = py - drag_start.y;
+
+		if(left_drag_init)
+		{
+			int dbx = ( (drag_start.x+scroll_offset_x) / current_frame_width) *  current_frame_width;
+			int dby = ( (drag_start.y+scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+			int d_select_x = dbx - off_x_i;
+			int d_select_y = dby - off_y_i;
+
+			int d_select_w = (( (px+scroll_offset_x) / current_frame_width) *  current_frame_width + current_frame_width) - dbx;
+			int d_select_h = (( (py+scroll_offset_y) / current_frame_height) *  current_frame_height + current_frame_height) - dby;
+			//drawRect(drag_start.x, drag_start.y, dw, dh);
+			drawRect(d_select_x, d_select_y, d_select_w, d_select_h);
+		}
+		else
+			drawRect(select_x, select_y, current_frame_width, current_frame_height);
+
+		//util_draw_cursor(select_x, select_y, irr::video::SColor(255,255,0,0));
+	}
+
+	if(mapEdit_tile_selection.width_in_tiles > 0 && mapEdit_tile_selection.height_in_tiles > 0)
+	{
+		int start_tile = mapEdit_tile_selection.row[0].data[0];
+
+		int selected_tile_x = current_frame_width * (start_tile % (img_w/current_frame_width)) - scroll_offset_x;
+		int selected_tile_y = current_frame_height * (start_tile / (img_w/current_frame_height)) - scroll_offset_y;
+
+		int selected_w = mapEdit_tile_selection.width_in_tiles * current_frame_width;
+		int selected_h = mapEdit_tile_selection.height_in_tiles * current_frame_height;
+
+		setColor(rgb(255, 255, 255));
+		drawRect(selected_tile_x, selected_tile_y, selected_w, selected_h);
+		//drawRect(selected_tile_x, selected_tile_y, current_frame_width, current_frame_height);
+	}
+
+
+	if(mouse_state.LeftIsDown() && stage_window_isActive)
+	{
+        bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				drag_start.x = px;
+				drag_start.y = py;
+
+				mapEdit_tile_selection.row.clear();
+
+				mapEdit_tile_selection.width_in_tiles = 0;
+				mapEdit_tile_selection.height_in_tiles = 0;
+
+				int fx = select_x + scroll_offset_x;
+				int fy = select_y + scroll_offset_y;
+				int fw = img_w;
+				int fh = img_h;
+
+				if(stage_window_isActive)
+				{
+					if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+						selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+					else
+						selected_frame = -1;
+				}
+				else
+					selected_frame = -1;
+
+				if(selected_frame >= 0)
+				{
+					selected_tile = selected_frame;
+					selected_tile_end = -1;
+					//tileEdit_mask_set = true;
+					//tileEdit_Sheet_Update = true;
+					//parent_window->UpdateWindowUI();
+				}
+
+				//std::cout << "TEST: " << selected_tile << std::endl;
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( ((!mouse_state.LeftIsDown()) || (!stage_window_isActive)) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+
+
+
+		int fx = select_x + scroll_offset_x;
+		int fy = select_y + scroll_offset_y;
+		int fw = img_w;
+		int fh = img_h;
+
+		if(stage_window_isActive)
+		{
+			if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+				selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+			else
+				selected_frame = -1;
+		}
+		else
+			selected_frame = -1;
+
+		if(selected_frame < 0)
+		{
+			mapEdit_tile_selection.width_in_tiles = 1;
+			mapEdit_tile_selection.height_in_tiles = 1;
+			Nirvana_TileSelection_Row t_row;
+			t_row.data.push_back(selected_tile);
+			mapEdit_tile_selection.row.push_back(t_row);
+		}
+		else
+		{
+			int d_start_x = (selected_tile % (img_w / current_frame_width)) * current_frame_width;
+			int d_start_y = (selected_tile / (img_w / current_frame_width)) * current_frame_height;
+
+			int d_end_x = (selected_frame % (img_w / current_frame_width)) * current_frame_width;
+			int d_end_y = (selected_frame / (img_w / current_frame_width)) * current_frame_height;
+
+			int rect_x = d_start_x < d_end_x ? d_start_x : d_end_x;
+			int rect_y = d_start_y < d_end_y ? d_start_y : d_end_y;
+
+			int rect_w = d_end_x - d_start_x;
+			if(rect_w < 0)
+				rect_w *= -1;
+			rect_w += current_frame_width;
+
+			int rect_h = d_end_y - d_start_y;
+			if(rect_h < 0)
+				rect_h *= -1;
+			rect_h += current_frame_height;
+
+			int num_rows = rect_h / current_frame_height;
+			int num_cols = rect_w / current_frame_width;
+
+			num_rows = (num_rows <= 0 ? 1 : num_rows);
+			num_cols = (num_cols <= 0 ? 1 : num_cols);
+
+			int fw = img_w / current_frame_width;
+			for(int tr = 0; tr < num_rows; tr++)
+			{
+				Nirvana_TileSelection_Row t_row;
+				int fy = (rect_y + (current_frame_height*tr)) / current_frame_height;
+				for(int tc = 0; tc < num_cols; tc++)
+				{
+					int fx = (rect_x + (current_frame_width*tc)) / current_frame_width;
+					t_row.data.push_back(fy*fw+fx);
+					//std::cout << (fy*fw+fx) << ", ";
+				}
+				//std::cout << std::endl;
+				mapEdit_tile_selection.row.push_back(t_row);
+			}
+
+			mapEdit_tile_selection.width_in_tiles = num_cols;
+			mapEdit_tile_selection.height_in_tiles = num_rows;
+
+			if(stage_edit_control)
+                stage_edit_control->mapEdit_tile_selection = mapEdit_tile_selection;
+
+			//std::cout << std::endl;
+
+			//std::cout << "START_POS: " << start_x << ", " << start_y << std::endl;
+		}
+
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
+
+int wxIrrlicht::pointInQuad(double x, double y, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4)
+{
+    //'"""
+	//'Check if a point (x, y) is inside a quadrilateral defined by its four vertices (x1, y1), (x2, y2), (x3, y3), and (x4, y4).
+	//'"""
+	//'# Compute the cross products of vectors from the point to each vertex of the quadrilateral.
+	//'# If all cross products have the same sign, the point is inside the quadrilateral.
+	double cross1 = (x - x1) * (y2 - y1) - (y - y1) * (x2 - x1);
+	double cross2 = (x - x2) * (y3 - y2) - (y - y2) * (x3 - x2);
+	double cross3 = (x - x3) * (y4 - y3) - (y - y3) * (x4 - x3);
+	double cross4 = (x - x4) * (y1 - y4) - (y - y4) * (x1 - x4);
+
+	if(cross1 >= 0 && cross2 >= 0 && cross3 >= 0 && cross4 >= 0)
+		return 1;
+	else if(cross1 <= 0 && cross2 <= 0 && cross3 <= 0 && cross4 <= 0)
+		return 1;
+	else
+		return 0;
+}
+
+void wxIrrlicht::UpdateStageISOTileSelect()
+{
+	if(clear_flag)
+	{
+		mapEdit_getContext();
+		setActiveCanvas(sheet_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
+	mapEdit_getContext();
+
+	//std::cout << "DEBUG: " << mapEdit_layerType << ", " << current_sheet_image << std::endl;
+
+	if(mapEdit_layerType != LAYER_TYPE_ISO_TILEMAP)
 		return;
 
 	if(current_sheet_image < 0 || current_sheet_image >= image.size())
@@ -6217,6 +7707,42 @@ void wxIrrlicht::UpdateStageTileSelect()
 
 	int select_x = bx - off_x_i;
 	int select_y = by - off_y_i;
+
+	int iso_x = (px % current_frame_width);
+	int iso_y = (py % current_frame_height);
+
+	bool in_tl = pointInQuad(iso_x, iso_y,
+                          -1 * (current_frame_width/2), 0,
+                          0, -1 *(current_frame_height/2),
+                          (current_frame_width/2), 0,
+                          0, (current_frame_height/2) );
+
+    bool in_tr = pointInQuad(iso_x, iso_y,
+                          (current_frame_width/2), 0,
+                          current_frame_width, -1 *(current_frame_height/2),
+                          current_frame_width + (current_frame_width/2), 0,
+                          current_frame_width, (current_frame_height/2));
+
+    bool in_bl = pointInQuad(iso_x, iso_y,
+                          -1 * (current_frame_width/2), current_frame_height,
+                          0, (current_frame_height/2),
+                          (current_frame_width/2), current_frame_height,
+                          0, current_frame_height + (current_frame_height/2) );
+
+    bool in_br = pointInQuad(iso_x, iso_y,
+                          (current_frame_width/2), current_frame_height,
+                          current_frame_width, (current_frame_height/2),
+                          current_frame_width + (current_frame_width/2), current_frame_height,
+                          current_frame_width, current_frame_height + (current_frame_height/2));
+
+    if(in_br)
+        std::cout << "BOTTOM RIGHT" << std::endl;
+    else if(in_bl)
+        std::cout << "BOTTOM LEFT" << std::endl;
+    else if(in_tr)
+        std::cout << "TOP RIGHT" << std::endl;
+    else if(in_tl)
+        std::cout << "TOP LEFT" << std::endl;
 
 	int img_x = -scroll_offset_x;
 	int img_y = -scroll_offset_y;
@@ -9971,8 +11497,8 @@ void wxIrrlicht::util_drawTileLayer(int layer)
 
 	util_updateTileset(tset);
 
-	int vp_widthInTiles = w/project->tileset[ tset ].object.tile_width;
-	int vp_heightInTiles = h/project->tileset[ tset ].object.tile_height;
+	int vp_widthInTiles = w/project->tileset[ tset ].object.tile_width+1;
+	int vp_heightInTiles = h/project->tileset[ tset ].object.tile_height+1;
 
 	int tset_img_id = project->tileset[ tset ].object.img_id;
 	int src_w = project->tileset[ tset ].object.tile_width;
@@ -10039,6 +11565,66 @@ void wxIrrlicht::util_drawTileLayer(int layer)
 			m_pDriver->draw2DImage(image[tset_img_id].image, dest, sourceRect, 0, 0, true);
 		}
 	}
+
+
+	if(project->stages[selected_stage].layers[layer].layer_type == LAYER_TYPE_ISO_TILEMAP)
+	{
+	    //std::cout << "DRAW ISO: " << project->stages[selected_stage].layers[layer].layer_map.tile_map2.num_tiles_across << std::endl;
+	    for(int iy = 0; iy < vp_heightInTiles+1; iy++)
+        {
+            for(int ix = 0; ix < vp_widthInTiles+1; ix++)
+            {
+                int current_frame = 0; //TODO: ADD TIMING
+                int map_x = tile_offset_x + ix;
+                int map_y = tile_offset_y + iy;
+
+
+                if(map_x < 0 || map_x >= project->stages[selected_stage].layers[layer].layer_map.tile_map2.num_tiles_across ||
+                   map_y < 0 || map_y >= project->stages[selected_stage].layers[layer].layer_map.tile_map2.num_tiles_down)
+                    continue;
+
+
+
+                int tile = project->stages[selected_stage].layers[layer].layer_map.tile_map2.rows[map_y].tile[map_x];
+
+                //if(tile == 16)
+                //    std::cout << "DB16: " << layer << " ";
+
+                if(tile < 0 || tile >= num_tiles_in_tset)
+                    continue;
+
+                //std::cout << "DB 2" << std::endl;
+
+                //std::cout << "Tile = " << tile << " < " << project->tileset[ tset ].object.tiles.size() << std::endl;
+
+                current_frame = project->tileset[ tset ].object.tiles[tile].current_frame;
+                tile = project->tileset[ tset ].object.tiles[tile].frames[current_frame];
+
+                if(tile < 0 || tile >= num_tiles_in_tset)
+                    continue;
+
+                int src_x = 0;
+                int src_y = 0;
+                util_getTileInTileset(tset, tile, &src_x, &src_y);
+                //std::cout << "DEBUG TMAP: " << tile << " -> " << src_x << ", " << src_y << std::endl;
+                irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(src_x, src_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
+
+                irr::video::SColor color(image[tset_img_id].alpha,
+                                        image[tset_img_id].color_mod.getRed(),
+                                        image[tset_img_id].color_mod.getGreen(),
+                                        image[tset_img_id].color_mod.getBlue());
+
+                int dst_x = screen_offset_x + (ix*src_w) - (src_w/2);
+                int dst_y = screen_offset_y + (iy*src_h) - (src_h/2);
+                irr::core::rect<irr::s32> dest( irr::core::vector2d<irr::s32>(dst_x, dst_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
+
+
+                //std::cout << "TILE DRAW " << std::endl << std::endl;
+                m_pDriver->draw2DImage(image[tset_img_id].image, dest, sourceRect, 0, 0, true);
+            }
+        }
+	}
+
 
 	//std::cout << std::endl << std::endl;
 
@@ -10118,7 +11704,7 @@ void wxIrrlicht::initLayer(int layer_index)
 	else
 		gfx_path.AppendDir(_("gfx"));
 
-	if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP)
+	if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP || project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_ISO_TILEMAP)
 	{
 		int screen_width = m_pDevice->getVideoDriver()->getScreenSize().Width;
 		int screen_height = m_pDevice->getVideoDriver()->getScreenSize().Height;
@@ -10132,7 +11718,7 @@ void wxIrrlicht::initLayer(int layer_index)
 		if(tset < 0 || tset >= project->tileset.size())
 		{
 			//std::cout << "TSET: " << tset << ", " << project->stages[selected_stage].layers[layer_index].layer_name << std::endl;
-			wxMessageBox(_("ERROR: Failed to load tileset [") + wxString(project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name));
+			wxMessageBox(_("ERROR: Failed to load tileset [") + wxString(project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name) + _("]"));
 		}
 		else
 		{
@@ -10221,7 +11807,7 @@ void wxIrrlicht::resizeLayers()
 			canvas[canvas_id].bkg_render_type = -1;
 		}
 
-		if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP || project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_CANVAS_2D)
+		if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP || project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_ISO_TILEMAP || project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_CANVAS_2D)
 		{
 			int screen_width = parent_window->GetClientSize().GetX();
 			int screen_height = parent_window->GetClientSize().GetY();
@@ -10241,14 +11827,14 @@ void wxIrrlicht::resizeLayers()
 			if(canvas_id >= 0 && canvas_id < canvas.size())
 				canvas[canvas_id].visible = project->stages[selected_stage].layers[layer_index].visible;
 
-			if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP)
+			if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP || project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_ISO_TILEMAP)
 			{
 				project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_index = project->getTilesetIndex(project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name);
 				int tset = project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_index;
 				if(tset < 0 || tset >= project->tileset.size())
 				{
 					//std::cout << "TSET: " << tset << ", " << project->stages[selected_stage].layers[layer_index].layer_name << std::endl;
-					wxMessageBox(_("ERROR: Failed to load tileset [") + wxString(project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name));
+					wxMessageBox(_("ERROR: Failed to load tileset [") + wxString(project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name) + _("]"));
 				}
 				else
 				{
