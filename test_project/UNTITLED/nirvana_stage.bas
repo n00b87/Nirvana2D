@@ -14,6 +14,7 @@ Dim RenderSetting
 End Type
 
 Type Nirvana_Shape
+Dim Name$
 Dim Sprite_ID
 Dim ShapeType
 End Type
@@ -26,6 +27,7 @@ Dim Alpha
 Dim Scroll_Speed As Nirvana_Vector2D
 Dim Ref_Canvas
 Dim Layer_TileMap As Nirvana_TileMap
+Dim Layer_TileMap2 As Nirvana_TileMap
 Dim Layer_Sprite_Count
 Dim Layer_Shape_Count
 Dim Bkg As Nirvana_Background
@@ -46,9 +48,10 @@ NIRVANA_DATA_DIR$ = NIRVANA_PROJECT_BASE_DIR$ + NIRVANA_PATH_SEPARATOR$ + "data"
 NIRVANA_BKG_DIR$ = NIRVANA_PROJECT_BASE_DIR$ + NIRVANA_PATH_SEPARATOR$ + "bkg" + NIRVANA_PATH_SEPARATOR$
 
 NIRVANA_LAYER_TYPE_TILEMAP = 0
-NIRVANA_LAYER_TYPE_SPRITE = 1
-NIRVANA_LAYER_TYPE_CANVAS_2D = 2
-NIRVANA_LAYER_TYPE_CANVAS_3D = 3
+NIRVANA_LAYER_TYPE_ISO_TILEMAP = 1
+NIRVANA_LAYER_TYPE_SPRITE = 2
+NIRVANA_LAYER_TYPE_CANVAS_2D = 3
+NIRVANA_LAYER_TYPE_CANVAS_3D = 4
 
 NIRVANA_IMG_RENDER_SETTING_NORMAL = 0
 NIRVANA_IMG_RENDER_SETTING_STRETCHED = 1
@@ -68,6 +71,8 @@ For i = 0 To 4
 	Nirvana_Stage_Layers[i].Ref_Canvas = -1
 	Nirvana_Stage_Layers[i].Layer_TileMap.Tileset_ID = -1
 	Nirvana_Stage_Layers[i].Layer_TileMap.TileMap_ID = -1
+	Nirvana_Stage_Layers[i].Layer_TileMap2.Tileset_ID = -1
+	Nirvana_Stage_Layers[i].Layer_TileMap2.TileMap_ID = -1
 	Nirvana_Stage_Layers[i].Bkg.Image_ID = -1
 Next
 
@@ -111,10 +116,17 @@ Sub Nirvana_ClearStage()
 		If Nirvana_Stage_Layers[i].LayerType = NIRVANA_LAYER_TYPE_TILEMAP Then
 			DeleteTileMap(Nirvana_Stage_Layers[i].Layer_TileMap.TileMap_ID)
 			DeleteTileSet(Nirvana_Stage_Layers[i].Layer_TileMap.Tileset_ID)
+		ElseIf Nirvana_Stage_Layers[i].LayerType = NIRVANA_LAYER_TYPE_ISO_TILEMAP Then
+			DeleteTileMap(Nirvana_Stage_Layers[i].Layer_TileMap.TileMap_ID)
+			DeleteTileMap(Nirvana_Stage_Layers[i].Layer_TileMap2.TileMap_ID)
+			DeleteTileSet(Nirvana_Stage_Layers[i].Layer_TileMap.Tileset_ID)
 		End If
 
 		Nirvana_Stage_Layers[i].Layer_TileMap.TileMap_ID = -1
+		Nirvana_Stage_Layers[i].Layer_TileMap2.TileMap_ID = -1
 		Nirvana_Stage_Layers[i].Layer_TileMap.Tileset_ID = -1
+
+		Nirvana_Stage_Layers[i].Layer_TileMap2.Tileset_ID = -1
 
 	Next
 
@@ -133,6 +145,9 @@ Sub Nirvana_ClearStage()
 
 	Nirvana_Tileset_ID_1 = -1
 	Nirvana_Tileset_Image_1 = -1
+
+	Nirvana_Tileset_ID_2 = -1
+	Nirvana_Tileset_Image_2 = -1
 
 	Nirvana_Sprite_Image_0 = -1
 	Nirvana_Sprite_Image_1 = -1
@@ -244,6 +259,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Sprites[1].Sprite_ID, TRUE)
 
 	'------- SHAPE ("POLYGON_1") -------
+	Nirvana_Stage_Shapes[0].Name$ = "POLYGON_1"
 	Nirvana_Stage_Shapes[0].Sprite_ID = CreateSprite(-1, 1, 1)
 
 	'Base Settings
@@ -274,6 +290,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Shapes[0].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("CHAIN_1") -------
+	Nirvana_Stage_Shapes[1].Name$ = "CHAIN_1"
 	Nirvana_Stage_Shapes[1].Sprite_ID = CreateSprite(-1, 1, 1)
 
 	'Base Settings
@@ -307,6 +324,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Shapes[1].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("BOX_1") -------
+	Nirvana_Stage_Shapes[2].Name$ = "BOX_1"
 	Nirvana_Stage_Shapes[2].Sprite_ID = CreateSprite(-1, 1, 1)
 
 	'Base Settings
@@ -323,6 +341,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Shapes[2].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("BOX_2") -------
+	Nirvana_Stage_Shapes[3].Name$ = "BOX_2"
 	Nirvana_Stage_Shapes[3].Sprite_ID = CreateSprite(-1, 1, 1)
 
 	'Base Settings
@@ -339,6 +358,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Shapes[3].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("CHAIN_2") -------
+	Nirvana_Stage_Shapes[4].Name$ = "CHAIN_2"
 	Nirvana_Stage_Shapes[4].Sprite_ID = CreateSprite(-1, 1, 1)
 
 	'Base Settings
@@ -537,6 +557,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Sprites[0].Sprite_ID, TRUE)
 
 	'------- SHAPE ("BOX_1") -------
+	Nirvana_Stage_Shapes[0].Name$ = "BOX_1"
 	Nirvana_Stage_Shapes[0].Sprite_ID = CreateSprite(-1, 1, 1)
 
 	'Base Settings
@@ -553,6 +574,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Shapes[0].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("BOX_2") -------
+	Nirvana_Stage_Shapes[1].Name$ = "BOX_2"
 	Nirvana_Stage_Shapes[1].Sprite_ID = CreateSprite(-1, 1, 1)
 
 	'Base Settings
@@ -569,6 +591,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Shapes[1].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("POLYGON_1") -------
+	Nirvana_Stage_Shapes[2].Name$ = "POLYGON_1"
 	Nirvana_Stage_Shapes[2].Sprite_ID = CreateSprite(-1, 1, 1)
 
 	'Base Settings
@@ -599,6 +622,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Shapes[2].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("CIRCLE_1") -------
+	Nirvana_Stage_Shapes[3].Name$ = "CIRCLE_1"
 	Nirvana_Stage_Shapes[3].Sprite_ID = CreateSprite(-1, 1, 1)
 
 	'Base Settings
@@ -615,6 +639,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Shapes[3].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("CHAIN_1") -------
+	Nirvana_Stage_Shapes[4].Name$ = "CHAIN_1"
 	Nirvana_Stage_Shapes[4].Sprite_ID = CreateSprite(-1, 1, 1)
 
 	'Base Settings
@@ -646,6 +671,53 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 End Function
 
 
+Function Nirvana_Stage_2(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
+	Nirvana_ClearStage()
+
+	Dim nv_stage As Nirvana_Stage
+	nv_stage.Name$ = "st3"
+	nv_stage.Tile_Size.Width = 64
+	nv_stage.Tile_Size.Height = 32
+	nv_stage.Stage_Size.Width = 100
+	nv_stage.Stage_Size.Height = 100
+	nv_stage.Layer_Count = 1
+
+	'-------LAYER (fd)-------
+
+	Nirvana_Stage_Layers[0].Name$ = "fd"
+	Nirvana_Stage_Layers[0].LayerType = NIRVANA_LAYER_TYPE_ISO_TILEMAP
+	Nirvana_Stage_Layers[0].Visible = TRUE
+	Nirvana_Stage_Layers[0].Alpha = 255
+	Nirvana_Stage_Layers[0].Scroll_Speed.X = 1
+	Nirvana_Stage_Layers[0].Scroll_Speed.Y = 1
+
+	Nirvana_Stage_Layers[0].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
+
+	'------- ISO TILEMAP 1 -------
+	Nirvana_Stage_Layers[0].Layer_TileMap = Nirvana_CreateTileMap("iso_test", 101, 101)
+
+	f = OpenFile(NIRVANA_DATA_DIR$ + "tm2.data", BINARY_INPUT)
+	For y = 0 To 100
+		For x = 0 To 100
+			SetTile(Nirvana_Stage_Layers[0].Layer_TileMap.TileMap_ID, Nirvana_Read32(f), x, y)
+		Next
+	Next
+	CloseFile(f)
+	'------- ISO TILEMAP 2 -------
+	Nirvana_Stage_Layers[0].Layer_TileMap2 = Nirvana_CreateTileMap("iso_test", 101, 101)
+
+	f = OpenFile(NIRVANA_DATA_DIR$ + "tm3.data", BINARY_INPUT)
+	For y = 0 To 100
+		For x = 0 To 100
+			SetTile(Nirvana_Stage_Layers[0].Layer_TileMap2.TileMap_ID, Nirvana_Read32(f), x, y)
+		Next
+	Next
+	CloseFile(f)
+
+	Return nv_stage
+End Function
+
+
 
 Function Nirvana_LoadStage(stage_name$, viewport_x, viewport_y, viewport_w, viewport_h)
 	GetWindowSize(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT)
@@ -657,6 +729,9 @@ Function Nirvana_LoadStage(stage_name$, viewport_x, viewport_y, viewport_w, view
 
 	Case "st2"
 		Nirvana_ActiveStage = Nirvana_Stage_1(viewport_x, viewport_y, viewport_w, viewport_h)
+
+	Case "st3"
+		Nirvana_ActiveStage = Nirvana_Stage_2(viewport_x, viewport_y, viewport_w, viewport_h)
 
 	Default
 		Return FALSE
@@ -671,41 +746,3 @@ Function Nirvana_LoadStage(stage_name$, viewport_x, viewport_y, viewport_w, view
 End Function
 
 
-Sub Nirvana_Update()
-	For layer_index = 0 To Nirvana_ActiveStage.Layer_Count-1
-		Canvas(Nirvana_Stage_Layers[layer_index].Ref_Canvas)
-		SetCanvasZ(Nirvana_Stage_Layers[layer_index].Ref_Canvas, Nirvana_ActiveStage.Layer_Count-layer_index)
-		offset_x = Nirvana_ActiveStage.Stage_Offset.X * Nirvana_Stage_Layers[layer_index].Scroll_Speed.X
-		offset_y = Nirvana_ActiveStage.Stage_Offset.Y * Nirvana_Stage_Layers[layer_index].Scroll_Speed.Y
-		Select Case Nirvana_Stage_Layers[layer_index].LayerType
-		Case NIRVANA_LAYER_TYPE_SPRITE
-			SetCanvasOffset(Nirvana_Stage_Layers[layer_index].Ref_Canvas, offset_x, offset_y)
-		Case NIRVANA_LAYER_TYPE_CANVAS_2D
-			ClearCanvas()
-			If ImageExists(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID) Then
-				Select Case Nirvana_Stage_Layers[layer_index].Bkg.RenderSetting
-				Case NIRVANA_IMG_RENDER_SETTING_NORMAL
-					DrawImage(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, 0, 0)
-				Case NIRVANA_IMG_RENDER_SETTING_STRETCHED
-					Dim img_w, img_h
-					GetImageSize(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, img_w, img_h)
-					DrawImage_BlitEx(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, 0, 0, img_w, img_h) 
-				Case NIRVANA_IMG_RENDER_SETTING_TILED
-					Dim img_w, img_h
-					GetImageSize(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, img_w, img_h)
-					tile_off_x = offset_x MOD img_w
-					tile_off_y = offset_y MOD img_h
-					For y = -1*tile_off_y To Nirvana_ActiveStage.Viewport_Size.Height-1 Step img_h
-						For x = -1*tile_off_x To Nirvana_ActiveStage.Viewport_Size.Width-1 Step img_w
-							DrawImage(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, x, y)
-						Next
-					Next
-				End Select
-			End If
-		Case NIRVANA_LAYER_TYPE_TILEMAP
-			ClearCanvas()
-			DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, offset_x, offset_y)
-		End Select
-	Next
-	Update()
-End Sub

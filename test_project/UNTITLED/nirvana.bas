@@ -192,6 +192,9 @@ Function Nirvana_GetLayerMaskHit(layer_index, mask_index, x, y)
 	tile_x = Int(x / Nirvana_ActiveStage.Tile_Size.Width)
 	tile_y = Int(y / Nirvana_ActiveStage.Tile_Size.Height)
 	tile = GetTile(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, tile_x, tile_y)
+	If tile < 0 Then
+		Return False
+	End If
 	Return MatrixValue(Nirvana_TileMask_Matrix[mask_index], 0, tile)
 End Function
 
@@ -218,6 +221,20 @@ Function Nirvana_GetSpriteDefinitionName$(sprite_index)
 	Return Nirvana_Stage_Sprites[sprite_index].BaseName$
 End Function
 
+Function Nirvana_SpriteIsDetached(sprite_index)
+	If sprite_index < 0 Or sprite_index >= ArraySize(Nirvana_Stage_Sprites, 1) Then
+		Return FALSE
+	End If
+	Return Nirvana_Stage_Sprites[sprite_index].IsDetached
+End Function
+
+Function Nirvana_GetDetachedSpriteID(sprite_index)
+	If sprite_index < 0 Or sprite_index >= ArraySize(Nirvana_Stage_Sprites, 1) Then
+		Return -1
+	End If
+	Return Nirvana_Stage_Sprites[sprite_index].Detached_Sprite_ID
+End Function
+
 Function Nirvana_GetSpriteAnimationCount(sprite_index)
 	If sprite_index < 0 Or sprite_index >= ArraySize(Nirvana_Stage_Sprites, 1) Then
 		Return 0
@@ -237,6 +254,18 @@ Function Nirvana_GetSpriteAnimationName$(sprite_index, animation_num)
 		Return ""
 	End If
 	Return Nirvana_SpriteAnimationNames$[animation_index]
+End Function
+
+Function Nirvana_GetSpriteAnimationIndex(sprite_index, animation_name$)
+	If sprite_index < 0 Or sprite_index >= ArraySize(Nirvana_Stage_Sprites, 1) Then
+		Return -1
+	End If
+	For i = 0 To Nirvana_GetSpriteAnimationCount(sprite_index)-1
+		If Nirvana_SpriteAnimationNames$[i] = animation_name$ Then
+			Return i+1
+		End If
+	Next
+	Return -1
 End Function
 
 
@@ -280,3 +309,59 @@ Function Nirvana_GetViewportSize() As Nirvana_Size2D
 	End If
 	Return v_size
 End Function
+
+
+'-------UPDATE-------
+Sub Nirvana_Update()
+	stage_spr_current_index = 0
+	For layer_index = 0 To Nirvana_ActiveStage.Layer_Count-1
+		Canvas(Nirvana_Stage_Layers[layer_index].Ref_Canvas)
+		SetCanvasZ(Nirvana_Stage_Layers[layer_index].Ref_Canvas, Nirvana_ActiveStage.Layer_Count-layer_index)
+		offset_x = Nirvana_ActiveStage.Stage_Offset.X * Nirvana_Stage_Layers[layer_index].Scroll_Speed.X
+		offset_y = Nirvana_ActiveStage.Stage_Offset.Y * Nirvana_Stage_Layers[layer_index].Scroll_Speed.Y
+		Select Case Nirvana_Stage_Layers[layer_index].LayerType
+		Case NIRVANA_LAYER_TYPE_SPRITE
+			SetCanvasOffset(Nirvana_Stage_Layers[layer_index].Ref_Canvas, offset_x, offset_y)
+			For spr_index = 0 To Nirvana_Stage_Layers[layer_index].Layer_Sprite_Count-1
+				If Nirvana_Stage_Sprites[stage_spr_current_index].IsDetached Then
+					detach_x = SpriteX(Nirvana_Stage_Sprites[stage_spr_current_index].Detached_Sprite_ID)
+					detach_y = SpriteY(Nirvana_Stage_Sprites[stage_spr_current_index].Detached_Sprite_ID)
+					SetSpritePosition(Nirvana_Stage_Sprites[stage_spr_current_index].Sprite_ID, detach_x, detach_y)
+				End If
+				stage_spr_current_index = stage_spr_current_index + 1
+			Next
+		Case NIRVANA_LAYER_TYPE_CANVAS_2D
+			ClearCanvas()
+			If ImageExists(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID) Then
+				Select Case Nirvana_Stage_Layers[layer_index].Bkg.RenderSetting
+				Case NIRVANA_IMG_RENDER_SETTING_NORMAL
+					DrawImage(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, 0, 0)
+				Case NIRVANA_IMG_RENDER_SETTING_STRETCHED
+					Dim img_w, img_h
+					GetImageSize(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, img_w, img_h)
+					DrawImage_BlitEx(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, 0, 0, img_w, img_h) 
+				Case NIRVANA_IMG_RENDER_SETTING_TILED
+					Dim img_w, img_h
+					GetImageSize(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, img_w, img_h)
+					tile_off_x = offset_x MOD img_w
+					tile_off_y = offset_y MOD img_h
+					For y = -1*tile_off_y To Nirvana_ActiveStage.Viewport_Size.Height-1 Step img_h
+						For x = -1*tile_off_x To Nirvana_ActiveStage.Viewport_Size.Width-1 Step img_w
+							DrawImage(Nirvana_Stage_Layers[layer_index].Bkg.Image_ID, x, y)
+						Next
+					Next
+				End Select
+			End If
+		Case NIRVANA_LAYER_TYPE_TILEMAP
+			ClearCanvas()
+			DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, offset_x, offset_y)
+		Case NIRVANA_LAYER_TYPE_ISO_TILEMAP
+			ClearCanvas()
+			tile_w = Nirvana_ActiveStage.Tile_Size.Width
+			tile_h = Nirvana_ActiveStage.Tile_Size.Height
+			DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, offset_x, offset_y)
+			DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap2.TileMap_ID, 0 - (tile_w/2), 0 - (tile_h/2), Nirvana_ActiveStage.Viewport_Size.Width + tile_w, Nirvana_ActiveStage.Viewport_Size.Height + tile_h, offset_x, offset_y)
+		End Select
+	Next
+	Update()
+End Sub

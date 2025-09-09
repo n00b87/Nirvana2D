@@ -441,6 +441,7 @@ class wxIrrlicht : public wxControl {
 
         void util_drawSelectedTiles();
         void StageSheet_SelectTileUpdate();
+
         void StageSheet_BoxSelectTileUpdate();
 
         void StageSheet_MoveTileUpdate();
@@ -457,14 +458,21 @@ class wxIrrlicht : public wxControl {
         void util_fillTile_ISO(int base_tile, int fill_tile, int x, int y, bool use_map2);
         void StageSheet_FillTileUpdate_ISO();
 
-        //void util_drawSelectedTiles_ISO();
         void StageSheet_SelectTileUpdate_ISO();
-        //void StageSheet_BoxSelectTileUpdate_ISO();
 
-        //void StageSheet_MoveTileUpdate_ISO();
-        //void StageSheet_CopyTileUpdate_ISO();
+        void getTriangleSides(float angle, float hyp, float* t_adjacent, float* t_opposite);
+        bool getLineIntersect(double p0_x, double p0_y, double p1_x, double p1_y, double p2_x, double p2_y, double p3_x, double p3_y, double* i_x, double* i_y);
 
-        //void StageSheet_DeleteSelectedTileUpdate_ISO();
+        void selectTileAt(int x, int y);
+        Nirvana_SelectTool_TileSelection getTileMapPositionAt(int x, int y);
+        void selectISOTilesInBox(bool start_m, int start_x, int start_y, int num_across, int num_down );
+
+        void StageSheet_BoxSelectTileUpdate_ISO();
+
+        void StageSheet_MoveTileUpdate_ISO();
+        void StageSheet_CopyTileUpdate_ISO();
+
+        void StageSheet_DeleteSelectedTileUpdate_ISO();
         //----------------------------------------------------
 
 

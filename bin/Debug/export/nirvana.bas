@@ -355,6 +355,12 @@ Sub Nirvana_Update()
 		Case NIRVANA_LAYER_TYPE_TILEMAP
 			ClearCanvas()
 			DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, offset_x, offset_y)
+		Case NIRVANA_LAYER_TYPE_ISO_TILEMAP
+			ClearCanvas()
+			tile_w = Nirvana_ActiveStage.Tile_Size.Width
+			tile_h = Nirvana_ActiveStage.Tile_Size.Height
+			DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, offset_x, offset_y)
+			DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap2.TileMap_ID, 0 - (tile_w/2), 0 - (tile_h/2), Nirvana_ActiveStage.Viewport_Size.Width + tile_w, Nirvana_ActiveStage.Viewport_Size.Height + tile_h, offset_x, offset_y)
 		End Select
 	Next
 	Update()
