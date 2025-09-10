@@ -567,13 +567,13 @@ class NewSprite_Dialog : public wxDialog
 		wxStaticText* m_staticText40;
 		wxSearchCtrl* m_spriteSheet_searchCtrl;
 		wxListBox* m_spriteSheet_listBox;
-		wxButton* m_newSprite_ok_button;
 		wxButton* m_newSprite_cancel_button;
+		wxButton* m_newSprite_ok_button;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnSearch( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
@@ -601,13 +601,13 @@ class NewTileset_Dialog : public wxDialog
 		wxStaticText* m_staticText40;
 		wxSearchCtrl* m_tileSheet_searchCtrl;
 		wxListBox* m_tileSheet_listBox;
-		wxButton* m_newTileset_ok_button;
 		wxButton* m_newTileset_cancel_button;
+		wxButton* m_newTileset_ok_button;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnSearch( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
@@ -637,12 +637,12 @@ class NewStage_Dialog : public wxDialog
 		wxSpinCtrl* m_width_spinCtrl;
 		wxStaticText* m_staticText473;
 		wxSpinCtrl* m_height_spinCtrl;
-		wxButton* m_button16;
 		wxButton* m_button17;
+		wxButton* m_button16;
 
 		// Virtual event handlers, override them in your derived class
-		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
@@ -666,12 +666,12 @@ class NewProject_Dialog : public wxDialog
 		wxTextCtrl* m_projectName_textCtrl;
 		wxStaticText* m_staticText98;
 		wxDirPickerCtrl* m_projectLocation_dirPicker;
-		wxButton* m_ok_button;
 		wxButton* m_cancel_button;
+		wxButton* m_ok_button;
 
 		// Virtual event handlers, override them in your derived class
-		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
@@ -700,14 +700,14 @@ class NewLayer_Dialog : public wxDialog
 		wxStaticText* m_staticText551;
 		wxSearchCtrl* m_tileset_searchCtrl;
 		wxListBox* m_tileset_listBox;
-		wxButton* m_button20;
 		wxButton* m_button21;
+		wxButton* m_button20;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnLayerTypeSelect( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSearch( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
@@ -762,12 +762,12 @@ class StageProperties_Dialog : public wxDialog
 		wxSpinCtrl* m_width_spinCtrl;
 		wxStaticText* m_staticText473;
 		wxSpinCtrl* m_height_spinCtrl;
-		wxButton* m_button16;
 		wxButton* m_button17;
+		wxButton* m_button16;
 
 		// Virtual event handlers, override them in your derived class
-		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
@@ -791,13 +791,13 @@ class AddSpriteInstance_Dialog : public wxDialog
 		wxStaticText* m_staticText60;
 		wxSearchCtrl* m_baseSprite_searchCtrl;
 		wxListBox* m_baseSpriteList_listBox;
-		wxButton* m_button27;
 		wxButton* m_button28;
+		wxButton* m_button27;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnSearch( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:

@@ -2123,11 +2123,11 @@ NewSprite_Dialog::NewSprite_Dialog( wxWindow* parent, wxWindowID id, const wxStr
 
 	bSizer100->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_newSprite_ok_button = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer100->Add( m_newSprite_ok_button, 0, wxALL, 5 );
-
 	m_newSprite_cancel_button = new wxButton( this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer100->Add( m_newSprite_cancel_button, 0, wxALL, 5 );
+
+	m_newSprite_ok_button = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer100->Add( m_newSprite_ok_button, 0, wxALL, 5 );
 
 
 	bSizer95->Add( bSizer100, 0, wxEXPAND, 5 );
@@ -2140,8 +2140,8 @@ NewSprite_Dialog::NewSprite_Dialog( wxWindow* parent, wxWindowID id, const wxStr
 
 	// Connect Events
 	m_spriteSheet_searchCtrl->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( NewSprite_Dialog::OnSearch ), NULL, this );
-	m_newSprite_ok_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewSprite_Dialog::OnCreate ), NULL, this );
 	m_newSprite_cancel_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewSprite_Dialog::OnCancel ), NULL, this );
+	m_newSprite_ok_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewSprite_Dialog::OnCreate ), NULL, this );
 }
 
 NewSprite_Dialog::~NewSprite_Dialog()
@@ -2232,11 +2232,11 @@ NewTileset_Dialog::NewTileset_Dialog( wxWindow* parent, wxWindowID id, const wxS
 
 	bSizer100->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_newTileset_ok_button = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer100->Add( m_newTileset_ok_button, 0, wxALL, 5 );
-
 	m_newTileset_cancel_button = new wxButton( this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer100->Add( m_newTileset_cancel_button, 0, wxALL, 5 );
+
+	m_newTileset_ok_button = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer100->Add( m_newTileset_ok_button, 0, wxALL, 5 );
 
 
 	bSizer95->Add( bSizer100, 0, wxEXPAND, 5 );
@@ -2249,8 +2249,8 @@ NewTileset_Dialog::NewTileset_Dialog( wxWindow* parent, wxWindowID id, const wxS
 
 	// Connect Events
 	m_tileSheet_searchCtrl->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( NewTileset_Dialog::OnSearch ), NULL, this );
-	m_newTileset_ok_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewTileset_Dialog::OnCreate ), NULL, this );
 	m_newTileset_cancel_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewTileset_Dialog::OnCancel ), NULL, this );
+	m_newTileset_ok_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewTileset_Dialog::OnCreate ), NULL, this );
 }
 
 NewTileset_Dialog::~NewTileset_Dialog()
@@ -2339,11 +2339,11 @@ NewStage_Dialog::NewStage_Dialog( wxWindow* parent, wxWindowID id, const wxStrin
 
 	bSizer116->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_button16 = new wxButton( m_panel45, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer116->Add( m_button16, 0, wxALL, 5 );
-
 	m_button17 = new wxButton( m_panel45, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer116->Add( m_button17, 0, wxALL, 5 );
+
+	m_button16 = new wxButton( m_panel45, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer116->Add( m_button16, 0, wxALL, 5 );
 
 
 	bSizer106->Add( bSizer116, 0, wxEXPAND, 5 );
@@ -2361,8 +2361,8 @@ NewStage_Dialog::NewStage_Dialog( wxWindow* parent, wxWindowID id, const wxStrin
 	this->Centre( wxBOTH );
 
 	// Connect Events
-	m_button16->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewStage_Dialog::OnCreate ), NULL, this );
 	m_button17->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewStage_Dialog::OnCancel ), NULL, this );
+	m_button16->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewStage_Dialog::OnCreate ), NULL, this );
 }
 
 NewStage_Dialog::~NewStage_Dialog()
@@ -2412,11 +2412,11 @@ NewProject_Dialog::NewProject_Dialog( wxWindow* parent, wxWindowID id, const wxS
 
 	bSizer116->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_ok_button = new wxButton( m_panel45, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer116->Add( m_ok_button, 0, wxALL, 5 );
-
 	m_cancel_button = new wxButton( m_panel45, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer116->Add( m_cancel_button, 0, wxALL, 5 );
+
+	m_ok_button = new wxButton( m_panel45, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer116->Add( m_ok_button, 0, wxALL, 5 );
 
 
 	bSizer106->Add( bSizer116, 0, wxEXPAND, 5 );
@@ -2434,8 +2434,8 @@ NewProject_Dialog::NewProject_Dialog( wxWindow* parent, wxWindowID id, const wxS
 	this->Centre( wxBOTH );
 
 	// Connect Events
-	m_ok_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewProject_Dialog::OnCreate ), NULL, this );
 	m_cancel_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewProject_Dialog::OnCancel ), NULL, this );
+	m_ok_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewProject_Dialog::OnCreate ), NULL, this );
 }
 
 NewProject_Dialog::~NewProject_Dialog()
@@ -2525,11 +2525,11 @@ NewLayer_Dialog::NewLayer_Dialog( wxWindow* parent, wxWindowID id, const wxStrin
 
 	bSizer119->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_button20 = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer119->Add( m_button20, 0, wxALL, 5 );
-
 	m_button21 = new wxButton( this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer119->Add( m_button21, 0, wxALL, 5 );
+
+	m_button20 = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer119->Add( m_button20, 0, wxALL, 5 );
 
 
 	bSizer117->Add( bSizer119, 0, wxEXPAND, 5 );
@@ -2543,8 +2543,8 @@ NewLayer_Dialog::NewLayer_Dialog( wxWindow* parent, wxWindowID id, const wxStrin
 	// Connect Events
 	m_layerType_comboBox->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( NewLayer_Dialog::OnLayerTypeSelect ), NULL, this );
 	m_tileset_searchCtrl->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( NewLayer_Dialog::OnSearch ), NULL, this );
-	m_button20->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewLayer_Dialog::OnCreate ), NULL, this );
 	m_button21->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewLayer_Dialog::OnCancel ), NULL, this );
+	m_button20->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewLayer_Dialog::OnCreate ), NULL, this );
 }
 
 NewLayer_Dialog::~NewLayer_Dialog()
@@ -2694,11 +2694,11 @@ StageProperties_Dialog::StageProperties_Dialog( wxWindow* parent, wxWindowID id,
 
 	bSizer116->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_button16 = new wxButton( m_panel45, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer116->Add( m_button16, 0, wxALL, 5 );
-
 	m_button17 = new wxButton( m_panel45, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer116->Add( m_button17, 0, wxALL, 5 );
+
+	m_button16 = new wxButton( m_panel45, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer116->Add( m_button16, 0, wxALL, 5 );
 
 
 	bSizer106->Add( bSizer116, 0, wxEXPAND, 5 );
@@ -2716,8 +2716,8 @@ StageProperties_Dialog::StageProperties_Dialog( wxWindow* parent, wxWindowID id,
 	this->Centre( wxBOTH );
 
 	// Connect Events
-	m_button16->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( StageProperties_Dialog::OnCreate ), NULL, this );
 	m_button17->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( StageProperties_Dialog::OnCancel ), NULL, this );
+	m_button16->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( StageProperties_Dialog::OnCreate ), NULL, this );
 }
 
 StageProperties_Dialog::~StageProperties_Dialog()
@@ -2779,11 +2779,11 @@ AddSpriteInstance_Dialog::AddSpriteInstance_Dialog( wxWindow* parent, wxWindowID
 
 	bSizer136->Add( 0, 0, 1, wxEXPAND, 5 );
 
-	m_button27 = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer136->Add( m_button27, 0, wxALL, 5 );
-
 	m_button28 = new wxButton( this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer136->Add( m_button28, 0, wxALL, 5 );
+
+	m_button27 = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer136->Add( m_button27, 0, wxALL, 5 );
 
 
 	bSizer132->Add( bSizer136, 0, wxEXPAND, 5 );
@@ -2796,8 +2796,8 @@ AddSpriteInstance_Dialog::AddSpriteInstance_Dialog( wxWindow* parent, wxWindowID
 
 	// Connect Events
 	m_baseSprite_searchCtrl->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( AddSpriteInstance_Dialog::OnSearch ), NULL, this );
-	m_button27->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AddSpriteInstance_Dialog::OnCreate ), NULL, this );
 	m_button28->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AddSpriteInstance_Dialog::OnCancel ), NULL, this );
+	m_button27->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( AddSpriteInstance_Dialog::OnCreate ), NULL, this );
 }
 
 AddSpriteInstance_Dialog::~AddSpriteInstance_Dialog()
