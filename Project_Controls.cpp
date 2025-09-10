@@ -2789,6 +2789,12 @@ void NirvanaEditor_MainFrame::OnLayerCheckListSelect( wxCommandEvent& event )
 		}
 		break;
 
+		case LAYER_TYPE_ISO_TILEMAP:
+		{
+			m_stageLayer_layerType_staticText->SetLabelText(_("ISO_TILEMAP"));
+		}
+		break;
+
 		default:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("[NA]"));

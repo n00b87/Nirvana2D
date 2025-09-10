@@ -9168,6 +9168,12 @@ void wxIrrlicht::UpdateStageSheet()
 		scroll_offset_x += scroll_speed;
 	}
 
+	if(scroll_offset_x < 0)
+        scroll_offset_x = 0;
+
+    if(scroll_offset_y < 0)
+        scroll_offset_y = 0;
+
 	updateStageViewportInfo();
 
 
