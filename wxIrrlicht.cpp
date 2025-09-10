@@ -3888,7 +3888,7 @@ void wxIrrlicht::StageSheet_FillTileUpdate_ISO()
             tmap_y += 1;
         }
 
-        std::cout << "NEGATIVE: " << tmap_x << ", " << tmap_y << std::endl;
+        //std::cout << "NEGATIVE: " << tmap_x << ", " << tmap_y << std::endl;
 
 
 		if(!(middle_drag_init||left_drag_init||right_drag_init))
@@ -6333,7 +6333,7 @@ void wxIrrlicht::StageSheet_MoveTileUpdate_ISO()
 
 				if(flip_map && (m2))
                 {
-                    std::cout << "FLIP +(" << diff_x << ", " << diff_y << ")" << std::endl;
+                    //std::cout << "FLIP +(" << diff_x << ", " << diff_y << ")" << std::endl;
                     dst_x += diff_x;
                     dst_y += diff_y;
                 }
@@ -6982,7 +6982,7 @@ void wxIrrlicht::StageSheet_CopyTileUpdate_ISO()
 
 				if(flip_map && (m2))
                 {
-                    std::cout << "FLIP +(" << diff_x << ", " << diff_y << ")" << std::endl;
+                    //std::cout << "FLIP +(" << diff_x << ", " << diff_y << ")" << std::endl;
                     dst_x += diff_x;
                     dst_y += diff_y;
                 }
@@ -9365,7 +9365,7 @@ void wxIrrlicht::mapEdit_getContext()
             mapEdit_hasContext = true;
             break;
         }
-        std::cout << "NO GO: " << i << std::endl;
+        //std::cout << "NO GO: " << i << std::endl;
 	}
 }
 
@@ -9761,7 +9761,7 @@ void wxIrrlicht::UpdateStageISOTileSelect()
                           current_frame_width + (current_frame_width/2), current_frame_height,
                           current_frame_width, current_frame_height + (current_frame_height/2));
 
-    if(in_br)
+    /*if(in_br)
         std::cout << "BOTTOM RIGHT" << std::endl;
     else if(in_bl)
         std::cout << "BOTTOM LEFT" << std::endl;
@@ -9769,6 +9769,7 @@ void wxIrrlicht::UpdateStageISOTileSelect()
         std::cout << "TOP RIGHT" << std::endl;
     else if(in_tl)
         std::cout << "TOP LEFT" << std::endl;
+    */
 
 	int img_x = -scroll_offset_x;
 	int img_y = -scroll_offset_y;
