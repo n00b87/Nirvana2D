@@ -3364,3 +3364,22 @@ void NirvanaEditor_MainFrame::OnMapEditSettings_CameraSpeed_SpinCtrl( wxSpinEven
 
 	map_editor->getMapViewControl()->scroll_speed = event.GetValue();
 }
+
+void NirvanaEditor_MainFrame::OnMapEditSettings_TileSelectSpeed_SpinCtrl( wxSpinEvent& event )
+{
+	if(!editor_init)
+		return;
+
+	map_editor->getTileSelectControl()->scroll_speed = event.GetValue();
+	tile_editor->getAnimationSheetControl()->scroll_speed = event.GetValue();
+	tile_editor->getMaskSheetControl()->scroll_speed = event.GetValue();
+}
+
+void NirvanaEditor_MainFrame::OnMapEditSettings_SpriteSelectSpeed_SpinCtrl( wxSpinEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	sprite_editor->getAnimationSheetControl()->scroll_speed = event.GetValue();
+	sprite_editor->getCollisionControl()->scroll_speed = event.GetValue();
+}

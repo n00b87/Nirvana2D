@@ -116,6 +116,8 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnMapEditSettings_ShowGrid_Checked( wxCommandEvent& event );
 		void OnMapEditSettings_GridColor_Change( wxColourPickerEvent& event );
 		void OnMapEditSettings_CameraSpeed_SpinCtrl( wxSpinEvent& event );
+		void OnMapEditSettings_TileSelectSpeed_SpinCtrl( wxSpinEvent& event );
+		void OnMapEditSettings_SpriteSelectSpeed_SpinCtrl( wxSpinEvent& event );
 
 		void OnProjectItemActivated( wxTreeEvent& event );
 		void OnActiveLayerSelect( wxCommandEvent& event );

@@ -1,4 +1,4 @@
-SPRITE name="gren_guy" frame_size=64,64;
+SPRITE name="gren_guy" frame_size=64,64 detached_shape=FALSE;
 SHAPE type=SPRITE_SHAPE_POLYGON point=16,59 point=6,20 point=25,4 point=40,4 point=45,32 point=41,60 ;
 ANIMATION name="SPRITE_BASE_ANIMATION" frame_count=1 fps=0 frame=0 ;
 ANIMATION name="default" frame_count=2 fps=11 frame=0,1 ;

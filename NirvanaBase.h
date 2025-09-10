@@ -33,6 +33,7 @@
 #include <wx/spinctrl.h>
 #include <wx/checkbox.h>
 #include <wx/clrpicker.h>
+#include <wx/scrolwin.h>
 #include <wx/aui/auibook.h>
 #include <wx/listbox.h>
 #include <wx/propgrid/propgrid.h>
@@ -131,7 +132,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxSpinCtrlDouble* m_mapEdit_layerVScroll_spinCtrlDouble;
 		wxStaticText* m_staticText5611;
 		wxSpinCtrl* m_mapEdit_layerAlpha_spinCtrl;
-		wxPanel* m_panel56;
+		wxScrolledWindow* m_scrolledWindow1;
 		wxPanel* m_panel57;
 		wxStaticText* m_staticText991;
 		wxStaticText* m_staticText104;
@@ -144,6 +145,14 @@ class Nirvana_MainFrame : public wxFrame
 		wxStaticText* m_staticText101;
 		wxStaticText* m_staticText102;
 		wxSpinCtrl* m_mapEdit_cameraSpeed_spinCtrl;
+		wxPanel* m_panel581;
+		wxStaticText* m_staticText1011;
+		wxStaticText* m_staticText1021;
+		wxSpinCtrl* m_mapEdit_tileSelect_Speed_spinCtrl;
+		wxPanel* m_panel5811;
+		wxStaticText* m_staticText10111;
+		wxStaticText* m_staticText10211;
+		wxSpinCtrl* m_mapEdit_spriteSelect_Speed_spinCtrl;
 		wxPanel* m_panel14;
 		wxAuiNotebook* m_mapEdit_layerObjectTools_auinotebook;
 		wxPanel* m_mapEdit_tile_panel;
@@ -374,6 +383,8 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnMapEditSettings_ShowGrid_Checked( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEditSettings_GridColor_Change( wxColourPickerEvent& event ) { event.Skip(); }
 		virtual void OnMapEditSettings_CameraSpeed_SpinCtrl( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnMapEditSettings_TileSelectSpeed_SpinCtrl( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnMapEditSettings_SpriteSelectSpeed_SpinCtrl( wxSpinEvent& event ) { event.Skip(); }
 		virtual void OnMapEditToolsTabChanged( wxAuiNotebookEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_TileTool_Select( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_TileTool_BoxSelect( wxCommandEvent& event ) { event.Skip(); }
