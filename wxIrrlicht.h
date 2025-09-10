@@ -551,7 +551,6 @@ class wxIrrlicht : public wxControl {
 
         void UpdateStageSheet();
         void UpdateStageTileSelect();
-        void UpdateStageISOTileSelect();
         void UpdateStageSpritePreview();
 
         std::vector<wxIrrlicht*> shared_control;

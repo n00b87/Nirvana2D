@@ -4944,6 +4944,12 @@ Nirvana_SelectTool_TileSelection wxIrrlicht::getTileMapPositionAt(int x, int y)
     }
 
 
+    Nirvana_SelectTool_TileSelection default_select;
+    default_select.tile_index = -1;
+    default_select.map_tile_pos.set(-1, -1);
+    default_select.box_start_pos.set(-1, -1);
+
+    return default_select;
 }
 
 
@@ -9081,17 +9087,51 @@ void wxIrrlicht::updateStageViewportInfo()
 	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
 	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
 
-	int bx = ( (px+adj_scroll_offset_x) / current_frame_width) *  current_frame_width;
-	int by = ( (py+adj_scroll_offset_y) / current_frame_height) *  current_frame_height;
+	int bx = ( (px+adj_scroll_offset_x) / current_frame_width);
+	int by = ( (py+adj_scroll_offset_y) / current_frame_height);
 
-	int cam_bx = ( (adj_scroll_offset_x) / current_frame_width) *  current_frame_width;
-	int cam_by = ( (adj_scroll_offset_y) / current_frame_height) *  current_frame_height;
+	int cam_bx = ( (adj_scroll_offset_x) / current_frame_width);
+	int cam_by = ( (adj_scroll_offset_y) / current_frame_height);
 
 	m_cameraAbsoluteX_staticText->SetLabelText(wxString::Format(_("%i"), adj_scroll_offset_x));
 	m_cameraAbsoluteY_staticText->SetLabelText(wxString::Format(_("%i"), adj_scroll_offset_y));
 
 	if(mapEdit_layerType == LAYER_TYPE_TILEMAP)
 	{
+		m_cameraTileX_staticText->SetLabelText(wxString::Format(_("%i"), cam_bx) );
+		m_cameraTileY_staticText->SetLabelText(wxString::Format(_("%i"), cam_by) );
+
+		m_stageTileX_staticText->SetLabelText(wxString::Format(_("%i"), bx ));
+		m_stageTileY_staticText->SetLabelText(wxString::Format(_("%i"), by ));
+	}
+	else if(mapEdit_layerType == LAYER_TYPE_ISO_TILEMAP)
+	{
+	    bx = px+adj_scroll_offset_x;
+        by = py+adj_scroll_offset_y;
+
+        cam_bx = adj_scroll_offset_x;
+        cam_by = adj_scroll_offset_y;
+
+        Nirvana_SelectTool_TileSelection iso_mouse_select = getTileMapPositionAt(bx, by);
+        Nirvana_SelectTool_TileSelection iso_cam_select = getTileMapPositionAt(cam_bx, cam_by);
+
+        bx = iso_mouse_select.map_tile_pos.X;
+        by = iso_mouse_select.map_tile_pos.Y;
+
+        if(!iso_mouse_select.use_map2)
+        {
+            bx += 1;
+        }
+
+        cam_bx = iso_cam_select.map_tile_pos.X;
+        cam_by = iso_cam_select.map_tile_pos.Y;
+
+        if(!iso_cam_select.use_map2)
+        {
+            cam_bx += 1;
+        }
+
+
 		m_cameraTileX_staticText->SetLabelText(wxString::Format(_("%i"), cam_bx) );
 		m_cameraTileY_staticText->SetLabelText(wxString::Format(_("%i"), cam_by) );
 
@@ -9708,315 +9748,6 @@ int wxIrrlicht::pointInQuad(double x, double y, double x1, double y1, double x2,
 		return 0;
 }
 
-void wxIrrlicht::UpdateStageISOTileSelect()
-{
-	if(clear_flag)
-	{
-		mapEdit_getContext();
-		setActiveCanvas(sheet_canvas);
-		clearCanvas();
-		clear_flag = false;
-		return;
-	}
-
-	mapEdit_getContext();
-
-	//std::cout << "DEBUG: " << mapEdit_layerType << ", " << current_sheet_image << std::endl;
-
-	if(mapEdit_layerType != LAYER_TYPE_ISO_TILEMAP)
-		return;
-
-	if(current_sheet_image < 0 || current_sheet_image >= image.size())
-		return;
-
-	//std::cout << "DEB2" << std::endl;
-
-	wxMouseState  mouse_state = wxGetMouseState();
-
-	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
-	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
-
-	int pw = this->GetSize().GetWidth();
-	int ph = this->GetSize().GetHeight();
-
-	if(stage_window_isActive)
-	{
-		this->SetFocusFromKbd();
-	}
-
-
-	//setActiveCanvas(sheet_canvas);
-	//clearCanvas();
-
-	if(VIEW_KEY_W)
-	{
-		scroll_offset_y -= scroll_speed;
-	}
-
-	if(VIEW_KEY_A)
-	{
-		scroll_offset_x -= scroll_speed;
-	}
-
-	if(VIEW_KEY_S)
-	{
-		scroll_offset_y += scroll_speed;
-	}
-
-	if(VIEW_KEY_D)
-	{
-		scroll_offset_x += scroll_speed;
-	}
-
-	int bx = ( (px+scroll_offset_x) / current_frame_width) *  current_frame_width;
-	int by = ( (py+scroll_offset_y) / current_frame_height) *  current_frame_height;
-
-	int off_x_i = (int)scroll_offset_x;
-	int off_y_i = (int)scroll_offset_y;
-
-	int select_x = bx - off_x_i;
-	int select_y = by - off_y_i;
-
-	int iso_x = (px % current_frame_width);
-	int iso_y = (py % current_frame_height);
-
-	bool in_tl = pointInQuad(iso_x, iso_y,
-                          -1 * (current_frame_width/2), 0,
-                          0, -1 *(current_frame_height/2),
-                          (current_frame_width/2), 0,
-                          0, (current_frame_height/2) );
-
-    bool in_tr = pointInQuad(iso_x, iso_y,
-                          (current_frame_width/2), 0,
-                          current_frame_width, -1 *(current_frame_height/2),
-                          current_frame_width + (current_frame_width/2), 0,
-                          current_frame_width, (current_frame_height/2));
-
-    bool in_bl = pointInQuad(iso_x, iso_y,
-                          -1 * (current_frame_width/2), current_frame_height,
-                          0, (current_frame_height/2),
-                          (current_frame_width/2), current_frame_height,
-                          0, current_frame_height + (current_frame_height/2) );
-
-    bool in_br = pointInQuad(iso_x, iso_y,
-                          (current_frame_width/2), current_frame_height,
-                          current_frame_width, (current_frame_height/2),
-                          current_frame_width + (current_frame_width/2), current_frame_height,
-                          current_frame_width, current_frame_height + (current_frame_height/2));
-
-    /*if(in_br)
-        std::cout << "BOTTOM RIGHT" << std::endl;
-    else if(in_bl)
-        std::cout << "BOTTOM LEFT" << std::endl;
-    else if(in_tr)
-        std::cout << "TOP RIGHT" << std::endl;
-    else if(in_tl)
-        std::cout << "TOP LEFT" << std::endl;
-    */
-
-	int img_x = -scroll_offset_x;
-	int img_y = -scroll_offset_y;
-	int img_w = 0;
-	int img_h = 0;
-
-	mapEdit_getContext();
-
-	if(!mapEdit_hasContext)
-		return;
-
-	if(imageExists(current_sheet_image))
-	{
-		setActiveCanvas(sheet_canvas);
-		clearCanvas();
-
-		getImageSizeI(current_sheet_image, &img_w, &img_h);
-		irr::core::dimension2du t_size = image[current_sheet_image].image->getSize();
-
-		//m_pDriver->draw2DImage(image[current_sheet_image].image, irr::core::vector2di(0,0));
-		drawImage_BlitEx_SW(current_sheet_image, img_x, img_y, img_w, img_h, 0, 0, img_w, img_h);
-		//drawImage_Rotozoom(current_sheet_image, 0, 0, 0, 1, 1);
-	}
-
-	setActiveCanvas(overlay_canvas);
-	clearCanvas();
-
-	if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
-	{
-		setColor(rgb(255, 0, 0));
-
-		int dw = px - drag_start.x;
-		int dh = py - drag_start.y;
-
-		if(left_drag_init)
-		{
-			int dbx = ( (drag_start.x+scroll_offset_x) / current_frame_width) *  current_frame_width;
-			int dby = ( (drag_start.y+scroll_offset_y) / current_frame_height) *  current_frame_height;
-
-			int d_select_x = dbx - off_x_i;
-			int d_select_y = dby - off_y_i;
-
-			int d_select_w = (( (px+scroll_offset_x) / current_frame_width) *  current_frame_width + current_frame_width) - dbx;
-			int d_select_h = (( (py+scroll_offset_y) / current_frame_height) *  current_frame_height + current_frame_height) - dby;
-			//drawRect(drag_start.x, drag_start.y, dw, dh);
-			drawRect(d_select_x, d_select_y, d_select_w, d_select_h);
-		}
-		else
-			drawRect(select_x, select_y, current_frame_width, current_frame_height);
-
-		//util_draw_cursor(select_x, select_y, irr::video::SColor(255,255,0,0));
-	}
-
-	if(mapEdit_tile_selection.width_in_tiles > 0 && mapEdit_tile_selection.height_in_tiles > 0)
-	{
-		int start_tile = mapEdit_tile_selection.row[0].data[0];
-
-		int selected_tile_x = current_frame_width * (start_tile % (img_w/current_frame_width)) - scroll_offset_x;
-		int selected_tile_y = current_frame_height * (start_tile / (img_w/current_frame_height)) - scroll_offset_y;
-
-		int selected_w = mapEdit_tile_selection.width_in_tiles * current_frame_width;
-		int selected_h = mapEdit_tile_selection.height_in_tiles * current_frame_height;
-
-		setColor(rgb(255, 255, 255));
-		drawRect(selected_tile_x, selected_tile_y, selected_w, selected_h);
-		//drawRect(selected_tile_x, selected_tile_y, current_frame_width, current_frame_height);
-	}
-
-
-	if(mouse_state.LeftIsDown() && stage_window_isActive)
-	{
-        bool init_click = false;
-
-		if(!(middle_drag_init||left_drag_init||right_drag_init))
-		{
-
-			if( px >= 0 && px < pw && py >= 0 && py < ph )
-			{
-				drag_start.x = px;
-				drag_start.y = py;
-
-				mapEdit_tile_selection.row.clear();
-
-				mapEdit_tile_selection.width_in_tiles = 0;
-				mapEdit_tile_selection.height_in_tiles = 0;
-
-				int fx = select_x + scroll_offset_x;
-				int fy = select_y + scroll_offset_y;
-				int fw = img_w;
-				int fh = img_h;
-
-				if(stage_window_isActive)
-				{
-					if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
-						selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
-					else
-						selected_frame = -1;
-				}
-				else
-					selected_frame = -1;
-
-				if(selected_frame >= 0)
-				{
-					selected_tile = selected_frame;
-					selected_tile_end = -1;
-					//tileEdit_mask_set = true;
-					//tileEdit_Sheet_Update = true;
-					//parent_window->UpdateWindowUI();
-				}
-
-				//std::cout << "TEST: " << selected_tile << std::endl;
-
-				left_drag_init = true;
-			}
-		}
-	}
-	else if( ((!mouse_state.LeftIsDown()) || (!stage_window_isActive)) && left_drag_init )
-	{
-		//SHOW_CURSOR;
-		//this->ReleaseMouse();
-		left_drag_init = false;
-
-
-
-		int fx = select_x + scroll_offset_x;
-		int fy = select_y + scroll_offset_y;
-		int fw = img_w;
-		int fh = img_h;
-
-		if(stage_window_isActive)
-		{
-			if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
-				selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
-			else
-				selected_frame = -1;
-		}
-		else
-			selected_frame = -1;
-
-		if(selected_frame < 0)
-		{
-			mapEdit_tile_selection.width_in_tiles = 1;
-			mapEdit_tile_selection.height_in_tiles = 1;
-			Nirvana_TileSelection_Row t_row;
-			t_row.data.push_back(selected_tile);
-			mapEdit_tile_selection.row.push_back(t_row);
-		}
-		else
-		{
-			int d_start_x = (selected_tile % (img_w / current_frame_width)) * current_frame_width;
-			int d_start_y = (selected_tile / (img_w / current_frame_width)) * current_frame_height;
-
-			int d_end_x = (selected_frame % (img_w / current_frame_width)) * current_frame_width;
-			int d_end_y = (selected_frame / (img_w / current_frame_width)) * current_frame_height;
-
-			int rect_x = d_start_x < d_end_x ? d_start_x : d_end_x;
-			int rect_y = d_start_y < d_end_y ? d_start_y : d_end_y;
-
-			int rect_w = d_end_x - d_start_x;
-			if(rect_w < 0)
-				rect_w *= -1;
-			rect_w += current_frame_width;
-
-			int rect_h = d_end_y - d_start_y;
-			if(rect_h < 0)
-				rect_h *= -1;
-			rect_h += current_frame_height;
-
-			int num_rows = rect_h / current_frame_height;
-			int num_cols = rect_w / current_frame_width;
-
-			num_rows = (num_rows <= 0 ? 1 : num_rows);
-			num_cols = (num_cols <= 0 ? 1 : num_cols);
-
-			int fw = img_w / current_frame_width;
-			for(int tr = 0; tr < num_rows; tr++)
-			{
-				Nirvana_TileSelection_Row t_row;
-				int fy = (rect_y + (current_frame_height*tr)) / current_frame_height;
-				for(int tc = 0; tc < num_cols; tc++)
-				{
-					int fx = (rect_x + (current_frame_width*tc)) / current_frame_width;
-					t_row.data.push_back(fy*fw+fx);
-					//std::cout << (fy*fw+fx) << ", ";
-				}
-				//std::cout << std::endl;
-				mapEdit_tile_selection.row.push_back(t_row);
-			}
-
-			mapEdit_tile_selection.width_in_tiles = num_cols;
-			mapEdit_tile_selection.height_in_tiles = num_rows;
-
-			if(stage_edit_control)
-                stage_edit_control->mapEdit_tile_selection = mapEdit_tile_selection;
-
-			//std::cout << std::endl;
-
-			//std::cout << "START_POS: " << start_x << ", " << start_y << std::endl;
-		}
-
-		//wxMessageBox(_("RELEASE"));
-		return;
-	}
-}
 
 void wxIrrlicht::UpdateStageSpritePreview()
 {
