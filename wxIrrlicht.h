@@ -94,6 +94,7 @@ class wxIrrlicht : public wxControl {
         font_obj font[MAX_FONTS];
         int active_font = -1;
         int ui_layer = -1;
+        int grid_layer = -1;
 
         int ui_font1 = -1;
         int ui_font2 = -1;
@@ -449,7 +450,7 @@ class wxIrrlicht : public wxControl {
 
         void StageSheet_DeleteSelectedTileUpdate();
 
-        void updateTileSelectionTilemap();
+        //void updateTileSelectionTilemap();
 
 
 

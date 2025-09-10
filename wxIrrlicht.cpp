@@ -172,6 +172,8 @@ actual_params->WindowId = (HWND)this->GetHandle();
 	back_buffer = createCanvas(t_size_w, t_size_h, 0, 0, parent_window->GetClientSize().GetX(), parent_window->GetClientSize().GetY());
 	ui_layer = createCanvas(t_size_w, t_size_h, 0, 0, parent_window->GetClientSize().GetX(), parent_window->GetClientSize().GetY());
 
+	grid_layer = createCanvas(t_size_w, t_size_h, 0, 0, parent_window->GetClientSize().GetX(), parent_window->GetClientSize().GetY());
+
 	//back_buffer = m_pDriver->addRenderTargetTexture(irr::core::dimension2d<irr::u32>((irr::u32)t_size, (irr::u32)t_size), "rt", ECF_A8R8G8B8);
 	//ui_layer = m_pDriver->addRenderTargetTexture(irr::core::dimension2d<irr::u32>((irr::u32)t_size, (irr::u32)t_size), "rt", ECF_A8R8G8B8);
 
@@ -400,6 +402,7 @@ void wxIrrlicht::OnRender() {
             }
         }
 
+
         //Draw shapes in other layer
         if(selected_stage >= 0 && selected_stage < project->stages.size())
 		{
@@ -440,6 +443,10 @@ void wxIrrlicht::OnRender() {
         irr::core::recti ui_rect( irr::core::position2di(0, 0), irr::core::dimension2du(this->GetSize().GetWidth(), this->GetSize().GetHeight()) );
 		irr::core::vector2d<f32> bb_size(canvas[back_buffer].dimension.Width, canvas[back_buffer].dimension.Height);
 		irr::video::SColor color(canvas[ui_layer].color_mod);
+
+		if(show_grid && control_id == NV_MAP_EDIT_MAP_SHEET)
+            util_draw2DImage2(m_pDriver, canvas[grid_layer].texture, ui_rect, ui_rect, irr::core::position2d<irr::s32>(0, 0), 0, true, color, bb_size );
+
         if(control_id == NV_MAP_EDIT_MAP_SHEET)
 			util_draw2DImage2(m_pDriver, canvas[ui_layer].texture, ui_rect, ui_rect, irr::core::position2d<irr::s32>(0, 0), 0, true, color, bb_size );
 
@@ -817,7 +824,8 @@ void wxIrrlicht::util_drawGrid()
 		return;
 
 	mapEdit_getContext();
-	setActiveCanvas(ui_layer);
+	//setActiveCanvas(grid_layer);
+	//clearCanvas();
 
 	setColor(rgb(grid_color.getRed(),grid_color.getGreen(),grid_color.getBlue()));
 
@@ -886,6 +894,8 @@ void wxIrrlicht::util_drawGrid()
             }
         }
 	}
+
+	setActiveCanvas(ui_layer);
 }
 
 void wxIrrlicht::UpdateSpriteAnimationSheet()
@@ -2231,7 +2241,7 @@ void wxIrrlicht::UpdateTileAnimationSheet()
 	if(tileEdit_selected_sheet_frame >= 0)
 	{
 		int selected_tile_x = current_frame_width * (tileEdit_selected_sheet_frame % (img_w/current_frame_width)) - scroll_offset_x;
-		int selected_tile_y = current_frame_height * (tileEdit_selected_sheet_frame / (img_w/current_frame_height)) - scroll_offset_y;
+		int selected_tile_y = current_frame_height * ((int) (tileEdit_selected_sheet_frame / (img_w/current_frame_width))) - scroll_offset_y;
 
 		setColor(rgb(255, 255, 255));
 		drawRect(selected_tile_x, selected_tile_y, current_frame_width, current_frame_height);
@@ -2565,7 +2575,7 @@ void wxIrrlicht::UpdateTileMask()
 		if(tileEdit_tileMask.tiles[i])
 		{
 			int selected_tile_x = current_frame_width * (i % (img_w/current_frame_width)) - scroll_offset_x;
-			int selected_tile_y = current_frame_height * (i / (img_w/current_frame_height)) - scroll_offset_y;
+			int selected_tile_y = current_frame_height * ((int) (tileEdit_selected_sheet_frame / (img_w/current_frame_width))) - scroll_offset_y;
 
 			setColor(rgb(150, 150, 150));
 			drawRect(selected_tile_x, selected_tile_y, current_frame_width, current_frame_height);
@@ -2764,15 +2774,20 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 			}
 		}
 
+
+		setActiveCanvas(ui_layer);
 		setColor(rgb(255, 0, 0));
 		drawRect(select_x, select_y, num_cols*current_frame_width, num_rows*current_frame_height);
 
+		setActiveCanvas(canvas_index);
 	}
 
 	if(mapEdit_lastAction_erase)
 	{
+	    setActiveCanvas(ui_layer);
 		setColor(rgb(255, 0, 0));
 		drawRect(select_x, select_y, current_frame_width, current_frame_height);
+		setActiveCanvas(canvas_index);
 	}
 
 	if(!stage_window_isActive)
@@ -3069,10 +3084,12 @@ void wxIrrlicht::StageSheet_SetTileUpdate_ISO()
 		int outline_x4 = select_x + (current_frame_width/2) + demo_off_x;
 		int outline_y4 = select_y + current_frame_height + demo_off_y;
 
+		setActiveCanvas(ui_layer);
 		drawLine(outline_x1, outline_y1, outline_x2, outline_y2);
 		drawLine(outline_x2, outline_y2, outline_x3, outline_y3);
 		drawLine(outline_x3, outline_y3, outline_x4, outline_y4);
 		drawLine(outline_x4, outline_y4, outline_x1, outline_y1);
+		setActiveCanvas(canvas_index);
 
 		//drawRect(select_x, select_y, num_cols*current_frame_width, num_rows*current_frame_height);
 
@@ -3386,8 +3403,10 @@ void wxIrrlicht::StageSheet_FillTileUpdate()
 
 	if(mapEdit_lastAction_erase)
 	{
+	    setActiveCanvas(ui_layer);
 		setColor(rgb(255, 0, 0));
 		drawRect(select_x, select_y, current_frame_width, current_frame_height);
+		setActiveCanvas(canvas_index);
 	}
 	else
 	{
@@ -3403,8 +3422,10 @@ void wxIrrlicht::StageSheet_FillTileUpdate()
 			drawImage_Blit(img_id, dst_x, dst_y, src_x, src_y, current_frame_width, current_frame_height);
 		}
 
+		setActiveCanvas(ui_layer);
 		setColor(rgb(255, 0, 0));
 		drawRect(select_x, select_y, current_frame_width, current_frame_height);
+		setActiveCanvas(canvas_index);
 	}
 
 	if(!stage_window_isActive)
@@ -3715,10 +3736,12 @@ void wxIrrlicht::StageSheet_FillTileUpdate_ISO()
 		int outline_x4 = select_x + (current_frame_width/2) + demo_off_x;
 		int outline_y4 = select_y + current_frame_height + demo_off_y;
 
+		setActiveCanvas(ui_layer);
 		drawLine(outline_x1, outline_y1, outline_x2, outline_y2);
 		drawLine(outline_x2, outline_y2, outline_x3, outline_y3);
 		drawLine(outline_x3, outline_y3, outline_x4, outline_y4);
 		drawLine(outline_x4, outline_y4, outline_x1, outline_y1);
+		setActiveCanvas(canvas_index);
 	}
 	else
 	{
@@ -3750,10 +3773,12 @@ void wxIrrlicht::StageSheet_FillTileUpdate_ISO()
 		int outline_x4 = select_x + (current_frame_width/2) + demo_off_x;
 		int outline_y4 = select_y + current_frame_height + demo_off_y;
 
+		setActiveCanvas(ui_layer);
 		drawLine(outline_x1, outline_y1, outline_x2, outline_y2);
 		drawLine(outline_x2, outline_y2, outline_x3, outline_y3);
 		drawLine(outline_x3, outline_y3, outline_x4, outline_y4);
 		drawLine(outline_x4, outline_y4, outline_x1, outline_y1);
+		setActiveCanvas(canvas_index);
 	}
 
 	if(!stage_window_isActive)
@@ -4016,8 +4041,10 @@ void wxIrrlicht::StageSheet_SelectTileUpdate()
 
 	if(stage_window_isActive)
 	{
+	    setActiveCanvas(ui_layer);
 		setColor(rgb(255, 0, 0));
 		drawRect(select_x, select_y, current_frame_width, current_frame_height);
+		setActiveCanvas(canvas_index);
 	}
 
 	if(!stage_window_isActive)
@@ -4235,10 +4262,12 @@ void wxIrrlicht::StageSheet_SelectTileUpdate_ISO()
 		int outline_x4 = select_x + (current_frame_width/2) + demo_off_x;
 		int outline_y4 = select_y + current_frame_height + demo_off_y;
 
+		setActiveCanvas(ui_layer);
 		drawLine(outline_x1, outline_y1, outline_x2, outline_y2);
 		drawLine(outline_x2, outline_y2, outline_x3, outline_y3);
 		drawLine(outline_x3, outline_y3, outline_x4, outline_y4);
 		drawLine(outline_x4, outline_y4, outline_x1, outline_y1);
+		setActiveCanvas(canvas_index);
 	}
 
 	if(!stage_window_isActive)
@@ -4495,12 +4524,14 @@ void wxIrrlicht::StageSheet_BoxSelectTileUpdate()
 		{
 			if(stage_window_isActive && mapEdit_selectTileTool_box.size() > 0)
 			{
+			    setActiveCanvas(ui_layer);
 				setColor(rgb(255, 255, 255));
 				int rect_x = mapEdit_selectTileTool_box[0].box_start_pos.X - adj_scroll_offset_x;
 				int rect_y = mapEdit_selectTileTool_box[0].box_start_pos.Y - adj_scroll_offset_y;
 				int rect_w = (px+adj_scroll_offset_x) - mapEdit_selectTileTool_box[0].box_start_pos.X;
 				int rect_h = (py+adj_scroll_offset_y) - mapEdit_selectTileTool_box[0].box_start_pos.Y;
 				drawRect(rect_x, rect_y, rect_w, rect_h);
+				setActiveCanvas(canvas_index);
 			}
 		}
 	}
@@ -5337,6 +5368,8 @@ void wxIrrlicht::StageSheet_BoxSelectTileUpdate_ISO()
 				line_b.end = lb_end_point;
 				line_c.end = lb_end_point;
 
+
+				setActiveCanvas(ui_layer);
 				//drawLine(line_a.start.X, line_a.start.Y, line_a.end.X, line_a.end.Y);
 				drawLine(line_b.start.X, line_b.start.Y, line_b.end.X, line_b.end.Y);
 				drawLine(line_c.start.X, line_c.start.Y, line_c.end.X, line_c.end.Y);
@@ -5345,6 +5378,7 @@ void wxIrrlicht::StageSheet_BoxSelectTileUpdate_ISO()
 
 				drawLine(line_a.start.X+diff_vec.X, line_a.start.Y+diff_vec.Y, line_a.end.X, line_a.end.Y);
 				drawLine(line_a.start.X+diff_vec.X, line_a.start.Y+diff_vec.Y, line_a.start.X, line_a.start.Y);
+				setActiveCanvas(canvas_index);
 
 			}
 		}
@@ -9095,6 +9129,9 @@ void wxIrrlicht::UpdateStageSheet()
 	setActiveCanvas(ui_layer);
 	clearCanvas();
 
+	setActiveCanvas(grid_layer);
+	clearCanvas();
+
 	setActiveCanvas(sheet_canvas);
 
 	wxMouseState  mouse_state = wxGetMouseState();
@@ -9497,7 +9534,7 @@ void wxIrrlicht::UpdateStageTileSelect()
 		int start_tile = mapEdit_tile_selection.row[0].data[0];
 
 		int selected_tile_x = current_frame_width * (start_tile % (img_w/current_frame_width)) - scroll_offset_x;
-		int selected_tile_y = current_frame_height * (start_tile / (img_w/current_frame_height)) - scroll_offset_y;
+		int selected_tile_y = current_frame_height * ((int) (start_tile / (img_w/current_frame_width))) - scroll_offset_y;
 
 		int selected_w = mapEdit_tile_selection.width_in_tiles * current_frame_width;
 		int selected_h = mapEdit_tile_selection.height_in_tiles * current_frame_height;
