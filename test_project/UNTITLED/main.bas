@@ -18,10 +18,25 @@ Dim camera_position As Nirvana_Vector2D
 'Variable for storing camera move speed
 cam_speed = 4
 
+
 'Exit While Loop when ESCAPE is pressed
-While Not Key(K_ESCAPE)
+While Not Key(K_ESCAPE) And WindowExists()
 	'Get the Current Camera Position
 	camera_position = Nirvana_GetStageOffset()
+	
+	If MouseButton(1) Then
+		
+		While MouseButton(1)
+			Update
+		Wend
+		
+		Dim v As Nirvana_Vector2D 
+		v = Nirvana_GetTileMapPosition(0, MouseX() + camera_position.X, MouseY() + camera_position.Y)
+		Print "V = "; v.X; ", "; v.Y; ": "; Nirvana_GetTile(0, v.X, v.Y)
+		
+		Nirvana_SetTile(0, 0, v.X, v.Y)
+	End If
+		
 	
 	'Move camera position Left or Right when arrow keys are pressed
 	If Key(K_LEFT) Then
