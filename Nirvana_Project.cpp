@@ -1365,6 +1365,39 @@ int Nirvana_Project::loadStage(wxString stage_file)
 					{
 						n_layer.visible = ( p_cmd[i].dict[obj_index].val.compare(_("TRUE"))==0 ? true : false );
 					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("sprite_grid"))==0)
+					{
+						n_layer.spriteGrid_type = ( p_cmd[i].dict[obj_index].val.compare(_("ISOMETRIC"))==0 ? SPRITE_LAYER_GRID_ISOMETRIC : SPRITE_LAYER_GRID_SQUARE );
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("sprite_sort_by"))==0)
+					{
+						n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_NONE;
+
+						if(p_cmd[i].dict[obj_index].val.compare(_("NONE"))==0)
+                        {
+                            n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_NONE;
+                        }
+                        else if(p_cmd[i].dict[obj_index].val.compare(_("LEAST_X"))==0)
+                        {
+                            n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_LEAST_X;
+                        }
+                        else if(p_cmd[i].dict[obj_index].val.compare(_("GREATEST_X"))==0)
+                        {
+                            n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_GREATEST_X;
+                        }
+                        else if(p_cmd[i].dict[obj_index].val.compare(_("LEAST_Y"))==0)
+                        {
+                            n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_LEAST_Y;
+                        }
+                        else if(p_cmd[i].dict[obj_index].val.compare(_("GREATEST_Y"))==0)
+                        {
+                            n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_GREATEST_Y;
+                        }
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("sprite_order"))==0)
+					{
+						n_layer.spriteSortOrder = ( p_cmd[i].dict[obj_index].val.compare(_("DESCENDING"))==0 ? SPRITE_LAYER_ORDER_DESCENDING : SPRITE_LAYER_ORDER_ASCENDING );
+					}
 				}
 
 				layer_index = obj.layers.size();
@@ -1862,6 +1895,9 @@ void Nirvana_Project::addLayer(int stage_index, std::string layer_name, int laye
 	n_layer.layer_map.nv_tileset_index = -1;
 	n_layer.layer_map.tile_map_index = -1;
 	n_layer.layer_map.tile_map.tileset = -1;
+	n_layer.spriteGrid_type = SPRITE_LAYER_GRID_SQUARE;
+	n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_NONE;
+	n_layer.spriteSortOrder = SPRITE_LAYER_ORDER_ASCENDING;
 	n_layer.ref_canvas = -1;
 
 	wxString n_layer_name = wxString(layer_name).Upper().Trim();
@@ -2177,6 +2213,73 @@ int Nirvana_Project::copyLayerSprite(int stage_index, int layer_index, int sprit
 
 	return copy_index;
 }
+
+int Nirvana_Project::getLayerSpriteGridType(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return 0;
+
+	return stages[stage_index].layers[layer_index].spriteGrid_type;
+}
+
+int Nirvana_Project::getLayerSpriteSortBy(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return 0;
+
+	return stages[stage_index].layers[layer_index].spriteSortBy;
+}
+
+int Nirvana_Project::getLayerSpriteSortOrder(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return 0;
+
+	return stages[stage_index].layers[layer_index].spriteSortOrder;
+}
+
+void Nirvana_Project::setLayerSpriteGridType(int stage_index, int layer_index, int grid_type)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers[layer_index].spriteGrid_type = grid_type;
+}
+
+void Nirvana_Project::setLayerSpriteSortBy(int stage_index, int layer_index, int sortBy)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers[layer_index].spriteSortBy = sortBy;
+}
+
+void Nirvana_Project::setLayerSpriteSortOrder(int stage_index, int layer_index, int sortOrder)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers[layer_index].spriteSortOrder = sortOrder;
+}
+
 
 int Nirvana_Project::getLayerSpriteIndex(int stage_index, int layer_index, std::string sprite_name)
 {

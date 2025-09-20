@@ -72,6 +72,12 @@ class Nirvana_Project
 		void setLayerOrder(int stage_index, int layer_index, int new_layer_index);
 		void deleteLayer(int stage_index, int layer_index);
 		int copyLayer(int stage_index, int layer_index);
+		int getLayerSpriteGridType(int stage_index, int layer_index);
+		int getLayerSpriteSortBy(int stage_index, int layer_index);
+		int getLayerSpriteSortOrder(int stage_index, int layer_index);
+		void setLayerSpriteGridType(int stage_index, int layer_index, int grid_type);
+		void setLayerSpriteSortBy(int stage_index, int layer_index, int sortBy);
+		void setLayerSpriteSortOrder(int stage_index, int layer_index, int sortOrder);
 
 		int createShape(int stage_index, int layer_index, int shape_type);
 		bool setShapeName(int stage_index, int layer_index, int shape_index, std::string shape_name);

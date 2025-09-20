@@ -466,6 +466,7 @@ class wxIrrlicht : public wxControl {
 
         void selectTileAt(int x, int y);
         Nirvana_SelectTool_TileSelection getTileMapPositionAt(int x, int y);
+        Nirvana_SelectTool_TileSelection getTileMapPositionAt_NTM(int x, int y);
         void selectISOTilesInBox(bool start_m, int start_x, int start_y, int num_across, int num_down );
 
         void StageSheet_BoxSelectTileUpdate_ISO();
@@ -478,6 +479,10 @@ class wxIrrlicht : public wxControl {
 
 
 
+
+        int sprite_grid_type = 0;
+        int sprite_sort_by = 0;
+        int sprite_order_by = 0;
 
         std::vector<int> pick_sprites;
         void pickSprites(int start_x, int start_y, int end_x, int end_y, bool current_canvas_only=true);

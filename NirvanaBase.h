@@ -31,15 +31,15 @@
 #include <wx/checklst.h>
 #include <wx/textctrl.h>
 #include <wx/spinctrl.h>
+#include <wx/simplebook.h>
+#include <wx/scrolwin.h>
 #include <wx/checkbox.h>
 #include <wx/clrpicker.h>
-#include <wx/scrolwin.h>
 #include <wx/aui/auibook.h>
 #include <wx/listbox.h>
 #include <wx/propgrid/propgrid.h>
 #include <wx/propgrid/advprops.h>
 #include <wx/grid.h>
-#include <wx/simplebook.h>
 #include <wx/splitter.h>
 #include <wx/menu.h>
 #include <wx/toolbar.h>
@@ -122,6 +122,8 @@ class Nirvana_MainFrame : public wxFrame
 		wxBitmapButton* m_bpButton21;
 		wxBitmapButton* m_bpButton22;
 		wxCheckListBox* m_layerVisible_checkList;
+		wxScrolledWindow* m_scrolledWindow2;
+		wxPanel* m_panel60;
 		wxStaticText* m_staticText99;
 		wxStaticText* m_stageLayer_layerType_staticText;
 		wxStaticText* m_staticText48;
@@ -132,6 +134,16 @@ class Nirvana_MainFrame : public wxFrame
 		wxSpinCtrlDouble* m_mapEdit_layerVScroll_spinCtrlDouble;
 		wxStaticText* m_staticText5611;
 		wxSpinCtrl* m_mapEdit_layerAlpha_spinCtrl;
+		wxSimplebook* m_layerSettings_extendSettings_simplebook;
+		wxPanel* m_panel62;
+		wxPanel* m_panel63;
+		wxStaticText* m_staticText114;
+		wxStaticText* m_staticText1031;
+		wxComboBox* m_layerSettings_spriteGridType_comboBox;
+		wxStaticText* m_staticText115;
+		wxComboBox* m_layerSettings_spriteSortBy_comboBox;
+		wxStaticText* m_staticText116;
+		wxComboBox* m_layerSettings_spriteOrderBy_comboBox;
 		wxScrolledWindow* m_scrolledWindow1;
 		wxPanel* m_panel57;
 		wxStaticText* m_staticText991;
@@ -379,6 +391,9 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnMapEdit_LayerHScroll( wxSpinDoubleEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_LayerVScroll( wxSpinDoubleEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_LayerAlpha( wxSpinEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteGridType( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteSortBy( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteOrderBy( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEditSettings_ShowShapes_Checked( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEditSettings_ShowGrid_Checked( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEditSettings_GridColor_Change( wxColourPickerEvent& event ) { event.Skip(); }
@@ -492,7 +507,7 @@ class Nirvana_MainFrame : public wxFrame
 
 	public:
 
-		Nirvana_MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Nirvana2D"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1219,720 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
+		Nirvana_MainFrame( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Nirvana"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 1219,720 ), long style = wxDEFAULT_FRAME_STYLE|wxTAB_TRAVERSAL );
 
 		~Nirvana_MainFrame();
 
@@ -870,6 +885,34 @@ class SetCamera_Dialog : public wxDialog
 		SetCamera_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Set Camera View"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 381,124 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~SetCamera_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class SpriteSortSetting_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class SpriteSortSetting_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText110;
+		wxStaticText* m_layerName_staticText;
+		wxStaticText* m_staticText111;
+		wxComboBox* m_sortOption_comboBox;
+		wxButton* m_button34;
+		wxButton* m_button33;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSet( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		SpriteSortSetting_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Sprite Render Priority"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 534,191 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~SpriteSortSetting_Dialog();
 
 };
 

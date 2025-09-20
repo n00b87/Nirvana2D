@@ -426,17 +426,23 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_layerVisible_checkList = new wxCheckListBox( m_panel40, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_layerVisible_checkListChoices, 0 );
 	bSizer124->Add( m_layerVisible_checkList, 1, wxALL|wxEXPAND, 5 );
 
+	m_scrolledWindow2 = new wxScrolledWindow( m_panel40, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
+	m_scrolledWindow2->SetScrollRate( 5, 5 );
+	wxBoxSizer* bSizer194;
+	bSizer194 = new wxBoxSizer( wxVERTICAL );
+
+	m_panel60 = new wxPanel( m_scrolledWindow2, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer125;
 	bSizer125 = new wxBoxSizer( wxVERTICAL );
 
 	wxBoxSizer* bSizer1761;
 	bSizer1761 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText99 = new wxStaticText( m_panel40, wxID_ANY, _("Type:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText99 = new wxStaticText( m_panel60, wxID_ANY, _("Type:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText99->Wrap( -1 );
 	bSizer1761->Add( m_staticText99, 1, wxALL, 5 );
 
-	m_stageLayer_layerType_staticText = new wxStaticText( m_panel40, wxID_ANY, _("[NA]"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_stageLayer_layerType_staticText = new wxStaticText( m_panel60, wxID_ANY, _("[NA]"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_stageLayer_layerType_staticText->Wrap( -1 );
 	bSizer1761->Add( m_stageLayer_layerType_staticText, 3, wxALL, 5 );
 
@@ -449,11 +455,11 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer111;
 	bSizer111 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText48 = new wxStaticText( m_panel40, wxID_ANY, _("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText48 = new wxStaticText( m_panel60, wxID_ANY, _("Name:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText48->Wrap( -1 );
 	bSizer111->Add( m_staticText48, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_layerName_textCtrl = new wxTextCtrl( m_panel40, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	m_layerName_textCtrl = new wxTextCtrl( m_panel60, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
 	bSizer111->Add( m_layerName_textCtrl, 3, wxALL, 5 );
 
 
@@ -465,11 +471,11 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer126;
 	bSizer126 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText56 = new wxStaticText( m_panel40, wxID_ANY, _("H Scroll:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText56 = new wxStaticText( m_panel60, wxID_ANY, _("H Scroll:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText56->Wrap( -1 );
 	bSizer126->Add( m_staticText56, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_mapEdit_layerHScroll_spinCtrlDouble = new wxSpinCtrlDouble( m_panel40, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000, 0, 0.1 );
+	m_mapEdit_layerHScroll_spinCtrlDouble = new wxSpinCtrlDouble( m_panel60, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000, 0, 0.1 );
 	m_mapEdit_layerHScroll_spinCtrlDouble->SetDigits( 2 );
 	bSizer126->Add( m_mapEdit_layerHScroll_spinCtrlDouble, 3, wxALL, 5 );
 
@@ -479,11 +485,11 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer1261;
 	bSizer1261 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText561 = new wxStaticText( m_panel40, wxID_ANY, _("V Scroll:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText561 = new wxStaticText( m_panel60, wxID_ANY, _("V Scroll:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText561->Wrap( -1 );
 	bSizer1261->Add( m_staticText561, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_mapEdit_layerVScroll_spinCtrlDouble = new wxSpinCtrlDouble( m_panel40, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000, 0, 0.1 );
+	m_mapEdit_layerVScroll_spinCtrlDouble = new wxSpinCtrlDouble( m_panel60, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000, 0, 0.1 );
 	m_mapEdit_layerVScroll_spinCtrlDouble->SetDigits( 2 );
 	bSizer1261->Add( m_mapEdit_layerVScroll_spinCtrlDouble, 3, wxALL, 5 );
 
@@ -493,18 +499,112 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer12611;
 	bSizer12611 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText5611 = new wxStaticText( m_panel40, wxID_ANY, _("Alpha:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText5611 = new wxStaticText( m_panel60, wxID_ANY, _("Alpha:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText5611->Wrap( -1 );
 	bSizer12611->Add( m_staticText5611, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_mapEdit_layerAlpha_spinCtrl = new wxSpinCtrl( m_panel40, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 255, 0 );
+	m_mapEdit_layerAlpha_spinCtrl = new wxSpinCtrl( m_panel60, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 255, 0 );
 	bSizer12611->Add( m_mapEdit_layerAlpha_spinCtrl, 3, wxALL, 5 );
 
 
 	bSizer125->Add( bSizer12611, 0, wxEXPAND, 5 );
 
+	wxBoxSizer* bSizer197;
+	bSizer197 = new wxBoxSizer( wxVERTICAL );
 
-	bSizer124->Add( bSizer125, 1, wxEXPAND, 5 );
+	m_layerSettings_extendSettings_simplebook = new wxSimplebook( m_panel60, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_panel62 = new wxPanel( m_layerSettings_extendSettings_simplebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_layerSettings_extendSettings_simplebook->AddPage( m_panel62, _("a page"), false );
+	m_panel63 = new wxPanel( m_layerSettings_extendSettings_simplebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE|wxTAB_TRAVERSAL );
+	m_panel63->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_GRAYTEXT ) );
+
+	wxBoxSizer* bSizer198;
+	bSizer198 = new wxBoxSizer( wxVERTICAL );
+
+	wxBoxSizer* bSizer199;
+	bSizer199 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText114 = new wxStaticText( m_panel63, wxID_ANY, _("Sprite Layer Properties"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText114->Wrap( -1 );
+	m_staticText114->SetFont( wxFont( wxNORMAL_FONT->GetPointSize(), wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, true, wxEmptyString ) );
+	m_staticText114->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer199->Add( m_staticText114, 0, wxALL, 5 );
+
+
+	bSizer198->Add( bSizer199, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer1832;
+	bSizer1832 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText1031 = new wxStaticText( m_panel63, wxID_ANY, _("Sprite Grid:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText1031->Wrap( -1 );
+	m_staticText1031->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer1832->Add( m_staticText1031, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_layerSettings_spriteGridType_comboBox = new wxComboBox( m_panel63, wxID_ANY, _("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	bSizer1832->Add( m_layerSettings_spriteGridType_comboBox, 2, wxALL, 5 );
+
+
+	bSizer198->Add( bSizer1832, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer200;
+	bSizer200 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText115 = new wxStaticText( m_panel63, wxID_ANY, _("Sort By:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText115->Wrap( -1 );
+	m_staticText115->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer200->Add( m_staticText115, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_layerSettings_spriteSortBy_comboBox = new wxComboBox( m_panel63, wxID_ANY, _("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	m_layerSettings_spriteSortBy_comboBox->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer200->Add( m_layerSettings_spriteSortBy_comboBox, 2, wxALL, 5 );
+
+
+	bSizer198->Add( bSizer200, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer1981;
+	bSizer1981 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText116 = new wxStaticText( m_panel63, wxID_ANY, _("Order:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText116->Wrap( -1 );
+	m_staticText116->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer1981->Add( m_staticText116, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_layerSettings_spriteOrderBy_comboBox = new wxComboBox( m_panel63, wxID_ANY, _("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	m_layerSettings_spriteOrderBy_comboBox->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer1981->Add( m_layerSettings_spriteOrderBy_comboBox, 2, wxALL, 5 );
+
+
+	bSizer198->Add( bSizer1981, 0, wxEXPAND, 5 );
+
+
+	m_panel63->SetSizer( bSizer198 );
+	m_panel63->Layout();
+	bSizer198->Fit( m_panel63 );
+	m_layerSettings_extendSettings_simplebook->AddPage( m_panel63, _("a page"), false );
+
+	bSizer197->Add( m_layerSettings_extendSettings_simplebook, 1, wxEXPAND | wxALL, 5 );
+
+
+	bSizer125->Add( bSizer197, 1, wxEXPAND, 5 );
+
+
+	m_panel60->SetSizer( bSizer125 );
+	m_panel60->Layout();
+	bSizer125->Fit( m_panel60 );
+	bSizer194->Add( m_panel60, 1, wxEXPAND | wxALL, 5 );
+
+
+	m_scrolledWindow2->SetSizer( bSizer194 );
+	m_scrolledWindow2->Layout();
+	bSizer194->Fit( m_scrolledWindow2 );
+	bSizer124->Add( m_scrolledWindow2, 1, wxEXPAND | wxALL, 5 );
 
 
 	bSizer871->Add( bSizer124, 1, wxEXPAND, 5 );
@@ -579,7 +679,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer183->Add( m_mapEdit_gridColor_colourPicker, 2, wxALL, 5 );
 
 
-	bSizer177->Add( bSizer183, 1, wxEXPAND, 5 );
+	bSizer177->Add( bSizer183, 0, wxEXPAND, 5 );
 
 
 	m_panel57->SetSizer( bSizer177 );
@@ -1923,6 +2023,9 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_layerHScroll_spinCtrlDouble->Connect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( Nirvana_MainFrame::OnMapEdit_LayerHScroll ), NULL, this );
 	m_mapEdit_layerVScroll_spinCtrlDouble->Connect( wxEVT_COMMAND_SPINCTRLDOUBLE_UPDATED, wxSpinDoubleEventHandler( Nirvana_MainFrame::OnMapEdit_LayerVScroll ), NULL, this );
 	m_mapEdit_layerAlpha_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnMapEdit_LayerAlpha ), NULL, this );
+	m_layerSettings_spriteGridType_comboBox->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_SpriteGridType ), NULL, this );
+	m_layerSettings_spriteSortBy_comboBox->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_SpriteSortBy ), NULL, this );
+	m_layerSettings_spriteOrderBy_comboBox->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_SpriteOrderBy ), NULL, this );
 	m_mapEdit_showShapes_checkBox->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEditSettings_ShowShapes_Checked ), NULL, this );
 	m_mapEdit_showGrid_checkBox->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEditSettings_ShowGrid_Checked ), NULL, this );
 	m_mapEdit_gridColor_colourPicker->Connect( wxEVT_COMMAND_COLOURPICKER_CHANGED, wxColourPickerEventHandler( Nirvana_MainFrame::OnMapEditSettings_GridColor_Change ), NULL, this );
@@ -3008,5 +3111,72 @@ SetCamera_Dialog::SetCamera_Dialog( wxWindow* parent, wxWindowID id, const wxStr
 }
 
 SetCamera_Dialog::~SetCamera_Dialog()
+{
+}
+
+SpriteSortSetting_Dialog::SpriteSortSetting_Dialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer188;
+	bSizer188 = new wxBoxSizer( wxVERTICAL );
+
+	wxBoxSizer* bSizer189;
+	bSizer189 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText110 = new wxStaticText( this, wxID_ANY, _("Layer Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText110->Wrap( -1 );
+	bSizer189->Add( m_staticText110, 1, wxALL, 5 );
+
+	m_layerName_staticText = new wxStaticText( this, wxID_ANY, _("MyLabel"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_layerName_staticText->Wrap( -1 );
+	bSizer189->Add( m_layerName_staticText, 4, wxALL, 5 );
+
+
+	bSizer188->Add( bSizer189, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer190;
+	bSizer190 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText111 = new wxStaticText( this, wxID_ANY, _("Sort By:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText111->Wrap( -1 );
+	bSizer190->Add( m_staticText111, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_sortOption_comboBox = new wxComboBox( this, wxID_ANY, _("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	bSizer190->Add( m_sortOption_comboBox, 4, wxALL, 5 );
+
+
+	bSizer188->Add( bSizer190, 0, wxEXPAND, 5 );
+
+
+	bSizer188->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer192;
+	bSizer192 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer192->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_button34 = new wxButton( this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer192->Add( m_button34, 0, wxALL, 5 );
+
+	m_button33 = new wxButton( this, wxID_ANY, _("Set"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer192->Add( m_button33, 0, wxALL, 5 );
+
+
+	bSizer188->Add( bSizer192, 0, wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer188 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_button34->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteSortSetting_Dialog::OnCancel ), NULL, this );
+	m_button33->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteSortSetting_Dialog::OnSet ), NULL, this );
+}
+
+SpriteSortSetting_Dialog::~SpriteSortSetting_Dialog()
 {
 }

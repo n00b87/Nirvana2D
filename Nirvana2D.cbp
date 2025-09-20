@@ -68,6 +68,8 @@
 		<Unit filename="NirvanaEditor_NewTileset_Dialog.h" />
 		<Unit filename="NirvanaEditor_SetCamera_Dialog.cpp" />
 		<Unit filename="NirvanaEditor_SetCamera_Dialog.h" />
+		<Unit filename="NirvanaEditor_SpriteSortSetting_Dialog.cpp" />
+		<Unit filename="NirvanaEditor_SpriteSortSetting_Dialog.h" />
 		<Unit filename="NirvanaEditor_StageProperties_Dialog.cpp" />
 		<Unit filename="NirvanaEditor_StageProperties_Dialog.h" />
 		<Unit filename="NirvanaEngine_Structs.h" />

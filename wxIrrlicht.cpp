@@ -846,7 +846,8 @@ void wxIrrlicht::util_drawGrid()
 
 	//std::cout << "GRID DBG: " << start_x << ", " << start_y << ", " << pw << ", " << ph << ", " << project->stages[selected_stage].tile_width << ", " << project->stages[selected_stage].tile_height << std::endl;
 
-	if(project->stages[selected_stage].layers[selected_layer].layer_type == LAYER_TYPE_ISO_TILEMAP)
+	if(project->stages[selected_stage].layers[selected_layer].layer_type == LAYER_TYPE_ISO_TILEMAP ||
+       (project->stages[selected_stage].layers[selected_layer].layer_type == LAYER_TYPE_SPRITE && sprite_grid_type == SPRITE_LAYER_GRID_ISOMETRIC) )
     {
         int tile_w = project->stages[selected_stage].tile_width;
         int tile_h = project->stages[selected_stage].tile_height;
@@ -4953,6 +4954,124 @@ Nirvana_SelectTool_TileSelection wxIrrlicht::getTileMapPositionAt(int x, int y)
 }
 
 
+Nirvana_SelectTool_TileSelection wxIrrlicht::getTileMapPositionAt_NTM(int x, int y)
+{
+    if(x < 0 || y < 0 )
+    {
+        Nirvana_SelectTool_TileSelection default_select;
+        default_select.tile_index = -1;
+        default_select.map_tile_pos.set(-1, -1);
+        default_select.box_start_pos.set(-1, -1);
+
+        return default_select;
+    }
+
+	int px = x;
+	int py = y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = 0; //scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = 0; //scroll_speed_y * scroll_offset_y;
+
+	int bx = ( (px+adj_scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+adj_scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)adj_scroll_offset_x;
+	int off_y_i = (int)adj_scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+
+	int iso_x = ((px+adj_scroll_offset_x) % current_frame_width);
+	int iso_y = ((py+adj_scroll_offset_y) % current_frame_height);
+
+	bool in_tl = pointInQuad(iso_x, iso_y,
+                          -1 * (current_frame_width/2), 0,
+                          0, -1 *(current_frame_height/2),
+                          (current_frame_width/2), 0,
+                          0, (current_frame_height/2) );
+
+    bool in_tr = pointInQuad(iso_x, iso_y,
+                          (current_frame_width/2), 0,
+                          current_frame_width, -1 *(current_frame_height/2),
+                          current_frame_width + (current_frame_width/2), 0,
+                          current_frame_width, (current_frame_height/2));
+
+    bool in_bl = pointInQuad(iso_x, iso_y,
+                          -1 * (current_frame_width/2), current_frame_height,
+                          0, (current_frame_height/2),
+                          (current_frame_width/2), current_frame_height,
+                          0, current_frame_height + (current_frame_height/2) );
+
+    bool in_br = pointInQuad(iso_x, iso_y,
+                          (current_frame_width/2), current_frame_height,
+                          current_frame_width, (current_frame_height/2),
+                          current_frame_width + (current_frame_width/2), current_frame_height,
+                          current_frame_width, current_frame_height + (current_frame_height/2));
+
+    bool use_map2 = (in_bl || in_br || in_tl || in_tr);
+
+    int tbx = ( (px+adj_scroll_offset_x) / current_frame_width);
+    int tby = ( (py+adj_scroll_offset_y) / current_frame_height);
+
+    int tmap_x = tbx;
+    int tmap_y = tby;
+
+    if(in_tl)
+    {
+        //do nothing for top left since it will be the same coordinate as tmap 1
+    }
+    else if(in_tr)
+    {
+        tmap_x += 1;
+    }
+    else if(in_bl)
+    {
+        tmap_y += 1;
+    }
+    else if(in_br)
+    {
+        tmap_x += 1;
+        tmap_y += 1;
+    }
+
+    if(in_tl || in_tr || in_bl || in_br)
+    {
+        Nirvana_SelectTool_TileSelection t_select;
+        t_select.tile_index = -1;
+        t_select.map_tile_pos.set(tmap_x, tmap_y);
+        t_select.use_map2 = true;
+
+        return t_select;
+
+    }
+    else
+    {
+        Nirvana_SelectTool_TileSelection t_select;
+        t_select.tile_index = -1;
+        t_select.map_tile_pos.set(tmap_x, tmap_y);
+        t_select.use_map2 = false;
+
+        return t_select;
+    }
+
+
+    Nirvana_SelectTool_TileSelection default_select;
+    default_select.tile_index = -1;
+    default_select.map_tile_pos.set(-1, -1);
+    default_select.box_start_pos.set(-1, -1);
+
+    return default_select;
+}
+
+
 void wxIrrlicht::selectISOTilesInBox(bool start_m, int start_x, int start_y, int num_across, int num_down )
 {
     irr::core::vector2df tile_size(current_frame_width/2, current_frame_height/2);
@@ -7640,19 +7759,50 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 
 			//std::cout << "MOVE: " << move_x << ", " << move_y << std::endl;
 
-			for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+			if(move_x != 0 || move_y != 0)
 			{
-				int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
-				int spr_x = mapEdit_selectSpriteTool_selection[i].start_pos.X + move_x;
-				int spr_y = mapEdit_selectSpriteTool_selection[i].start_pos.Y + move_y;
+			    for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+                {
+                    int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
+                    int spr_x = mapEdit_selectSpriteTool_selection[i].start_pos.X + move_x;
+                    int spr_y = mapEdit_selectSpriteTool_selection[i].start_pos.Y + move_y;
 
-				if(tile_snap)
-				{
-					spr_x = (spr_x/current_frame_width)*current_frame_width;
-					spr_y = (spr_y/current_frame_height)*current_frame_height;
-				}
+                    if(tile_snap)
+                    {
+                        if(sprite_grid_type == SPRITE_LAYER_GRID_ISOMETRIC)
+                        {
+                            Nirvana_SelectTool_TileSelection iso_sprite_selection = getTileMapPositionAt_NTM(spr_x, spr_y);
+                            spr_x = iso_sprite_selection.map_tile_pos.X;
+                            spr_y = iso_sprite_selection.map_tile_pos.Y;
 
-				setSpritePosition(sprite_index, spr_x, spr_y);
+                            //std::cout << "map tile pos : " << spr_x << ", " << spr_y << std::endl;
+
+                            if(spr_x < 0 || spr_y < 0)
+                            {
+                                spr_x = 0;
+                                spr_y = 0;
+                            }
+
+                            if(iso_sprite_selection.use_map2)
+                            {
+                                spr_x = (spr_x * current_frame_width) - (current_frame_width/2);
+                                spr_y = (spr_y * current_frame_height) - (current_frame_height/2);
+                            }
+                            else
+                            {
+                                spr_x = spr_x * current_frame_width;
+                                spr_y = spr_y * current_frame_height;
+                            }
+                        }
+                        else
+                        {
+                            spr_x = (spr_x/current_frame_width)*current_frame_width;
+                            spr_y = (spr_y/current_frame_height)*current_frame_height;
+                        }
+                    }
+
+                    setSpritePosition(sprite_index, spr_x, spr_y);
+                }
 			}
 
 			map_sprite_pos_changed = true;
@@ -12639,9 +12789,208 @@ void wxIrrlicht::util_drawSprites(int canvas_id)
 
 	//std::cout << "DG: " << canvas[canvas_id].sprite_id.size() << " ~ " << sprite.size() << std::endl;
 
-	for(int spr_index = 0; spr_index < canvas[canvas_id].sprite_id.size(); spr_index++)
+	irr::core::array<irr::s32> sorted_sprites(canvas[canvas_id].sprite_id.size());
+
+	sorted_sprites.clear();
+    for(int spr_index = 0; spr_index < canvas[canvas_id].sprite_id.size(); spr_index++)
+    {
+        sorted_sprites.push_back(canvas[canvas_id].sprite_id[spr_index]);
+    }
+
+    int layer_index = -1;
+
+    for(int i = 0; i < project->getStageNumLayers(selected_stage); i++)
+    {
+        if(project->stages[selected_stage].layers[i].ref_canvas == canvas_id)
+        {
+            layer_index = i;
+            break;
+        }
+    }
+
+    int layer_sprite_sort_by = project->getLayerSpriteSortBy(selected_stage, layer_index);
+    int layer_sprite_order_by = project->getLayerSpriteSortOrder(selected_stage, layer_index);
+
+	switch(layer_sprite_sort_by)
 	{
-		int spr_id = canvas[canvas_id].sprite_id[spr_index];
+        case SPRITE_LAYER_SORT_BY_NONE:
+        {
+        }
+        break;
+
+        case SPRITE_LAYER_SORT_BY_LEAST_X:
+        {
+            if(layer_sprite_order_by == SPRITE_LAYER_ORDER_ASCENDING)
+            {
+                for(int a = 0; a < sorted_sprites.size(); a++)
+                {
+                    for(int b = (a + 1); b < sorted_sprites.size(); b++)
+                    {
+                        int a_index = sorted_sprites[a];
+                        int b_index = sorted_sprites[b];
+
+                        if(sprite[b_index].position.X < sprite[a_index].position.X)
+                        {
+                            sorted_sprites[a] = b_index;
+                            sorted_sprites[b] = a_index;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for(int a = 0; a < sorted_sprites.size(); a++)
+                {
+                    for(int b = (a + 1); b < sorted_sprites.size(); b++)
+                    {
+                        int a_index = sorted_sprites[a];
+                        int b_index = sorted_sprites[b];
+
+                        if(sprite[b_index].position.X > sprite[a_index].position.X)
+                        {
+                            sorted_sprites[a] = b_index;
+                            sorted_sprites[b] = a_index;
+                        }
+                    }
+                }
+            }
+        }
+        break;
+
+        case SPRITE_LAYER_SORT_BY_GREATEST_X:
+        {
+            if(layer_sprite_order_by == SPRITE_LAYER_ORDER_ASCENDING)
+            {
+                for(int a = 0; a < sorted_sprites.size(); a++)
+                {
+                    for(int b = (a + 1); b < sorted_sprites.size(); b++)
+                    {
+                        int a_index = sorted_sprites[a];
+                        int b_index = sorted_sprites[b];
+
+                        int a_great_x = sprite[a_index].position.X + (sprite[a_index].frame_size.Width * sprite[a_index].scale.X);
+                        int b_great_x = sprite[b_index].position.X + (sprite[b_index].frame_size.Width * sprite[b_index].scale.X);
+
+                        if(b_great_x < a_great_x)
+                        {
+                            sorted_sprites[a] = b_index;
+                            sorted_sprites[b] = a_index;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for(int a = 0; a < sorted_sprites.size(); a++)
+                {
+                    for(int b = (a + 1); b < sorted_sprites.size(); b++)
+                    {
+                        int a_index = sorted_sprites[a];
+                        int b_index = sorted_sprites[b];
+
+                        int a_great_x = sprite[a_index].position.X + (sprite[a_index].frame_size.Width * sprite[a_index].scale.X);
+                        int b_great_x = sprite[b_index].position.X + (sprite[b_index].frame_size.Width * sprite[b_index].scale.X);
+
+                        if(b_great_x > a_great_x)
+                        {
+                            sorted_sprites[a] = b_index;
+                            sorted_sprites[b] = a_index;
+                        }
+                    }
+                }
+            }
+        }
+        break;
+
+        case SPRITE_LAYER_SORT_BY_LEAST_Y:
+        {
+            if(layer_sprite_order_by == SPRITE_LAYER_ORDER_ASCENDING)
+            {
+                for(int a = 0; a < sorted_sprites.size(); a++)
+                {
+                    for(int b = (a + 1); b < sorted_sprites.size(); b++)
+                    {
+                        int a_index = sorted_sprites[a];
+                        int b_index = sorted_sprites[b];
+
+                        if(sprite[b_index].position.Y < sprite[a_index].position.Y)
+                        {
+                            sorted_sprites[a] = b_index;
+                            sorted_sprites[b] = a_index;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for(int a = 0; a < sorted_sprites.size(); a++)
+                {
+                    for(int b = (a + 1); b < sorted_sprites.size(); b++)
+                    {
+                        int a_index = sorted_sprites[a];
+                        int b_index = sorted_sprites[b];
+
+                        if(sprite[b_index].position.Y > sprite[a_index].position.Y)
+                        {
+                            sorted_sprites[a] = b_index;
+                            sorted_sprites[b] = a_index;
+                        }
+                    }
+                }
+            }
+        }
+        break;
+
+        case SPRITE_LAYER_SORT_BY_GREATEST_Y:
+        {
+            if(layer_sprite_order_by == SPRITE_LAYER_ORDER_ASCENDING)
+            {
+                for(int a = 0; a < sorted_sprites.size(); a++)
+                {
+                    for(int b = (a + 1); b < sorted_sprites.size(); b++)
+                    {
+                        int a_index = sorted_sprites[a];
+                        int b_index = sorted_sprites[b];
+
+                        int a_great_y = sprite[a_index].position.Y + (sprite[a_index].frame_size.Height * sprite[a_index].scale.Y);
+                        int b_great_y = sprite[b_index].position.Y + (sprite[b_index].frame_size.Height * sprite[b_index].scale.Y);
+
+                        if(b_great_y < a_great_y)
+                        {
+                            sorted_sprites[a] = b_index;
+                            sorted_sprites[b] = a_index;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for(int a = 0; a < sorted_sprites.size(); a++)
+                {
+                    for(int b = (a + 1); b < sorted_sprites.size(); b++)
+                    {
+                        int a_index = sorted_sprites[a];
+                        int b_index = sorted_sprites[b];
+
+                        int a_great_y = sprite[a_index].position.Y + (sprite[a_index].frame_size.Height * sprite[a_index].scale.Y);
+                        int b_great_y = sprite[b_index].position.Y + (sprite[b_index].frame_size.Height * sprite[b_index].scale.Y);
+
+                        if(b_great_y > a_great_y)
+                        {
+                            sorted_sprites[a] = b_index;
+                            sorted_sprites[b] = a_index;
+                        }
+                    }
+                }
+            }
+        }
+        break;
+
+	}
+
+	for(int spr_index = 0; spr_index < sorted_sprites.size(); spr_index++)
+	{
+		int spr_id = sorted_sprites[spr_index];
 
 		sprite2D_obj* n_sprite = &sprite[spr_id];
 
@@ -13626,7 +13975,10 @@ void wxIrrlicht::resizeLayers()
 			int canvas_id = project->stages[selected_stage].layers[layer_index].ref_canvas;
 
 			if(canvas_id >= 0 && canvas_id < canvas.size())
-				canvas[canvas_id].visible = project->stages[selected_stage].layers[layer_index].visible;
+            {
+                canvas[canvas_id].visible = project->stages[selected_stage].layers[layer_index].visible;
+                canvas[canvas_id].layer_index = layer_index;
+            }
 
 			if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_TILEMAP || project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_ISO_TILEMAP)
 			{
@@ -13682,7 +14034,10 @@ void wxIrrlicht::resizeLayers()
 			int canvas_id = project->stages[selected_stage].layers[layer_index].ref_canvas;
 
 			if(canvas_id >= 0 && canvas_id < canvas.size())
-				canvas[canvas_id].visible = project->stages[selected_stage].layers[layer_index].visible;
+            {
+                canvas[canvas_id].visible = project->stages[selected_stage].layers[layer_index].visible;
+                canvas[canvas_id].layer_index = layer_index;
+            }
 
 			for(int spr_index = 0; spr_index < project->stages[selected_stage].layers[layer_index].layer_sprites.size(); spr_index++)
 			{

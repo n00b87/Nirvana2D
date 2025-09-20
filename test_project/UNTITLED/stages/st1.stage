@@ -77,9 +77,15 @@ ROW value=-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-
 ROW value=-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1;
 END_TILEMAP;
 
-LAYER name="sprite_layer1" type=LAYER_TYPE_SPRITE scroll_speed=1,1 alpha=255 visible=TRUE;
+LAYER name="sprite_layer1" type=LAYER_TYPE_SPRITE scroll_speed=1,1 alpha=255 sprite_grid=ISOMETRIC sprite_sort_by=GREATEST_Y sprite_order=DESCENDING visible=TRUE;
 SPRITE name="g1" base="grz" type=SPRITE_TYPE_STATIC position=108,417 scale=1,1 rotation=228.829 alpha=255 animation="Walk_Left" visible=TRUE;
 SPRITE name="c1" base="chr" type=SPRITE_TYPE_DYNAMIC position=944,369 scale=1,1 rotation=0 alpha=255 animation="SPRITE_BASE_ANIMATION" visible=TRUE;
+SPRITE name="G1_1" base="grz" type=SPRITE_TYPE_STATIC position=86,422 scale=1,1 rotation=331.669 alpha=255 animation="Walk_Left" visible=TRUE;
+SPRITE name="G1_1_1" base="grz" type=SPRITE_TYPE_STATIC position=57,413 scale=1,1 rotation=54.021 alpha=255 animation="Walk_Left" visible=TRUE;
+SPRITE name="C1_1" base="chr" type=SPRITE_TYPE_DYNAMIC position=1040,457 scale=1,1 rotation=0 alpha=255 animation="SPRITE_BASE_ANIMATION" visible=TRUE;
+SPRITE name="C1_1_1" base="chr" type=SPRITE_TYPE_DYNAMIC position=1136,546 scale=1,1 rotation=0 alpha=255 animation="SPRITE_BASE_ANIMATION" visible=TRUE;
+SPRITE name="C1_1_1_1" base="chr" type=SPRITE_TYPE_DYNAMIC position=991,415 scale=1,1 rotation=0 alpha=255 animation="SPRITE_BASE_ANIMATION" visible=TRUE;
+SPRITE name="C1_1_1_1_1" base="chr" type=SPRITE_TYPE_DYNAMIC position=1089,503 scale=1,1 rotation=0 alpha=255 animation="SPRITE_BASE_ANIMATION" visible=TRUE;
 SHAPE name="POLYGON_1" type=SPRITE_SHAPE_POLYGON point=671,242 point=548,340 point=683,450 point=792,345 ;
 SHAPE name="CHAIN_1" type=SPRITE_SHAPE_CHAIN point=637,382 point=614,302 point=668,346 point=724,297 point=696,378 ;
 SHAPE name="BOX_1" type=SPRITE_SHAPE_BOX point=571,476 size=233,40 ;
@@ -160,6 +166,6 @@ ROW value=-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-
 ROW value=-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1;
 END_TILEMAP;
 
-LAYER name="sprite_layer2" type=LAYER_TYPE_SPRITE scroll_speed=1,1 alpha=255 visible=TRUE;
+LAYER name="sprite_layer2" type=LAYER_TYPE_SPRITE scroll_speed=1,1 alpha=255 sprite_grid=SQUARE sprite_sort_by=NONE sprite_order=ASCENDING visible=TRUE;
 SPRITE name="guy1" base="gren_guy" type=SPRITE_TYPE_DYNAMIC position=559,446 scale=1,1 rotation=360 alpha=180 animation="SPRITE_BASE_ANIMATION" visible=TRUE;
 

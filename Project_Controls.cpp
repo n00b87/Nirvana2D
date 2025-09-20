@@ -775,6 +775,46 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 
 				stage_file.Write(_("alpha=") + wxString::Format(_("%i"), project->stages[i].layers[layer_index].layer_alpha) + _(" "));
 
+				if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_SPRITE)
+				{
+				    stage_file.Write(_("sprite_grid=") + (project->stages[i].layers[layer_index].spriteGrid_type == SPRITE_LAYER_GRID_ISOMETRIC ? _("ISOMETRIC") : _("SQUARE")) + _(" "));
+
+                    switch(project->stages[i].layers[layer_index].spriteSortBy)
+                    {
+                        case SPRITE_LAYER_SORT_BY_NONE:
+                        {
+                            stage_file.Write(_("sprite_sort_by=") + _("NONE") + _(" "));
+                        }
+                        break;
+
+                        case SPRITE_LAYER_SORT_BY_LEAST_X:
+                        {
+                            stage_file.Write(_("sprite_sort_by=") + _("LEAST_X") + _(" "));
+                        }
+                        break;
+
+                        case SPRITE_LAYER_SORT_BY_GREATEST_X:
+                        {
+                            stage_file.Write(_("sprite_sort_by=") + _("GREATEST_X") + _(" "));
+                        }
+                        break;
+
+                        case SPRITE_LAYER_SORT_BY_LEAST_Y:
+                        {
+                            stage_file.Write(_("sprite_sort_by=") + _("LEAST_Y") + _(" "));
+                        }
+                        break;
+
+                        case SPRITE_LAYER_SORT_BY_GREATEST_Y:
+                        {
+                            stage_file.Write(_("sprite_sort_by=") + _("GREATEST_Y") + _(" "));
+                        }
+                        break;
+                    }
+
+                    stage_file.Write(_("sprite_order=") + (project->stages[i].layers[layer_index].spriteSortOrder == SPRITE_LAYER_ORDER_DESCENDING ? _("DESCENDING") : _("ASCENDING")) + _(" "));
+				}
+
 				stage_file.Write(_("visible=") + ( project->stages[i].layers[layer_index].visible ? _("TRUE") : _("FALSE") ) + _(";\n"));
 
 				if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_CANVAS_2D)
@@ -1551,6 +1591,44 @@ bool NirvanaEditor_MainFrame::generateStages()
 			else if(project->stages[stage_index].layers[layer_index].layer_type == LAYER_TYPE_SPRITE)
 			{
 				fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Ref_Canvas = ") + _("OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)\n");
+
+				fn_str += _("\tSetSpriteLayerPriority(Nirvana_Stage_Layers[") + layer_list_index_str + _("].Ref_Canvas, ");
+				switch(project->stages[stage_index].layers[layer_index].spriteSortBy)
+				{
+                    case SPRITE_LAYER_SORT_BY_NONE:
+                    {
+                        fn_str += _("SPRITE_PRIORITY_NONE, ");
+                    }
+                    break;
+
+                    case SPRITE_LAYER_SORT_BY_LEAST_X:
+                    {
+                        fn_str += _("SPRITE_PRIORITY_LEAST_X, ");
+                    }
+                    break;
+
+                    case SPRITE_LAYER_SORT_BY_GREATEST_X:
+                    {
+                        fn_str += _("SPRITE_PRIORITY_GREATEST_X, ");
+                    }
+                    break;
+
+                    case SPRITE_LAYER_SORT_BY_LEAST_Y:
+                    {
+                        fn_str += _("SPRITE_PRIORITY_LEAST_Y, ");
+                    }
+                    break;
+
+                    case SPRITE_LAYER_SORT_BY_GREATEST_Y:
+                    {
+                        fn_str += _("SPRITE_PRIORITY_GREATEST_Y, ");
+                    }
+                    break;
+				}
+
+				fn_str += (project->stages[stage_index].layers[layer_index].spriteSortOrder == SPRITE_LAYER_ORDER_DESCENDING ? _("SPRITE_ORDER_DESCENDING") : _("SPRITE_ORDER_ASCENDING")) + _(")\n");
+
+
 				fn_str += _("\tCanvas(Nirvana_Stage_Layers[") + layer_list_index_str + _("].Ref_Canvas)\n");
 				fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_Sprite_Count = ") + wxString::Format(_("%i"), (int)project->stages[stage_index].layers[layer_index].layer_sprites.size()) + _("\n");
 				fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_Shape_Count = ") + wxString::Format(_("%i"), (int)project->stages[stage_index].layers[layer_index].layer_shapes.size()) + _("\n");
@@ -2743,6 +2821,21 @@ void NirvanaEditor_MainFrame::OnActiveLayerSelect( wxCommandEvent& event )
 		return;
 
 	map_editor->selectLayer(event.GetSelection());
+
+	int stage_index = map_editor->getSelectedStage();
+	int layer_index = map_editor->getSelectedLayer();
+
+	if(project->getLayerType(stage_index, layer_index) == LAYER_TYPE_SPRITE)
+    {
+        map_editor->getMapViewControl()->sprite_grid_type = project->getLayerSpriteGridType(stage_index, layer_index);
+        map_editor->getMapViewControl()->sprite_sort_by = project->getLayerSpriteSortBy(stage_index, layer_index);
+        map_editor->getMapViewControl()->sprite_order_by = project->getLayerSpriteSortOrder(stage_index, layer_index);
+
+        //std::cout << "DBG INFO: " << map_editor->getMapViewControl()->sprite_grid_type << ", "
+        //                          << map_editor->getMapViewControl()->sprite_sort_by << ", "
+        //                          << map_editor->getMapViewControl()->sprite_order_by << std::endl;
+    }
+
 	updateMapEditor();
 }
 
@@ -2768,36 +2861,46 @@ void NirvanaEditor_MainFrame::OnLayerCheckListSelect( wxCommandEvent& event )
 		case LAYER_TYPE_CANVAS_2D:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("CANVAS_2D"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(0);
 		}
 		break;
 
 		case LAYER_TYPE_CANVAS_3D:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("CANVAS_3D"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(0);
 		}
 		break;
 
 		case LAYER_TYPE_SPRITE:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("SPRITE"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(1);
+
+			m_layerSettings_spriteGridType_comboBox->SetSelection(project->getLayerSpriteGridType(stage_index, layer_index));
+			m_layerSettings_spriteSortBy_comboBox->SetSelection(project->getLayerSpriteSortBy(stage_index, layer_index));
+			m_layerSettings_spriteOrderBy_comboBox->SetSelection(project->getLayerSpriteSortOrder(stage_index, layer_index));
 		}
 		break;
 
 		case LAYER_TYPE_TILEMAP:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("TILEMAP"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(0);
 		}
 		break;
 
 		case LAYER_TYPE_ISO_TILEMAP:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("ISO_TILEMAP"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(0);
 		}
 		break;
 
 		default:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("[NA]"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(0);
 		}
 		break;
 	}
@@ -3382,4 +3485,85 @@ void NirvanaEditor_MainFrame::OnMapEditSettings_SpriteSelectSpeed_SpinCtrl( wxSp
 
 	sprite_editor->getAnimationSheetControl()->scroll_speed = event.GetValue();
 	sprite_editor->getCollisionControl()->scroll_speed = event.GetValue();
+}
+
+
+
+
+void NirvanaEditor_MainFrame::OnMapEdit_SpriteGridType( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	if(!project)
+		return;
+
+	int stage_index = map_editor->getSelectedStage();
+	if(stage_index < 0 || stage_index >= project->getStageCount())
+		return;
+
+	int layer_index = m_layerVisible_checkList->GetSelection();
+
+	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
+		return;
+
+	int grid_type = m_layerSettings_spriteGridType_comboBox->GetSelection();
+	project->setLayerSpriteGridType(stage_index, layer_index, grid_type);
+
+	if(layer_index == map_editor->getSelectedLayer())
+        map_editor->getMapViewControl()->sprite_grid_type = grid_type;
+
+    //std::cout << "grid type" << std::endl;
+}
+
+void NirvanaEditor_MainFrame::OnMapEdit_SpriteSortBy( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	if(!project)
+		return;
+
+	int stage_index = map_editor->getSelectedStage();
+	if(stage_index < 0 || stage_index >= project->getStageCount())
+		return;
+
+	int layer_index = m_layerVisible_checkList->GetSelection();
+
+	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
+		return;
+
+	int sort_by = m_layerSettings_spriteSortBy_comboBox->GetSelection();
+	project->setLayerSpriteSortBy(stage_index, layer_index, sort_by);
+
+    if(layer_index == map_editor->getSelectedLayer())
+        map_editor->getMapViewControl()->sprite_sort_by = sort_by;
+
+    //std::cout << "sort by" << std::endl;
+}
+
+void NirvanaEditor_MainFrame::OnMapEdit_SpriteOrderBy( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	if(!project)
+		return;
+
+	int stage_index = map_editor->getSelectedStage();
+	if(stage_index < 0 || stage_index >= project->getStageCount())
+		return;
+
+	int layer_index = m_layerVisible_checkList->GetSelection();
+
+	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
+		return;
+
+	int sort_order = m_layerSettings_spriteOrderBy_comboBox->GetSelection();
+	project->setLayerSpriteSortOrder(stage_index, layer_index, sort_order);
+
+    if(layer_index == map_editor->getSelectedLayer())
+        map_editor->getMapViewControl()->sprite_order_by = sort_order;
+
+    //std::cout << "order by" << std::endl;
 }

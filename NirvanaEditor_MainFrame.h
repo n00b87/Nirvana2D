@@ -132,6 +132,9 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnMapEdit_LayerHScroll( wxSpinDoubleEvent& event );
 		void OnMapEdit_LayerVScroll( wxSpinDoubleEvent& event );
 		void OnMapEdit_LayerAlpha( wxSpinEvent& event );
+		void OnMapEdit_SpriteGridType( wxCommandEvent& event );
+		void OnMapEdit_SpriteSortBy( wxCommandEvent& event );
+		void OnMapEdit_SpriteOrderBy( wxCommandEvent& event );
 
 		void OnMapEdit_TileTool_Select( wxCommandEvent& event );
 		void OnMapEdit_TileTool_BoxSelect( wxCommandEvent& event );
@@ -153,6 +156,7 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent& event );
 		void OnMapEdit_SpriteTool_CopySprite( wxCommandEvent& event );
 		void OnMapEdit_SpriteTool_CenterOnSprite( wxCommandEvent& event );
+		void OnMapEdit_SpriteTool_SortSettings( wxCommandEvent& event );
 		void OnMapEdit_SpriteListSelect( wxCommandEvent& event );
 		void OnMapEdit_SpritePropertyGridChanged( wxPropertyGridEvent& event );
 

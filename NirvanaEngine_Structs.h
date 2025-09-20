@@ -340,6 +340,10 @@ struct Nirvana_Map_Layer
 	irr::core::vector2df scroll_speed;
 	int layer_alpha = 255;
 
+	int spriteGrid_type = 0;
+	int spriteSortBy = 0;
+	int spriteSortOrder = 0;
+
 	int ref_canvas = -1;
 };
 

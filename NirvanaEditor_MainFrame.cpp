@@ -39,6 +39,19 @@ Nirvana_MainFrame( parent )
 	m_spriteEdit_collisionShape_comboBox->Append(_("POLYGON"));
 	m_spriteEdit_collisionShape_comboBox->Append(_("CIRCLE"));
 
+	m_layerSettings_spriteGridType_comboBox->Append(_("SQUARE"));
+	m_layerSettings_spriteGridType_comboBox->Append(_("ISOMETRIC"));
+
+	m_layerSettings_spriteSortBy_comboBox->Append(_("NONE"));
+	m_layerSettings_spriteSortBy_comboBox->Append(_("LEAST X"));
+	m_layerSettings_spriteSortBy_comboBox->Append(_("GREATEST X"));
+	m_layerSettings_spriteSortBy_comboBox->Append(_("LEAST Y"));
+	m_layerSettings_spriteSortBy_comboBox->Append(_("GREATEST Y"));
+
+	m_layerSettings_spriteOrderBy_comboBox->Append(_("ASCENDING"));
+	m_layerSettings_spriteOrderBy_comboBox->Append(_("DESCENDING"));
+
+
 	map_editor = new Nirvana_MapEditor(this, m_mapEdit_map_panel, m_mapEdit_tileSelect_panel);
 	map_editor->getMapViewControl()->GetDevice()->getContextManager()->activateContext(map_editor->getMapViewControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 	map_editor->getMapViewControl()->mapEdit_hasContext = true;

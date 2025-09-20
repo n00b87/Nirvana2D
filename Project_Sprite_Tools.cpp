@@ -369,6 +369,11 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_CenterOnSprite( wxCommandEven
 	map_editor->getMapViewControl()->scroll_offset_y = y/scroll_speed_y - (map_editor->getMapViewControl()->GetClientSize().GetHeight()/2)/scroll_speed_y;
 }
 
+void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_SortSettings( wxCommandEvent& event )
+{
+
+}
+
 
 void NirvanaEditor_MainFrame::reloadSpriteProperties()
 {
