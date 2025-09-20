@@ -162,6 +162,111 @@ Function Nirvana_SetLayerBackgroundRenderType(layer_index, render_type)
 End Function
 
 
+'-------TILE MAP----------
+Function Nirvana_GetTile(layer_index, x, y)
+	If layer_index < 0 Or layer_index >= Nirvana_ActiveStage.Layer_Count Then
+		Return -1
+	End If
+	
+	tile_index = -1
+	Select Case Nirvana_Stage_Layers[layer_index].LayerType
+	Case NIRVANA_LAYER_TYPE_TILEMAP
+		tile_index = GetTile(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, x, y)
+	Case NIRVANA_LAYER_TYPE_ISO_TILEMAP
+		If x MOD 2 Then
+			'Map 1
+			x = (x / 2)
+			tile_index = GetTile(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, x, y)
+		Else
+			'Map 2
+			x = (x / 2)
+			tile_index = GetTile(Nirvana_Stage_Layers[layer_index].Layer_TileMap2.TileMap_ID, x, y)
+		End If
+	End Select
+	
+	Return tile_index
+End Function
+
+Function Nirvana_GetTileMapPosition(layer_index, stage_x, stage_y) As Nirvana_Vector2D
+	Dim tm_pos As Nirvana_Vector2D
+	tm_pos.X = -1
+	tm_pos.Y = -1
+	
+	If layer_index < 0 Or layer_index >= Nirvana_ActiveStage.Layer_Count Then
+		Return tm_pos
+	End If
+	
+	
+	Select Case Nirvana_Stage_Layers[layer_index].LayerType
+	Case NIRVANA_LAYER_TYPE_TILEMAP
+		tm_pos.X = Int(stage_x / Nirvana_ActiveStage.Tile_Size.Width)
+		tm_pos.Y = Int(stage_y / Nirvana_ActiveStage.Tile_Size.Height)
+	Case NIRVANA_LAYER_TYPE_ISO_TILEMAP
+		tm_pos.X = Int(stage_x / Nirvana_ActiveStage.Tile_Size.Width)
+		tm_pos.Y = Int(stage_y / Nirvana_ActiveStage.Tile_Size.Height)
+		
+		tw = Nirvana_ActiveStage.Tile_Size.Width
+		th = Nirvana_ActiveStage.Tile_Size.Height
+		tx = tm_pos.X * tw
+		ty = tm_pos.Y * th
+		
+		'Top Left
+		top_left = PointInQuad(stage_x, stage_y, tx - (tw/2), ty, tx, ty - (th/2), tx + (tw/2), ty, tx, ty + (th/2))
+		
+		'Top Right
+		top_right = PointInQuad(stage_x, stage_y, tx + (tw/2), ty, tx + tw, ty - (th/2), tx + tw + (tw/2), ty, tx + tw, ty + (th/2))
+		
+		'Bottom Left
+		bottom_left = PointInQuad(stage_x, stage_y, tx - (tw/2), ty + th, tx, ty + (th/2), tx + (tw/2), ty + th, tx, ty + th + (th/2))
+		
+		'Bottom Right
+		bottom_right = PointInQuad(stage_x, stage_y, tx + (tw/2), ty + th, tx + tw, ty + (th/2), tx + tw + (tw/2), ty + th, tx + tw, ty + th + (th/2))
+		
+		
+		tm_pos.X = (tm_pos.X * 2) + 1 'Default to Map 1 position
+		
+		If top_left Then
+			tm_pos.X = tm_pos.X - 1
+		ElseIf top_right Then
+			tm_pos.X = tm_pos.X + 1
+		ElseIf bottom_left Then
+			tm_pos.X = tm_pos.X - 1
+			tm_pos.Y = tm_pos.Y + 1
+		ElseIf bottom_right Then
+			tm_pos.X = tm_pos.X + 1
+			tm_pos.Y = tm_pos.Y + 1
+		End If
+	End Select
+	
+	Return tm_pos
+End Function
+
+
+Function Nirvana_SetTile(layer_index, tile_index, x, y)
+	If layer_index < 0 Or layer_index >= Nirvana_ActiveStage.Layer_Count Then
+		Return FALSE
+	End If
+	
+	Select Case Nirvana_Stage_Layers[layer_index].LayerType
+	Case NIRVANA_LAYER_TYPE_TILEMAP
+		SetTile(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, tile_index, x, y)
+	Case NIRVANA_LAYER_TYPE_ISO_TILEMAP
+		If x MOD 2 Then
+			'Map 1
+			x = (x / 2)
+			SetTile(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, tile_index, x, y)
+		Else
+			'Map 2
+			x = (x / 2)
+			SetTile(Nirvana_Stage_Layers[layer_index].Layer_TileMap2.TileMap_ID, tile_index, x, y)
+		End If
+	End Select
+	
+	Return TRUE
+	
+End Function
+
+
 '-------TILE MASK----------
 Function Nirvana_GetTileMaskName$(mask_index)
 	If mask_index < 0 Or mask_index >= ArraySize(Nirvana_TileMask_Matrix_Name$, 1) Then
@@ -355,6 +460,12 @@ Sub Nirvana_Update()
 		Case NIRVANA_LAYER_TYPE_TILEMAP
 			ClearCanvas()
 			DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, offset_x, offset_y)
+		Case NIRVANA_LAYER_TYPE_ISO_TILEMAP
+			ClearCanvas()
+			tile_w = Nirvana_ActiveStage.Tile_Size.Width
+			tile_h = Nirvana_ActiveStage.Tile_Size.Height
+			DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, 0, 0, Nirvana_ActiveStage.Viewport_Size.Width, Nirvana_ActiveStage.Viewport_Size.Height, offset_x, offset_y)
+			DrawTileMap(Nirvana_Stage_Layers[layer_index].Layer_TileMap2.TileMap_ID, 0 - (tile_w/2), 0 - (tile_h/2), Nirvana_ActiveStage.Viewport_Size.Width + tile_w, Nirvana_ActiveStage.Viewport_Size.Height + tile_h, offset_x, offset_y)
 		End Select
 	Next
 	Update()

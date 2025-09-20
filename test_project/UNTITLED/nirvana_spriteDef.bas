@@ -5,6 +5,8 @@ Type Nirvana_Sprite
 Dim Name$
 Dim BaseName$
 Dim Sprite_ID
+Dim Detached_Sprite_ID
+Dim IsDetached
 Dim Animation_Name_Index
 Dim Animation_Count
 End Type
@@ -24,7 +26,7 @@ Nirvana_SpriteAnimationNames$[2] = "hover"
 Nirvana_SpriteAnimationNames$[3] = "default"
 
 
-Function Nirvana_SpriteDef_0()
+Function Nirvana_SpriteDef_0(ByRef detached_spr_id)
 	If Nirvana_Sprite_Image_0 < 0 Then
 		If OS$ = "WINDOWS" Then
 			Nirvana_Sprite_Image_0 = LoadImage(NIRVANA_SPRITE_DIR$ + "graizor.png")
@@ -57,6 +59,8 @@ Function Nirvana_SpriteDef_0()
 
 
 	'-------SHAPE-------
+detached_spr_id = -1
+
 	SetSpriteShape(spr_id, SPRITE_SHAPE_BOX)
 	SetSpriteShapeOffset(spr_id, 20, 0)
 	SetSpriteBox(spr_id, 23, 64)
@@ -64,7 +68,7 @@ Function Nirvana_SpriteDef_0()
 	Return spr_id
 End Function
 
-Function Nirvana_SpriteDef_1()
+Function Nirvana_SpriteDef_1(ByRef detached_spr_id)
 	If Nirvana_Sprite_Image_1 < 0 Then
 		If OS$ = "WINDOWS" Then
 			Nirvana_Sprite_Image_1 = LoadImage(NIRVANA_SPRITE_DIR$ + "chronos.png")
@@ -89,6 +93,8 @@ Function Nirvana_SpriteDef_1()
 
 
 	'-------SHAPE-------
+detached_spr_id = -1
+
 	SetSpriteShape(spr_id, SPRITE_SHAPE_BOX)
 	SetSpriteShapeOffset(spr_id, 8, 138)
 	SetSpriteBox(spr_id, 87, 57)
@@ -96,7 +102,7 @@ Function Nirvana_SpriteDef_1()
 	Return spr_id
 End Function
 
-Function Nirvana_SpriteDef_2()
+Function Nirvana_SpriteDef_2(ByRef detached_spr_id)
 	If Nirvana_Sprite_Image_2 < 0 Then
 		If OS$ = "WINDOWS" Then
 			Nirvana_Sprite_Image_2 = LoadImage(NIRVANA_SPRITE_DIR$ + "grenguy.png")
@@ -120,6 +126,8 @@ Function Nirvana_SpriteDef_2()
 
 
 	'-------SHAPE-------
+detached_spr_id = -1
+
 	SetSpriteShape(spr_id, SPRITE_SHAPE_POLYGON)
 	Dim shape_point_x[6]
 	Dim shape_point_y[6]
@@ -156,17 +164,20 @@ Function Nirvana_CreateSprite(base_name$, sprite_name$) As Nirvana_Sprite
 	Select Case base_name$
 
 	Case "grz"
-		nv_sprite.Sprite_ID = Nirvana_SpriteDef_0()
+		nv_sprite.Sprite_ID = Nirvana_SpriteDef_0(nv_sprite.Detached_Sprite_ID)
+		nv_sprite.IsDetached = FALSE
 		nv_sprite.Animation_Name_Index = 0
 		nv_sprite.Animation_Count = 3
 
 	Case "chr"
-		nv_sprite.Sprite_ID = Nirvana_SpriteDef_1()
+		nv_sprite.Sprite_ID = Nirvana_SpriteDef_1(nv_sprite.Detached_Sprite_ID)
+		nv_sprite.IsDetached = FALSE
 		nv_sprite.Animation_Name_Index = 2
 		nv_sprite.Animation_Count = 2
 
 	Case "gren_guy"
-		nv_sprite.Sprite_ID = Nirvana_SpriteDef_2()
+		nv_sprite.Sprite_ID = Nirvana_SpriteDef_2(nv_sprite.Detached_Sprite_ID)
+		nv_sprite.IsDetached = FALSE
 		nv_sprite.Animation_Name_Index = 3
 		nv_sprite.Animation_Count = 2
 

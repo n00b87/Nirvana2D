@@ -104,6 +104,9 @@ struct tilemap_obj
 	int num_tiles_down;
 
 	std::vector<tilemap_row_obj> rows;
+
+	//std::vector<tilemap_row_obj> iso_rows1;
+	//std::vector<tilemap_row_obj> iso_rows2;
 };
 
 struct nv_editor_point
@@ -243,6 +246,7 @@ struct Nirvana_SelectTool_TileSelection
 	int tile_index = -1;
 	irr::core::vector2di map_tile_pos;
 	irr::core::vector2di box_start_pos;
+	bool use_map2;
 };
 
 struct Nirvana_SelectTool_SpriteSelection
@@ -301,6 +305,7 @@ struct Nirvana_Map_TileMap
 	int nv_tileset_index = -1;
 	int tile_map_index = -1;
 	tilemap_obj tile_map;
+	tilemap_obj tile_map2;
 };
 
 struct Nirvana_Map_Background
@@ -334,6 +339,10 @@ struct Nirvana_Map_Layer
 	Nirvana_Map_Background bkg;
 	irr::core::vector2df scroll_speed;
 	int layer_alpha = 255;
+
+	int spriteGrid_type = 0;
+	int spriteSortBy = 0;
+	int spriteSortOrder = 0;
 
 	int ref_canvas = -1;
 };

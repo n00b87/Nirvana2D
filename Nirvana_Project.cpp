@@ -1251,6 +1251,8 @@ int Nirvana_Project::loadStage(wxString stage_file)
 
 		int layer_index = 0;
 
+		int layer_tmap_index = 0;
+
 		for(int i = 0; i < p_cmd.size(); i++)
 		{
 			if(p_cmd[i].dict.size() == 0)
@@ -1302,6 +1304,8 @@ int Nirvana_Project::loadStage(wxString stage_file)
 				n_layer.layer_map.tile_map.texture = NULL;
 				n_layer.layer_map.tile_map.tileset = -1;
 
+				layer_tmap_index = 0;
+
 				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
 				{
 					if(p_cmd[i].dict[obj_index].key.compare(_("name"))==0)
@@ -1322,6 +1326,10 @@ int Nirvana_Project::loadStage(wxString stage_file)
 						else if(p_cmd[i].dict[obj_index].val.compare(_("LAYER_TYPE_TILEMAP"))==0)
 						{
 							n_layer.layer_type = LAYER_TYPE_TILEMAP;
+						}
+						else if(p_cmd[i].dict[obj_index].val.compare(_("LAYER_TYPE_ISO_TILEMAP"))==0)
+						{
+							n_layer.layer_type = LAYER_TYPE_ISO_TILEMAP;
 						}
 						else if(p_cmd[i].dict[obj_index].val.compare(_("LAYER_TYPE_SPRITE"))==0)
 						{
@@ -1357,6 +1365,39 @@ int Nirvana_Project::loadStage(wxString stage_file)
 					{
 						n_layer.visible = ( p_cmd[i].dict[obj_index].val.compare(_("TRUE"))==0 ? true : false );
 					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("sprite_grid"))==0)
+					{
+						n_layer.spriteGrid_type = ( p_cmd[i].dict[obj_index].val.compare(_("ISOMETRIC"))==0 ? SPRITE_LAYER_GRID_ISOMETRIC : SPRITE_LAYER_GRID_SQUARE );
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("sprite_sort_by"))==0)
+					{
+						n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_NONE;
+
+						if(p_cmd[i].dict[obj_index].val.compare(_("NONE"))==0)
+                        {
+                            n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_NONE;
+                        }
+                        else if(p_cmd[i].dict[obj_index].val.compare(_("LEAST_X"))==0)
+                        {
+                            n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_LEAST_X;
+                        }
+                        else if(p_cmd[i].dict[obj_index].val.compare(_("GREATEST_X"))==0)
+                        {
+                            n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_GREATEST_X;
+                        }
+                        else if(p_cmd[i].dict[obj_index].val.compare(_("LEAST_Y"))==0)
+                        {
+                            n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_LEAST_Y;
+                        }
+                        else if(p_cmd[i].dict[obj_index].val.compare(_("GREATEST_Y"))==0)
+                        {
+                            n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_GREATEST_Y;
+                        }
+					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("sprite_order"))==0)
+					{
+						n_layer.spriteSortOrder = ( p_cmd[i].dict[obj_index].val.compare(_("DESCENDING"))==0 ? SPRITE_LAYER_ORDER_DESCENDING : SPRITE_LAYER_ORDER_ASCENDING );
+					}
 				}
 
 				layer_index = obj.layers.size();
@@ -1390,10 +1431,19 @@ int Nirvana_Project::loadStage(wxString stage_file)
 			}
 			else if(p_cmd[i].dict[0].key.compare(_("START_TILEMAP"))==0)
 			{
-			    obj.layers[layer_index].layer_map.nv_tileset_index = -1;
-				obj.layers[layer_index].layer_map.tile_map.rows.clear();
-				obj.layers[layer_index].layer_map.tile_map.num_tiles_across = 0;
-				obj.layers[layer_index].layer_map.tile_map.num_tiles_down = 0;
+			    if(layer_tmap_index == 0)
+			    {
+			        obj.layers[layer_index].layer_map.nv_tileset_index = -1;
+                    obj.layers[layer_index].layer_map.tile_map.rows.clear();
+                    obj.layers[layer_index].layer_map.tile_map.num_tiles_across = 0;
+                    obj.layers[layer_index].layer_map.tile_map.num_tiles_down = 0;
+			    }
+			    else if(layer_tmap_index == 1)
+                {
+                    obj.layers[layer_index].layer_map.tile_map2.rows.clear();
+                    obj.layers[layer_index].layer_map.tile_map2.num_tiles_across = 0;
+                    obj.layers[layer_index].layer_map.tile_map2.num_tiles_down = 0;
+                }
 			}
 			else if(p_cmd[i].dict[0].key.compare(_("ROW"))==0)
 			{
@@ -1415,21 +1465,40 @@ int Nirvana_Project::loadStage(wxString stage_file)
 							t_row.tile.push_back(tile_value);
 						}
 
-						if(t_row.tile.size() >= obj.layers[layer_index].layer_map.tile_map.num_tiles_across)
+						if(layer_tmap_index == 0)
 						{
-							obj.layers[layer_index].layer_map.tile_map.num_tiles_across = t_row.tile.size();
+						    if(t_row.tile.size() >= obj.layers[layer_index].layer_map.tile_map.num_tiles_across)
+                            {
+                                obj.layers[layer_index].layer_map.tile_map.num_tiles_across = t_row.tile.size();
+                            }
 						}
+						else if(layer_tmap_index == 1)
+                        {
+                            if(t_row.tile.size() >= obj.layers[layer_index].layer_map.tile_map2.num_tiles_across)
+                            {
+                                obj.layers[layer_index].layer_map.tile_map2.num_tiles_across = t_row.tile.size();
+                            }
+                        }
 					}
 				}
 
-				obj.layers[layer_index].layer_map.tile_map.rows.push_back(t_row);
+				if(layer_tmap_index == 0)
+				{
+				    obj.layers[layer_index].layer_map.tile_map.rows.push_back(t_row);
+                    obj.layers[layer_index].layer_map.tile_map.num_tiles_down = obj.layers[layer_index].layer_map.tile_map.rows.size();
+				}
+				else if(layer_tmap_index == 1)
+                {
+                    obj.layers[layer_index].layer_map.tile_map2.rows.push_back(t_row);
+                    obj.layers[layer_index].layer_map.tile_map2.num_tiles_down = obj.layers[layer_index].layer_map.tile_map2.rows.size();
+                }
 
-				obj.layers[layer_index].layer_map.tile_map.num_tiles_down = obj.layers[layer_index].layer_map.tile_map.rows.size();
 
 			}
 			else if(p_cmd[i].dict[0].key.compare(_("END_TILEMAP"))==0)
 			{
-				// Don't need to do anything for this
+				layer_tmap_index++;
+
 			}
 			else if(p_cmd[i].dict[0].key.compare(_("SPRITE"))==0)
 			{
@@ -1747,6 +1816,53 @@ void Nirvana_Project::setStageSize(int stage_index, int width, int height)
 	}
 }
 
+void Nirvana_Project::setStageSizeISO(int stage_index, int width, int height)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+    //std::cout << "SET STAGE SIZE" << std::endl;
+
+	stages[stage_index].width_in_tiles = width;
+	stages[stage_index].height_in_tiles = height;
+
+	for(int i = 0; i < stages[stage_index].layers.size(); i++)
+	{
+		if(stages[stage_index].layers[i].layer_type == LAYER_TYPE_ISO_TILEMAP)
+		{
+			int original_width = stages[stage_index].layers[i].layer_map.tile_map.num_tiles_across;
+			int original_height = stages[stage_index].layers[i].layer_map.tile_map.num_tiles_down;
+
+			stages[stage_index].layers[i].layer_map.tile_map.num_tiles_across = width;
+			stages[stage_index].layers[i].layer_map.tile_map.num_tiles_down = height;
+
+			stages[stage_index].layers[i].layer_map.tile_map2.num_tiles_across = width;
+			stages[stage_index].layers[i].layer_map.tile_map2.num_tiles_down = height;
+
+			stages[stage_index].layers[i].layer_map.tile_map.rows.resize(height+1);
+			stages[stage_index].layers[i].layer_map.tile_map2.rows.resize(height+1);
+
+			//std::cout << "ROWS: " << stages[stage_index].layers[i].layer_map.tile_map.rows.size() << std::endl;
+
+			for(int m_row = 0; m_row < stages[stage_index].layers[i].layer_map.tile_map.rows.size(); m_row++)
+			{
+				stages[stage_index].layers[i].layer_map.tile_map.rows[m_row].tile.resize(width+1);
+				stages[stage_index].layers[i].layer_map.tile_map2.rows[m_row].tile.resize(width+1);
+
+				for(int m_col = (m_row < original_height ? original_width : 0); m_col < (width+1); m_col++)
+				{
+					//std::cout << "C = " << m_col << std::endl;
+					if(m_col < 0)
+						continue;
+
+					stages[stage_index].layers[i].layer_map.tile_map.rows[m_row].tile[m_col] = -1;
+					stages[stage_index].layers[i].layer_map.tile_map2.rows[m_row].tile[m_col] = -1;
+				}
+			}
+		}
+	}
+}
+
 irr::core::vector2di Nirvana_Project::getStageSize(int stage_index)
 {
 	if(stage_index < 0 || stage_index >= stages.size())
@@ -1779,6 +1895,9 @@ void Nirvana_Project::addLayer(int stage_index, std::string layer_name, int laye
 	n_layer.layer_map.nv_tileset_index = -1;
 	n_layer.layer_map.tile_map_index = -1;
 	n_layer.layer_map.tile_map.tileset = -1;
+	n_layer.spriteGrid_type = SPRITE_LAYER_GRID_SQUARE;
+	n_layer.spriteSortBy = SPRITE_LAYER_SORT_BY_NONE;
+	n_layer.spriteSortOrder = SPRITE_LAYER_ORDER_ASCENDING;
 	n_layer.ref_canvas = -1;
 
 	wxString n_layer_name = wxString(layer_name).Upper().Trim();
@@ -1795,6 +1914,8 @@ void Nirvana_Project::addLayer(int stage_index, std::string layer_name, int laye
 
 	if(layer_type == LAYER_TYPE_TILEMAP)
 		setStageSize(stage_index, stages[stage_index].width_in_tiles, stages[stage_index].height_in_tiles);
+    else if(layer_type == LAYER_TYPE_ISO_TILEMAP)
+        setStageSizeISO(stage_index, stages[stage_index].width_in_tiles, stages[stage_index].height_in_tiles);
 }
 
 int Nirvana_Project::getStageNumLayers(int stage_index)
@@ -2092,6 +2213,73 @@ int Nirvana_Project::copyLayerSprite(int stage_index, int layer_index, int sprit
 
 	return copy_index;
 }
+
+int Nirvana_Project::getLayerSpriteGridType(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return 0;
+
+	return stages[stage_index].layers[layer_index].spriteGrid_type;
+}
+
+int Nirvana_Project::getLayerSpriteSortBy(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return 0;
+
+	return stages[stage_index].layers[layer_index].spriteSortBy;
+}
+
+int Nirvana_Project::getLayerSpriteSortOrder(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return 0;
+
+	return stages[stage_index].layers[layer_index].spriteSortOrder;
+}
+
+void Nirvana_Project::setLayerSpriteGridType(int stage_index, int layer_index, int grid_type)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers[layer_index].spriteGrid_type = grid_type;
+}
+
+void Nirvana_Project::setLayerSpriteSortBy(int stage_index, int layer_index, int sortBy)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers[layer_index].spriteSortBy = sortBy;
+}
+
+void Nirvana_Project::setLayerSpriteSortOrder(int stage_index, int layer_index, int sortOrder)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers[layer_index].spriteSortOrder = sortOrder;
+}
+
 
 int Nirvana_Project::getLayerSpriteIndex(int stage_index, int layer_index, std::string sprite_name)
 {

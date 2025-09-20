@@ -13,9 +13,11 @@ SPRITE file="grenguy.png";
 
 TILESET file="tiles2.png";
 TILESET file="tilesheet.png";
+TILESET file="brickpavers2-sheet.png";
 
 
 ---------------- STAGES ---------------------;
 
 STAGE file="st1.stage";
 STAGE file="st2.stage";
+STAGE file="st3.stage";

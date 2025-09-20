@@ -94,6 +94,7 @@ class wxIrrlicht : public wxControl {
         font_obj font[MAX_FONTS];
         int active_font = -1;
         int ui_layer = -1;
+        int grid_layer = -1;
 
         int ui_font1 = -1;
         int ui_font2 = -1;
@@ -441,6 +442,7 @@ class wxIrrlicht : public wxControl {
 
         void util_drawSelectedTiles();
         void StageSheet_SelectTileUpdate();
+
         void StageSheet_BoxSelectTileUpdate();
 
         void StageSheet_MoveTileUpdate();
@@ -448,8 +450,39 @@ class wxIrrlicht : public wxControl {
 
         void StageSheet_DeleteSelectedTileUpdate();
 
-        void updateTileSelectionTilemap();
+        //void updateTileSelectionTilemap();
 
+
+
+        //ISO Tiles
+        void StageSheet_SetTileUpdate_ISO();
+        void util_fillTile_ISO(int base_tile, int fill_tile, int x, int y, bool use_map2);
+        void StageSheet_FillTileUpdate_ISO();
+
+        void StageSheet_SelectTileUpdate_ISO();
+
+        void getTriangleSides(float angle, float hyp, float* t_adjacent, float* t_opposite);
+        bool getLineIntersect(double p0_x, double p0_y, double p1_x, double p1_y, double p2_x, double p2_y, double p3_x, double p3_y, double* i_x, double* i_y);
+
+        void selectTileAt(int x, int y);
+        Nirvana_SelectTool_TileSelection getTileMapPositionAt(int x, int y);
+        Nirvana_SelectTool_TileSelection getTileMapPositionAt_NTM(int x, int y);
+        void selectISOTilesInBox(bool start_m, int start_x, int start_y, int num_across, int num_down );
+
+        void StageSheet_BoxSelectTileUpdate_ISO();
+
+        void StageSheet_MoveTileUpdate_ISO();
+        void StageSheet_CopyTileUpdate_ISO();
+
+        void StageSheet_DeleteSelectedTileUpdate_ISO();
+        //----------------------------------------------------
+
+
+
+
+        int sprite_grid_type = 0;
+        int sprite_sort_by = 0;
+        int sprite_order_by = 0;
 
         std::vector<int> pick_sprites;
         void pickSprites(int start_x, int start_y, int end_x, int end_y, bool current_canvas_only=true);
@@ -517,6 +550,8 @@ class wxIrrlicht : public wxControl {
 		wxSpinCtrl* m_mapEdit_circleShape_centerX_spinCtrl = NULL;
 		wxSpinCtrl* m_mapEdit_circleShape_centerY_spinCtrl = NULL;
 		wxSpinCtrl* m_mapEdit_circleShape_radius_spinCtrl = NULL;
+
+		int pointInQuad(double x, double y, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4);
 
 
         void UpdateStageSheet();

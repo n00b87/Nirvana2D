@@ -762,16 +762,58 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 					stage_file.Write(_("LAYER_TYPE_SPRITE"));
 				else if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP)
 					stage_file.Write(_("LAYER_TYPE_TILEMAP"));
+                else if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
+					stage_file.Write(_("LAYER_TYPE_ISO_TILEMAP"));
 
 				stage_file.Write(_(" "));
 
-				if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP)
+				if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP || project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
 					stage_file.Write(_("tileset=\"") + wxString( project->stages[i].layers[layer_index].layer_map.nv_tileset_name ) + _("\" "));
 
 				stage_file.Write(_("scroll_speed=") + wxString::FromDouble((double)project->stages[i].layers[layer_index].scroll_speed.X) + _(",") +
 													  wxString::FromDouble((double)project->stages[i].layers[layer_index].scroll_speed.Y) + _(" "));
 
 				stage_file.Write(_("alpha=") + wxString::Format(_("%i"), project->stages[i].layers[layer_index].layer_alpha) + _(" "));
+
+				if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_SPRITE)
+				{
+				    stage_file.Write(_("sprite_grid=") + (project->stages[i].layers[layer_index].spriteGrid_type == SPRITE_LAYER_GRID_ISOMETRIC ? _("ISOMETRIC") : _("SQUARE")) + _(" "));
+
+                    switch(project->stages[i].layers[layer_index].spriteSortBy)
+                    {
+                        case SPRITE_LAYER_SORT_BY_NONE:
+                        {
+                            stage_file.Write(_("sprite_sort_by=") + _("NONE") + _(" "));
+                        }
+                        break;
+
+                        case SPRITE_LAYER_SORT_BY_LEAST_X:
+                        {
+                            stage_file.Write(_("sprite_sort_by=") + _("LEAST_X") + _(" "));
+                        }
+                        break;
+
+                        case SPRITE_LAYER_SORT_BY_GREATEST_X:
+                        {
+                            stage_file.Write(_("sprite_sort_by=") + _("GREATEST_X") + _(" "));
+                        }
+                        break;
+
+                        case SPRITE_LAYER_SORT_BY_LEAST_Y:
+                        {
+                            stage_file.Write(_("sprite_sort_by=") + _("LEAST_Y") + _(" "));
+                        }
+                        break;
+
+                        case SPRITE_LAYER_SORT_BY_GREATEST_Y:
+                        {
+                            stage_file.Write(_("sprite_sort_by=") + _("GREATEST_Y") + _(" "));
+                        }
+                        break;
+                    }
+
+                    stage_file.Write(_("sprite_order=") + (project->stages[i].layers[layer_index].spriteSortOrder == SPRITE_LAYER_ORDER_DESCENDING ? _("DESCENDING") : _("ASCENDING")) + _(" "));
+				}
 
 				stage_file.Write(_("visible=") + ( project->stages[i].layers[layer_index].visible ? _("TRUE") : _("FALSE") ) + _(";\n"));
 
@@ -869,7 +911,7 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 						stage_file.Write(_(";\n"));
 					}
 				}
-				else if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP)
+				else if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP || project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
 				{
 					stage_file.Write(_("START_TILEMAP;\n"));
 
@@ -885,6 +927,24 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 					}
 
 					stage_file.Write(_("END_TILEMAP;\n"));
+
+					if(project->stages[i].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
+                    {
+                        stage_file.Write(_("START_TILEMAP;\n"));
+
+                        for(int t_row = 0; t_row < project->stages[i].layers[layer_index].layer_map.tile_map2.rows.size(); t_row++)
+                        {
+                            stage_file.Write(_("ROW value="));
+                            for(int tile_index = 0; tile_index < project->stages[i].layers[layer_index].layer_map.tile_map2.rows[t_row].tile.size(); tile_index++)
+                            {
+                                stage_file.Write( wxString::Format(_("%i"), project->stages[i].layers[layer_index].layer_map.tile_map2.rows[t_row].tile[tile_index]) +
+                                                    ( ((tile_index+1) < project->stages[i].layers[layer_index].layer_map.tile_map2.rows[t_row].tile.size()) ? _(",") : _("") ) );
+                            }
+                            stage_file.Write(_(";\n"));
+                        }
+
+                        stage_file.Write(_("END_TILEMAP;\n"));
+                    }
 				}
 
 				stage_file.Write(_("\n"));
@@ -1395,6 +1455,7 @@ bool NirvanaEditor_MainFrame::generateStages()
 	pfile.Write(_("Dim Scroll_Speed As Nirvana_Vector2D\n"));
 	pfile.Write(_("Dim Ref_Canvas\n"));
 	pfile.Write(_("Dim Layer_TileMap As Nirvana_TileMap\n"));
+	pfile.Write(_("Dim Layer_TileMap2 As Nirvana_TileMap\n"));
 	pfile.Write(_("Dim Layer_Sprite_Count\n"));
 	pfile.Write(_("Dim Layer_Shape_Count\n"));
 	pfile.Write(_("Dim Bkg As Nirvana_Background\n"));
@@ -1421,9 +1482,10 @@ bool NirvanaEditor_MainFrame::generateStages()
 	nv_constants += _("NIRVANA_BKG_DIR$ = NIRVANA_PROJECT_BASE_DIR$ + NIRVANA_PATH_SEPARATOR$ + \"") + project->bkg_path + _("\" + NIRVANA_PATH_SEPARATOR$\n");
 	nv_constants += _("\n");
 	nv_constants += _("NIRVANA_LAYER_TYPE_TILEMAP = 0\n");
-	nv_constants += _("NIRVANA_LAYER_TYPE_SPRITE = 1\n");
-	nv_constants += _("NIRVANA_LAYER_TYPE_CANVAS_2D = 2\n");
-	nv_constants += _("NIRVANA_LAYER_TYPE_CANVAS_3D = 3\n");
+	nv_constants += _("NIRVANA_LAYER_TYPE_ISO_TILEMAP = 1\n");
+	nv_constants += _("NIRVANA_LAYER_TYPE_SPRITE = 2\n");
+	nv_constants += _("NIRVANA_LAYER_TYPE_CANVAS_2D = 3\n");
+	nv_constants += _("NIRVANA_LAYER_TYPE_CANVAS_3D = 4\n");
 	nv_constants += _("\n");
 	nv_constants += _("NIRVANA_IMG_RENDER_SETTING_NORMAL = 0\n");
 	nv_constants += _("NIRVANA_IMG_RENDER_SETTING_STRETCHED = 1\n");
@@ -1484,6 +1546,8 @@ bool NirvanaEditor_MainFrame::generateStages()
 				layer_type_str = _("NIRVANA_LAYER_TYPE_SPRITE");
 			else if(project->stages[stage_index].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP)
 				layer_type_str = _("NIRVANA_LAYER_TYPE_TILEMAP");
+            else if(project->stages[stage_index].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
+				layer_type_str = _("NIRVANA_LAYER_TYPE_ISO_TILEMAP");
 
 			wxString layer_visible_str = (project->stages[stage_index].layers[layer_index].visible ? _("TRUE") : _("FALSE"));
 			wxString layer_alpha_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_alpha);
@@ -1527,6 +1591,44 @@ bool NirvanaEditor_MainFrame::generateStages()
 			else if(project->stages[stage_index].layers[layer_index].layer_type == LAYER_TYPE_SPRITE)
 			{
 				fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Ref_Canvas = ") + _("OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)\n");
+
+				fn_str += _("\tSetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[") + layer_list_index_str + _("].Ref_Canvas, ");
+				switch(project->stages[stage_index].layers[layer_index].spriteSortBy)
+				{
+                    case SPRITE_LAYER_SORT_BY_NONE:
+                    {
+                        fn_str += _("SPRITE_PRIORITY_NONE, ");
+                    }
+                    break;
+
+                    case SPRITE_LAYER_SORT_BY_LEAST_X:
+                    {
+                        fn_str += _("SPRITE_PRIORITY_LEAST_X, ");
+                    }
+                    break;
+
+                    case SPRITE_LAYER_SORT_BY_GREATEST_X:
+                    {
+                        fn_str += _("SPRITE_PRIORITY_GREATEST_X, ");
+                    }
+                    break;
+
+                    case SPRITE_LAYER_SORT_BY_LEAST_Y:
+                    {
+                        fn_str += _("SPRITE_PRIORITY_LEAST_Y, ");
+                    }
+                    break;
+
+                    case SPRITE_LAYER_SORT_BY_GREATEST_Y:
+                    {
+                        fn_str += _("SPRITE_PRIORITY_GREATEST_Y, ");
+                    }
+                    break;
+				}
+
+				fn_str += (project->stages[stage_index].layers[layer_index].spriteSortOrder == SPRITE_LAYER_ORDER_DESCENDING ? _("SPRITE_ORDER_DESCENDING") : _("SPRITE_ORDER_ASCENDING")) + _(")\n");
+
+
 				fn_str += _("\tCanvas(Nirvana_Stage_Layers[") + layer_list_index_str + _("].Ref_Canvas)\n");
 				fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_Sprite_Count = ") + wxString::Format(_("%i"), (int)project->stages[stage_index].layers[layer_index].layer_sprites.size()) + _("\n");
 				fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_Shape_Count = ") + wxString::Format(_("%i"), (int)project->stages[stage_index].layers[layer_index].layer_shapes.size()) + _("\n");
@@ -1840,6 +1942,114 @@ bool NirvanaEditor_MainFrame::generateStages()
 					tmap_file.Close();
 				}
 			}
+			else if(project->stages[stage_index].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
+			{
+				fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Ref_Canvas = ") + _("OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)\n");
+				wxString tmap1_data_filename = _("tm") + wxString::Format(_("%i"), tmap_data_index) + _(".data");
+				tmap_data_index++;
+
+				wxString tmap2_data_filename = _("tm") + wxString::Format(_("%i"), tmap_data_index) + _(".data");
+				tmap_data_index++;
+
+				fn_str += _("\n");
+				if(project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows.size() > 0)
+				{
+					if(project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[0].tile.size() > 0)
+					{
+						fn_str += _("\t\'------- ISO TILEMAP 1 -------\n");
+						wxString tset_name_str = wxString(project->stages[stage_index].layers[layer_index].layer_map.nv_tileset_name);
+						wxString tmap_width_str = wxString::Format(_("%i"), (int)project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[0].tile.size());
+						wxString tmap_height_str = wxString::Format(_("%i"), (int)project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows.size());
+						fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_TileMap = Nirvana_CreateTileMap(\"") + tset_name_str + _("\", ") + tmap_width_str + _(", ") + tmap_height_str + _(")\n");
+						fn_str += _("\n");
+
+						fn_str += _("\t") + _("f = OpenFile(NIRVANA_DATA_DIR$ + \"") + tmap1_data_filename + ("\", BINARY_INPUT)\n");
+						fn_str += _("\t") + _("For y = 0 To ") + wxString::Format(_("%i"), (int)(project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows.size()-1)) + _("\n");
+						fn_str += _("\t\t") + _("For x = 0 To ") + wxString::Format(_("%i"), (int)(project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[0].tile.size()-1)) + _("\n");
+						fn_str += _("\t\t\t") + _("SetTile(Nirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_TileMap.TileMap_ID, Nirvana_Read32(f), x, y)\n");
+						fn_str += _("\t\t") + _("Next\n");
+						fn_str += _("\t") + _("Next\n");
+						fn_str += _("\t") + _("CloseFile(f)\n");
+					}
+				}
+
+				if(project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows.size() > 0)
+				{
+					if(project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows[0].tile.size() > 0)
+					{
+						fn_str += _("\t\'------- ISO TILEMAP 2 -------\n");
+						wxString tset_name_str = wxString(project->stages[stage_index].layers[layer_index].layer_map.nv_tileset_name);
+						wxString tmap_width_str = wxString::Format(_("%i"), (int)project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows[0].tile.size());
+						wxString tmap_height_str = wxString::Format(_("%i"), (int)project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows.size());
+						fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_TileMap2 = Nirvana_CreateTileMap(\"") + tset_name_str + _("\", ") + tmap_width_str + _(", ") + tmap_height_str + _(")\n");
+						fn_str += _("\n");
+
+						fn_str += _("\t") + _("f = OpenFile(NIRVANA_DATA_DIR$ + \"") + tmap2_data_filename + ("\", BINARY_INPUT)\n");
+						fn_str += _("\t") + _("For y = 0 To ") + wxString::Format(_("%i"), (int)(project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows.size()-1)) + _("\n");
+						fn_str += _("\t\t") + _("For x = 0 To ") + wxString::Format(_("%i"), (int)(project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows[0].tile.size()-1)) + _("\n");
+						fn_str += _("\t\t\t") + _("SetTile(Nirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_TileMap2.TileMap_ID, Nirvana_Read32(f), x, y)\n");
+						fn_str += _("\t\t") + _("Next\n");
+						fn_str += _("\t") + _("Next\n");
+						fn_str += _("\t") + _("CloseFile(f)\n");
+					}
+				}
+
+				wxFileName tm1_fname(project->getDir());
+				tm1_fname.AppendDir(_("data"));
+				if(!tm1_fname.Exists())
+					wxMkdir(tm1_fname.GetAbsolutePath());
+
+				tm1_fname.SetFullName(tmap1_data_filename);
+				wxFile tmap1_file(tm1_fname.GetAbsolutePath(), wxFile::write);
+
+				if(tmap1_file.IsOpened())
+				{
+					if(project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows.size() > 0)
+					{
+						int* t_value = new int[project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[0].tile.size()];
+
+						for(int t_row = 0; t_row < project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows.size(); t_row++)
+						{
+							for(int t_col = 0; t_col < project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[t_row].tile.size(); t_col++)
+							{
+								t_value[t_col] = project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[t_row].tile[t_col];
+							}
+							tmap1_file.Write(t_value, sizeof(int) * project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[t_row].tile.size());
+						}
+					}
+
+					tmap1_file.Close();
+				}
+
+
+				wxFileName tm2_fname(project->getDir());
+				tm2_fname.AppendDir(_("data"));
+				if(!tm2_fname.Exists())
+					wxMkdir(tm2_fname.GetAbsolutePath());
+
+				tm2_fname.SetFullName(tmap2_data_filename);
+				wxFile tmap2_file(tm2_fname.GetAbsolutePath(), wxFile::write);
+
+				if(tmap2_file.IsOpened())
+				{
+					if(project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows.size() > 0)
+					{
+						int* t_value = new int[project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows[0].tile.size()];
+
+						for(int t_row = 0; t_row < project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows.size(); t_row++)
+						{
+							for(int t_col = 0; t_col < project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows[t_row].tile.size(); t_col++)
+							{
+								t_value[t_col] = project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows[t_row].tile[t_col];
+							}
+							tmap2_file.Write(t_value, sizeof(int) * project->stages[stage_index].layers[layer_index].layer_map.tile_map2.rows[t_row].tile.size());
+						}
+					}
+
+					tmap2_file.Close();
+				}
+
+			}
 
 			fn_str += _("\n");
 		}
@@ -1870,6 +2080,8 @@ bool NirvanaEditor_MainFrame::generateStages()
 	pfile.Write(_("\tNirvana_Stage_Layers[i].Ref_Canvas = -1\n"));
 	pfile.Write(_("\tNirvana_Stage_Layers[i].Layer_TileMap.Tileset_ID = -1\n"));
 	pfile.Write(_("\tNirvana_Stage_Layers[i].Layer_TileMap.TileMap_ID = -1\n"));
+	pfile.Write(_("\tNirvana_Stage_Layers[i].Layer_TileMap2.Tileset_ID = -1\n"));
+	pfile.Write(_("\tNirvana_Stage_Layers[i].Layer_TileMap2.TileMap_ID = -1\n"));
 	pfile.Write(_("\tNirvana_Stage_Layers[i].Bkg.Image_ID = -1\n"));
 	pfile.Write(_("Next\n\n"));
 
@@ -1912,9 +2124,15 @@ bool NirvanaEditor_MainFrame::generateStages()
 	pfile.Write(_("\t\tIf Nirvana_Stage_Layers[i].LayerType = NIRVANA_LAYER_TYPE_TILEMAP Then\n"));
 	pfile.Write(_("\t\t\tDeleteTileMap(Nirvana_Stage_Layers[i].Layer_TileMap.TileMap_ID)\n"));
 	pfile.Write(_("\t\t\tDeleteTileSet(Nirvana_Stage_Layers[i].Layer_TileMap.Tileset_ID)\n"));
+	pfile.Write(_("\t\tElseIf Nirvana_Stage_Layers[i].LayerType = NIRVANA_LAYER_TYPE_ISO_TILEMAP Then\n"));
+	pfile.Write(_("\t\t\tDeleteTileMap(Nirvana_Stage_Layers[i].Layer_TileMap.TileMap_ID)\n"));
+	pfile.Write(_("\t\t\tDeleteTileMap(Nirvana_Stage_Layers[i].Layer_TileMap2.TileMap_ID)\n"));
+	pfile.Write(_("\t\t\tDeleteTileSet(Nirvana_Stage_Layers[i].Layer_TileMap.Tileset_ID)\n"));
 	pfile.Write(_("\t\tEnd If\n\n"));
 	pfile.Write(_("\t\tNirvana_Stage_Layers[i].Layer_TileMap.TileMap_ID = -1\n"));
+	pfile.Write(_("\t\tNirvana_Stage_Layers[i].Layer_TileMap2.TileMap_ID = -1\n"));
 	pfile.Write(_("\t\tNirvana_Stage_Layers[i].Layer_TileMap.Tileset_ID = -1\n\n"));
+	pfile.Write(_("\t\tNirvana_Stage_Layers[i].Layer_TileMap2.Tileset_ID = -1\n\n"));
 	pfile.Write(_("\tNext\n\n"));
 
 	pfile.Write(_("\tWhile Stack_Size_N(Nirvana_Tileset_Image_Stack) > 0\n"));
@@ -2040,6 +2258,44 @@ void NirvanaEditor_MainFrame::OnGenerate( wxCommandEvent& event )
 	dst_inc_fname.SetFullName(_("nirvana.bas"));
 
 	wxCopyFile(src_inc_fname.GetAbsolutePath(), dst_inc_fname.GetAbsolutePath());
+
+
+
+	wxFileName studio_project_path = project->project_filename_obj;
+	studio_project_path.SetFullName(wxString(project->project_name) + _(".rcprj"));
+
+	if(!studio_project_path.Exists())
+	{
+		wxFile pfile(studio_project_path.GetAbsolutePath(), wxFile::write);
+
+		if(pfile.IsOpened())
+		{
+			pfile.Write(_("RCBASIC_STUDIO:2.0\n"));
+			pfile.Write(_("PROJECT_NAME:") + wxString(project->project_name) + _("\n"));
+			pfile.Write(_("PROJECT_MAIN:main.bas\n"));
+			pfile.Write(_("AUTHOR:Nirvana2D\n"));
+			pfile.Write(_("WEBSITE:http://www.rcbasic.com\n"));
+			pfile.Write(_("DESCRIPTION:Nirvana2D Project\n"));
+			pfile.Write(_("SOURCE_REL:main.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_constants.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_spriteDef.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_stage.bas\n"));
+			pfile.Write(_("SOURCE_REL:nirvana_tileset.bas\n"));
+
+			pfile.Close();
+		}
+
+		wxFileName template_path(wxStandardPaths::Get().GetExecutablePath());
+		template_path.AppendDir(_("export"));
+		template_path.SetFullName(_("template.bas"));
+
+		wxFileName template_tgt_path = project->project_filename_obj;
+		template_tgt_path.SetFullName(_("main.bas"));
+
+		if(!template_tgt_path.Exists())
+            wxCopyFile(template_path.GetAbsolutePath(), template_tgt_path.GetAbsolutePath());
+	}
 }
 
 void NirvanaEditor_MainFrame::OnNewStage( wxCommandEvent& event )
@@ -2175,6 +2431,7 @@ void NirvanaEditor_MainFrame::OnMapEdit_StageSettingsClick( wxCommandEvent& even
 
 	project->setStageName(stage_index, dialog->stage_name.ToStdString());
 	project->setStageSize(stage_index, dialog->tiles_across, dialog->tiles_down);
+	project->setStageSizeISO(stage_index, dialog->tiles_across, dialog->tiles_down);
 
 	m_project_treeCtrl->SetItemText( stage_treeItem[stage_index], dialog->stage_name );
 
@@ -2472,6 +2729,7 @@ void NirvanaEditor_MainFrame::updateMapEditor()
 
 		switch(project->getLayerType(stage_index, layer_index))
 		{
+		    case LAYER_TYPE_ISO_TILEMAP:
 			case LAYER_TYPE_TILEMAP:
 			{
 				m_mapEdit_layerTileset_staticText->SetLabelText( wxString(project->getTilesetName( project->getLayerTileset(stage_index, layer_index) )));
@@ -2563,6 +2821,21 @@ void NirvanaEditor_MainFrame::OnActiveLayerSelect( wxCommandEvent& event )
 		return;
 
 	map_editor->selectLayer(event.GetSelection());
+
+	int stage_index = map_editor->getSelectedStage();
+	int layer_index = map_editor->getSelectedLayer();
+
+	if(project->getLayerType(stage_index, layer_index) == LAYER_TYPE_SPRITE)
+    {
+        map_editor->getMapViewControl()->sprite_grid_type = project->getLayerSpriteGridType(stage_index, layer_index);
+        map_editor->getMapViewControl()->sprite_sort_by = project->getLayerSpriteSortBy(stage_index, layer_index);
+        map_editor->getMapViewControl()->sprite_order_by = project->getLayerSpriteSortOrder(stage_index, layer_index);
+
+        //std::cout << "DBG INFO: " << map_editor->getMapViewControl()->sprite_grid_type << ", "
+        //                          << map_editor->getMapViewControl()->sprite_sort_by << ", "
+        //                          << map_editor->getMapViewControl()->sprite_order_by << std::endl;
+    }
+
 	updateMapEditor();
 }
 
@@ -2588,30 +2861,46 @@ void NirvanaEditor_MainFrame::OnLayerCheckListSelect( wxCommandEvent& event )
 		case LAYER_TYPE_CANVAS_2D:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("CANVAS_2D"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(0);
 		}
 		break;
 
 		case LAYER_TYPE_CANVAS_3D:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("CANVAS_3D"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(0);
 		}
 		break;
 
 		case LAYER_TYPE_SPRITE:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("SPRITE"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(1);
+
+			m_layerSettings_spriteGridType_comboBox->SetSelection(project->getLayerSpriteGridType(stage_index, layer_index));
+			m_layerSettings_spriteSortBy_comboBox->SetSelection(project->getLayerSpriteSortBy(stage_index, layer_index));
+			m_layerSettings_spriteOrderBy_comboBox->SetSelection(project->getLayerSpriteSortOrder(stage_index, layer_index));
 		}
 		break;
 
 		case LAYER_TYPE_TILEMAP:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("TILEMAP"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(0);
+		}
+		break;
+
+		case LAYER_TYPE_ISO_TILEMAP:
+		{
+			m_stageLayer_layerType_staticText->SetLabelText(_("ISO_TILEMAP"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(0);
 		}
 		break;
 
 		default:
 		{
 			m_stageLayer_layerType_staticText->SetLabelText(_("[NA]"));
+			m_layerSettings_extendSettings_simplebook->SetSelection(0);
 		}
 		break;
 	}
@@ -3177,4 +3466,104 @@ void NirvanaEditor_MainFrame::OnMapEditSettings_CameraSpeed_SpinCtrl( wxSpinEven
 		return;
 
 	map_editor->getMapViewControl()->scroll_speed = event.GetValue();
+}
+
+void NirvanaEditor_MainFrame::OnMapEditSettings_TileSelectSpeed_SpinCtrl( wxSpinEvent& event )
+{
+	if(!editor_init)
+		return;
+
+	map_editor->getTileSelectControl()->scroll_speed = event.GetValue();
+	tile_editor->getAnimationSheetControl()->scroll_speed = event.GetValue();
+	tile_editor->getMaskSheetControl()->scroll_speed = event.GetValue();
+}
+
+void NirvanaEditor_MainFrame::OnMapEditSettings_SpriteSelectSpeed_SpinCtrl( wxSpinEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	sprite_editor->getAnimationSheetControl()->scroll_speed = event.GetValue();
+	sprite_editor->getCollisionControl()->scroll_speed = event.GetValue();
+}
+
+
+
+
+void NirvanaEditor_MainFrame::OnMapEdit_SpriteGridType( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	if(!project)
+		return;
+
+	int stage_index = map_editor->getSelectedStage();
+	if(stage_index < 0 || stage_index >= project->getStageCount())
+		return;
+
+	int layer_index = m_layerVisible_checkList->GetSelection();
+
+	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
+		return;
+
+	int grid_type = m_layerSettings_spriteGridType_comboBox->GetSelection();
+	project->setLayerSpriteGridType(stage_index, layer_index, grid_type);
+
+	if(layer_index == map_editor->getSelectedLayer())
+        map_editor->getMapViewControl()->sprite_grid_type = grid_type;
+
+    //std::cout << "grid type" << std::endl;
+}
+
+void NirvanaEditor_MainFrame::OnMapEdit_SpriteSortBy( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	if(!project)
+		return;
+
+	int stage_index = map_editor->getSelectedStage();
+	if(stage_index < 0 || stage_index >= project->getStageCount())
+		return;
+
+	int layer_index = m_layerVisible_checkList->GetSelection();
+
+	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
+		return;
+
+	int sort_by = m_layerSettings_spriteSortBy_comboBox->GetSelection();
+	project->setLayerSpriteSortBy(stage_index, layer_index, sort_by);
+
+    if(layer_index == map_editor->getSelectedLayer())
+        map_editor->getMapViewControl()->sprite_sort_by = sort_by;
+
+    //std::cout << "sort by" << std::endl;
+}
+
+void NirvanaEditor_MainFrame::OnMapEdit_SpriteOrderBy( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	if(!project)
+		return;
+
+	int stage_index = map_editor->getSelectedStage();
+	if(stage_index < 0 || stage_index >= project->getStageCount())
+		return;
+
+	int layer_index = m_layerVisible_checkList->GetSelection();
+
+	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
+		return;
+
+	int sort_order = m_layerSettings_spriteOrderBy_comboBox->GetSelection();
+	project->setLayerSpriteSortOrder(stage_index, layer_index, sort_order);
+
+    if(layer_index == map_editor->getSelectedLayer())
+        map_editor->getMapViewControl()->sprite_order_by = sort_order;
+
+    //std::cout << "order by" << std::endl;
 }

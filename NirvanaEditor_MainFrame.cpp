@@ -39,6 +39,19 @@ Nirvana_MainFrame( parent )
 	m_spriteEdit_collisionShape_comboBox->Append(_("POLYGON"));
 	m_spriteEdit_collisionShape_comboBox->Append(_("CIRCLE"));
 
+	m_layerSettings_spriteGridType_comboBox->Append(_("SQUARE"));
+	m_layerSettings_spriteGridType_comboBox->Append(_("ISOMETRIC"));
+
+	m_layerSettings_spriteSortBy_comboBox->Append(_("NONE"));
+	m_layerSettings_spriteSortBy_comboBox->Append(_("LEAST X"));
+	m_layerSettings_spriteSortBy_comboBox->Append(_("GREATEST X"));
+	m_layerSettings_spriteSortBy_comboBox->Append(_("LEAST Y"));
+	m_layerSettings_spriteSortBy_comboBox->Append(_("GREATEST Y"));
+
+	m_layerSettings_spriteOrderBy_comboBox->Append(_("ASCENDING"));
+	m_layerSettings_spriteOrderBy_comboBox->Append(_("DESCENDING"));
+
+
 	map_editor = new Nirvana_MapEditor(this, m_mapEdit_map_panel, m_mapEdit_tileSelect_panel);
 	map_editor->getMapViewControl()->GetDevice()->getContextManager()->activateContext(map_editor->getMapViewControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 	map_editor->getMapViewControl()->mapEdit_hasContext = true;
@@ -226,53 +239,32 @@ Nirvana_MainFrame( parent )
 					}
 				}
 			}
-			else if(p_cmd[i].dict[0].key.compare(_("MAP_EDITOR_TILE_SELECT_CONTROL"))==0)
+			else if(p_cmd[i].dict[0].key.compare(_("TILE_SELECT_CONTROL"))==0)
 			{
 				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
 				{
 					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
 					{
-						p_cmd[i].dict[obj_index].val.ToInt(&map_editor->getTileSelectControl()->scroll_speed);
+						int speed = 1;
+						p_cmd[i].dict[obj_index].val.ToInt(&speed);
+
+						map_editor->getTileSelectControl()->scroll_speed = speed;
+                        tile_editor->getAnimationSheetControl()->scroll_speed = speed;
+                        tile_editor->getMaskSheetControl()->scroll_speed = speed;
 					}
 				}
 			}
-			else if(p_cmd[i].dict[0].key.compare(_("TILE_EDITOR_ANIMATION_SHEET_CONTROL"))==0)
+			else if(p_cmd[i].dict[0].key.compare(_("SPRITE_SELECT_CONTROL"))==0)
 			{
 				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
 				{
 					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
 					{
-						p_cmd[i].dict[obj_index].val.ToInt(&tile_editor->getAnimationSheetControl()->scroll_speed);
-					}
-				}
-			}
-			else if(p_cmd[i].dict[0].key.compare(_("TILE_EDITOR_MASK_SHEET_CONTROL"))==0)
-			{
-				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
-				{
-					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
-					{
-						p_cmd[i].dict[obj_index].val.ToInt(&tile_editor->getMaskSheetControl()->scroll_speed);
-					}
-				}
-			}
-			else if(p_cmd[i].dict[0].key.compare(_("SPRITE_EDITOR_ANIMATION_SHEET_CONTROL"))==0)
-			{
-				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
-				{
-					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
-					{
-						p_cmd[i].dict[obj_index].val.ToInt(&sprite_editor->getAnimationSheetControl()->scroll_speed);
-					}
-				}
-			}
-			else if(p_cmd[i].dict[0].key.compare(_("SPRITE_EDITOR_SHAPE_SHEET_CONTROL"))==0)
-			{
-				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
-				{
-					if(p_cmd[i].dict[obj_index].key.compare(_("scroll_speed"))==0)
-					{
-						p_cmd[i].dict[obj_index].val.ToInt(&sprite_editor->getCollisionControl()->scroll_speed);
+					    int speed = 1;
+						p_cmd[i].dict[obj_index].val.ToInt(&speed);
+
+						sprite_editor->getAnimationSheetControl()->scroll_speed = speed;
+                        sprite_editor->getCollisionControl()->scroll_speed = speed;
 					}
 				}
 			}
@@ -286,6 +278,9 @@ Nirvana_MainFrame( parent )
 														   map_editor->getMapViewControl()->grid_color.getBlue(),
 														   255 ) );
 	m_mapEdit_cameraSpeed_spinCtrl->SetValue( map_editor->getMapViewControl()->scroll_speed );
+
+	m_mapEdit_tileSelect_Speed_spinCtrl->SetValue( map_editor->getTileSelectControl()->scroll_speed );
+	m_mapEdit_spriteSelect_Speed_spinCtrl->SetValue( sprite_editor->getAnimationSheetControl()->scroll_speed );
 
 
 
@@ -314,27 +309,16 @@ void NirvanaEditor_MainFrame::OnNirvanaClose( wxCloseEvent& event )
 		map_control_config += _("grid_color=") + wxString::Format(_("%u"), map_editor->getMapViewControl()->grid_color.color) + _(" ");
 		map_control_config += _("show_shapes=") + (map_editor->getMapViewControl()->show_shapes_all ? _("true") : _("false")) + _(";");
 
-		wxString map_tileSelect_control_config = _("MAP_EDITOR_TILE_SELECT_CONTROL ");
-		map_tileSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getTileSelectControl()->scroll_speed) + _(";");
+		wxString tileSelect_control_config = _("TILE_SELECT_CONTROL ");
+		tileSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getTileSelectControl()->scroll_speed) + _(";");
 
-		wxString tile_animation_control_config = _("TILE_EDITOR_ANIMATION_SHEET_CONTROL ");
-		tile_animation_control_config += _("scroll_speed=") + wxString::Format(_("%i"), tile_editor->getAnimationSheetControl()->scroll_speed) + _(";");
+		wxString spriteSelect_control_config = _("SPRITE_SELECT_CONTROL ");
+		spriteSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), sprite_editor->getAnimationSheetControl()->scroll_speed) + _(";");
 
-		wxString tile_mask_control_config = _("TILE_EDITOR_MASK_SHEET_CONTROL ");
-		tile_mask_control_config += _("scroll_speed=") + wxString::Format(_("%i"), tile_editor->getMaskSheetControl()->scroll_speed) + _(";");
-
-		wxString sprite_animation_control_config = _("SPRITE_EDITOR_ANIMATION_SHEET_CONTROL ");
-		sprite_animation_control_config += _("scroll_speed=") + wxString::Format(_("%i"), sprite_editor->getAnimationSheetControl()->scroll_speed) + _(";");
-
-		wxString sprite_shape_control_config = _("SPRITE_EDITOR_SHAPE_SHEET_CONTROL ");
-		sprite_shape_control_config += _("scroll_speed=") + wxString::Format(_("%i"), sprite_editor->getCollisionControl()->scroll_speed) + _(";");
 
 		cfg_file.Write(map_control_config + _("\n"));
-		cfg_file.Write(map_tileSelect_control_config + _("\n"));
-		cfg_file.Write(tile_animation_control_config + _("\n"));
-		cfg_file.Write(tile_mask_control_config + _("\n"));
-		cfg_file.Write(sprite_animation_control_config + _("\n"));
-		cfg_file.Write(sprite_shape_control_config + _("\n"));
+		cfg_file.Write(tileSelect_control_config + _("\n"));
+		cfg_file.Write(spriteSelect_control_config + _("\n"));
 
 		cfg_file.Close();
 	}
