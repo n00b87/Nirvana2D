@@ -1592,7 +1592,7 @@ bool NirvanaEditor_MainFrame::generateStages()
 			{
 				fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Ref_Canvas = ") + _("OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)\n");
 
-				fn_str += _("\tSetSpriteLayerPriority(Nirvana_Stage_Layers[") + layer_list_index_str + _("].Ref_Canvas, ");
+				fn_str += _("\tSetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[") + layer_list_index_str + _("].Ref_Canvas, ");
 				switch(project->stages[stage_index].layers[layer_index].spriteSortBy)
 				{
                     case SPRITE_LAYER_SORT_BY_NONE:

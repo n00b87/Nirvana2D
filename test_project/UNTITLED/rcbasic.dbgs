@@ -182,8 +182,8 @@ AN main.Nirvana_Stage_0 stage_shape_x_4 67
 AN main.Nirvana_Stage_0 stage_shape_y_4 68
 N main.Nirvana_Stage_0.#FOR:6 y 69
 N main.Nirvana_Stage_0.#FOR:6.#FOR:7 x 70
-AN main.Nirvana_Stage_0 sprite_shape_x_2 71
-AN main.Nirvana_Stage_0 sprite_shape_y_2 72
+AN main.Nirvana_Stage_0 sprite_shape_x_8 71
+AN main.Nirvana_Stage_0 sprite_shape_y_8 72
 UN main.nirvana_stage_1 active 0
 US main.nirvana_stage_1 name$ 0
 U main.nirvana_stage_1 tile_size 0

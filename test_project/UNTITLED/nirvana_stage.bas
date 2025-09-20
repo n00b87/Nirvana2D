@@ -62,7 +62,7 @@ NIRVANA_WINDOW_WIDTH = 320
 NIRVANA_WINDOW_HEIGHT = 200
 
 
-Dim Nirvana_Stage_Sprites[3] As Nirvana_Sprite
+Dim Nirvana_Stage_Sprites[9] As Nirvana_Sprite
 Dim Nirvana_Stage_Shape_Points[1] As Nirvana_Vector2D
 Dim Nirvana_Stage_Shapes[5] As Nirvana_Shape
 Dim Nirvana_Stage_Layers[5] As Nirvana_Layer
@@ -76,7 +76,7 @@ For i = 0 To 4
 	Nirvana_Stage_Layers[i].Bkg.Image_ID = -1
 Next
 
-For i = 0 To 2
+For i = 0 To 8
 	Nirvana_Stage_Sprites[i].Sprite_ID = -1
 Next
 
@@ -212,8 +212,9 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[2].Scroll_Speed.Y = 1
 
 	Nirvana_Stage_Layers[2].Ref_Canvas = OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)
+	SetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[2].Ref_Canvas, SPRITE_PRIORITY_GREATEST_Y, SPRITE_ORDER_DESCENDING)
 	Canvas(Nirvana_Stage_Layers[2].Ref_Canvas)
-	Nirvana_Stage_Layers[2].Layer_Sprite_Count = 2
+	Nirvana_Stage_Layers[2].Layer_Sprite_Count = 8
 	Nirvana_Stage_Layers[2].Layer_Shape_Count = 5
 
 	'------- SPRITE ("g1") -------
@@ -257,6 +258,132 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	'Render Settings
 	SetSpriteAlpha(Nirvana_Stage_Sprites[1].Sprite_ID, 255)
 	SetSpriteVisible(Nirvana_Stage_Sprites[1].Sprite_ID, TRUE)
+
+	'------- SPRITE ("G1_1") -------
+	Nirvana_Stage_Sprites[2] = Nirvana_CreateSprite("grz", "G1_1")
+
+	'Base Settings
+	SetSpriteType(Nirvana_Stage_Sprites[2].Sprite_ID, SPRITE_TYPE_STATIC)
+	SetSpriteAnimation(Nirvana_Stage_Sprites[2].Sprite_ID, 2, -1)
+
+	'Shape
+	SetSpriteShape(Nirvana_Stage_Sprites[2].Sprite_ID, SPRITE_SHAPE_BOX)
+	SetSpriteShapeOffset(Nirvana_Stage_Sprites[2].Sprite_ID, 20, 0)
+	SetSpriteBox(Nirvana_Stage_Sprites[2].Sprite_ID, 23, 64)
+
+	'Transform
+	SetSpritePosition(Nirvana_Stage_Sprites[2].Sprite_ID, 86, 422)
+	SetSpriteScale(Nirvana_Stage_Sprites[2].Sprite_ID, 1, 1)
+	SetSpriteRotation(Nirvana_Stage_Sprites[2].Sprite_ID, 331.669)
+
+	'Render Settings
+	SetSpriteAlpha(Nirvana_Stage_Sprites[2].Sprite_ID, 255)
+	SetSpriteVisible(Nirvana_Stage_Sprites[2].Sprite_ID, TRUE)
+
+	'------- SPRITE ("G1_1_1") -------
+	Nirvana_Stage_Sprites[3] = Nirvana_CreateSprite("grz", "G1_1_1")
+
+	'Base Settings
+	SetSpriteType(Nirvana_Stage_Sprites[3].Sprite_ID, SPRITE_TYPE_STATIC)
+	SetSpriteAnimation(Nirvana_Stage_Sprites[3].Sprite_ID, 2, -1)
+
+	'Shape
+	SetSpriteShape(Nirvana_Stage_Sprites[3].Sprite_ID, SPRITE_SHAPE_BOX)
+	SetSpriteShapeOffset(Nirvana_Stage_Sprites[3].Sprite_ID, 20, 0)
+	SetSpriteBox(Nirvana_Stage_Sprites[3].Sprite_ID, 23, 64)
+
+	'Transform
+	SetSpritePosition(Nirvana_Stage_Sprites[3].Sprite_ID, 57, 413)
+	SetSpriteScale(Nirvana_Stage_Sprites[3].Sprite_ID, 1, 1)
+	SetSpriteRotation(Nirvana_Stage_Sprites[3].Sprite_ID, 54.021)
+
+	'Render Settings
+	SetSpriteAlpha(Nirvana_Stage_Sprites[3].Sprite_ID, 255)
+	SetSpriteVisible(Nirvana_Stage_Sprites[3].Sprite_ID, TRUE)
+
+	'------- SPRITE ("C1_1") -------
+	Nirvana_Stage_Sprites[4] = Nirvana_CreateSprite("chr", "C1_1")
+
+	'Base Settings
+	SetSpriteType(Nirvana_Stage_Sprites[4].Sprite_ID, SPRITE_TYPE_DYNAMIC)
+	SetSpriteAnimation(Nirvana_Stage_Sprites[4].Sprite_ID, 0, -1)
+
+	'Shape
+	SetSpriteShape(Nirvana_Stage_Sprites[4].Sprite_ID, SPRITE_SHAPE_BOX)
+	SetSpriteShapeOffset(Nirvana_Stage_Sprites[4].Sprite_ID, 8, 138)
+	SetSpriteBox(Nirvana_Stage_Sprites[4].Sprite_ID, 87, 57)
+
+	'Transform
+	SetSpritePosition(Nirvana_Stage_Sprites[4].Sprite_ID, 1040, 457)
+	SetSpriteScale(Nirvana_Stage_Sprites[4].Sprite_ID, 1, 2)
+	SetSpriteRotation(Nirvana_Stage_Sprites[4].Sprite_ID, 0)
+
+	'Render Settings
+	SetSpriteAlpha(Nirvana_Stage_Sprites[4].Sprite_ID, 255)
+	SetSpriteVisible(Nirvana_Stage_Sprites[4].Sprite_ID, TRUE)
+
+	'------- SPRITE ("C1_1_1") -------
+	Nirvana_Stage_Sprites[5] = Nirvana_CreateSprite("chr", "C1_1_1")
+
+	'Base Settings
+	SetSpriteType(Nirvana_Stage_Sprites[5].Sprite_ID, SPRITE_TYPE_DYNAMIC)
+	SetSpriteAnimation(Nirvana_Stage_Sprites[5].Sprite_ID, 0, -1)
+
+	'Shape
+	SetSpriteShape(Nirvana_Stage_Sprites[5].Sprite_ID, SPRITE_SHAPE_BOX)
+	SetSpriteShapeOffset(Nirvana_Stage_Sprites[5].Sprite_ID, 8, 138)
+	SetSpriteBox(Nirvana_Stage_Sprites[5].Sprite_ID, 87, 57)
+
+	'Transform
+	SetSpritePosition(Nirvana_Stage_Sprites[5].Sprite_ID, 1136, 546)
+	SetSpriteScale(Nirvana_Stage_Sprites[5].Sprite_ID, 1, 1)
+	SetSpriteRotation(Nirvana_Stage_Sprites[5].Sprite_ID, 0)
+
+	'Render Settings
+	SetSpriteAlpha(Nirvana_Stage_Sprites[5].Sprite_ID, 255)
+	SetSpriteVisible(Nirvana_Stage_Sprites[5].Sprite_ID, TRUE)
+
+	'------- SPRITE ("C1_1_1_1") -------
+	Nirvana_Stage_Sprites[6] = Nirvana_CreateSprite("chr", "C1_1_1_1")
+
+	'Base Settings
+	SetSpriteType(Nirvana_Stage_Sprites[6].Sprite_ID, SPRITE_TYPE_DYNAMIC)
+	SetSpriteAnimation(Nirvana_Stage_Sprites[6].Sprite_ID, 0, -1)
+
+	'Shape
+	SetSpriteShape(Nirvana_Stage_Sprites[6].Sprite_ID, SPRITE_SHAPE_BOX)
+	SetSpriteShapeOffset(Nirvana_Stage_Sprites[6].Sprite_ID, 8, 138)
+	SetSpriteBox(Nirvana_Stage_Sprites[6].Sprite_ID, 87, 57)
+
+	'Transform
+	SetSpritePosition(Nirvana_Stage_Sprites[6].Sprite_ID, 991, 415)
+	SetSpriteScale(Nirvana_Stage_Sprites[6].Sprite_ID, 1, 1)
+	SetSpriteRotation(Nirvana_Stage_Sprites[6].Sprite_ID, 0)
+
+	'Render Settings
+	SetSpriteAlpha(Nirvana_Stage_Sprites[6].Sprite_ID, 255)
+	SetSpriteVisible(Nirvana_Stage_Sprites[6].Sprite_ID, TRUE)
+
+	'------- SPRITE ("C1_1_1_1_1") -------
+	Nirvana_Stage_Sprites[7] = Nirvana_CreateSprite("chr", "C1_1_1_1_1")
+
+	'Base Settings
+	SetSpriteType(Nirvana_Stage_Sprites[7].Sprite_ID, SPRITE_TYPE_DYNAMIC)
+	SetSpriteAnimation(Nirvana_Stage_Sprites[7].Sprite_ID, 0, -1)
+
+	'Shape
+	SetSpriteShape(Nirvana_Stage_Sprites[7].Sprite_ID, SPRITE_SHAPE_BOX)
+	SetSpriteShapeOffset(Nirvana_Stage_Sprites[7].Sprite_ID, 8, 138)
+	SetSpriteBox(Nirvana_Stage_Sprites[7].Sprite_ID, 87, 57)
+
+	'Transform
+	SetSpritePosition(Nirvana_Stage_Sprites[7].Sprite_ID, 1089, 503)
+	SetSpriteScale(Nirvana_Stage_Sprites[7].Sprite_ID, 1, 1)
+	SetSpriteRotation(Nirvana_Stage_Sprites[7].Sprite_ID, 0)
+
+	'Render Settings
+	SetSpriteAlpha(Nirvana_Stage_Sprites[7].Sprite_ID, 255)
+	SetSpriteVisible(Nirvana_Stage_Sprites[7].Sprite_ID, TRUE)
 
 	'------- SHAPE ("POLYGON_1") -------
 	Nirvana_Stage_Shapes[0].Name$ = "POLYGON_1"
@@ -427,50 +554,51 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[4].Scroll_Speed.Y = 1
 
 	Nirvana_Stage_Layers[4].Ref_Canvas = OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)
+	SetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[4].Ref_Canvas, SPRITE_PRIORITY_NONE, SPRITE_ORDER_ASCENDING)
 	Canvas(Nirvana_Stage_Layers[4].Ref_Canvas)
 	Nirvana_Stage_Layers[4].Layer_Sprite_Count = 1
 	Nirvana_Stage_Layers[4].Layer_Shape_Count = 0
 
 	'------- SPRITE ("guy1") -------
-	Nirvana_Stage_Sprites[2] = Nirvana_CreateSprite("gren_guy", "guy1")
+	Nirvana_Stage_Sprites[8] = Nirvana_CreateSprite("gren_guy", "guy1")
 
 	'Base Settings
-	SetSpriteType(Nirvana_Stage_Sprites[2].Sprite_ID, SPRITE_TYPE_DYNAMIC)
-	SetSpriteAnimation(Nirvana_Stage_Sprites[2].Sprite_ID, 0, -1)
+	SetSpriteType(Nirvana_Stage_Sprites[8].Sprite_ID, SPRITE_TYPE_DYNAMIC)
+	SetSpriteAnimation(Nirvana_Stage_Sprites[8].Sprite_ID, 0, -1)
 
 	'Shape
-	SetSpriteShape(Nirvana_Stage_Sprites[2].Sprite_ID, SPRITE_SHAPE_POLYGON)
-	Dim sprite_shape_x_2[6]
-	Dim sprite_shape_y_2[6]
+	SetSpriteShape(Nirvana_Stage_Sprites[8].Sprite_ID, SPRITE_SHAPE_POLYGON)
+	Dim sprite_shape_x_8[6]
+	Dim sprite_shape_y_8[6]
 
-	sprite_shape_x_2[0] = 16
-	sprite_shape_y_2[0] = 59
+	sprite_shape_x_8[0] = 16
+	sprite_shape_y_8[0] = 59
 
-	sprite_shape_x_2[1] = 6
-	sprite_shape_y_2[1] = 20
+	sprite_shape_x_8[1] = 6
+	sprite_shape_y_8[1] = 20
 
-	sprite_shape_x_2[2] = 25
-	sprite_shape_y_2[2] = 4
+	sprite_shape_x_8[2] = 25
+	sprite_shape_y_8[2] = 4
 
-	sprite_shape_x_2[3] = 40
-	sprite_shape_y_2[3] = 4
+	sprite_shape_x_8[3] = 40
+	sprite_shape_y_8[3] = 4
 
-	sprite_shape_x_2[4] = 45
-	sprite_shape_y_2[4] = 32
+	sprite_shape_x_8[4] = 45
+	sprite_shape_y_8[4] = 32
 
-	sprite_shape_x_2[5] = 41
-	sprite_shape_y_2[5] = 60
+	sprite_shape_x_8[5] = 41
+	sprite_shape_y_8[5] = 60
 
-	SetSpritePolygon(Nirvana_Stage_Sprites[2].Sprite_ID, sprite_shape_x_2, sprite_shape_y_2, 6)
+	SetSpritePolygon(Nirvana_Stage_Sprites[8].Sprite_ID, sprite_shape_x_8, sprite_shape_y_8, 6)
 
 	'Transform
-	SetSpritePosition(Nirvana_Stage_Sprites[2].Sprite_ID, 559, 446)
-	SetSpriteScale(Nirvana_Stage_Sprites[2].Sprite_ID, 1, 1)
-	SetSpriteRotation(Nirvana_Stage_Sprites[2].Sprite_ID, 360)
+	SetSpritePosition(Nirvana_Stage_Sprites[8].Sprite_ID, 559, 446)
+	SetSpriteScale(Nirvana_Stage_Sprites[8].Sprite_ID, 1, 1)
+	SetSpriteRotation(Nirvana_Stage_Sprites[8].Sprite_ID, 360)
 
 	'Render Settings
-	SetSpriteAlpha(Nirvana_Stage_Sprites[2].Sprite_ID, 180)
-	SetSpriteVisible(Nirvana_Stage_Sprites[2].Sprite_ID, TRUE)
+	SetSpriteAlpha(Nirvana_Stage_Sprites[8].Sprite_ID, 180)
+	SetSpriteVisible(Nirvana_Stage_Sprites[8].Sprite_ID, TRUE)
 
 
 	Return nv_stage
@@ -511,6 +639,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[1].Scroll_Speed.Y = 1
 
 	Nirvana_Stage_Layers[1].Ref_Canvas = OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)
+	SetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[1].Ref_Canvas, SPRITE_PRIORITY_NONE, SPRITE_ORDER_ASCENDING)
 	Canvas(Nirvana_Stage_Layers[1].Ref_Canvas)
 	Nirvana_Stage_Layers[1].Layer_Sprite_Count = 1
 	Nirvana_Stage_Layers[1].Layer_Shape_Count = 5

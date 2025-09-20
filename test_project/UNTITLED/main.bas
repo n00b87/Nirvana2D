@@ -10,7 +10,7 @@ vsync = FALSE
 OpenWindow( title$, w, h, fullscreen, vsync )
 
 'Load Nirvana Stage
-Nirvana_LoadStage("st3", 0, 0, w, h)
+Nirvana_LoadStage("st1", 0, 0, w, h)
 
 'Vector for storing camera position
 Dim camera_position As Nirvana_Vector2D
@@ -26,6 +26,8 @@ While Not Key(K_ESCAPE) And WindowExists()
 	
 	If MouseButton(1) Then
 		
+		SetSpriteScale(Nirvana_GetSpriteID(Nirvana_GetLayerSpriteIndex(2, "C1_1")), 1, 1)
+		
 		While MouseButton(1)
 			Update
 		Wend
@@ -34,7 +36,7 @@ While Not Key(K_ESCAPE) And WindowExists()
 		v = Nirvana_GetTileMapPosition(0, MouseX() + camera_position.X, MouseY() + camera_position.Y)
 		Print "V = "; v.X; ", "; v.Y; ": "; Nirvana_GetTile(0, v.X, v.Y)
 		
-		Nirvana_SetTile(0, 0, v.X, v.Y)
+		'Nirvana_SetTile(0, 0, v.X, v.Y)
 	End If
 		
 	
