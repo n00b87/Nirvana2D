@@ -9585,6 +9585,12 @@ void wxIrrlicht::mapEdit_getContext()
         {
             if(shared_control[i]->mapEdit_hasContext)
             {
+                if(shared_control[i] == this)
+                {
+                    mapEdit_hasContext = true;
+                    return;
+                }
+
                 shared_control[i]->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
                 shared_control[i]->mapEdit_hasContext = false;
             }

@@ -1,8 +1,8 @@
 # depslib dependency file v1.0
-1758270808 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
+1758412777 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
 	"NirvanaBase.h"
 
-1758090094 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
+1758412777 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
 	<wx/artprov.h>
 	<wx/xrc/xmlres.h>
 	<wx/intl.h>
@@ -1606,7 +1606,7 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/toolbar.h
 
-1758230717 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
+1758412777 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
 	"NirvanaBase.h"
 	"wxIrrlicht.h"
 	"Nirvana_SpriteAnimation.h"
@@ -1654,7 +1654,7 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/dialog.h
 
-1758263406 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
+1758412777 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -2842,7 +2842,7 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/dirdlg.h
 
-1758248489 /home/n00b/Projects/Nirvana2D/wxIrrlicht.h
+1758412777 /home/n00b/Projects/Nirvana2D/wxIrrlicht.h
 	<windows.h>
 	<irrlicht.h>
 	<wx/wx.h>
@@ -6416,7 +6416,7 @@
 
 1741217486 /usr/include/gtk-3.0/gtk/gtk-autocleanups.h
 
-1758263422 /home/n00b/Projects/Nirvana2D/rc_defines.h
+1758412777 /home/n00b/Projects/Nirvana2D/rc_defines.h
 
 1750832044 /home/n00b/Projects/Nirvana2D/rc_utf8.h
 	<string>
@@ -6464,7 +6464,7 @@
 	"wx/string.h"
 	"wx/filefn.h"
 
-1758094794 /home/n00b/Projects/Nirvana2D/Nirvana_Project.h
+1758412777 /home/n00b/Projects/Nirvana2D/Nirvana_Project.h
 	<wx/wx.h>
 	<wx/filename.h>
 	<vector>
@@ -6472,12 +6472,12 @@
 	"NirvanaEngine_Structs.h"
 	"rc_defines.h"
 
-1758091062 /home/n00b/Projects/Nirvana2D/NirvanaEngine_Structs.h
+1758412777 /home/n00b/Projects/Nirvana2D/NirvanaEngine_Structs.h
 	<irrlicht.h>
 	<vector>
 	"rc_defines.h"
 
-1758270491 source:/home/n00b/Projects/Nirvana2D/Nirvana_Project.cpp
+1758412777 source:/home/n00b/Projects/Nirvana2D/Nirvana_Project.cpp
 	"Nirvana_Project.h"
 	<wx/wx.h>
 	<wx/filename.h>
@@ -6506,7 +6506,7 @@
 	"Nirvana_Project.h"
 	<wx/arrstr.h>
 
-1756758716 source:/home/n00b/Projects/Nirvana2D/Nirvana_MapEditor.cpp
+1758412777 source:/home/n00b/Projects/Nirvana2D/Nirvana_MapEditor.cpp
 	"Nirvana_MapEditor.h"
 	<wx/display.h>
 	<irrlicht.h>
@@ -6525,7 +6525,7 @@
 	"NirvanaBase.h"
 	"Nirvana_Project.h"
 
-1758269327 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
+1758412777 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -6538,7 +6538,7 @@
 	"NirvanaEditor_NewProject_Dialog.h"
 	"Nirvana_Project.h"
 
-1756751877 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewLayer_Dialog.cpp
+1758412777 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_NewLayer_Dialog.cpp
 	"NirvanaEditor_NewLayer_Dialog.h"
 	"rc_defines.h"
 
@@ -6646,7 +6646,7 @@
 	"NirvanaBase.h"
 	"Nirvana_Project.h"
 
-1758011194 source:/home/n00b/Projects/Nirvana2D/Project_Sprite_Tools.cpp
+1758412777 source:/home/n00b/Projects/Nirvana2D/Project_Sprite_Tools.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -6685,7 +6685,7 @@
 
 1731957962 /usr/lib/x86_64-linux-gnu/wx/include/gtk3-unicode-3.2/wx/setup.h
 
-1752079328 /usr/include/x86_64-linux-gnu/sys/types.h
+1758111459 /usr/include/x86_64-linux-gnu/sys/types.h
 	<features.h>
 	<bits/types.h>
 	<bits/types/clock_t.h>
@@ -6698,38 +6698,38 @@
 	<sys/select.h>
 	<bits/pthreadtypes.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types.h
 	<features.h>
 	<bits/wordsize.h>
 	<bits/timesize.h>
 	<bits/typesizes.h>
 	<bits/time64.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/wordsize.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/wordsize.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/timesize.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/timesize.h
 	<bits/wordsize.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/typesizes.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/typesizes.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/time64.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/time64.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types/clock_t.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types/clock_t.h
 	<bits/types.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h
 	<bits/types.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types/time_t.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types/time_t.h
 	<bits/types.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types/timer_t.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types/timer_t.h
 	<bits/types.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/stdint-intn.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/stdint-intn.h
 	<bits/types.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/sys/select.h
+1758111459 /usr/include/x86_64-linux-gnu/sys/select.h
 	<features.h>
 	<bits/types.h>
 	<bits/select.h>
@@ -6739,50 +6739,50 @@
 	<bits/types/struct_timespec.h>
 	<bits/select2.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/select.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/select.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h
 	<bits/types/__sigset_t.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h
 	<bits/types.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h
 	<bits/types.h>
 	<bits/endian.h>
 	<bits/types/time_t.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/endian.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/endian.h
 	<bits/endianness.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/endianness.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/endianness.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/select2.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/select2.h
 	<bits/select-decl.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/select-decl.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/select-decl.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h
 	<bits/thread-shared-types.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h
 	<bits/pthreadtypes-arch.h>
 	<bits/atomic_wide_counter.h>
 	<bits/struct_mutex.h>
 	<bits/struct_rwlock.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h
 	<bits/wordsize.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/struct_mutex.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/struct_mutex.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h
 
-1752079328 /usr/include/x86_64-linux-gnu/sys/stat.h
+1758111459 /usr/include/x86_64-linux-gnu/sys/stat.h
 	<features.h>
 	<bits/types.h>
 	<bits/types/struct_timespec.h>
@@ -6790,26 +6790,26 @@
 	<bits/stat.h>
 	<bits/statx.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/stat.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/stat.h
 	<bits/struct_stat.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/struct_stat.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/struct_stat.h
 	<bits/struct_stat_time64_helper.h>
 	<bits/struct_stat_time64_helper.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/struct_stat_time64_helper.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/struct_stat_time64_helper.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/statx.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/statx.h
 	"linux/stat.h"
 	<bits/statx-generic.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/statx-generic.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/statx-generic.h
 	<bits/types/struct_statx_timestamp.h>
 	<bits/types/struct_statx.h>
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types/struct_statx_timestamp.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types/struct_statx_timestamp.h
 
-1752079328 /usr/include/x86_64-linux-gnu/bits/types/struct_statx.h
+1758111459 /usr/include/x86_64-linux-gnu/bits/types/struct_statx.h
 
 1747037349 /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h
 	<glib/gmacros.h>
