@@ -56,21 +56,19 @@ Function Nirvana_MakeTileCut(tmp_canvas, tset_image, cut_index, tile_w, tile_h)
 	widthInTiles = img_w / tile_w
 
 	src_x = (Nirvana_Tileset_Cuts[cut_index].StartTile MOD widthInTiles) * tile_w
-	src_y = (Nirvana_Tileset_Cuts[cut_index].StartTile  /  widthInTiles) * tile_h
+	src_y = Int(Nirvana_Tileset_Cuts[cut_index].StartTile  /  widthInTiles) * tile_h
 	src_w = tile_w * Nirvana_Tileset_Cuts[cut_index].NumCols
 	src_h = tile_h * Nirvana_Tileset_Cuts[cut_index].NumRows
 
 	DrawImage_Blit(tset_image, 0, 0, src_x, src_y, src_w, src_h)
 
 	Img_ID = CanvasClip(0, 0, src_w, src_h)
+	ColorKey(Img_ID, -1)
 
 	Canvas(current_canvas)
-	
-	Print "Image: "; Img_ID
 
 	Return Img_ID
 End Function
-
 Function Nirvana_Tileset_0()
 	If Nirvana_Tileset_ID_0 >= 0 Then
 		Return Nirvana_Tileset_ID_0

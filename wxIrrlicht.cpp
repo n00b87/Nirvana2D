@@ -3563,6 +3563,9 @@ void wxIrrlicht::util_fillTile_ISO(int base_tile, int fill_tile, int x, int y, b
 
 	int num_cols = 0;
 
+	if(y < 0 || y >= num_rows)
+		return;
+
 	if(use_map2)
     {
         num_cols = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[y].tile.size();
@@ -3573,8 +3576,8 @@ void wxIrrlicht::util_fillTile_ISO(int base_tile, int fill_tile, int x, int y, b
     }
 
 
-	if(y < 0 || y >= num_rows)
-		return;
+	//if(y < 0 || y >= num_rows)
+		//return;
 
 	if(x < 0 || x >= num_cols)
 		return;
