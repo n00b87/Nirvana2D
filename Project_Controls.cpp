@@ -1476,13 +1476,14 @@ bool NirvanaEditor_MainFrame::generateTilesets()
 	pfile.Write(_("\twidthInTiles = img_w / tile_w\n"));
 	pfile.Write(_("\n"));
 	pfile.Write(_("\tsrc_x = (Nirvana_Tileset_Cuts[cut_index].StartTile MOD widthInTiles) * tile_w\n"));
-	pfile.Write(_("\tsrc_y = (Nirvana_Tileset_Cuts[cut_index].StartTile  /  widthInTiles) * tile_h\n"));
+	pfile.Write(_("\tsrc_y = Int(Nirvana_Tileset_Cuts[cut_index].StartTile  /  widthInTiles) * tile_h\n"));
 	pfile.Write(_("\tsrc_w = tile_w * Nirvana_Tileset_Cuts[cut_index].NumCols\n"));
 	pfile.Write(_("\tsrc_h = tile_h * Nirvana_Tileset_Cuts[cut_index].NumRows\n"));
 	pfile.Write(_("\n"));
 	pfile.Write(_("\tDrawImage_Blit(tset_image, 0, 0, src_x, src_y, src_w, src_h)\n"));
 	pfile.Write(_("\n"));
 	pfile.Write(_("\tImg_ID = CanvasClip(0, 0, src_w, src_h)\n"));
+	pfile.Write(_("\tColorKey(Img_ID, -1)\n"));
 	pfile.Write(_("\n"));
 	pfile.Write(_("\tCanvas(current_canvas)\n"));
 	pfile.Write(_("\n"));
