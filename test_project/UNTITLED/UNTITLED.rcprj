@@ -1,0 +1,12 @@
+RCBASIC_STUDIO:1.0
+PROJECT_NAME:UNTITLED
+PROJECT_MAIN:main.bas
+AUTHOR:Nirvana2D
+WEBSITE:http://www.rcbasic.com
+DESCRIPTION:Nirvana2D Project
+SOURCE_REL:main.bas
+SOURCE_REL:nirvana.bas
+SOURCE_REL:nirvana_constants.bas
+SOURCE_REL:nirvana_spriteDef.bas
+SOURCE_REL:nirvana_stage.bas
+SOURCE_REL:nirvana_tileset.bas

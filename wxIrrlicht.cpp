@@ -1,6 +1,7 @@
 #include <wx/wx.h>
 #include <wx/stdpaths.h>
 #include <wx/filename.h>
+#include <wx/listbox.h>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -184,6 +185,12 @@ actual_params->WindowId = (HWND)this->GetHandle();
 	view2D_texture = NULL;
 
 	grid_color.set(255, 200, 200, 200);
+
+	ts_tileset_id = -1;
+    ts_sprite_cut_id = -1;
+    ts_sprite_id = -1;
+
+    is_tile_select_screen = false;
 
 	m_init = true;
 
@@ -412,6 +419,7 @@ void wxIrrlicht::OnRender() {
 			}
 
 			util_drawSelectedSprites();
+			util_drawSelectedTS();
 			util_drawSelectedTiles();
 
 			if(show_shapes_all)
@@ -7368,7 +7376,885 @@ void wxIrrlicht::util_drawSelectedTiles()
 }
 
 
-void wxIrrlicht::pickSprites(int start_x, int start_y, int end_x, int end_y, bool current_canvas_only)
+
+int wxIrrlicht::getCutFromTileSelection()
+{
+	if(!project)
+		return -1;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return -1;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return -1;
+
+	int canvas_index = project->stages[selected_stage].layers[selected_layer].ref_canvas;
+
+	if(canvas_index < 0 || canvas_index >= canvas.size())
+		return -1;
+
+    mapEdit_getContext();
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	int current_active_canvas = active_canvas;
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx = ( (px+adj_scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+adj_scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)adj_scroll_offset_x;
+	int off_y_i = (int)adj_scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+	int img_x = -adj_scroll_offset_x;
+	int img_y = -adj_scroll_offset_y;
+	int img_w = 0;
+	int img_h = 0;
+
+	int tset = project->stages[selected_stage].layers[selected_layer].layer_map.nv_tileset_index;
+
+	if(tset < 0 || tset >= project->tileset.size())
+		return -1;
+
+	int img_id = project->tileset[tset].object.img_id;
+
+	if(img_id < 0 || img_id >= image.size())
+		return -1;
+
+	int num_rows = mapEdit_tile_selection.row.size();
+
+	//std::cout << "SetTILE: rows=" << num_rows << std::endl;
+	int num_cols = 0;
+
+	if(num_rows > 0)
+		num_cols = mapEdit_tile_selection.row[0].data.size();
+
+    //std::cout << "SetTILE: rows=" << num_cols << std::endl;
+
+
+	//util_drawTileLayer(selected_layer);
+
+
+	if(stage_window_isActive && num_cols > 0 && (!mapEdit_lastAction_erase))
+	{
+        int start_tile = mapEdit_tile_selection.row[0].data[0];
+        int cut_index = -1;
+
+        // loop through cuts
+        for(int i = 0; i < project->tileset[tset].tileset_cut.size(); i++)
+        {
+            if(start_tile == project->tileset[tset].tileset_cut[i].start_tile && project->tileset[tset].tileset_cut[i].num_cols == num_cols && project->tileset[tset].tileset_cut[i].num_rows == num_rows)
+            {
+                if(imageExists(project->tileset[tset].tileset_cut[i].cut_image_id))
+                {
+                    return i;
+                }
+
+                cut_index = i;
+                break;
+            }
+        }
+
+        if(cut_index < 0)
+        {
+            ts_cut n_cut;
+            cut_index = project->tileset[tset].tileset_cut.size();
+            n_cut.start_tile = start_tile;
+            n_cut.num_cols = num_cols;
+            n_cut.num_rows = num_rows;
+            n_cut.cut_image_id = -1;
+            n_cut.tileset_index = tset;
+            project->tileset[tset].tileset_cut.push_back(n_cut);
+        }
+
+		int src_x = 0;
+		int src_y = 0;
+		int dst_x = 0;
+		int dst_y = 0;
+
+        setActiveCanvas(back_buffer);
+        int current_clear_color = clear_color.color;
+        setClearColor(0);
+        clearCanvas();
+        setClearColor(current_clear_color);
+
+        util_getTileInTileset(tset, start_tile, &src_x, &src_y);
+
+        int src_w = num_cols * current_frame_width;
+        int src_h = num_rows * current_frame_height;
+
+        drawImage_Blit(img_id, 0, 0, src_x, src_y, src_w, src_h);
+
+        project->tileset[tset].tileset_cut[cut_index].cut_image_id = canvasClip(0, 0, src_w, src_h);
+        setColorKey(project->tileset[tset].tileset_cut[cut_index].cut_image_id, -1);
+
+        setActiveCanvas(current_active_canvas);
+
+        return cut_index;
+
+	}
+
+    return -1;
+
+}
+
+void wxIrrlicht::StageSheet_SelectTile_SpriteLayer_Update()
+{
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	int canvas_index = project->stages[selected_stage].layers[selected_layer].ref_canvas;
+
+	if(canvas_index < 0 || canvas_index >= canvas.size())
+		return;
+
+    mapEdit_getContext();
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	setActiveCanvas(canvas_index);
+	//clearCanvas();
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx = ( (px+adj_scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+adj_scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)adj_scroll_offset_x;
+	int off_y_i = (int)adj_scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+
+	if(!stage_window_isActive)
+	{
+		left_drag_init = false;
+		right_drag_init = false;
+		return;
+	}
+
+
+	if(mouse_state.LeftIsDown())
+	{
+		bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				if(!VIEW_KEY_CTRL)
+					mapEdit_selectSpriteTool_selection.clear();
+
+				pickSprites(bx, by, bx+1, by+1, true, true);
+
+				if(pick_sprites.size() > 0)
+				{
+					Nirvana_SelectTool_SpriteSelection n_sprite_selection;
+					n_sprite_selection.layer_sprite_index = pick_sprites[0];
+					mapEdit_selectSpriteTool_selection.push_back(n_sprite_selection);
+				}
+
+				map_sprite_selection_changed = true;
+
+
+				//std::cout << "TEST: " << selected_layer << std::endl;
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
+void wxIrrlicht::StageSheet_BoxSelectTile_SpriteLayer_Update()
+{
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	int canvas_index = project->stages[selected_stage].layers[selected_layer].ref_canvas;
+
+	if(canvas_index < 0 || canvas_index >= canvas.size())
+		return;
+
+    mapEdit_getContext();
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	setActiveCanvas(canvas_index);
+	//clearCanvas();
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx =px+adj_scroll_offset_x;
+	int by = py+adj_scroll_offset_y;
+
+	int off_x_i = (int)adj_scroll_offset_x;
+	int off_y_i = (int)adj_scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+
+	if(!stage_window_isActive)
+	{
+		left_drag_init = false;
+		right_drag_init = false;
+		return;
+	}
+
+	if(left_drag_init)
+	{
+
+		setActiveCanvas(ui_layer);
+		setColor(rgb(255,255,255));
+		int rect_x = selectSprite_box_start.X - adj_scroll_offset_x;
+		int rect_y = selectSprite_box_start.Y - adj_scroll_offset_y;
+		int rect_w = bx - selectSprite_box_start.X;
+		int rect_h = by - selectSprite_box_start.Y;
+		drawRect(rect_x, rect_y, rect_w, rect_h);
+		setActiveCanvas(canvas_index);
+	}
+
+
+	if(mouse_state.LeftIsDown())
+	{
+		bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				if(!VIEW_KEY_CTRL)
+					mapEdit_selectSpriteTool_selection.clear();
+
+				selectSprite_box_start.set(bx, by);
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+		int min_x = selectSprite_box_start.X < bx ? selectSprite_box_start.X : bx;
+		int min_y = selectSprite_box_start.Y < by ? selectSprite_box_start.Y : by;
+
+		int max_x = selectSprite_box_start.X > bx ? selectSprite_box_start.X : bx;
+		int max_y = selectSprite_box_start.Y > by ? selectSprite_box_start.Y : by;
+
+		std::cout << "call pick" << std::endl;
+		pickSprites(min_x, min_y, max_x, max_y, true, true);
+
+		if(pick_sprites.size() > 0)
+		{
+		    std::cout << "pick_size = " << pick_sprites.size() << std::endl;
+			for(int i = 0; i < pick_sprites.size(); i++)
+			{
+				Nirvana_SelectTool_SpriteSelection n_sprite_selection;
+				n_sprite_selection.layer_sprite_index = pick_sprites[i];
+				mapEdit_selectSpriteTool_selection.push_back(n_sprite_selection);
+			}
+			map_sprite_selection_changed = true;
+		}
+
+
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
+void wxIrrlicht::StageSheet_MoveTile_SpriteLayer_Update()
+{
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	int canvas_index = project->stages[selected_stage].layers[selected_layer].ref_canvas;
+
+	if(canvas_index < 0 || canvas_index >= canvas.size())
+		return;
+
+    mapEdit_getContext();
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	setActiveCanvas(canvas_index);
+	//clearCanvas();
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx =px+adj_scroll_offset_x;
+	int by = py+adj_scroll_offset_y;
+
+	int off_x_i = (int)adj_scroll_offset_x;
+	int off_y_i = (int)adj_scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+
+	//std::cout << "DBG1" << std::endl;
+
+	if(!stage_window_isActive)
+	{
+		left_drag_init = false;
+		right_drag_init = false;
+		return;
+	}
+
+	//std::cout << "DBG2" << std::endl;
+
+
+	if(mouse_state.LeftIsDown())
+	{
+	    //std::cout << "YOLO: " << px << ", " << py << std::endl;
+		bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+
+				selectSprite_box_start.set(bx, by);
+
+				for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+				{
+					int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
+					int spr_x = sprite[sprite_index].position.X;
+					int spr_y = sprite[sprite_index].position.Y;
+					mapEdit_selectSpriteTool_selection[i].start_pos.set(spr_x, spr_y);
+				}
+
+				left_drag_init = true;
+			}
+		}
+		else if(left_drag_init)
+		{
+			int move_x = bx - selectSprite_box_start.X;
+			int move_y = by - selectSprite_box_start.Y;
+
+			//std::cout << "MOVE: " << move_x << ", " << move_y << std::endl;
+
+			if(move_x != 0 || move_y != 0)
+			{
+			    for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+                {
+                    int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
+                    int spr_x = mapEdit_selectSpriteTool_selection[i].start_pos.X + move_x;
+                    int spr_y = mapEdit_selectSpriteTool_selection[i].start_pos.Y + move_y;
+
+                    if(sprite_grid_type == SPRITE_LAYER_GRID_ISOMETRIC)
+                    {
+                        Nirvana_SelectTool_TileSelection iso_sprite_selection = getTileMapPositionAt_NTM(spr_x, spr_y);
+                        spr_x = iso_sprite_selection.map_tile_pos.X;
+                        spr_y = iso_sprite_selection.map_tile_pos.Y;
+
+                        //std::cout << "map tile pos : " << spr_x << ", " << spr_y << std::endl;
+
+                        if(spr_x < 0 || spr_y < 0)
+                        {
+                            spr_x = 0;
+                            spr_y = 0;
+                        }
+
+                        if(iso_sprite_selection.use_map2)
+                        {
+                            spr_x = (spr_x * current_frame_width) - (current_frame_width/2);
+                            spr_y = (spr_y * current_frame_height) - (current_frame_height/2);
+                        }
+                        else
+                        {
+                            spr_x = spr_x * current_frame_width;
+                            spr_y = spr_y * current_frame_height;
+                        }
+                    }
+                    else
+                    {
+                        spr_x = (spr_x/current_frame_width)*current_frame_width;
+                        spr_y = (spr_y/current_frame_height)*current_frame_height;
+                    }
+
+
+                    setSpritePosition(sprite_index, spr_x, spr_y);
+
+                    int ts_index = sprite[sprite_index].layer_ts_index;
+                    if(ts_index >= 0 && ts_index < project->stages[selected_stage].layers[selected_layer].layer_tile_sprites.size())
+                    {
+                        project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[ts_index].x = spr_x;
+                        project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[ts_index].y = spr_y;
+                    }
+                }
+			}
+
+			map_sprite_pos_changed = true;
+			//parent_window->UpdateWindowUI();
+		}
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
+void wxIrrlicht::StageSheet_SetTile_SpriteLayer_Update()
+{
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
+		return;
+
+	int canvas_index = project->stages[selected_stage].layers[selected_layer].ref_canvas;
+
+	if(canvas_index < 0 || canvas_index >= canvas.size())
+		return;
+
+    mapEdit_getContext();
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	setActiveCanvas(canvas_index);
+	//clearCanvas();
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx =px+adj_scroll_offset_x;
+	int by = py+adj_scroll_offset_y;
+
+	int off_x_i = (int)adj_scroll_offset_x;
+	int off_y_i = (int)adj_scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+
+
+	int tset = project->stages[selected_stage].layers[selected_layer].layer_map.nv_tileset_index;
+
+	if(tset < 0 || tset >= project->tileset.size())
+		return;
+
+	int img_id = project->tileset[tset].object.img_id;
+
+	if(img_id < 0 || img_id >= image.size())
+		return;
+
+	int num_rows = mapEdit_tile_selection.row.size();
+
+	int num_cols = 0;
+
+	if(num_rows > 0)
+		num_cols = mapEdit_tile_selection.row[0].data.size();
+
+    int actual_spr_x = 0;
+    int actual_spr_y = 0;
+
+	if(stage_window_isActive && num_cols > 0 && (!mapEdit_lastAction_erase))
+	{
+		int src_x = 0;
+		int src_y = 0;
+		int dst_x = 0;
+		int dst_y = 0;
+
+		//std::cout << "DBG: " << img_id << std::endl;
+
+		setActiveCanvas(canvas_index);
+
+
+		//----------------
+		//int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
+        int spr_x = select_x + off_x_i;
+        int spr_y = select_y + off_y_i;
+
+        //int ts_tileset_id;
+        //int ts_sprite_cut_id;
+        //int ts_sprite_id;
+
+        if(ts_sprite_cut_id >= 0)
+        {
+            int start_tile = mapEdit_tile_selection.row[0].data[0];
+
+            if(project->tileset[tset].tileset_cut[ts_sprite_cut_id].start_tile == start_tile &&
+               project->tileset[tset].tileset_cut[ts_sprite_cut_id].num_cols == num_cols &&
+               project->tileset[tset].tileset_cut[ts_sprite_cut_id].num_rows == num_rows &&
+               project->tileset[tset].tileset_cut[ts_sprite_cut_id].tileset_index == ts_tileset_id)
+            {
+                // current ts_sprite_id does not need to be changed
+            }
+            else
+            {
+                if(spriteExists(ts_sprite_id))
+                {
+                    deleteSprite(ts_sprite_id);
+                    ts_sprite_id = -1;
+                    ts_tileset_id = -1;
+                    ts_sprite_cut_id = -1;
+                }
+            }
+        }
+
+        if(ts_sprite_cut_id < 0)
+        {
+            // create new ts_cut from current selection
+            ts_sprite_cut_id = getCutFromTileSelection();
+
+            if(ts_sprite_cut_id >= 0)
+            {
+                ts_tileset_id = tset;
+                ts_sprite_id = createSprite(-1, project->tileset[tset].tileset_cut[ts_sprite_cut_id].cut_image_id, current_frame_width*num_cols, current_frame_height*num_rows);
+            }
+        }
+
+        if(sprite_grid_type == SPRITE_LAYER_GRID_ISOMETRIC)
+        {
+            Nirvana_SelectTool_TileSelection iso_sprite_selection = getTileMapPositionAt_NTM(spr_x, spr_y);
+            spr_x = iso_sprite_selection.map_tile_pos.X;
+            spr_y = iso_sprite_selection.map_tile_pos.Y;
+
+            //std::cout << "map tile pos : " << spr_x << ", " << spr_y << std::endl;
+
+            if(spr_x < 0 || spr_y < 0)
+            {
+                spr_x = 0;
+                spr_y = 0;
+            }
+
+            if(iso_sprite_selection.use_map2)
+            {
+                spr_x = (spr_x * current_frame_width) - (current_frame_width/2);
+                spr_y = (spr_y * current_frame_height) - (current_frame_height/2);
+            }
+            else
+            {
+                spr_x = spr_x * current_frame_width;
+                spr_y = spr_y * current_frame_height;
+            }
+        }
+        else
+        {
+            spr_x = (spr_x/current_frame_width)*current_frame_width;
+            spr_y = (spr_y/current_frame_height)*current_frame_height;
+        }
+
+        //-----------------
+
+
+		actual_spr_x = spr_x;
+		actual_spr_y = spr_y;
+
+		if(spriteExists(ts_sprite_id))
+            setSpritePosition(ts_sprite_id, actual_spr_x, actual_spr_y);
+
+
+		setActiveCanvas(ui_layer);
+		setColor(rgb(255, 0, 0));
+		drawRect(spr_x - off_x_i, spr_y - off_y_i, num_cols*current_frame_width, num_rows*current_frame_height);
+
+		setActiveCanvas(canvas_index);
+	}
+
+
+	int ts_erase_x = -1;
+	int ts_erase_y = -1;
+
+	if(mapEdit_lastAction_erase)
+    {
+        if(spriteExists(ts_sprite_id))
+        {
+            deleteSprite(ts_sprite_id);
+        }
+
+        ts_sprite_id = -1;
+        ts_sprite_cut_id = -1;
+        ts_tileset_id = -1;
+
+        int spr_x = select_x + off_x_i;
+        int spr_y = select_y + off_y_i;
+
+        if(sprite_grid_type == SPRITE_LAYER_GRID_ISOMETRIC)
+        {
+            Nirvana_SelectTool_TileSelection iso_sprite_selection = getTileMapPositionAt_NTM(spr_x, spr_y);
+            spr_x = iso_sprite_selection.map_tile_pos.X;
+            spr_y = iso_sprite_selection.map_tile_pos.Y;
+
+            //std::cout << "map tile pos : " << spr_x << ", " << spr_y << std::endl;
+
+            if(spr_x < 0 || spr_y < 0)
+            {
+                spr_x = 0;
+                spr_y = 0;
+            }
+
+            if(iso_sprite_selection.use_map2)
+            {
+                spr_x = (spr_x * current_frame_width) - (current_frame_width/2);
+                spr_y = (spr_y * current_frame_height) - (current_frame_height/2);
+            }
+            else
+            {
+                spr_x = spr_x * current_frame_width;
+                spr_y = spr_y * current_frame_height;
+            }
+        }
+        else
+        {
+            spr_x = (spr_x/current_frame_width)*current_frame_width;
+            spr_y = (spr_y/current_frame_height)*current_frame_height;
+        }
+
+        ts_erase_x = spr_x;
+        ts_erase_y = spr_y;
+
+        setActiveCanvas(ui_layer);
+		setColor(rgb(255, 0, 0));
+		drawRect(spr_x - off_x_i, spr_y - off_y_i, current_frame_width, current_frame_height);
+
+		setActiveCanvas(canvas_index);
+    }
+
+
+	//std::cout << "DBG1" << std::endl;
+
+	if(!stage_window_isActive)
+	{
+		left_drag_init = false;
+		right_drag_init = false;
+		return;
+	}
+
+	//std::cout << "DBG2" << std::endl;
+
+
+	if(mouse_state.LeftIsDown() || mouse_state.RightIsDown())
+	{
+	    //std::cout << "YOLO: " << px << ", " << py << std::endl;
+		bool init_click = false;
+
+		if(!(left_drag_init||middle_drag_init||right_drag_init))
+		{
+		    if( px >= 0 && px < pw && py >= 0 && py < ph )
+            {
+                mapEdit_selectSpriteTool_selection.clear();
+
+                int ts_x = ts_erase_x;
+                int ts_y = ts_erase_y;
+                int ts_w = current_frame_width;
+                int ts_h = current_frame_height;
+
+                if(spriteExists(ts_sprite_id))
+                {
+                    ts_x = sprite[ts_sprite_id].position.X;
+                    ts_y = sprite[ts_sprite_id].position.Y;
+                    ts_w = sprite[ts_sprite_id].frame_size.Width;
+                    ts_h = sprite[ts_sprite_id].frame_size.Height;
+                }
+
+                int layer_st_index = -1;
+                int selected_st_index = -1;
+
+                for(int i = 0; i < project->stages[selected_stage].layers[selected_layer].layer_tile_sprites.size(); i++)
+                {
+                    int spr_index = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[i].sprite_id;
+
+                    if(spr_index < 0 || spr_index >= sprite.size())
+                    {
+                        layer_st_index = i;
+                        //break;
+
+                        //continue;
+                    }
+                    else
+                    {
+                        int spr_x = sprite[spr_index].position.X;
+                        int spr_y = sprite[spr_index].position.Y;
+
+                        if(spr_x == ts_x && spr_y == ts_y)
+                        {
+                           selected_st_index = i;
+                        }
+                    }
+
+                    if(selected_st_index >= 0 && layer_st_index >= 0)
+                        break;
+
+                }
+
+                if(layer_st_index >= 0)
+                {
+                    int spr_index = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[layer_st_index].sprite_id;
+                    //deleteSprite(spr_index);
+                    project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[layer_st_index].sprite_id = -1;
+
+                    //project->stages[selected_stage].layers[selected_layer].layer_tile_sprites.erase( project->stages[selected_stage].layers[selected_layer].layer_tile_sprites.begin() +
+                      //                                                                               layer_st_index );
+                }
+
+                if(mouse_state.LeftIsDown())
+                {
+                    if(!mapEdit_lastAction_erase)
+                    {
+                        tileSprite_obj tsprite;
+                        tsprite.width = current_frame_width * num_cols;
+                        tsprite.height = current_frame_height * num_rows;
+                        tsprite.sheet_index = mapEdit_tile_selection.row[0].data[0];
+                        tsprite.image_id = project->tileset[tset].tileset_cut[ts_sprite_cut_id].cut_image_id;
+                        tsprite.tset = tset;
+                        tsprite.cut_index = ts_sprite_cut_id;
+                        tsprite.x = actual_spr_x;
+                        tsprite.y = actual_spr_y;
+                        tsprite.sprite_id = createSprite(-1, tsprite.image_id, tsprite.width, tsprite.height);
+                        setSpritePosition(tsprite.sprite_id, actual_spr_x, actual_spr_y);
+
+                        if(layer_st_index < 0)
+                        {
+                            sprite[tsprite.sprite_id].layer_ts_index = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites.size();
+                            project->stages[selected_stage].layers[selected_layer].layer_tile_sprites.push_back(tsprite);
+                        }
+                        else
+                        {
+                            sprite[tsprite.sprite_id].layer_ts_index = layer_st_index;
+                            project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[layer_st_index] = tsprite;
+                        }
+                    }
+
+                    mapEdit_lastAction_erase = false;
+                }
+                else
+                {
+                    if(selected_st_index >= 0)
+                    {
+                        int spr_index = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[selected_st_index].sprite_id;
+                        deleteSprite(spr_index);
+                        project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[selected_st_index].sprite_id = -1;
+                    }
+
+                    mapEdit_lastAction_erase = true;
+                }
+
+
+                left_drag_init = true; // This could be left or right mouse click but I check the left mouse when making a new sprite so it doesn't matter
+            }
+		}
+
+	}
+	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	{
+
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+
+}
+
+
+void wxIrrlicht::StageSheet_DeleteSelectedTile_SpriteLayer_Update()
+{
+
+}
+
+
+
+void wxIrrlicht::pickSprites(int start_x, int start_y, int end_x, int end_y, bool current_canvas_only, bool pick_tile_sprite)
 {
 	pick_sprites.clear();
 	for(int i = 0; i < sprite.size(); i++)
@@ -7376,8 +8262,14 @@ void wxIrrlicht::pickSprites(int start_x, int start_y, int end_x, int end_y, boo
 		if(!sprite[i].active)
 			continue;
 
+        if(pick_tile_sprite == false && sprite[i].layer_sprite_unique_id < 0)
+            continue;
+
 		if(current_canvas_only && (sprite[i].parent_canvas != active_canvas))
 			continue;
+
+        if(pick_tile_sprite && sprite[i].layer_sprite_unique_id >= 0)
+            continue;
 
 		float scale_x = sprite[i].scale.X;
 		float scale_y = sprite[i].scale.Y;
@@ -9480,10 +10372,22 @@ void wxIrrlicht::UpdateStageSheet()
 				stage_collisionEdit_move();
 			else if(map_tool == MAP_TOOL_SHAPE_DRAW)
 				stage_collisionEdit_draw();
+            else if(map_tool == MAP_TOOL_TS_SELECT)
+				StageSheet_SelectTile_SpriteLayer_Update();
+            else if(map_tool == MAP_TOOL_TS_BOXSELECT)
+				StageSheet_BoxSelectTile_SpriteLayer_Update();
+            else if(map_tool == MAP_TOOL_TS_MOVE)
+				StageSheet_MoveTile_SpriteLayer_Update();
+            else if(map_tool == MAP_TOOL_TS_SET)
+				StageSheet_SetTile_SpriteLayer_Update();
+            else if(map_tool == MAP_TOOL_TS_DELETE)
+				StageSheet_DeleteSelectedTile_SpriteLayer_Update();
+
+            // TODO: ADD MAP_TOOL_TS_ functions
 
 			if(selected_stage >= 0 && selected_stage < project->stages.size())
 			{
-				if(selected_layer >= 0 && selected_layer < project->stages[selected_stage].layers.size())
+				if(selected_layer >= 0 && selected_layer < project->stages[selected_stage].layers.size() && (!is_tile_select_screen))
 				{
 					selected_sprite = -1;
 					//update all sprites in selected layer
@@ -9608,6 +10512,281 @@ void wxIrrlicht::mapEdit_getContext()
 	}
 }
 
+
+void wxIrrlicht::UpdateStageTileSelect_SpriteLayer()
+{
+	if(clear_flag)
+	{
+		mapEdit_getContext();
+		setActiveCanvas(sheet_canvas);
+		clearCanvas();
+		clear_flag = false;
+		return;
+	}
+
+	mapEdit_getContext();
+
+	if(current_sheet_image < 0 || current_sheet_image >= image.size())
+		return;
+
+    if(!imageExists(current_sheet_image))
+        return;
+
+	//std::cout << "DEB2" << std::endl;
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+	if(stage_window_isActive)
+	{
+		this->SetFocusFromKbd();
+	}
+
+
+	//setActiveCanvas(sheet_canvas);
+	//clearCanvas();
+
+	if(VIEW_KEY_W)
+	{
+		scroll_offset_y -= scroll_speed;
+	}
+
+	if(VIEW_KEY_A)
+	{
+		scroll_offset_x -= scroll_speed;
+	}
+
+	if(VIEW_KEY_S)
+	{
+		scroll_offset_y += scroll_speed;
+	}
+
+	if(VIEW_KEY_D)
+	{
+		scroll_offset_x += scroll_speed;
+	}
+
+	int bx = ( (px+scroll_offset_x) / current_frame_width) *  current_frame_width;
+	int by = ( (py+scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+	int off_x_i = (int)scroll_offset_x;
+	int off_y_i = (int)scroll_offset_y;
+
+	int select_x = bx - off_x_i;
+	int select_y = by - off_y_i;
+
+	int img_x = -scroll_offset_x;
+	int img_y = -scroll_offset_y;
+	int img_w = 0;
+	int img_h = 0;
+
+	mapEdit_getContext();
+
+	if(!mapEdit_hasContext)
+		return;
+
+	if(imageExists(current_sheet_image))
+	{
+		setActiveCanvas(sheet_canvas);
+		clearCanvas();
+
+		getImageSizeI(current_sheet_image, &img_w, &img_h);
+		irr::core::dimension2du t_size = image[current_sheet_image].image->getSize();
+
+		//m_pDriver->draw2DImage(image[current_sheet_image].image, irr::core::vector2di(0,0));
+		drawImage_BlitEx_SW(current_sheet_image, img_x, img_y, img_w, img_h, 0, 0, img_w, img_h);
+		//drawImage_Rotozoom(current_sheet_image, 0, 0, 0, 1, 1);
+	}
+
+	setActiveCanvas(overlay_canvas);
+	clearCanvas();
+
+	if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+	{
+		setColor(rgb(255, 0, 0));
+
+		int dw = px - drag_start.x;
+		int dh = py - drag_start.y;
+
+		if(left_drag_init)
+		{
+			int dbx = ( (drag_start.x+scroll_offset_x) / current_frame_width) *  current_frame_width;
+			int dby = ( (drag_start.y+scroll_offset_y) / current_frame_height) *  current_frame_height;
+
+			int d_select_x = dbx - off_x_i;
+			int d_select_y = dby - off_y_i;
+
+			int d_select_w = (( (px+scroll_offset_x) / current_frame_width) *  current_frame_width + current_frame_width) - dbx;
+			int d_select_h = (( (py+scroll_offset_y) / current_frame_height) *  current_frame_height + current_frame_height) - dby;
+			//drawRect(drag_start.x, drag_start.y, dw, dh);
+			drawRect(d_select_x, d_select_y, d_select_w, d_select_h);
+		}
+		else
+			drawRect(select_x, select_y, current_frame_width, current_frame_height);
+
+		//util_draw_cursor(select_x, select_y, irr::video::SColor(255,255,0,0));
+	}
+
+	if(mapEdit_tile_selection.width_in_tiles > 0 && mapEdit_tile_selection.height_in_tiles > 0)
+	{
+		int start_tile = mapEdit_tile_selection.row[0].data[0];
+
+		//std::cout << "DBG: " << img_w << ", " << current_frame_width << std::endl;
+
+		int selected_tile_x = current_frame_width * (start_tile % (img_w/current_frame_width)) - scroll_offset_x;
+		int selected_tile_y = current_frame_height * ((int) (start_tile / (img_w/current_frame_width))) - scroll_offset_y;
+
+		int selected_w = mapEdit_tile_selection.width_in_tiles * current_frame_width;
+		int selected_h = mapEdit_tile_selection.height_in_tiles * current_frame_height;
+
+		setColor(rgb(255, 255, 255));
+		drawRect(selected_tile_x, selected_tile_y, selected_w, selected_h);
+
+	}
+
+
+	if(mouse_state.LeftIsDown() && stage_window_isActive)
+	{
+        bool init_click = false;
+
+		if(!(middle_drag_init||left_drag_init||right_drag_init))
+		{
+
+			if( px >= 0 && px < pw && py >= 0 && py < ph )
+			{
+				drag_start.x = px;
+				drag_start.y = py;
+
+				mapEdit_tile_selection.row.clear();
+
+				mapEdit_tile_selection.width_in_tiles = 0;
+				mapEdit_tile_selection.height_in_tiles = 0;
+
+				int fx = select_x + scroll_offset_x;
+				int fy = select_y + scroll_offset_y;
+				int fw = img_w;
+				int fh = img_h;
+
+				if(stage_window_isActive)
+				{
+					if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+						selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+					else
+						selected_frame = -1;
+				}
+				else
+					selected_frame = -1;
+
+				if(selected_frame >= 0)
+				{
+					selected_tile = selected_frame;
+					selected_tile_end = -1;
+					//tileEdit_mask_set = true;
+					//tileEdit_Sheet_Update = true;
+					//parent_window->UpdateWindowUI();
+				}
+
+				//std::cout << "TEST: " << selected_tile << std::endl;
+
+				left_drag_init = true;
+			}
+		}
+	}
+	else if( ((!mouse_state.LeftIsDown()) || (!stage_window_isActive)) && left_drag_init )
+	{
+		//SHOW_CURSOR;
+		//this->ReleaseMouse();
+		left_drag_init = false;
+
+
+
+		int fx = select_x + scroll_offset_x;
+		int fy = select_y + scroll_offset_y;
+		int fw = img_w;
+		int fh = img_h;
+
+		if(stage_window_isActive)
+		{
+			if(px >= img_x && px < (img_x+img_w) && py >= img_y && py < (img_y+img_h))
+				selected_frame = (fy/current_frame_height) * (fw/current_frame_width) + (fx/current_frame_width);
+			else
+				selected_frame = -1;
+		}
+		else
+			selected_frame = -1;
+
+		if(selected_frame < 0)
+		{
+			mapEdit_tile_selection.width_in_tiles = 1;
+			mapEdit_tile_selection.height_in_tiles = 1;
+			Nirvana_TileSelection_Row t_row;
+			t_row.data.push_back(selected_tile);
+			mapEdit_tile_selection.row.push_back(t_row);
+		}
+		else
+		{
+			int d_start_x = (selected_tile % (img_w / current_frame_width)) * current_frame_width;
+			int d_start_y = (selected_tile / (img_w / current_frame_width)) * current_frame_height;
+
+			int d_end_x = (selected_frame % (img_w / current_frame_width)) * current_frame_width;
+			int d_end_y = (selected_frame / (img_w / current_frame_width)) * current_frame_height;
+
+			int rect_x = d_start_x < d_end_x ? d_start_x : d_end_x;
+			int rect_y = d_start_y < d_end_y ? d_start_y : d_end_y;
+
+			int rect_w = d_end_x - d_start_x;
+			if(rect_w < 0)
+				rect_w *= -1;
+			rect_w += current_frame_width;
+
+			int rect_h = d_end_y - d_start_y;
+			if(rect_h < 0)
+				rect_h *= -1;
+			rect_h += current_frame_height;
+
+			int num_rows = rect_h / current_frame_height;
+			int num_cols = rect_w / current_frame_width;
+
+			num_rows = (num_rows <= 0 ? 1 : num_rows);
+			num_cols = (num_cols <= 0 ? 1 : num_cols);
+
+			int fw = img_w / current_frame_width;
+			for(int tr = 0; tr < num_rows; tr++)
+			{
+				Nirvana_TileSelection_Row t_row;
+				int fy = (rect_y + (current_frame_height*tr)) / current_frame_height;
+				for(int tc = 0; tc < num_cols; tc++)
+				{
+					int fx = (rect_x + (current_frame_width*tc)) / current_frame_width;
+					t_row.data.push_back(fy*fw+fx);
+					//std::cout << (fy*fw+fx) << ", ";
+				}
+				//std::cout << std::endl;
+				mapEdit_tile_selection.row.push_back(t_row);
+			}
+
+			mapEdit_tile_selection.width_in_tiles = num_cols;
+			mapEdit_tile_selection.height_in_tiles = num_rows;
+
+			if(stage_edit_control)
+                stage_edit_control->mapEdit_tile_selection = mapEdit_tile_selection;
+
+			//std::cout << std::endl;
+
+			//std::cout << "START_POS: " << start_x << ", " << start_y << std::endl;
+		}
+
+		//wxMessageBox(_("RELEASE"));
+		return;
+	}
+}
+
+
 void wxIrrlicht::UpdateStageTileSelect()
 {
 	if(clear_flag)
@@ -9622,6 +10801,12 @@ void wxIrrlicht::UpdateStageTileSelect()
 	mapEdit_getContext();
 
 	//std::cout << "DEBUG: " << mapEdit_layerType << ", " << current_sheet_image << std::endl;
+
+	if( mapEdit_layerType == LAYER_TYPE_SPRITE )
+    {
+        UpdateStageTileSelect_SpriteLayer();
+        return;
+    }
 
 	if( (mapEdit_layerType != LAYER_TYPE_TILEMAP) && (mapEdit_layerType != LAYER_TYPE_ISO_TILEMAP) )
     {
@@ -10312,6 +11497,84 @@ int wxIrrlicht::getCanvasZ(int canvas_id)
     return 0;
 }
 
+
+void wxIrrlicht::drawCanvasImage(irr::video::ITexture* texture, int x, int y, int src_x, int src_y, int src_w, int src_h, int tgt_width, int tgt_height)
+{
+    if(texture)
+    {
+        irr::core::rect<irr::s32> sourceRect( irr::core::vector2d<irr::s32>(src_x, src_y), irr::core::dimension2d<irr::s32>(src_w, src_h));
+
+        irr::core::vector2d<irr::s32> position(x, y);
+
+        irr::core::position2d<irr::s32> rotationPoint(0, 0); //since we are not rotating it doesn't matter
+
+        irr::f32 rotation = 0;
+        irr::core::vector2df scale(1.0, 1.0);
+        bool useAlphaChannel = true;
+        irr::video::SColor color(255,255,255,255);
+
+        irr::core::rect<irr::s32> dest( irr::core::vector2d<irr::s32>(x, y), irr::core::dimension2d<irr::s32>(src_w, src_h));
+
+        irr::core::vector2df screenSize(tgt_width, tgt_height);
+
+        m_pDriver->draw2DImage(texture, position, sourceRect, 0, color, useAlphaChannel);
+    }
+}
+
+int wxIrrlicht::canvasClip(int x, int y, int w, int h)
+{
+    if(w <= 0 || h <=0)
+        return -1;
+
+    if(active_canvas >= 0 && active_canvas < canvas.size())
+    {
+        if(!canvas[active_canvas].texture)
+            return -1;
+    }
+    else
+        return -1;
+
+    irr::video::ITexture* texture = m_pDriver->addRenderTargetTexture(irr::core::dimension2d<irr::u32>((irr::u32)w, (irr::u32)h), "canvas_clip_image", irr::video::ECF_A8R8G8B8);
+
+    if(!texture)
+        return -1;
+
+    m_pDriver->setRenderTarget(texture);
+
+    int tgt_w = texture->getSize().Width;
+    int tgt_h = texture->getSize().Height;
+
+    drawCanvasImage(canvas[active_canvas].texture, 0, 0, x, y, w, h, tgt_w, tgt_h);
+
+    setActiveCanvas(active_canvas);
+
+    int img_id = -1;
+    image_obj img;
+    img.image = texture;
+    img.alpha = 255;
+
+    for(int i = 0; i < image.size(); i++)
+    {
+        if(image[i].image == NULL)
+        {
+            img_id = i;
+            break;
+        }
+    }
+
+    if(img_id < 0)
+    {
+        img_id = image.size();
+        image.push_back(img);
+    }
+    else
+    {
+        image[img_id] = img;
+    }
+
+    return img_id;
+}
+
 void wxIrrlicht::setClearColor(irr::u32 color)
 {
     clear_color.set(color);
@@ -10765,7 +12028,7 @@ void wxIrrlicht::drawImage(int img_id, int x, int y)
 	if(active_canvas < 0 || active_canvas >= canvas.size())
 		return;
 
-	if(active_canvas == back_buffer || active_canvas == ui_layer)
+	if(active_canvas == ui_layer)
 		return;
 
     if(img_id < 0 || img_id >= image.size())
@@ -11616,6 +12879,8 @@ int wxIrrlicht::createSprite(int layer_sprite_index, int img_id, double w, doubl
 	sprite[spr_id].image_id = img_id;
 	sprite[spr_id].frame_size.set(w, h);
 	sprite[spr_id].layer_sprite_index = layer_sprite_index;
+	sprite[spr_id].layer_sprite_unique_id = -1;
+	sprite[spr_id].layer_ts_index = -1;
 
 	if(selected_stage >= 0 && selected_stage < project->stages.size())
 	{
@@ -11691,6 +12956,7 @@ void wxIrrlicht::deleteSprite(int spr_id)
 	sprite[spr_id].active = false;
 	sprite[spr_id].parent_canvas = -1;
 	sprite[spr_id].animation.clear();
+	sprite[spr_id].layer_ts_index = -1;
 	int parent_canvas = sprite[spr_id].parent_canvas;
 
 	if(parent_canvas < 0 || parent_canvas >= canvas.size())
@@ -12281,6 +13547,72 @@ void wxIrrlicht::util_drawShapes(int layer_index)
 }
 
 
+void wxIrrlicht::util_drawSelectedTS()
+{
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(selected_layer < 0 || selected_layer >= project->getStageNumLayers(selected_stage))
+		return;
+
+	int ref_canvas = project->stages[selected_stage].layers[selected_layer].ref_canvas;
+
+	if(ref_canvas < 0 || ref_canvas >= canvas.size())
+		return;
+
+    if(mapEdit_layerType == LAYER_TYPE_SPRITE && (!is_tile_select_screen))
+        return;
+
+
+	mapEdit_getContext();
+	setActiveCanvas(ui_layer);
+
+
+	wxMouseState  mouse_state = wxGetMouseState();
+
+	int px = mouse_state.GetPosition().x - this->GetScreenPosition().x;
+	int py = mouse_state.GetPosition().y - this->GetScreenPosition().y;
+
+	int pw = this->GetSize().GetWidth();
+	int ph = this->GetSize().GetHeight();
+
+
+	float scroll_speed_x = project->getLayerScrollSpeed(selected_stage, selected_layer).X;
+	float scroll_speed_y = project->getLayerScrollSpeed(selected_stage, selected_layer).Y;
+
+	int adj_scroll_offset_x = scroll_speed_x * scroll_offset_x;
+	int adj_scroll_offset_y = scroll_speed_y * scroll_offset_y;
+
+	int bx = px+adj_scroll_offset_x;
+	int by = py+adj_scroll_offset_y;
+
+
+	setColor(rgb(255, 255, 255));
+
+	double canvas_offset_x = 0;
+	double canvas_offset_y = 0;
+	getCanvasOffset(ref_canvas, &canvas_offset_x, &canvas_offset_y);
+
+	int off_x = (int)canvas_offset_x;
+	int off_y = (int)canvas_offset_y;
+
+	for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+	{
+		if(mapEdit_selectSpriteTool_selection[i].layer_sprite_index < 0 || mapEdit_selectSpriteTool_selection[i].layer_sprite_index >= sprite.size())
+			continue;
+
+		int spr_id = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; // The layer_sprite_index should be the correct sprite id for tile sprites
+
+		int x = sprite[spr_id].position.X - off_x;
+		int y = sprite[spr_id].position.Y - off_y;
+		int w = sprite[spr_id].frame_size.Width;
+		int h = sprite[spr_id].frame_size.Height;
+
+		drawRect(x, y, w, h);
+	}
+}
+
+
 void wxIrrlicht::util_drawSelectedSprites()
 {
 	if(selected_stage < 0 || selected_stage >= project->stages.size())
@@ -12293,6 +13625,10 @@ void wxIrrlicht::util_drawSelectedSprites()
 
 	if(ref_canvas < 0 || ref_canvas >= canvas.size())
 		return;
+
+    if(mapEdit_layerType == LAYER_TYPE_SPRITE && is_tile_select_screen)
+        return;
+
 
 	mapEdit_getContext();
 	setActiveCanvas(ui_layer);
@@ -13902,6 +15238,29 @@ void wxIrrlicht::initLayer(int layer_index)
 			//std::cout << "add sprite: " << project->stages[selected_stage].layers[layer_index].layer_sprites[spr_index].map_sprite_id << std::endl;
 			addLayerSprite(layer_index, spr_index);
 		}
+
+
+		project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_index = project->getTilesetIndex(project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name);
+		int tset = project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_index;
+		if(tset >= 0 || tset < project->tileset.size())
+		{
+			//std::cout << "dbg tileset: " << project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name << " -> " << tset << std::endl;
+			wxFileName img_path = gfx_path;
+			img_path.SetFullName(project->tileset[tset].file);
+
+			project->tileset[ tset ].object.img_id = util_getImageID(img_path.GetAbsolutePath().ToStdString());
+
+			if(!imageExists(project->tileset[ tset ].object.img_id))
+				project->tileset[ tset ].object.img_id = loadImage(img_path.GetAbsolutePath().ToStdString());
+
+            loadTilesetCuts(tset);
+
+            for(int spr_index = 0; spr_index < project->stages[selected_stage].layers[layer_index].layer_tile_sprites.size(); spr_index++)
+            {
+                addLayerTS(layer_index, spr_index);
+            }
+		}
+
 	}
 	else if(project->getLayerType(selected_stage, layer_index) == LAYER_TYPE_CANVAS_2D)
 	{
@@ -14050,6 +15409,37 @@ void wxIrrlicht::resizeLayers()
 				//std::cout << "add sprite: " << project->stages[selected_stage].layers[layer_index].layer_sprites[spr_index].map_sprite_id << std::endl;
 				addLayerSprite(layer_index, spr_index);
 			}
+
+
+			project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_index = project->getTilesetIndex(project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name);
+            int tset = project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_index;
+            if(tset >= 0 || tset < project->tileset.size())
+            {
+                //std::cout << "dbg tileset: " << project->stages[selected_stage].layers[layer_index].layer_map.nv_tileset_name << " -> " << tset << std::endl;
+                wxFileName gfx_path(project->getDir());
+
+                if(project)
+                    gfx_path.AppendDir(project->tile_path);
+                else
+                    gfx_path.AppendDir(_("gfx"));
+
+                wxFileName img_path = gfx_path;
+                img_path.SetFullName(project->tileset[tset].file);
+
+                project->tileset[ tset ].object.img_id = util_getImageID(img_path.GetAbsolutePath().ToStdString());
+
+                if(!imageExists(project->tileset[ tset ].object.img_id))
+                    project->tileset[ tset ].object.img_id = loadImage(img_path.GetAbsolutePath().ToStdString());
+
+                //std::cout << "Load Cut: " << project->tileset[tset].tileset_name << std::endl;
+                loadTilesetCuts(tset);
+
+                for(int spr_index = 0; spr_index < project->stages[selected_stage].layers[layer_index].layer_tile_sprites.size(); spr_index++)
+                {
+                    //std::cout << "TS# " << spr_index << std::endl;
+                    addLayerTS(layer_index, spr_index);
+                }
+            }
 		}
 	}
 }
@@ -14108,8 +15498,22 @@ void wxIrrlicht::clearStage()
 			project->stages[selected_stage].layers[layer_index].layer_sprites[spr_index].map_sprite_id = -1;
 		}
 
+		for(int spr_index = 0; spr_index < project->stages[selected_stage].layers[layer_index].layer_tile_sprites.size(); spr_index++)
+		{
+			project->stages[selected_stage].layers[layer_index].layer_tile_sprites[spr_index].sprite_id = -1;
+			project->stages[selected_stage].layers[layer_index].layer_tile_sprites[spr_index].image_id = -1;
+		}
+
 		project->stages[selected_stage].layers[layer_index].bkg.image_id = -1;
 	}
+
+	for(int i = 0; i < project->tileset.size(); i++)
+    {
+        for(int cut_index = 0; cut_index < project->tileset[i].tileset_cut.size(); cut_index++)
+        {
+            project->tileset[i].tileset_cut[cut_index].cut_image_id = -1;
+        }
+    }
 
 	selected_stage = -1;
 	selected_layer = -1;
@@ -14256,4 +15660,109 @@ void wxIrrlicht::addLayerSprite(int layer_index, int project_sprite)
 			break;
 		}
 	}
+}
+
+
+int wxIrrlicht::loadTilesetCuts(int tset)
+{
+	if(!project)
+		return -1;
+
+	if(tset < 0 || tset >= project->tileset.size())
+		return -1;
+
+
+    mapEdit_getContext();
+
+	int img_id = project->tileset[tset].object.img_id;
+
+	if(img_id < 0 || img_id >= image.size())
+		return -1;
+
+    int current_clear_color = clear_color.color;
+    setActiveCanvas(back_buffer);
+    setClearColor(0);
+
+	for(int cut_index = 0; cut_index < project->tileset[tset].tileset_cut.size(); cut_index++)
+    {
+		int src_x = 0;
+		int src_y = 0;
+		int dst_x = 0;
+		int dst_y = 0;
+
+		int start_tile = project->tileset[tset].tileset_cut[cut_index].start_tile;
+
+        clearCanvas();
+
+        util_getTileInTileset(tset, start_tile, &src_x, &src_y);
+
+        //std::cout << "INFO: " << start_tile << ", " << src_x << ", " << src_y << std::endl;
+
+        int src_w = project->tileset[tset].tileset_cut[cut_index].num_cols * project->stages[selected_stage].tile_width;
+        int src_h = project->tileset[tset].tileset_cut[cut_index].num_rows * project->stages[selected_stage].tile_height;
+
+        drawImage_Blit(img_id, 0, 0, src_x, src_y, src_w, src_h);
+
+        project->tileset[tset].tileset_cut[cut_index].cut_image_id = canvasClip(0, 0, src_w, src_h);
+        setColorKey(project->tileset[tset].tileset_cut[cut_index].cut_image_id, -1);
+    }
+
+	setClearColor(current_clear_color);
+
+    return -1;
+
+}
+
+
+void wxIrrlicht::addLayerTS(int layer_index, int ts_index)
+{
+	if(!project)
+		return;
+
+	if(selected_stage < 0 || selected_stage >= project->stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= project->stages[selected_stage].layers.size())
+		return;
+
+	if(project->getLayerType(selected_stage, layer_index) != LAYER_TYPE_SPRITE)
+		return;
+
+	if(ts_index < 0 || ts_index >= project->stages[selected_stage].layers[layer_index].layer_tile_sprites.size())
+		return;
+
+	mapEdit_getContext();
+	setActiveCanvas(project->stages[selected_stage].layers[layer_index].ref_canvas);
+
+	int tset = project->stages[selected_stage].layers[layer_index].layer_tile_sprites[ts_index].tset;
+
+	if(tset < 0 || tset >= project->tileset.size())
+        return;
+
+    int cut_index = project->stages[selected_stage].layers[layer_index].layer_tile_sprites[ts_index].cut_index;
+
+    if(cut_index < 0 || cut_index >= project->tileset[tset].tileset_cut.size())
+        return;
+
+	int img_id = project->tileset[tset].tileset_cut[cut_index].cut_image_id;
+
+	if(img_id < 0 || img_id >= image.size())
+        return;
+
+	int w = project->stages[selected_stage].layers[layer_index].layer_tile_sprites[ts_index].width;
+	int h = project->stages[selected_stage].layers[layer_index].layer_tile_sprites[ts_index].height;
+
+	project->stages[selected_stage].layers[layer_index].layer_tile_sprites[ts_index].sprite_id = createSprite(-1, img_id, w, h);
+	int spr_id = project->stages[selected_stage].layers[layer_index].layer_tile_sprites[ts_index].sprite_id;
+
+	//std::cout << "Sprite: " << spr_id << " -> w=" << w << ", h=" << h << ", img=" << img_id << std::endl;
+
+	if(spr_id < 0)
+		return;
+
+	int x = project->stages[selected_stage].layers[layer_index].layer_tile_sprites[ts_index].x;
+	int y = project->stages[selected_stage].layers[layer_index].layer_tile_sprites[ts_index].y;
+
+	setSpritePosition(spr_id, x, y);
+	sprite[spr_id].layer_ts_index = ts_index;
 }

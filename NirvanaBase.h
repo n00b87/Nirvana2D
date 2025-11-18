@@ -168,6 +168,8 @@ class Nirvana_MainFrame : public wxFrame
 		wxPanel* m_panel14;
 		wxAuiNotebook* m_mapEdit_layerObjectTools_auinotebook;
 		wxPanel* m_mapEdit_tile_panel;
+		wxSimplebook* m_mapEdit_spriteTileTools_simplebook;
+		wxPanel* m_panel70;
 		wxAuiToolBar* m_mapEdit_tileTools_auiToolBar;
 		wxAuiToolBarItem* m_mapEdit_tileToolbar_select_tool;
 		wxAuiToolBarItem* m_mapEdit_tileToolbar_boxSelect_tool;
@@ -176,9 +178,20 @@ class Nirvana_MainFrame : public wxFrame
 		wxAuiToolBarItem* m_mapEdit_tileToolbar_copyTile_tool;
 		wxAuiToolBarItem* m_mapEdit_tileToolbar_fillTile_tool;
 		wxAuiToolBarItem* m_mapEdit_tileToolbar_deleteSelected_tool;
+		wxPanel* m_panel71;
+		wxAuiToolBar* m_mapEdit_tileTools_auiToolBar1;
+		wxAuiToolBarItem* m_mapEdit_tsToolbar_select_tool;
+		wxAuiToolBarItem* m_mapEdit_tsToolbar_boxSelect_tool;
+		wxAuiToolBarItem* m_mapEdit_tsToolbar_move_tool;
+		wxAuiToolBarItem* m_mapEdit_tsToolbar_setTSprite_solid_tool;
+		wxAuiToolBarItem* m_mapEdit_tsToolbar_deleteSelected_tool;
 		wxPanel* m_mapEdit_tilesetInfo_panel;
 		wxStaticText* m_staticText95;
 		wxStaticText* m_mapEdit_layerTileset_staticText;
+		wxSimplebook* m_tilesetExtraOptions_simplebook;
+		wxPanel* m_tilesetExtra_default_panel;
+		wxPanel* m_tilesetExtra_spriteOptions_panel;
+		wxButton* m_tileset_spriteSetTileset_button;
 		wxStaticLine* m_staticline11;
 		wxPanel* m_mapEdit_tileSelect_panel;
 		wxPanel* m_mapEdit_sprite_panel;
@@ -408,6 +421,12 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnMapEdit_TileTool_CopyTile( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_TileTool_FillTile( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_TileTool_DeleteSelected( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TSTool_Select( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TSTool_BoxSelect( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TSTool_Move( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TSTool_SetTile( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_TSTool_DeleteSelected( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSetSpriteLayerTileset( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnEnterMapEditTileSelect( wxMouseEvent& event ) { event.Skip(); }
 		virtual void OnLeaveMapEditTileSelect( wxMouseEvent& event ) { event.Skip(); }
 		virtual void OnUpdateMapEditTileSelect( wxUpdateUIEvent& event ) { event.Skip(); }
@@ -680,35 +699,6 @@ class NewStage_Dialog : public wxDialog
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-/// Class NewProject_Dialog
-///////////////////////////////////////////////////////////////////////////////
-class NewProject_Dialog : public wxDialog
-{
-	private:
-
-	protected:
-		wxPanel* m_panel45;
-		wxStaticText* m_staticText46;
-		wxTextCtrl* m_projectName_textCtrl;
-		wxStaticText* m_staticText98;
-		wxDirPickerCtrl* m_projectLocation_dirPicker;
-		wxButton* m_cancel_button;
-		wxButton* m_ok_button;
-
-		// Virtual event handlers, override them in your derived class
-		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
-
-
-	public:
-
-		NewProject_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("New Project"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 514,181 ), long style = wxDEFAULT_DIALOG_STYLE );
-
-		~NewProject_Dialog();
-
-};
-
-///////////////////////////////////////////////////////////////////////////////
 /// Class NewLayer_Dialog
 ///////////////////////////////////////////////////////////////////////////////
 class NewLayer_Dialog : public wxDialog
@@ -741,6 +731,35 @@ class NewLayer_Dialog : public wxDialog
 		NewLayer_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("New Layer"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 554,377 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~NewLayer_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class NewProject_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class NewProject_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxPanel* m_panel45;
+		wxStaticText* m_staticText46;
+		wxTextCtrl* m_projectName_textCtrl;
+		wxStaticText* m_staticText98;
+		wxDirPickerCtrl* m_projectLocation_dirPicker;
+		wxButton* m_cancel_button;
+		wxButton* m_ok_button;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		NewProject_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("New Project"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 514,181 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~NewProject_Dialog();
 
 };
 
@@ -913,6 +932,61 @@ class SpriteSortSetting_Dialog : public wxDialog
 		SpriteSortSetting_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Sprite Render Priority"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 534,191 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~SpriteSortSetting_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class SpriteLayer_SelectTileset_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class SpriteLayer_SelectTileset_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxPanel* m_layerType_tileset_panel;
+		wxStaticText* m_staticText551;
+		wxSearchCtrl* m_tileset_searchCtrl;
+		wxListBox* m_tileset_listBox;
+		wxButton* m_button21;
+		wxButton* m_button20;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnSearch( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSelect( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		SpriteLayer_SelectTileset_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Set Tilesheet"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 554,378 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~SpriteLayer_SelectTileset_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class SpriteLayer_ChangeTilesetWarning_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class SpriteLayer_ChangeTilesetWarning_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText63;
+		wxStaticText* m_msg_staticText;
+		wxButton* m_button23;
+		wxButton* m_button24;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnContinue( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		SpriteLayer_ChangeTilesetWarning_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Change Tileset"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 341,187 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~SpriteLayer_ChangeTilesetWarning_Dialog();
 
 };
 

@@ -73,6 +73,11 @@
 #define MAP_TOOL_SHAPE_BOXSELECT	14
 #define MAP_TOOL_SHAPE_MOVE			15
 #define MAP_TOOL_SHAPE_DRAW			16
+#define MAP_TOOL_TS_SELECT          17
+#define MAP_TOOL_TS_BOXSELECT       18
+#define MAP_TOOL_TS_MOVE            19
+#define MAP_TOOL_TS_SET             20
+#define MAP_TOOL_TS_DELETE          21
 
 
 #define SPRITE_TYPE_STATIC		0

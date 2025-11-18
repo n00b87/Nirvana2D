@@ -819,7 +819,12 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer261;
 	bSizer261 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_mapEdit_tileTools_auiToolBar = new wxAuiToolBar( m_mapEdit_tile_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
+	m_mapEdit_spriteTileTools_simplebook = new wxSimplebook( m_mapEdit_tile_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_panel70 = new wxPanel( m_mapEdit_spriteTileTools_simplebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer214;
+	bSizer214 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_mapEdit_tileTools_auiToolBar = new wxAuiToolBar( m_panel70, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
 	m_mapEdit_tileToolbar_select_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
 
 	m_mapEdit_tileToolbar_boxSelect_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
@@ -838,7 +843,41 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 
 	m_mapEdit_tileTools_auiToolBar->Realize();
 
-	bSizer261->Add( m_mapEdit_tileTools_auiToolBar, 1, wxALL, 5 );
+	bSizer214->Add( m_mapEdit_tileTools_auiToolBar, 1, wxALL, 0 );
+
+
+	m_panel70->SetSizer( bSizer214 );
+	m_panel70->Layout();
+	bSizer214->Fit( m_panel70 );
+	m_mapEdit_spriteTileTools_simplebook->AddPage( m_panel70, _("a page"), false );
+	m_panel71 = new wxPanel( m_mapEdit_spriteTileTools_simplebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer215;
+	bSizer215 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_mapEdit_tileTools_auiToolBar1 = new wxAuiToolBar( m_panel71, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
+	m_mapEdit_tsToolbar_select_tool = m_mapEdit_tileTools_auiToolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+
+	m_mapEdit_tsToolbar_boxSelect_tool = m_mapEdit_tileTools_auiToolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+
+	m_mapEdit_tsToolbar_move_tool = m_mapEdit_tileTools_auiToolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+
+	m_mapEdit_tsToolbar_setTSprite_solid_tool = m_mapEdit_tileTools_auiToolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/place_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+
+	m_mapEdit_tileTools_auiToolBar1->AddSeparator();
+
+	m_mapEdit_tsToolbar_deleteSelected_tool = m_mapEdit_tileTools_auiToolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	m_mapEdit_tileTools_auiToolBar1->Realize();
+
+	bSizer215->Add( m_mapEdit_tileTools_auiToolBar1, 1, wxALL, 0 );
+
+
+	m_panel71->SetSizer( bSizer215 );
+	m_panel71->Layout();
+	bSizer215->Fit( m_panel71 );
+	m_mapEdit_spriteTileTools_simplebook->AddPage( m_panel71, _("a page"), false );
+
+	bSizer261->Add( m_mapEdit_spriteTileTools_simplebook, 1, wxEXPAND | wxALL, 5 );
 
 
 	bSizer16->Add( bSizer261, 0, wxEXPAND, 5 );
@@ -849,11 +888,32 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 
 	m_staticText95 = new wxStaticText( m_mapEdit_tilesetInfo_panel, wxID_ANY, _("Tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText95->Wrap( -1 );
-	bSizer174->Add( m_staticText95, 0, wxALL, 5 );
+	bSizer174->Add( m_staticText95, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
 	m_mapEdit_layerTileset_staticText = new wxStaticText( m_mapEdit_tilesetInfo_panel, wxID_ANY, _("[NA]"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_mapEdit_layerTileset_staticText->Wrap( -1 );
-	bSizer174->Add( m_mapEdit_layerTileset_staticText, 0, wxALL, 5 );
+	bSizer174->Add( m_mapEdit_layerTileset_staticText, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_tilesetExtraOptions_simplebook = new wxSimplebook( m_mapEdit_tilesetInfo_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0 );
+	m_tilesetExtra_default_panel = new wxPanel( m_tilesetExtraOptions_simplebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_tilesetExtraOptions_simplebook->AddPage( m_tilesetExtra_default_panel, _("a page"), false );
+	m_tilesetExtra_spriteOptions_panel = new wxPanel( m_tilesetExtraOptions_simplebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer1991;
+	bSizer1991 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer1991->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_tileset_spriteSetTileset_button = new wxButton( m_tilesetExtra_spriteOptions_panel, wxID_ANY, _("Set Tilesheet"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer1991->Add( m_tileset_spriteSetTileset_button, 0, wxALL, 0 );
+
+
+	m_tilesetExtra_spriteOptions_panel->SetSizer( bSizer1991 );
+	m_tilesetExtra_spriteOptions_panel->Layout();
+	bSizer1991->Fit( m_tilesetExtra_spriteOptions_panel );
+	m_tilesetExtraOptions_simplebook->AddPage( m_tilesetExtra_spriteOptions_panel, _("a page"), false );
+
+	bSizer174->Add( m_tilesetExtraOptions_simplebook, 1, wxEXPAND | wxALL, 0 );
 
 
 	m_mapEdit_tilesetInfo_panel->SetSizer( bSizer174 );
@@ -2040,6 +2100,12 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	this->Connect( m_mapEdit_tileToolbar_copyTile_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_TileTool_CopyTile ) );
 	this->Connect( m_mapEdit_tileToolbar_fillTile_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_TileTool_FillTile ) );
 	this->Connect( m_mapEdit_tileToolbar_deleteSelected_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_TileTool_DeleteSelected ) );
+	this->Connect( m_mapEdit_tsToolbar_select_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_TSTool_Select ) );
+	this->Connect( m_mapEdit_tsToolbar_boxSelect_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_TSTool_BoxSelect ) );
+	this->Connect( m_mapEdit_tsToolbar_move_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_TSTool_Move ) );
+	this->Connect( m_mapEdit_tsToolbar_setTSprite_solid_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_TSTool_SetTile ) );
+	this->Connect( m_mapEdit_tsToolbar_deleteSelected_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_TSTool_DeleteSelected ) );
+	m_tileset_spriteSetTileset_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnSetSpriteLayerTileset ), NULL, this );
 	m_mapEdit_tileSelect_panel->Connect( wxEVT_ENTER_WINDOW, wxMouseEventHandler( Nirvana_MainFrame::OnEnterMapEditTileSelect ), NULL, this );
 	m_mapEdit_tileSelect_panel->Connect( wxEVT_LEAVE_WINDOW, wxMouseEventHandler( Nirvana_MainFrame::OnLeaveMapEditTileSelect ), NULL, this );
 	m_mapEdit_tileSelect_panel->Connect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( Nirvana_MainFrame::OnUpdateMapEditTileSelect ), NULL, this );
@@ -2547,79 +2613,6 @@ NewStage_Dialog::~NewStage_Dialog()
 {
 }
 
-NewProject_Dialog::NewProject_Dialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
-{
-	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
-
-	wxBoxSizer* bSizer105;
-	bSizer105 = new wxBoxSizer( wxVERTICAL );
-
-	m_panel45 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
-	wxBoxSizer* bSizer106;
-	bSizer106 = new wxBoxSizer( wxVERTICAL );
-
-	wxBoxSizer* bSizer107;
-	bSizer107 = new wxBoxSizer( wxHORIZONTAL );
-
-	m_staticText46 = new wxStaticText( m_panel45, wxID_ANY, _("Project Name:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText46->Wrap( -1 );
-	bSizer107->Add( m_staticText46, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
-	m_projectName_textCtrl = new wxTextCtrl( m_panel45, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer107->Add( m_projectName_textCtrl, 3, wxALL, 5 );
-
-
-	bSizer106->Add( bSizer107, 0, wxEXPAND, 5 );
-
-	wxBoxSizer* bSizer176;
-	bSizer176 = new wxBoxSizer( wxHORIZONTAL );
-
-	m_staticText98 = new wxStaticText( m_panel45, wxID_ANY, _("Project Location:"), wxDefaultPosition, wxDefaultSize, 0 );
-	m_staticText98->Wrap( -1 );
-	bSizer176->Add( m_staticText98, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
-
-	m_projectLocation_dirPicker = new wxDirPickerCtrl( m_panel45, wxID_ANY, wxEmptyString, _("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
-	bSizer176->Add( m_projectLocation_dirPicker, 3, wxALL, 5 );
-
-
-	bSizer106->Add( bSizer176, 0, wxEXPAND, 5 );
-
-	wxBoxSizer* bSizer116;
-	bSizer116 = new wxBoxSizer( wxHORIZONTAL );
-
-
-	bSizer116->Add( 0, 0, 1, wxEXPAND, 5 );
-
-	m_cancel_button = new wxButton( m_panel45, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer116->Add( m_cancel_button, 0, wxALL, 5 );
-
-	m_ok_button = new wxButton( m_panel45, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
-	bSizer116->Add( m_ok_button, 0, wxALL, 5 );
-
-
-	bSizer106->Add( bSizer116, 0, wxEXPAND, 5 );
-
-
-	m_panel45->SetSizer( bSizer106 );
-	m_panel45->Layout();
-	bSizer106->Fit( m_panel45 );
-	bSizer105->Add( m_panel45, 1, wxEXPAND | wxALL, 5 );
-
-
-	this->SetSizer( bSizer105 );
-	this->Layout();
-
-	this->Centre( wxBOTH );
-
-	// Connect Events
-	m_cancel_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewProject_Dialog::OnCancel ), NULL, this );
-	m_ok_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewProject_Dialog::OnCreate ), NULL, this );
-}
-
-NewProject_Dialog::~NewProject_Dialog()
-{
-}
-
 NewLayer_Dialog::NewLayer_Dialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
 {
 	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
@@ -2726,6 +2719,79 @@ NewLayer_Dialog::NewLayer_Dialog( wxWindow* parent, wxWindowID id, const wxStrin
 }
 
 NewLayer_Dialog::~NewLayer_Dialog()
+{
+}
+
+NewProject_Dialog::NewProject_Dialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer105;
+	bSizer105 = new wxBoxSizer( wxVERTICAL );
+
+	m_panel45 = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer106;
+	bSizer106 = new wxBoxSizer( wxVERTICAL );
+
+	wxBoxSizer* bSizer107;
+	bSizer107 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText46 = new wxStaticText( m_panel45, wxID_ANY, _("Project Name:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText46->Wrap( -1 );
+	bSizer107->Add( m_staticText46, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_projectName_textCtrl = new wxTextCtrl( m_panel45, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer107->Add( m_projectName_textCtrl, 3, wxALL, 5 );
+
+
+	bSizer106->Add( bSizer107, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer176;
+	bSizer176 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText98 = new wxStaticText( m_panel45, wxID_ANY, _("Project Location:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText98->Wrap( -1 );
+	bSizer176->Add( m_staticText98, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_projectLocation_dirPicker = new wxDirPickerCtrl( m_panel45, wxID_ANY, wxEmptyString, _("Select a folder"), wxDefaultPosition, wxDefaultSize, wxDIRP_DEFAULT_STYLE );
+	bSizer176->Add( m_projectLocation_dirPicker, 3, wxALL, 5 );
+
+
+	bSizer106->Add( bSizer176, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer116;
+	bSizer116 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer116->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_cancel_button = new wxButton( m_panel45, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer116->Add( m_cancel_button, 0, wxALL, 5 );
+
+	m_ok_button = new wxButton( m_panel45, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer116->Add( m_ok_button, 0, wxALL, 5 );
+
+
+	bSizer106->Add( bSizer116, 0, wxEXPAND, 5 );
+
+
+	m_panel45->SetSizer( bSizer106 );
+	m_panel45->Layout();
+	bSizer106->Fit( m_panel45 );
+	bSizer105->Add( m_panel45, 1, wxEXPAND | wxALL, 5 );
+
+
+	this->SetSizer( bSizer105 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_cancel_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewProject_Dialog::OnCancel ), NULL, this );
+	m_ok_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( NewProject_Dialog::OnCreate ), NULL, this );
+}
+
+NewProject_Dialog::~NewProject_Dialog()
 {
 }
 
@@ -3178,5 +3244,157 @@ SpriteSortSetting_Dialog::SpriteSortSetting_Dialog( wxWindow* parent, wxWindowID
 }
 
 SpriteSortSetting_Dialog::~SpriteSortSetting_Dialog()
+{
+}
+
+SpriteLayer_SelectTileset_Dialog::SpriteLayer_SelectTileset_Dialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer117;
+	bSizer117 = new wxBoxSizer( wxVERTICAL );
+
+	m_layerType_tileset_panel = new wxPanel( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	wxBoxSizer* bSizer121;
+	bSizer121 = new wxBoxSizer( wxVERTICAL );
+
+	wxBoxSizer* bSizer122;
+	bSizer122 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText551 = new wxStaticText( m_layerType_tileset_panel, wxID_ANY, _("Tileset:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText551->Wrap( -1 );
+	bSizer122->Add( m_staticText551, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_tileset_searchCtrl = new wxSearchCtrl( m_layerType_tileset_panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	#ifndef __WXMAC__
+	m_tileset_searchCtrl->ShowSearchButton( true );
+	#endif
+	m_tileset_searchCtrl->ShowCancelButton( false );
+	bSizer122->Add( m_tileset_searchCtrl, 4, wxALL, 5 );
+
+
+	bSizer121->Add( bSizer122, 0, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer123;
+	bSizer123 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer123->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_tileset_listBox = new wxListBox( m_layerType_tileset_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	bSizer123->Add( m_tileset_listBox, 4, wxALL|wxEXPAND, 5 );
+
+
+	bSizer121->Add( bSizer123, 1, wxEXPAND, 5 );
+
+
+	m_layerType_tileset_panel->SetSizer( bSizer121 );
+	m_layerType_tileset_panel->Layout();
+	bSizer121->Fit( m_layerType_tileset_panel );
+	bSizer117->Add( m_layerType_tileset_panel, 1, wxEXPAND | wxALL, 5 );
+
+	wxBoxSizer* bSizer119;
+	bSizer119 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer119->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_button21 = new wxButton( this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer119->Add( m_button21, 0, wxALL, 5 );
+
+	m_button20 = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer119->Add( m_button20, 0, wxALL, 5 );
+
+
+	bSizer117->Add( bSizer119, 0, wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer117 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_tileset_searchCtrl->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( SpriteLayer_SelectTileset_Dialog::OnSearch ), NULL, this );
+	m_button21->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteLayer_SelectTileset_Dialog::OnCancel ), NULL, this );
+	m_button20->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteLayer_SelectTileset_Dialog::OnSelect ), NULL, this );
+}
+
+SpriteLayer_SelectTileset_Dialog::~SpriteLayer_SelectTileset_Dialog()
+{
+}
+
+SpriteLayer_ChangeTilesetWarning_Dialog::SpriteLayer_ChangeTilesetWarning_Dialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer127;
+	bSizer127 = new wxBoxSizer( wxVERTICAL );
+
+
+	bSizer127->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer140;
+	bSizer140 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer140->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_staticText63 = new wxStaticText( this, wxID_ANY, _("WARNING: Changing tileset will remove \nall layer sprites created with current tileset."), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText63->Wrap( -1 );
+	bSizer140->Add( m_staticText63, 0, wxALL, 5 );
+
+
+	bSizer140->Add( 0, 0, 1, wxEXPAND, 5 );
+
+
+	bSizer127->Add( bSizer140, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer128;
+	bSizer128 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer128->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_msg_staticText = new wxStaticText( this, wxID_ANY, _("Do you want to continue?"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_msg_staticText->Wrap( -1 );
+	bSizer128->Add( m_msg_staticText, 0, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+
+	bSizer128->Add( 0, 0, 1, wxEXPAND, 5 );
+
+
+	bSizer127->Add( bSizer128, 2, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer129;
+	bSizer129 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer129->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_button23 = new wxButton( this, wxID_ANY, _("YES"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer129->Add( m_button23, 0, wxALL, 5 );
+
+	m_button24 = new wxButton( this, wxID_ANY, _("NO"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer129->Add( m_button24, 0, wxALL, 5 );
+
+
+	bSizer129->Add( 0, 0, 1, wxEXPAND, 5 );
+
+
+	bSizer127->Add( bSizer129, 0, wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer127 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_button23->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteLayer_ChangeTilesetWarning_Dialog::OnContinue ), NULL, this );
+	m_button24->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SpriteLayer_ChangeTilesetWarning_Dialog::OnCancel ), NULL, this );
+}
+
+SpriteLayer_ChangeTilesetWarning_Dialog::~SpriteLayer_ChangeTilesetWarning_Dialog()
 {
 }

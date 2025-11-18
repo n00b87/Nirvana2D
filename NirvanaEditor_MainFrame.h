@@ -77,6 +77,9 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		bool generateTilesets();
 		bool generateStages();
 
+		std::vector<int> gt_tileset_cut_start_index;
+        std::vector<int> gt_tileset_cut_count;
+
 	public:
 		/** Constructor */
 		NirvanaEditor_MainFrame( wxWindow* parent );
@@ -146,6 +149,13 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnEnterMapEditTileSelect( wxMouseEvent& event );
 		void OnLeaveMapEditTileSelect( wxMouseEvent& event );
 		void OnUpdateMapEditTileSelect( wxUpdateUIEvent& event );
+
+		void OnSetSpriteLayerTileset( wxCommandEvent& event );
+		void OnMapEdit_TSTool_Select( wxCommandEvent& event );
+		void OnMapEdit_TSTool_BoxSelect( wxCommandEvent& event );
+		void OnMapEdit_TSTool_Move( wxCommandEvent& event );
+		void OnMapEdit_TSTool_SetTile( wxCommandEvent& event );
+		void OnMapEdit_TSTool_DeleteSelected( wxCommandEvent& event );
 
 		void OnMapEdit_SpriteTool_Select( wxCommandEvent& event );
 		void OnMapEdit_SpriteTool_BoxSelect( wxCommandEvent& event );

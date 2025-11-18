@@ -3,7 +3,7 @@ STAGE name="st2" tile_size=32,32 stage_size=100,100;
 LAYER name="background_layer" type=LAYER_TYPE_CANVAS_2D scroll_speed=1,1 alpha=255 visible=TRUE;
 BKG image="bkg_city_ruin.png" render_setting=IMG_RENDER_SETTING_STRETCHED;
 
-LAYER name="sp_layer" type=LAYER_TYPE_SPRITE scroll_speed=1,1 alpha=255 sprite_grid=SQUARE sprite_sort_by=NONE sprite_order=ASCENDING visible=TRUE;
+LAYER name="sp_layer" type=LAYER_TYPE_SPRITE tileset="" scroll_speed=1,1 alpha=255 sprite_grid=SQUARE sprite_sort_by=NONE sprite_order=ASCENDING visible=TRUE;
 SPRITE name="stage2_guy" base="gren_guy" type=SPRITE_TYPE_DYNAMIC position=323,181 scale=1,1 rotation=0 alpha=255 animation="SPRITE_BASE_ANIMATION" visible=TRUE;
 SHAPE name="BOX_1" type=SPRITE_SHAPE_BOX point=326,366 size=233,92 ;
 SHAPE name="BOX_2" type=SPRITE_SHAPE_BOX point=763,356 size=370,118 ;

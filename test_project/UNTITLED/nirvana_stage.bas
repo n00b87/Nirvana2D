@@ -31,6 +31,7 @@ Dim Layer_TileMap2 As Nirvana_TileMap
 Dim Layer_Sprite_Count
 Dim Layer_Shape_Count
 Dim Bkg As Nirvana_Background
+Dim Layer_TS_Stack
 End Type
 
 Type Nirvana_Stage
@@ -108,6 +109,9 @@ Sub Nirvana_ClearStage()
 		CloseCanvas(Nirvana_Stage_Layers[i].Ref_Canvas)
 		Nirvana_Stage_Layers[i].Ref_Canvas = -1
 
+		DeleteStack_N(Nirvana_Stage_Layers[i].Layer_TS_Stack)
+		Nirvana_Stage_Layers[i].Layer_TS_Stack = -1
+
 		If ImageExists(Nirvana_Stage_Layers[i].Bkg.Image_ID) Then
 			DeleteImage(Nirvana_Stage_Layers[i].Bkg.Image_ID)
 			Nirvana_Stage_Layers[i].Bkg.Image_ID = -1
@@ -157,15 +161,19 @@ Sub Nirvana_ClearStage()
 End Sub
 
 Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
+	Print "DBG 1"
 	Nirvana_ClearStage()
+	Print "DBG 2"
 
 	Dim nv_stage As Nirvana_Stage
+	Print "DBG x0"
 	nv_stage.Name$ = "st1"
 	nv_stage.Tile_Size.Width = 32
 	nv_stage.Tile_Size.Height = 32
 	nv_stage.Stage_Size.Width = 60
 	nv_stage.Stage_Size.Height = 70
 	nv_stage.Layer_Count = 5
+	Print "DBG x1"
 
 	'-------LAYER (bg)-------
 
@@ -175,10 +183,15 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[0].Alpha = 200
 	Nirvana_Stage_Layers[0].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[0].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[0].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
+	Print "DBG x2: "; NIRVANA_WINDOW_WIDTH; ", "; NIRVANA_WINDOW_HEIGHT; ", "; vp_x; ", "; vp_y; ", "; vp_w; ", "; vp_h
 
 	Nirvana_Stage_Layers[0].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
+	Print "DBG n1"
 	Nirvana_Stage_Layers[0].Bkg.Image_ID = LoadImage(NIRVANA_BKG_DIR$ + "final_bkg.png")
+	Print "DBG n2"
 	Nirvana_Stage_Layers[0].Bkg.RenderSetting = NIRVANA_IMG_RENDER_SETTING_TILED
+	Print "DBG x3"
 
 	'-------LAYER (tile_layer1)-------
 
@@ -188,12 +201,14 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[1].Alpha = 255
 	Nirvana_Stage_Layers[1].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[1].Scroll_Speed.Y = 1
-
+	Nirvana_Stage_Layers[1].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
+Print "DBG x4"
 	Nirvana_Stage_Layers[1].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
-
+Print "DBG x5"
 	'------- TILEMAP -------
 	Nirvana_Stage_Layers[1].Layer_TileMap = Nirvana_CreateTileMap("tset1", 60, 70)
 
+	Print "DBG 2.1"
 	f = OpenFile(NIRVANA_DATA_DIR$ + "tm0.data", BINARY_INPUT)
 	For y = 0 To 69
 		For x = 0 To 59
@@ -201,6 +216,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 		Next
 	Next
 	CloseFile(f)
+	Print "DBG 2.2"
 
 	'-------LAYER (sprite_layer1)-------
 
@@ -210,6 +226,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[2].Alpha = 255
 	Nirvana_Stage_Layers[2].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[2].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[2].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[2].Ref_Canvas = OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)
 	SetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[2].Ref_Canvas, SPRITE_PRIORITY_GREATEST_Y, SPRITE_ORDER_DESCENDING)
@@ -315,7 +332,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 
 	'Transform
 	SetSpritePosition(Nirvana_Stage_Sprites[4].Sprite_ID, 1040, 457)
-	SetSpriteScale(Nirvana_Stage_Sprites[4].Sprite_ID, 1, 2)
+	SetSpriteScale(Nirvana_Stage_Sprites[4].Sprite_ID, 1, 1)
 	SetSpriteRotation(Nirvana_Stage_Sprites[4].Sprite_ID, 0)
 
 	'Render Settings
@@ -521,6 +538,50 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpritePosition(Nirvana_Stage_Shapes[4].Sprite_ID,  0, 0) 'Set to (0,0) so that offset will be world position
 	SetSpriteVisible(Nirvana_Stage_Shapes[4].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
+	Print "DBG 3"
+	'------- TILE SPRITES  -------
+	Cut_Start_Index = 0
+	Nirvana_Stage_Layers[2].Layer_TS_Stack = CreateStack_N()
+	cut_index = Cut_Start_Index + 0
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + 0].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 32, 32)
+
+	cut_index = Cut_Start_Index + 0
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + 0].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 464, 16)
+
+	cut_index = Cut_Start_Index + 0
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + 0].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 128, 128)
+
+	cut_index = Cut_Start_Index + 1
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + 1].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 272, 176)
+
+	cut_index = Cut_Start_Index + 2
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + 2].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 176, 272)
+
+	cut_index = Cut_Start_Index + 2
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + 2].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 240, 272)
+
+	cut_index = Cut_Start_Index + 2
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + 2].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 304, 272)
+
+	cut_index = Cut_Start_Index + 3
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + 3].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 64, 320)
+
 
 	'-------LAYER (tile_layer2)-------
 
@@ -530,6 +591,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[3].Alpha = 255
 	Nirvana_Stage_Layers[3].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[3].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[3].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[3].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
 
@@ -552,6 +614,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[4].Alpha = 255
 	Nirvana_Stage_Layers[4].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[4].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[4].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[4].Ref_Canvas = OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)
 	SetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[4].Ref_Canvas, SPRITE_PRIORITY_NONE, SPRITE_ORDER_ASCENDING)
@@ -600,6 +663,24 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteAlpha(Nirvana_Stage_Sprites[8].Sprite_ID, 180)
 	SetSpriteVisible(Nirvana_Stage_Sprites[8].Sprite_ID, TRUE)
 
+	'------- TILE SPRITES  -------
+	Cut_Start_Index = 4
+	Nirvana_Stage_Layers[4].Layer_TS_Stack = CreateStack_N()
+	cut_index = Cut_Start_Index + -1
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + -1].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[4].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 64, 256)
+
+	cut_index = Cut_Start_Index + 0
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + 0].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[4].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 384, 256)
+
+	cut_index = Cut_Start_Index + 0
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[Cut_Start_Index + 0].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[4].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 224, 32)
+
 
 	Return nv_stage
 End Function
@@ -624,6 +705,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[0].Alpha = 255
 	Nirvana_Stage_Layers[0].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[0].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[0].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[0].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
 	Nirvana_Stage_Layers[0].Bkg.Image_ID = LoadImage(NIRVANA_BKG_DIR$ + "bkg_city_ruin.png")
@@ -637,6 +719,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[1].Alpha = 255
 	Nirvana_Stage_Layers[1].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[1].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[1].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[1].Ref_Canvas = OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)
 	SetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[1].Ref_Canvas, SPRITE_PRIORITY_NONE, SPRITE_ORDER_ASCENDING)
@@ -795,6 +878,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpritePosition(Nirvana_Stage_Shapes[4].Sprite_ID,  0, 0) 'Set to (0,0) so that offset will be world position
 	SetSpriteVisible(Nirvana_Stage_Shapes[4].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
+	'------- TILE SPRITES  -------
 
 	Return nv_stage
 End Function
@@ -819,6 +903,7 @@ Function Nirvana_Stage_2(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[0].Alpha = 255
 	Nirvana_Stage_Layers[0].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[0].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[0].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[0].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
 
