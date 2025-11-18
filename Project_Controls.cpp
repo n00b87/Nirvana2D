@@ -2022,6 +2022,8 @@ bool NirvanaEditor_MainFrame::generateStages()
 
                     for(int sprite_index = 0; sprite_index < project->stages[stage_index].layers[layer_index].layer_tile_sprites.size(); sprite_index++)
                     {
+                        if(project->stages[stage_index].layers[layer_index].layer_tile_sprites[sprite_index].cut_index < 0)
+                            continue;
                         //_("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_TS_Stack = ")
                         wxString cut_index_str = _("Cut_Start_Index + ") + wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_tile_sprites[sprite_index].cut_index);
                         fn_str += _("\t") + _("cut_index = ") + cut_index_str + _("\n");
@@ -2032,7 +2034,7 @@ bool NirvanaEditor_MainFrame::generateStages()
                         //wxString num_cols_str = _("Nirvana_Tileset_Cuts[cut_index].NumCols");
                         //wxString num_rows_str = _("Nirvana_Tileset_Cuts[cut_index].NumRows");
 
-                        fn_str += _("\t") + _("t_sprite = ") + _("CreateSprite(Nirvana_Tileset_Cuts[") + cut_index_str + _("].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * ") + tile_w_str + _(", Nirvana_Tileset_Cuts[cut_index].NumRows * ") + tile_h_str + _(")\n");
+                        fn_str += _("\t") + _("t_sprite = ") + _("CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * ") + tile_w_str + _(", Nirvana_Tileset_Cuts[cut_index].NumRows * ") + tile_h_str + _(")\n");
 
                         fn_str += _("\tPush_N(Nirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_TS_Stack, t_sprite)\n");
 
