@@ -12928,6 +12928,7 @@ int wxIrrlicht::createSprite(int layer_sprite_index, int img_id, double w, doubl
 	else
 		sprite[spr_id].visible = true;
 
+	sprite[spr_id].angle = 0;
 	sprite[spr_id].scale.set(1.0, 1.0);
 	sprite[spr_id].alpha = 255;
 	sprite[spr_id].z = 0;
