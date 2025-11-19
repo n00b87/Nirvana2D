@@ -424,7 +424,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 
 	wxArrayString m_layerVisible_checkListChoices;
 	m_layerVisible_checkList = new wxCheckListBox( m_panel40, wxID_ANY, wxDefaultPosition, wxDefaultSize, m_layerVisible_checkListChoices, 0 );
-	bSizer124->Add( m_layerVisible_checkList, 1, wxALL|wxEXPAND, 5 );
+	bSizer124->Add( m_layerVisible_checkList, 2, wxALL|wxEXPAND, 5 );
 
 	m_scrolledWindow2 = new wxScrolledWindow( m_panel40, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxHSCROLL|wxVSCROLL );
 	m_scrolledWindow2->SetScrollRate( 5, 5 );
@@ -621,7 +621,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_scrolledWindow2->SetSizer( bSizer194 );
 	m_scrolledWindow2->Layout();
 	bSizer194->Fit( m_scrolledWindow2 );
-	bSizer124->Add( m_scrolledWindow2, 1, wxEXPAND | wxALL, 5 );
+	bSizer124->Add( m_scrolledWindow2, 3, wxEXPAND | wxALL, 5 );
 
 
 	bSizer871->Add( bSizer124, 1, wxEXPAND, 5 );
@@ -871,22 +871,22 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer215;
 	bSizer215 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_mapEdit_tileTools_auiToolBar1 = new wxAuiToolBar( m_panel71, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
-	m_mapEdit_tsToolbar_select_tool = m_mapEdit_tileTools_auiToolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_spriteTileTools_auiToolBar = new wxAuiToolBar( m_panel71, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
+	m_mapEdit_tsToolbar_select_tool = m_mapEdit_spriteTileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_tsToolbar_boxSelect_tool = m_mapEdit_tileTools_auiToolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tsToolbar_boxSelect_tool = m_mapEdit_spriteTileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_tsToolbar_move_tool = m_mapEdit_tileTools_auiToolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tsToolbar_move_tool = m_mapEdit_spriteTileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_tsToolbar_setTSprite_solid_tool = m_mapEdit_tileTools_auiToolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/place_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tsToolbar_setTSprite_solid_tool = m_mapEdit_spriteTileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/place_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_tileTools_auiToolBar1->AddSeparator();
+	m_mapEdit_spriteTileTools_auiToolBar->AddSeparator();
 
-	m_mapEdit_tsToolbar_deleteSelected_tool = m_mapEdit_tileTools_auiToolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tsToolbar_deleteSelected_tool = m_mapEdit_spriteTileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
-	m_mapEdit_tileTools_auiToolBar1->Realize();
+	m_mapEdit_spriteTileTools_auiToolBar->Realize();
 
-	bSizer215->Add( m_mapEdit_tileTools_auiToolBar1, 1, wxALL, 0 );
+	bSizer215->Add( m_mapEdit_spriteTileTools_auiToolBar, 1, wxALL, 0 );
 
 
 	m_panel71->SetSizer( bSizer215 );

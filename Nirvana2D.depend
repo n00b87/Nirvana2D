@@ -1,8 +1,8 @@
 # depslib dependency file v1.0
-1763504457 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
+1763542767 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
 	"NirvanaBase.h"
 
-1763504457 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
+1763542767 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
 	<wx/artprov.h>
 	<wx/xrc/xmlres.h>
 	<wx/intl.h>
@@ -6528,7 +6528,7 @@
 	"NirvanaBase.h"
 	"Nirvana_Project.h"
 
-1763514873 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
+1763530963 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>

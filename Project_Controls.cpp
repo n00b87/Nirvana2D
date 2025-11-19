@@ -2277,6 +2277,13 @@ bool NirvanaEditor_MainFrame::generateStages()
 	pfile.Write(_("Dim Nirvana_Stage_Shapes[") + wxString::Format(_("%i"), stage_shape_array_size) + _("] As Nirvana_Shape\n"));
 	pfile.Write(_("Dim Nirvana_Stage_Layers[") + wxString::Format(_("%i"), stage_layer_array_size) + _("] As Nirvana_Layer\n"));
 	pfile.Write(_("\n"));
+	pfile.Write(_("Dim Nirvana_NULL_Shape As Nirvana_Shape\n"));
+    pfile.Write(_("Nirvana_NULL_Shape.Name$ = \"\"\n"));
+    pfile.Write(_("Nirvana_NULL_Shape.Sprite_ID = -1\n"));
+    pfile.Write(_("Nirvana_NULL_Shape.ShapeType = -1\n"));
+    pfile.Write(_("Nirvana_NULL_Shape.ShapeData_Matrix = -1\n"));
+    pfile.Write(_("ArrayFill(Nirvana_Stage_Shapes, Nirvana_NULL_Shape)\n"));
+    pfile.Write(_("\n"));
 	pfile.Write(_("For i = 0 To ") + wxString::Format(_("%i"), stage_layer_array_size-1) + _("\n"));
 	pfile.Write(_("\tNirvana_Stage_Layers[i].Ref_Canvas = -1\n"));
 	pfile.Write(_("\tNirvana_Stage_Layers[i].Layer_TileMap.Tileset_ID = -1\n"));
@@ -2315,10 +2322,21 @@ bool NirvanaEditor_MainFrame::generateStages()
 	pfile.Write(_("\tEnd If\n\n"));
 	pfile.Write(_("\tNirvana_ActiveStage.Stage_Offset.X = 0\n"));
 	pfile.Write(_("\tNirvana_ActiveStage.Stage_Offset.Y = 0\n"));
+	pfile.Write(_("\n"));
+	pfile.Write(_("\tNum_Shapes = ArraySize(Nirvana_Stage_Shapes, 1)\n"));
+	pfile.Write(_("\tFor n = 0 To Num_Shapes-1\n"));
+    pfile.Write(_("\t\tIf MatrixExists(Nirvana_Stage_Shapes[n].ShapeData_Matrix) Then\n"));
+    pfile.Write(_("\t\t\tDeleteMatrix(Nirvana_Stage_Shapes[n].ShapeData_Matrix)\n"));
+    pfile.Write(_("\t\tEnd If\n"));
+    pfile.Write(_("\t\tNirvana_Stage_Shapes[n].ShapeData_Matrix = -1\n"));
+	pfile.Write(_("\tNext\n"));
+    pfile.Write(_("\n"));
 	pfile.Write(_("\tFor i = 0 To Nirvana_ActiveStage.Layer_Count-1\n\n"));
 	pfile.Write(_("\t\tCloseCanvas(Nirvana_Stage_Layers[i].Ref_Canvas)\n"));
 	pfile.Write(_("\t\tNirvana_Stage_Layers[i].Ref_Canvas = -1\n\n"));
-	pfile.Write(_("\t\tDeleteStack_N(Nirvana_Stage_Layers[i].Layer_TS_Stack)\n"));
+	pfile.Write(_("\t\tIf Stack_N_Exists(Nirvana_Stage_Layers[i].Layer_TS_Stack) Then\n"));
+	pfile.Write(_("\t\t\tDeleteStack_N(Nirvana_Stage_Layers[i].Layer_TS_Stack)\n"));
+	pfile.Write(_("\t\tEnd If\n"));
 	pfile.Write(_("\t\tNirvana_Stage_Layers[i].Layer_TS_Stack = -1\n\n"));
 	pfile.Write(_("\t\tIf ImageExists(Nirvana_Stage_Layers[i].Bkg.Image_ID) Then\n"));
 	pfile.Write(_("\t\t\tDeleteImage(Nirvana_Stage_Layers[i].Bkg.Image_ID)\n"));
@@ -3051,10 +3069,22 @@ void NirvanaEditor_MainFrame::OnActiveLayerSelect( wxCommandEvent& event )
         map_editor->getMapViewControl()->sprite_sort_by = project->getLayerSpriteSortBy(stage_index, layer_index);
         map_editor->getMapViewControl()->sprite_order_by = project->getLayerSpriteSortOrder(stage_index, layer_index);
 
-        //m_mapEdit_tileTools_auiToolBar->get;
 
         m_tilesetExtraOptions_simplebook->SetSelection(1);
         m_mapEdit_spriteTileTools_simplebook->SetSelection(1);
+
+
+        m_mapEdit_tsToolbar_select_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+        m_mapEdit_tsToolbar_boxSelect_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+        m_mapEdit_tsToolbar_move_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+
+        m_mapEdit_tsToolbar_setTSprite_solid_tool->SetState(wxAUI_BUTTON_STATE_CHECKED);
+
+        m_mapEdit_spriteTileTools_auiToolBar->Refresh();
+
+        selected_map_tool = MAP_TOOL_TS_SET;
+        map_editor->setMapTool(selected_map_tool);
+
 
         //std::cout << "DBG INFO: " << map_editor->getMapViewControl()->sprite_grid_type << ", "
         //                          << map_editor->getMapViewControl()->sprite_sort_by << ", "
@@ -3064,6 +3094,19 @@ void NirvanaEditor_MainFrame::OnActiveLayerSelect( wxCommandEvent& event )
     {
         m_tilesetExtraOptions_simplebook->SetSelection(0);
         m_mapEdit_spriteTileTools_simplebook->SetSelection(0);
+
+        m_mapEdit_tileToolbar_select_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+        m_mapEdit_tileToolbar_boxSelect_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+        m_mapEdit_tileToolbar_move_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+        m_mapEdit_tileToolbar_copyTile_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+        m_mapEdit_tileToolbar_fillTile_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+
+        m_mapEdit_tileToolbar_setTile_tool->SetState(wxAUI_BUTTON_STATE_CHECKED);
+
+        m_mapEdit_tileTools_auiToolBar->Refresh();
+
+        selected_map_tool = MAP_TOOL_TILE_SET;
+        map_editor->setMapTool(selected_map_tool);
     }
 
 	updateMapEditor();

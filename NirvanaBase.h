@@ -181,7 +181,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxAuiToolBarItem* m_mapEdit_tileToolbar_fillTile_tool;
 		wxAuiToolBarItem* m_mapEdit_tileToolbar_deleteSelected_tool;
 		wxPanel* m_panel71;
-		wxAuiToolBar* m_mapEdit_tileTools_auiToolBar1;
+		wxAuiToolBar* m_mapEdit_spriteTileTools_auiToolBar;
 		wxAuiToolBarItem* m_mapEdit_tsToolbar_select_tool;
 		wxAuiToolBarItem* m_mapEdit_tsToolbar_boxSelect_tool;
 		wxAuiToolBarItem* m_mapEdit_tsToolbar_move_tool;
