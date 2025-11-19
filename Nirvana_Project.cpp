@@ -1425,6 +1425,10 @@ int Nirvana_Project::loadStage(wxString stage_file)
 					{
 						n_layer.spriteSortOrder = ( p_cmd[i].dict[obj_index].val.compare(_("DESCENDING"))==0 ? SPRITE_LAYER_ORDER_DESCENDING : SPRITE_LAYER_ORDER_ASCENDING );
 					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("sprite_shape_data"))==0)
+					{
+						n_layer.spriteShapeDataSetting = ( p_cmd[i].dict[obj_index].val.compare(_("GENERATE"))==0 ? SPRITE_LAYER_SHAPE_DATA_GENERATE : SPRITE_LAYER_SHAPE_DATA_EXPORT_ONLY );
+					}
 				}
 
 				layer_index = obj.layers.size();
@@ -2336,6 +2340,17 @@ int Nirvana_Project::getLayerSpriteSortOrder(int stage_index, int layer_index)
 	return stages[stage_index].layers[layer_index].spriteSortOrder;
 }
 
+int Nirvana_Project::getLayerSpriteShapeDataSetting(int stage_index, int layer_index)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return 0;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return 0;
+
+	return stages[stage_index].layers[layer_index].spriteShapeDataSetting;
+}
+
 void Nirvana_Project::setLayerSpriteGridType(int stage_index, int layer_index, int grid_type)
 {
 	if(stage_index < 0 || stage_index >= stages.size())
@@ -2369,6 +2384,16 @@ void Nirvana_Project::setLayerSpriteSortOrder(int stage_index, int layer_index, 
 	stages[stage_index].layers[layer_index].spriteSortOrder = sortOrder;
 }
 
+void Nirvana_Project::setLayerSpriteShapeDataSetting(int stage_index, int layer_index, int shapeDataSetting)
+{
+	if(stage_index < 0 || stage_index >= stages.size())
+		return;
+
+	if(layer_index < 0 || layer_index >= stages[stage_index].layers.size())
+		return;
+
+	stages[stage_index].layers[layer_index].spriteShapeDataSetting = shapeDataSetting;
+}
 
 int Nirvana_Project::getLayerSpriteIndex(int stage_index, int layer_index, std::string sprite_name)
 {

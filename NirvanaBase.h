@@ -144,6 +144,8 @@ class Nirvana_MainFrame : public wxFrame
 		wxComboBox* m_layerSettings_spriteSortBy_comboBox;
 		wxStaticText* m_staticText116;
 		wxComboBox* m_layerSettings_spriteOrderBy_comboBox;
+		wxStaticText* m_staticText1161;
+		wxComboBox* m_layerSettings_shapeData_comboBox;
 		wxScrolledWindow* m_scrolledWindow1;
 		wxPanel* m_panel57;
 		wxStaticText* m_staticText991;
@@ -407,6 +409,7 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnMapEdit_SpriteGridType( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_SpriteSortBy( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEdit_SpriteOrderBy( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnMapEdit_SpriteShapeDataSetting( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEditSettings_ShowShapes_Checked( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEditSettings_ShowGrid_Checked( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnMapEditSettings_GridColor_Change( wxColourPickerEvent& event ) { event.Skip(); }

@@ -53,6 +53,9 @@ Nirvana_MainFrame( parent )
 	m_layerSettings_spriteOrderBy_comboBox->Append(_("ASCENDING"));
 	m_layerSettings_spriteOrderBy_comboBox->Append(_("DESCENDING"));
 
+	m_layerSettings_shapeData_comboBox->Append(_("GENERATE SHAPES"));
+	m_layerSettings_shapeData_comboBox->Append(_("EXPORT DATA ONLY"));
+
 
 	map_editor = new Nirvana_MapEditor(this, m_mapEdit_map_panel, m_mapEdit_tileSelect_panel);
 	map_editor->getMapViewControl()->GetDevice()->getContextManager()->activateContext(map_editor->getMapViewControl()->GetDevice()->getVideoDriver()->getExposedVideoData());

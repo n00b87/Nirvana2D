@@ -138,6 +138,7 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnMapEdit_SpriteGridType( wxCommandEvent& event );
 		void OnMapEdit_SpriteSortBy( wxCommandEvent& event );
 		void OnMapEdit_SpriteOrderBy( wxCommandEvent& event );
+		void OnMapEdit_SpriteShapeDataSetting( wxCommandEvent& event );
 
 		void OnMapEdit_TileTool_Select( wxCommandEvent& event );
 		void OnMapEdit_TileTool_BoxSelect( wxCommandEvent& event );

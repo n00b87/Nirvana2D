@@ -374,6 +374,7 @@ struct Nirvana_Map_Layer
 	int spriteGrid_type = 0;
 	int spriteSortBy = 0;
 	int spriteSortOrder = 0;
+	int spriteShapeDataSetting = 0;
 
 	int ref_canvas = -1;
 };

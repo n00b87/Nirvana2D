@@ -1,8 +1,8 @@
 # depslib dependency file v1.0
-1763329405 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
+1763504457 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
 	"NirvanaBase.h"
 
-1763329405 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
+1763504457 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
 	<wx/artprov.h>
 	<wx/xrc/xmlres.h>
 	<wx/intl.h>
@@ -1606,7 +1606,7 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/toolbar.h
 
-1763364277 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
+1763504666 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
 	"NirvanaBase.h"
 	"wxIrrlicht.h"
 	"Nirvana_SpriteAnimation.h"
@@ -1654,7 +1654,7 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/dialog.h
 
-1763348568 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
+1763503035 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -6419,7 +6419,7 @@
 
 1741217486 /usr/include/gtk-3.0/gtk/gtk-autocleanups.h
 
-1763111269 /home/n00b/Projects/Nirvana2D/rc_defines.h
+1763504186 /home/n00b/Projects/Nirvana2D/rc_defines.h
 
 1750832044 /home/n00b/Projects/Nirvana2D/rc_utf8.h
 	<string>
@@ -6467,7 +6467,7 @@
 	"wx/string.h"
 	"wx/filefn.h"
 
-1758412777 /home/n00b/Projects/Nirvana2D/Nirvana_Project.h
+1763514873 /home/n00b/Projects/Nirvana2D/Nirvana_Project.h
 	<wx/wx.h>
 	<wx/filename.h>
 	<vector>
@@ -6475,12 +6475,12 @@
 	"NirvanaEngine_Structs.h"
 	"rc_defines.h"
 
-1763348540 /home/n00b/Projects/Nirvana2D/NirvanaEngine_Structs.h
+1763504032 /home/n00b/Projects/Nirvana2D/NirvanaEngine_Structs.h
 	<irrlicht.h>
 	<vector>
 	"rc_defines.h"
 
-1763348592 source:/home/n00b/Projects/Nirvana2D/Nirvana_Project.cpp
+1763514847 source:/home/n00b/Projects/Nirvana2D/Nirvana_Project.cpp
 	"Nirvana_Project.h"
 	<wx/wx.h>
 	<wx/filename.h>
@@ -6528,7 +6528,7 @@
 	"NirvanaBase.h"
 	"Nirvana_Project.h"
 
-1763436147 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
+1763514873 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>

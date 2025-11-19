@@ -827,6 +827,8 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
                     }
 
                     stage_file.Write(_("sprite_order=") + (project->stages[i].layers[layer_index].spriteSortOrder == SPRITE_LAYER_ORDER_DESCENDING ? _("DESCENDING") : _("ASCENDING")) + _(" "));
+
+                    stage_file.Write(_("sprite_shape_data=") + (project->stages[i].layers[layer_index].spriteShapeDataSetting == SPRITE_LAYER_SHAPE_DATA_GENERATE ? _("GENERATE") : _("EXPORT_DATA_ONLY")) + _(" "));
 				}
 
 				stage_file.Write(_("visible=") + ( project->stages[i].layers[layer_index].visible ? _("TRUE") : _("FALSE") ) + _(";\n"));
@@ -1564,6 +1566,7 @@ bool NirvanaEditor_MainFrame::generateStages()
 	pfile.Write(_("Dim Name$\n"));
 	pfile.Write(_("Dim Sprite_ID\n"));
 	pfile.Write(_("Dim ShapeType\n"));
+	pfile.Write(_("Dim ShapeData_Matrix\n"));
 	pfile.Write(_("End Type\n"));
 
 	pfile.Write(_("\n"));
@@ -1912,39 +1915,67 @@ bool NirvanaEditor_MainFrame::generateStages()
 
 					fn_str += _("\t\'------- SHAPE (\"") + shape_name + _("\") -------\n");
 					fn_str += _("\tNirvana_Stage_Shapes[") + shape_index_str + _("].Name$ = \"") + shape_name + _("\"\n");
-					fn_str += _("\tNirvana_Stage_Shapes[") + shape_index_str + _("].Sprite_ID = CreateSprite(-1, 1, 1)\n");
+					if(project->stages[stage_index].layers[layer_index].spriteShapeDataSetting == SPRITE_LAYER_SHAPE_DATA_GENERATE)
+                        fn_str += _("\tNirvana_Stage_Shapes[") + shape_index_str + _("].Sprite_ID = CreateSprite(-1, 1, 1)\n");
+					else
+                        fn_str += _("\tNirvana_Stage_Shapes[") + shape_index_str + _("].Sprite_ID = -1\n");
 					fn_str += _("\n");
 
 					wxString spr_id_str = shape_var_str + _(".Sprite_ID");
 					fn_str += _("\t\'Base Settings\n");
 
 					wxString body_type_str = _("SPRITE_TYPE_STATIC");
-					fn_str += _("\tSetSpriteType(") + spr_id_str + _(", ") + body_type_str + _(")\n");
-					fn_str += _("\tSetSpriteSolid(") + spr_id_str + _(", TRUE)\n");
+
+					if(project->stages[stage_index].layers[layer_index].spriteShapeDataSetting == SPRITE_LAYER_SHAPE_DATA_GENERATE)
+					{
+					    fn_str += _("\tSetSpriteType(") + spr_id_str + _(", ") + body_type_str + _(")\n");
+                        fn_str += _("\tSetSpriteSolid(") + spr_id_str + _(", TRUE)\n");
+					}
 
 					fn_str += _("\t\'Shape\n");
 					if(project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_type == SPRITE_SHAPE_BOX)
 					{
 						fn_str += _("\t") + shape_var_str + _(".ShapeType = SPRITE_SHAPE_BOX\n");
-						fn_str += _("\t") + _("SetSpriteShape(") + spr_id_str + _(", ") + shape_var_str + _(".ShapeType)\n");
+
+						if(project->stages[stage_index].layers[layer_index].spriteShapeDataSetting == SPRITE_LAYER_SHAPE_DATA_GENERATE)
+                            fn_str += _("\t") + _("SetSpriteShape(") + spr_id_str + _(", ") + shape_var_str + _(".ShapeType)\n");
 
 						wxString off_x_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].offset_x);
 						wxString off_y_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].offset_y);
 						wxString box_width_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].box_width);
 						wxString box_height_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].box_height);
-						fn_str += _("\t") + _("SetSpriteShapeOffset(") + spr_id_str + _(", ") + off_x_str + _(", ") + off_y_str + _(")\n");
-						fn_str += _("\t") + _("SetSpriteBox(") + spr_id_str + _(", ") + box_width_str + _(", ") + box_height_str + _(")\n");
+						fn_str += _("\tNirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix = DimMatrix(4, 1)\n");
+						fn_str += _("\tSetMatrixValue(Nirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix, 0, 0, ") + off_x_str + _(")\n");
+						fn_str += _("\tSetMatrixValue(Nirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix, 1, 0, ") + off_y_str + _(")\n");
+						fn_str += _("\tSetMatrixValue(Nirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix, 2, 0, ") + box_width_str + _(")\n");
+						fn_str += _("\tSetMatrixValue(Nirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix, 3, 0, ") + box_height_str + _(")\n");
+
+						if(project->stages[stage_index].layers[layer_index].spriteShapeDataSetting == SPRITE_LAYER_SHAPE_DATA_GENERATE)
+						{
+						    fn_str += _("\t") + _("SetSpriteShapeOffset(") + spr_id_str + _(", ") + off_x_str + _(", ") + off_y_str + _(")\n");
+                            fn_str += _("\t") + _("SetSpriteBox(") + spr_id_str + _(", ") + box_width_str + _(", ") + box_height_str + _(")\n");
+						}
 					}
 					else if(project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_type == SPRITE_SHAPE_CIRCLE)
 					{
 						fn_str += _("\t") + shape_var_str + _(".ShapeType = SPRITE_SHAPE_CIRCLE\n");
-						fn_str += _("\t") + _("SetSpriteShape(") + spr_id_str + _(", ") + shape_var_str + _(".ShapeType)\n");
+
+						if(project->stages[stage_index].layers[layer_index].spriteShapeDataSetting == SPRITE_LAYER_SHAPE_DATA_GENERATE)
+                            fn_str += _("\t") + _("SetSpriteShape(") + spr_id_str + _(", ") + shape_var_str + _(".ShapeType)\n");
 
 						wxString off_x_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].offset_x);
 						wxString off_y_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].offset_y);
 						wxString radius_str = wxString::FromDouble(project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].radius);
-						fn_str += _("\t") + _("SetSpriteShapeOffset(") + spr_id_str + _(", ") + off_x_str + _(", ") + off_y_str + _(")\n");
-						fn_str += _("\t") + _("SetSpriteRadius(") + spr_id_str + _(", ") + radius_str + _(")\n");
+						fn_str += _("\tNirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix = DimMatrix(3, 1)\n");
+						fn_str += _("\tSetMatrixValue(Nirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix, 0, 0, ") + off_x_str + _(")\n");
+						fn_str += _("\tSetMatrixValue(Nirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix, 1, 0, ") + off_y_str + _(")\n");
+						fn_str += _("\tSetMatrixValue(Nirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix, 2, 0, ") + radius_str + _(")\n");
+
+						if(project->stages[stage_index].layers[layer_index].spriteShapeDataSetting == SPRITE_LAYER_SHAPE_DATA_GENERATE)
+						{
+						    fn_str += _("\t") + _("SetSpriteShapeOffset(") + spr_id_str + _(", ") + off_x_str + _(", ") + off_y_str + _(")\n");
+                            fn_str += _("\t") + _("SetSpriteRadius(") + spr_id_str + _(", ") + radius_str + _(")\n");
+						}
 					}
 					else if(project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_type == SPRITE_SHAPE_CHAIN || project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_type == SPRITE_SHAPE_POLYGON)
 					{
@@ -1953,7 +1984,8 @@ bool NirvanaEditor_MainFrame::generateStages()
 						else
 							fn_str += _("\t") + shape_var_str + _(".ShapeType = SPRITE_SHAPE_POLYGON\n");
 
-						fn_str += _("\t") + _("SetSpriteShape(") + spr_id_str + _(", ") + shape_var_str + _(".ShapeType)\n");
+						if(project->stages[stage_index].layers[layer_index].spriteShapeDataSetting == SPRITE_LAYER_SHAPE_DATA_GENERATE)
+                            fn_str += _("\t") + _("SetSpriteShape(") + spr_id_str + _(", ") + shape_var_str + _(".ShapeType)\n");
 
 						wxString shape_x_str = _("stage_shape_x_") + wxString::Format(_("%i"), shape_start_index);
 						wxString shape_y_str = _("stage_shape_y_") + wxString::Format(_("%i"), shape_start_index);
@@ -1963,46 +1995,55 @@ bool NirvanaEditor_MainFrame::generateStages()
 
 						fn_str += (_("\tDim ")) + shape_x_str + _("[") + wxString::Format(_("%i"), shape_size) + _("]\n");
 						fn_str += (_("\tDim ")) + shape_y_str + _("[") + wxString::Format(_("%i"), shape_size) + _("]\n");
+						fn_str += _("\tNirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix = DimMatrix(2, ") + wxString::Format(_("%i"), shape_size) + _(")\n");
 						fn_str += _("\n");
 
 						for(int pt_index = 0; pt_index < shape_size; pt_index++)
 						{
 							fn_str += _("\t") + shape_x_str + _("[") + wxString::Format(_("%i"), pt_index) + _("] = ") + wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].points[pt_index].X) + _("\n");
 							fn_str += _("\t") + shape_y_str + _("[") + wxString::Format(_("%i"), pt_index) + _("] = ") + wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].points[pt_index].Y) + _("\n");
+							fn_str += _("\tSetMatrixValue(Nirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix, 0, ") + wxString::Format(_("%i"), pt_index) + _(", ") + shape_x_str + _("[") + wxString::Format(_("%i"), pt_index) + _("])\n");
+							fn_str += _("\tSetMatrixValue(Nirvana_Stage_Shapes[") + shape_index_str + _("].ShapeData_Matrix, 1, ") + wxString::Format(_("%i"), pt_index) + _(", ") + shape_y_str + _("[") + wxString::Format(_("%i"), pt_index) + _("])\n");
 							fn_str += _("\n");
 						}
 
-						if(project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_type == SPRITE_SHAPE_CHAIN)
+						if(project->stages[stage_index].layers[layer_index].spriteShapeDataSetting == SPRITE_LAYER_SHAPE_DATA_GENERATE)
 						{
-							wxString prev_x_str = _("0");
-							wxString prev_y_str = _("0");
+						    if(project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].shape_type == SPRITE_SHAPE_CHAIN)
+                            {
+                                wxString prev_x_str = _("0");
+                                wxString prev_y_str = _("0");
 
-							wxString next_x_str = _("0");
-							wxString next_y_str = _("0");
+                                wxString next_x_str = _("0");
+                                wxString next_y_str = _("0");
 
-							if(shape_size > 0)
-							{
-								prev_x_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].points[0].X - 1);
-								prev_y_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].points[0].Y - 1);
+                                if(shape_size > 0)
+                                {
+                                    prev_x_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].points[0].X - 1);
+                                    prev_y_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].points[0].Y - 1);
 
-								next_x_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].points[shape_size-1].X +1);
-								next_y_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].points[shape_size-1].Y -1);
-							}
+                                    next_x_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].points[shape_size-1].X +1);
+                                    next_y_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_shapes[shape_index].points[shape_size-1].Y -1);
+                                }
 
-							fn_str += _("\t") + _("SetSpriteChain(") + spr_id_str + _(", ") + shape_x_str + _(", ") + shape_y_str + _(", ") + wxString::Format(_("%i"), shape_size) + _(", ") +
-																							  prev_x_str + _(", ") + prev_y_str + _(", ") + next_x_str + _(", ") + next_y_str + _(")\n");
-						}
-						else
-						{
-							fn_str += _("\t") + _("SetSpritePolygon(") + spr_id_str + _(", ") + shape_x_str + _(", ") + shape_y_str + _(", ") + wxString::Format(_("%i"), shape_size) + _(")\n");
+                                fn_str += _("\t") + _("SetSpriteChain(") + spr_id_str + _(", ") + shape_x_str + _(", ") + shape_y_str + _(", ") + wxString::Format(_("%i"), shape_size) + _(", ") +
+                                                                                                  prev_x_str + _(", ") + prev_y_str + _(", ") + next_x_str + _(", ") + next_y_str + _(")\n");
+                            }
+                            else
+                            {
+                                fn_str += _("\t") + _("SetSpritePolygon(") + spr_id_str + _(", ") + shape_x_str + _(", ") + shape_y_str + _(", ") + wxString::Format(_("%i"), shape_size) + _(")\n");
+                            }
 						}
 					}
 
 					fn_str += _("\n");
 
-					fn_str +=_("\t\'Transform\n");
-					fn_str += _("\tSetSpritePosition(") + spr_id_str + _(",  0, 0) \'Set to (0,0) so that offset will be world position\n");
-					fn_str += _("\tSetSpriteVisible(") + spr_id_str + _(", FALSE) \'Image is -1 so it wouldn\'t render anyway\n");
+					if(project->stages[stage_index].layers[layer_index].spriteShapeDataSetting == SPRITE_LAYER_SHAPE_DATA_GENERATE)
+					{
+					    fn_str +=_("\t\'Transform\n");
+                        fn_str += _("\tSetSpritePosition(") + spr_id_str + _(",  0, 0) \'Set to (0,0) so that offset will be world position\n");
+                        fn_str += _("\tSetSpriteVisible(") + spr_id_str + _(", FALSE) \'Image is -1 so it wouldn\'t render anyway\n");
+					}
 
 					fn_str += _("\n");
 
@@ -3069,6 +3110,7 @@ void NirvanaEditor_MainFrame::OnLayerCheckListSelect( wxCommandEvent& event )
 			m_layerSettings_spriteGridType_comboBox->SetSelection(project->getLayerSpriteGridType(stage_index, layer_index));
 			m_layerSettings_spriteSortBy_comboBox->SetSelection(project->getLayerSpriteSortBy(stage_index, layer_index));
 			m_layerSettings_spriteOrderBy_comboBox->SetSelection(project->getLayerSpriteSortOrder(stage_index, layer_index));
+			m_layerSettings_shapeData_comboBox->SetSelection(project->getLayerSpriteShapeDataSetting(stage_index, layer_index));
 		}
 		break;
 
@@ -3755,4 +3797,27 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteOrderBy( wxCommandEvent& event )
         map_editor->getMapViewControl()->sprite_order_by = sort_order;
 
     //std::cout << "order by" << std::endl;
+}
+
+
+void NirvanaEditor_MainFrame::OnMapEdit_SpriteShapeDataSetting( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	if(!project)
+		return;
+
+	int stage_index = map_editor->getSelectedStage();
+	if(stage_index < 0 || stage_index >= project->getStageCount())
+		return;
+
+	int layer_index = m_layerVisible_checkList->GetSelection();
+
+	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
+		return;
+
+	int shapeDataSetting = m_layerSettings_shapeData_comboBox->GetSelection();
+	project->setLayerSpriteShapeDataSetting(stage_index, layer_index, shapeDataSetting);
+
 }

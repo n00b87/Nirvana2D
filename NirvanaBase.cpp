@@ -547,7 +547,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer1832->Add( m_layerSettings_spriteGridType_comboBox, 2, wxALL, 5 );
 
 
-	bSizer198->Add( bSizer1832, 0, wxEXPAND, 5 );
+	bSizer198->Add( bSizer1832, 0, wxEXPAND, 1 );
 
 	wxBoxSizer* bSizer200;
 	bSizer200 = new wxBoxSizer( wxHORIZONTAL );
@@ -564,7 +564,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer200->Add( m_layerSettings_spriteSortBy_comboBox, 2, wxALL, 5 );
 
 
-	bSizer198->Add( bSizer200, 0, wxEXPAND, 5 );
+	bSizer198->Add( bSizer200, 0, wxEXPAND, 1 );
 
 	wxBoxSizer* bSizer1981;
 	bSizer1981 = new wxBoxSizer( wxHORIZONTAL );
@@ -581,7 +581,24 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer1981->Add( m_layerSettings_spriteOrderBy_comboBox, 2, wxALL, 5 );
 
 
-	bSizer198->Add( bSizer1981, 0, wxEXPAND, 5 );
+	bSizer198->Add( bSizer1981, 0, wxEXPAND, 1 );
+
+	wxBoxSizer* bSizer19811;
+	bSizer19811 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText1161 = new wxStaticText( m_panel63, wxID_ANY, _("Shape Data:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText1161->Wrap( -1 );
+	m_staticText1161->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer19811->Add( m_staticText1161, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
+
+	m_layerSettings_shapeData_comboBox = new wxComboBox( m_panel63, wxID_ANY, _("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	m_layerSettings_shapeData_comboBox->SetForegroundColour( wxSystemSettings::GetColour( wxSYS_COLOUR_WINDOWTEXT ) );
+
+	bSizer19811->Add( m_layerSettings_shapeData_comboBox, 2, wxALL, 5 );
+
+
+	bSizer198->Add( bSizer19811, 1, wxEXPAND, 1 );
 
 
 	m_panel63->SetSizer( bSizer198 );
@@ -2086,6 +2103,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_layerSettings_spriteGridType_comboBox->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_SpriteGridType ), NULL, this );
 	m_layerSettings_spriteSortBy_comboBox->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_SpriteSortBy ), NULL, this );
 	m_layerSettings_spriteOrderBy_comboBox->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_SpriteOrderBy ), NULL, this );
+	m_layerSettings_shapeData_comboBox->Connect( wxEVT_COMMAND_COMBOBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEdit_SpriteShapeDataSetting ), NULL, this );
 	m_mapEdit_showShapes_checkBox->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEditSettings_ShowShapes_Checked ), NULL, this );
 	m_mapEdit_showGrid_checkBox->Connect( wxEVT_COMMAND_CHECKBOX_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnMapEditSettings_ShowGrid_Checked ), NULL, this );
 	m_mapEdit_gridColor_colourPicker->Connect( wxEVT_COMMAND_COLOURPICKER_CHANGED, wxColourPickerEventHandler( Nirvana_MainFrame::OnMapEditSettings_GridColor_Change ), NULL, this );
