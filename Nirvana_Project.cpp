@@ -2279,6 +2279,45 @@ int Nirvana_Project::copyLayerSprite(int stage_index, int layer_index, int sprit
 
 	int n = 1;
 	wxString base_spr_name = wxString(stages[stage_index].layers[layer_index].layer_sprites[sprite_index].sprite_name).Upper().Trim();
+
+	// remove _#### from end of name if it is a previous copy name
+	int s_name_index = -1;
+	for(int i = 0; i < base_spr_name.Length(); i++)
+    {
+        if(i < 0)
+            continue;
+
+        wxString c = base_spr_name.substr(i, 1);
+
+        if(s_name_index >= 0)
+        {
+            if(c.compare(_("0"))==0 || c.compare(_("1"))==0 || c.compare(_("2"))==0 ||
+               c.compare(_("3"))==0 || c.compare(_("4"))==0 || c.compare(_("5"))==0 ||
+               c.compare(_("6"))==0 || c.compare(_("7"))==0 || c.compare(_("8"))==0 ||
+               c.compare(_("9"))==0)
+               {
+                   // Do nothing
+               }
+               else if(c.compare(_("_"))==0)
+               {
+                   s_name_index = i;
+               }
+               else
+               {
+                   s_name_index = -1;
+               }
+        }
+        else if(c.compare(_("_"))==0)
+        {
+            s_name_index = i;
+        }
+    }
+
+    if(s_name_index >= 0)
+    {
+        base_spr_name = base_spr_name.substr(0, s_name_index);
+    }
+
 	wxString copy_spr_name = base_spr_name + _("_") + wxString::Format(_("%i"), n);
 
 	for(int i = 0; i < stages[stage_index].layers[layer_index].layer_sprites.size(); i++)
