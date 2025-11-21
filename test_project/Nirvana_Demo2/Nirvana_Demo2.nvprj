@@ -1,0 +1,16 @@
+NIRVANA version=1.0;
+PROJECT name="Nirvana_Demo2";
+MEDIA_PATH bkg="bkg" tile="tiles" stage="stages" sprite="sprites";
+
+---------------- SPRITES ---------------------;
+
+
+
+---------------- TILESETS ---------------------;
+
+TILESET file="grassland_tiles.png";
+
+
+---------------- STAGES ---------------------;
+
+STAGE file="st1.stage";

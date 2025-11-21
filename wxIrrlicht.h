@@ -91,6 +91,10 @@ class wxIrrlicht : public wxControl {
 
         wxWindow* parent_window;
 
+        wxListBox* spriteBase_listBox;
+
+        int addProjectSpriteBase(int sheet_index, int w, int h);
+
         font_obj font[MAX_FONTS];
         int active_font = -1;
         int ui_layer = -1;
@@ -98,6 +102,8 @@ class wxIrrlicht : public wxControl {
 
         int ui_font1 = -1;
         int ui_font2 = -1;
+
+        std::vector<tileSprite_obj> t_sprite;
 
         int stage_edit_tool = -1;
 
@@ -155,6 +161,8 @@ class wxIrrlicht : public wxControl {
 		irr::u32 canvasAlpha(int canvas_id);
 		void setCanvasZ(int canvas_id, int z);
 		int getCanvasZ(int canvas_id);
+		void drawCanvasImage(irr::video::ITexture* texture, int x, int y, int src_x, int src_y, int src_w, int src_h, int tgt_width, int tgt_height);
+		int canvasClip(int x, int y, int w, int h);
 
 
 		//Colors
@@ -450,6 +458,29 @@ class wxIrrlicht : public wxControl {
 
         void StageSheet_DeleteSelectedTileUpdate();
 
+
+        // Tile Sprites
+        bool is_tile_select_screen;
+
+        int ts_tileset_id;
+        int ts_sprite_cut_id;
+        int ts_sprite_id;
+
+        int getCutFromTileSelection();
+
+        void StageSheet_SelectTile_SpriteLayer_Update();
+        void StageSheet_BoxSelectTile_SpriteLayer_Update();
+
+        void StageSheet_MoveTile_SpriteLayer_Update();
+        void StageSheet_SetTile_SpriteLayer_Update();
+
+        void StageSheet_DeleteSelectedTile_SpriteLayer_Update();
+
+        void util_drawSelectedTS();
+
+        int loadTilesetCuts(int tset);
+        void addLayerTS(int layer_index, int ts_index);
+
         //void updateTileSelectionTilemap();
 
 
@@ -485,7 +516,7 @@ class wxIrrlicht : public wxControl {
         int sprite_order_by = 0;
 
         std::vector<int> pick_sprites;
-        void pickSprites(int start_x, int start_y, int end_x, int end_y, bool current_canvas_only=true);
+        void pickSprites(int start_x, int start_y, int end_x, int end_y, bool current_canvas_only=true, bool pick_tile_sprite=false);
 
         bool map_sprite_selection_changed = false;
         bool map_sprite_pos_changed = false;
@@ -555,6 +586,7 @@ class wxIrrlicht : public wxControl {
 
 
         void UpdateStageSheet();
+        void UpdateStageTileSelect_SpriteLayer();
         void UpdateStageTileSelect();
         void UpdateStageSpritePreview();
 

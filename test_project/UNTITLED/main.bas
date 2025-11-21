@@ -10,7 +10,7 @@ vsync = FALSE
 OpenWindow( title$, w, h, fullscreen, vsync )
 
 'Load Nirvana Stage
-Nirvana_LoadStage("st1", 0, 0, w, h)
+Nirvana_LoadStage("st2", 0, 0, w, h)
 
 'Vector for storing camera position
 Dim camera_position As Nirvana_Vector2D
@@ -52,6 +52,12 @@ While Not Key(K_ESCAPE) And WindowExists()
 		camera_position.Y = camera_position.Y - cam_speed
 	ElseIf Key(K_DOWN) Then
 		camera_position.Y = camera_position.Y + cam_speed
+	End If
+	
+	If Key(K_SPACE) Then
+		Nirvana_LoadStage("st2", 0, 0, w, h)
+	ElseIf Key(K_B) Then
+		Nirvana_LoadStage("st1", 0, 0, w, h)
 	End If
 	
 	'Set camera to new position

@@ -6,6 +6,8 @@
 #include "Nirvana_Project.h"
 #include "NirvanaEditor_NewSprite_Dialog.h"
 #include "NirvanaEditor_NewTileset_Dialog.h"
+#include "NirvanaEditor_SpriteLayer_SelectTileset_Dialog.h"
+#include "NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.h"
 
 
 
@@ -50,6 +52,9 @@ Nirvana_MainFrame( parent )
 
 	m_layerSettings_spriteOrderBy_comboBox->Append(_("ASCENDING"));
 	m_layerSettings_spriteOrderBy_comboBox->Append(_("DESCENDING"));
+
+	m_layerSettings_shapeData_comboBox->Append(_("GENERATE SHAPES"));
+	m_layerSettings_shapeData_comboBox->Append(_("EXPORT DATA ONLY"));
 
 
 	map_editor = new Nirvana_MapEditor(this, m_mapEdit_map_panel, m_mapEdit_tileSelect_panel);
@@ -285,6 +290,7 @@ Nirvana_MainFrame( parent )
 
 
 	map_editor->getMapViewControl()->force_refresh();
+	map_editor->getMapViewControl()->is_tile_select_screen = true;
 }
 
 void NirvanaEditor_MainFrame::OnNirvanaClose( wxCloseEvent& event )
@@ -382,6 +388,12 @@ void NirvanaEditor_MainFrame::OnMapEditToolsTabChanged( wxAuiNotebookEvent& even
 	wxPanel* new_panel = (wxPanel*)m_mapEdit_layerObjectTools_auinotebook->GetPage(page_index);
 
 	map_editor->getTileSelectControl()->update_events = false;
+	map_editor->getMapViewControl()->is_tile_select_screen = false;
+
+	map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.clear();
+	map_editor->getMapViewControl()->mapEdit_selectTileTool_selection.clear();
+	map_editor->getMapViewControl()->mapEdit_selectTileTool_box.clear();
+	map_editor->getMapViewControl()->selected_sprite = -1;
 
 	if(new_panel == m_mapEdit_tile_panel)
 	{
@@ -392,6 +404,7 @@ void NirvanaEditor_MainFrame::OnMapEditToolsTabChanged( wxAuiNotebookEvent& even
 		map_editor->setMapTool(selected_map_tool);
 		m_mapEdit_tileTools_auiToolBar->ToggleTool(m_mapEdit_tileToolbar_select_tool->GetId(), true);
 		map_editor->getTileSelectControl()->update_events = true;
+		map_editor->getMapViewControl()->is_tile_select_screen = true;
 	}
 	else if(new_panel == m_mapEdit_sprite_panel)
 	{
@@ -463,6 +476,199 @@ void NirvanaEditor_MainFrame::OnTileEditor_Edit_Changed( wxAuiNotebookEvent& eve
 		tile_editor->startEditor(1);
 	}
 }
+
+
+void NirvanaEditor_MainFrame::OnSetSpriteLayerTileset( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	if(!project)
+		return;
+
+	int stage_index = map_editor->getSelectedStage();
+	if(stage_index < 0)
+		return;
+
+    int layer_index = map_editor->getSelectedLayer();
+
+	if(layer_index < 0)
+	{
+		return;
+	}
+
+    if(project->stages[stage_index].layers[layer_index].layer_map.nv_tileset_index >= 0)
+    {
+        NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog* warning_dialog = new NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog(this);
+        PreDialog();
+        warning_dialog->ShowModal();
+        PostDialog();
+
+        if(!warning_dialog->continue_flag)
+            return;
+    }
+
+
+	NirvanaEditor_SpriteLayer_SelectTileset_Dialog* dialog = new NirvanaEditor_SpriteLayer_SelectTileset_Dialog(this);
+
+	int tile_width = project->getStageTileSize(stage_index).X;
+	int tile_height = project->getStageTileSize(stage_index).Y;
+
+	for(int i = 0; i < project->getTilesetCount(); i++)
+	{
+		if(tile_width == project->getTilesetTileSize(i).X && tile_height == project->getTilesetTileSize(i).Y)
+			dialog->tileset_list.push_back(wxString(project->getTilesetName(i)));
+	}
+
+	dialog->refresh_list();
+
+	PreDialog();
+	dialog->ShowModal();
+	PostDialog();
+
+	if(!dialog->select_flag)
+		return;
+
+    // Delete current tile sprites
+	for(int i = 0; i < project->stages[stage_index].layers[layer_index].layer_tile_sprites.size(); i++)
+	{
+		int map_spr_id = project->stages[stage_index].layers[layer_index].layer_tile_sprites[i].sprite_id;
+		map_editor->getMapViewControl()->deleteSprite(map_spr_id);
+	}
+
+	project->stages[stage_index].layers[layer_index].layer_tile_sprites.clear();
+
+	map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.clear();
+	map_editor->getMapViewControl()->selected_sprite = -1;
+
+
+
+	int nv_tileset_index = project->getTilesetIndex(dialog->selected_tileset.ToStdString());
+
+	if(nv_tileset_index < 0)
+        return;
+
+	project->setLayerTileset(stage_index, layer_index, nv_tileset_index);
+
+	m_mapEdit_layerTileset_staticText->SetLabelText( wxString(project->getTilesetName( project->getLayerTileset(stage_index, layer_index) )));
+
+	// Update Tile select with tilesheet directly since it was just selected
+	map_editor->getTileSelectControl()->mapEdit_getContext();
+    if(map_editor->getTileSelectControl()->imageExists( map_editor->getTileSelectControl()->current_sheet_image ))
+        map_editor->getTileSelectControl()->deleteImage(map_editor->getTileSelectControl()->current_sheet_image);
+
+    wxFileName gfx_dir(project->getDir());
+
+    if(project)
+        gfx_dir.AppendDir(project->tile_path);
+    else
+        gfx_dir.AppendDir(_("gfx"));
+
+    Nirvana_Map_Layer n_layer = project->getStageLayer(stage_index, layer_index);
+
+    std::string sheet_file_name = project->getTileset(nv_tileset_index).file.ToStdString();
+
+    gfx_dir.SetFullName(wxString(sheet_file_name));
+
+    if(sheet_file_name.compare("")!=0)
+        map_editor->getTileSelectControl()->current_sheet_image = map_editor->getTileSelectControl()->loadImage(gfx_dir.GetAbsolutePath().ToStdString());
+
+    //std::cout << "TS Current Sheet: " << map_editor->getTileSelectControl()->current_sheet_image << std::endl;
+}
+
+
+void NirvanaEditor_MainFrame::OnMapEdit_TSTool_Select( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	selected_map_tool = MAP_TOOL_TS_SELECT;
+	map_editor->setMapTool(selected_map_tool);
+}
+
+void NirvanaEditor_MainFrame::OnMapEdit_TSTool_BoxSelect( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	selected_map_tool = MAP_TOOL_TS_BOXSELECT;
+	map_editor->setMapTool(selected_map_tool);
+}
+
+void NirvanaEditor_MainFrame::OnMapEdit_TSTool_Move( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	selected_map_tool = MAP_TOOL_TS_MOVE;
+	map_editor->setMapTool(selected_map_tool);
+}
+
+void NirvanaEditor_MainFrame::OnMapEdit_TSTool_SetTile( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	selected_map_tool = MAP_TOOL_TS_SET;
+	map_editor->setMapTool(selected_map_tool);
+}
+
+void NirvanaEditor_MainFrame::OnMapEdit_TSTool_DeleteSelected( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+    if(!project)
+		return;
+
+	int stage_index = map_editor->getSelectedStage();
+	if(stage_index < 0)
+		return;
+
+	int layer_index = map_editor->getSelectedLayer();
+	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
+		return;
+
+	if(project->getLayerType(stage_index, layer_index) != LAYER_TYPE_SPRITE)
+	{
+		return;
+	}
+
+	if(map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.size() == 0)
+		return;
+
+	irr::core::array<int> layer_spr_array; //The irrlicht array has built-in sort and I don't feel like doing it myself
+
+	for(int i = 0; i < map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.size(); i++)
+	{
+		int map_spr_id = map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection[i].layer_sprite_index;
+		int spr_index = map_editor->getMapViewControl()->sprite[map_spr_id].layer_ts_index;
+
+		map_editor->getMapViewControl()->deleteSprite(map_spr_id);
+		layer_spr_array.push_back(spr_index);
+	}
+
+	for(int i = 0; i < layer_spr_array.size(); i++)
+	{
+		if(i < 0)
+			break;
+
+		//std::cout << "array: " << layer_spr_array[i] << ", " << project->stages[stage_index].layers[layer_index].layer_sprites[layer_spr_array[i]].sprite_name << std::endl;
+
+		project->stages[stage_index].layers[layer_index].layer_tile_sprites[layer_spr_array[i]].sprite_id = -1;
+		project->stages[stage_index].layers[layer_index].layer_tile_sprites[layer_spr_array[i]].sheet_index = -1;
+		project->stages[stage_index].layers[layer_index].layer_tile_sprites[layer_spr_array[i]].image_id = -1;
+		project->stages[stage_index].layers[layer_index].layer_tile_sprites[layer_spr_array[i]].cut_index = -1;
+		project->stages[stage_index].layers[layer_index].layer_tile_sprites[layer_spr_array[i]].tset = -1;
+	}
+
+
+	map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.clear();
+	map_editor->getMapViewControl()->selected_sprite = -1;
+}
+
+
+
 
 void NirvanaEditor_MainFrame::OnSpriteEditor_Edit_Changed( wxAuiNotebookEvent& event )
 {
@@ -1488,6 +1694,8 @@ void NirvanaEditor_MainFrame::OnDeleteTilesetClick( wxCommandEvent& event )
 	int stage_index = map_editor->getSelectedStage();
 
 	map_editor->getMapViewControl()->clearStage();
+
+	std::vector<Nirvana_Tileset> tmp_tilesets = project->tileset;
 	project->deleteTileset(tset_id);
 
 	for(int st_i = 0; st_i < project->stages.size(); st_i++)
@@ -1497,14 +1705,61 @@ void NirvanaEditor_MainFrame::OnDeleteTilesetClick( wxCommandEvent& event )
 			if(layer_index < 0)
 				continue;
 
-			if(project->stages[st_i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP)
+			if(project->stages[st_i].layers[layer_index].layer_type == LAYER_TYPE_TILEMAP || project->stages[st_i].layers[layer_index].layer_type == LAYER_TYPE_ISO_TILEMAP)
 			{
 				if(project->stages[st_i].layers[layer_index].layer_map.nv_tileset_index == tset_id)
 				{
 					project->deleteLayer(st_i, layer_index);
 					layer_index = -1;
 				}
+				else if(project->stages[st_i].layers[layer_index].layer_map.nv_tileset_index > tset_id)
+                {
+                    project->stages[st_i].layers[layer_index].layer_map.nv_tileset_index--;
+                    int n_tset_index = project->stages[st_i].layers[layer_index].layer_map.nv_tileset_index;
+                    if(n_tset_index >= 0 && n_tset_index < project->tileset.size())
+                        project->stages[st_i].layers[layer_index].layer_map.nv_tileset_name = project->tileset[n_tset_index].tileset_name.ToStdString();
+                }
 			}
+			else if(project->stages[st_i].layers[layer_index].layer_type == LAYER_TYPE_SPRITE)
+            {
+                if(project->stages[st_i].layers[layer_index].layer_map.nv_tileset_index == tset_id)
+                {
+                    //std::cout << "SP LAYER: " << layer_index << std::endl;
+                    for(int spr_index = 0; spr_index < project->stages[st_i].layers[layer_index].layer_tile_sprites.size(); spr_index++)
+                    {
+                        int sprite_id = project->stages[st_i].layers[layer_index].layer_tile_sprites[spr_index].sprite_id;
+                        map_editor->getMapViewControl()->deleteSprite(sprite_id);
+                    }
+                    project->stages[st_i].layers[layer_index].layer_tile_sprites.clear();
+                    project->stages[st_i].layers[layer_index].layer_map.nv_tileset_index = -1;
+                    project->stages[st_i].layers[layer_index].layer_map.nv_tileset_name = "";
+                    //project->setLayerTileset(st_i, layer_index, -1);
+                    map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.clear();
+                    map_editor->getMapViewControl()->selected_sprite = -1;
+
+                    layer_index = -1;
+                }
+                else if(project->stages[st_i].layers[layer_index].layer_map.nv_tileset_index > tset_id)
+                {
+                    project->stages[st_i].layers[layer_index].layer_map.nv_tileset_index--;
+                    int n_tset_index = project->stages[st_i].layers[layer_index].layer_map.nv_tileset_index;
+
+                    for(int spr_index = 0; spr_index < project->stages[st_i].layers[layer_index].layer_tile_sprites.size(); spr_index++)
+                    {
+                        project->stages[st_i].layers[layer_index].layer_tile_sprites[spr_index].tset = n_tset_index;
+                    }
+
+                    if(n_tset_index >= 0 && n_tset_index < project->tileset.size())
+                    {
+                        project->stages[st_i].layers[layer_index].layer_map.nv_tileset_name = project->tileset[n_tset_index].tileset_name.ToStdString();
+
+                        if((n_tset_index+1) < tmp_tilesets.size())
+                        {
+                            project->tileset[n_tset_index].tileset_cut = tmp_tilesets[n_tset_index+1].tileset_cut;
+                        }
+                    }
+                }
+            }
 		}
 	}
 

@@ -272,6 +272,7 @@ void Nirvana_MapEditor::selectLayer(int layer_index)
 
 	switch(n_layer.layer_type)
 	{
+	    case LAYER_TYPE_SPRITE:
 	    case LAYER_TYPE_ISO_TILEMAP:
 		case LAYER_TYPE_TILEMAP:
 		{
@@ -289,17 +290,13 @@ void Nirvana_MapEditor::selectLayer(int layer_index)
 			std::string sheet_file_name = project->getTileset(n_layer.layer_map.nv_tileset_index).file.ToStdString();
 			gfx_dir.SetFullName(wxString(sheet_file_name));
 
-			getTileSelectControl()->current_sheet_image = getTileSelectControl()->loadImage(gfx_dir.GetAbsolutePath().ToStdString());
+			if(sheet_file_name.compare("")!=0)
+                getTileSelectControl()->current_sheet_image = getTileSelectControl()->loadImage(gfx_dir.GetAbsolutePath().ToStdString());
 
 			//std::cout << "CURRENT SHEET: " << getTileSelectControl()->current_sheet_image << std::endl;
 
 			//getTileSelectControl()->setActiveCanvas(getTileSelectControl()->sheet_canvas);
 			//getTileSelectControl()->drawImage_BlitEx(getTileSelectControl()->current_sheet_image, 0, 0, 4, 256, 0, 0, 512, 256);
-		}
-		break;
-
-		case LAYER_TYPE_SPRITE:
-		{
 		}
 		break;
 

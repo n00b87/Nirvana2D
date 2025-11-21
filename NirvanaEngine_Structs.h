@@ -177,6 +177,7 @@ struct sprite2D_obj
 
 	int layer_sprite_index = -1;
 	int layer_sprite_unique_id = -1;
+	int layer_ts_index = -1;
 
 	int type;
 
@@ -270,6 +271,17 @@ struct Nirvana_SpriteBase
 	bool include_flag = false;
 };
 
+
+struct ts_cut
+{
+    int tileset_index;
+    int start_tile;
+    int num_cols;
+    int num_rows;
+    int cut_image_id;
+};
+
+
 struct Nirvana_Tileset
 {
 	wxString file;
@@ -278,6 +290,8 @@ struct Nirvana_Tileset
 	tileset_obj object;
 
 	std::vector<tilemask_obj> mask;
+
+	std::vector<ts_cut> tileset_cut;
 };
 
 struct Nirvana_Map_Sprite
@@ -328,6 +342,21 @@ struct Nirvana_Map_CollisionShape
 	irr::core::array<irr::core::vector2di> next_points;
 };
 
+struct tileSprite_obj
+{
+    int tset;
+    int cut_index;
+    int sheet_index;
+    int x;
+    int y;
+    int width;
+    int height;
+    int image_id;
+    int nv_sprite_id;
+    int sprite_id;
+};
+
+
 struct Nirvana_Map_Layer
 {
 	std::string layer_name;
@@ -336,6 +365,8 @@ struct Nirvana_Map_Layer
 	Nirvana_Map_TileMap layer_map;
 	std::vector<Nirvana_Map_Sprite> layer_sprites;
 	std::vector<sprite2D_physics_obj> layer_shapes;
+	int ts_tileset;  // NOTE: tileset for sprite layers
+	std::vector<tileSprite_obj> layer_tile_sprites; // sprites created from tileset
 	Nirvana_Map_Background bkg;
 	irr::core::vector2df scroll_speed;
 	int layer_alpha = 255;
@@ -343,6 +374,7 @@ struct Nirvana_Map_Layer
 	int spriteGrid_type = 0;
 	int spriteSortBy = 0;
 	int spriteSortOrder = 0;
+	int spriteShapeDataSetting = 0;
 
 	int ref_canvas = -1;
 };

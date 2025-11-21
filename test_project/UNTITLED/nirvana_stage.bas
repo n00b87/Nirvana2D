@@ -17,6 +17,7 @@ Type Nirvana_Shape
 Dim Name$
 Dim Sprite_ID
 Dim ShapeType
+Dim ShapeData_Matrix
 End Type
 
 Type Nirvana_Layer
@@ -31,6 +32,7 @@ Dim Layer_TileMap2 As Nirvana_TileMap
 Dim Layer_Sprite_Count
 Dim Layer_Shape_Count
 Dim Bkg As Nirvana_Background
+Dim Layer_TS_Stack
 End Type
 
 Type Nirvana_Stage
@@ -64,8 +66,16 @@ NIRVANA_WINDOW_HEIGHT = 200
 
 Dim Nirvana_Stage_Sprites[9] As Nirvana_Sprite
 Dim Nirvana_Stage_Shape_Points[1] As Nirvana_Vector2D
-Dim Nirvana_Stage_Shapes[5] As Nirvana_Shape
+Dim Nirvana_Stage_Shapes[6] As Nirvana_Shape
 Dim Nirvana_Stage_Layers[5] As Nirvana_Layer
+
+Dim Nirvana_NULL_Shape As Nirvana_Shape
+Nirvana_NULL_Shape.Name$ = ""
+Nirvana_NULL_Shape.Sprite_ID = -1
+Nirvana_NULL_Shape.ShapeType = -1
+Nirvana_NULL_Shape.ShapeData_Matrix = -1
+
+ArrayFill(Nirvana_Stage_Shapes, Nirvana_NULL_Shape)
 
 For i = 0 To 4
 	Nirvana_Stage_Layers[i].Ref_Canvas = -1
@@ -80,7 +90,7 @@ For i = 0 To 8
 	Nirvana_Stage_Sprites[i].Sprite_ID = -1
 Next
 
-For i = 0 To 4
+For i = 0 To 5
 	Nirvana_Stage_Shapes[i].Sprite_ID = -1
 Next
 
@@ -103,10 +113,24 @@ Sub Nirvana_ClearStage()
 
 	Nirvana_ActiveStage.Stage_Offset.X = 0
 	Nirvana_ActiveStage.Stage_Offset.Y = 0
+
+	Num_Shapes = ArraySize(Nirvana_Stage_Shapes, 1)
+	For n = 0 To Num_Shapes-1
+		If MatrixExists(Nirvana_Stage_Shapes[n].ShapeData_Matrix) Then
+			DeleteMatrix(Nirvana_Stage_Shapes[n].ShapeData_Matrix)
+		End If
+		Nirvana_Stage_Shapes[n].ShapeData_Matrix = -1
+	Next
+
 	For i = 0 To Nirvana_ActiveStage.Layer_Count-1
 
 		CloseCanvas(Nirvana_Stage_Layers[i].Ref_Canvas)
 		Nirvana_Stage_Layers[i].Ref_Canvas = -1
+
+		If Stack_N_Exists(Nirvana_Stage_Layers[i].Layer_TS_Stack) Then
+			DeleteStack_N(Nirvana_Stage_Layers[i].Layer_TS_Stack)
+		End If
+		Nirvana_Stage_Layers[i].Layer_TS_Stack = -1
 
 		If ImageExists(Nirvana_Stage_Layers[i].Bkg.Image_ID) Then
 			DeleteImage(Nirvana_Stage_Layers[i].Bkg.Image_ID)
@@ -175,6 +199,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[0].Alpha = 200
 	Nirvana_Stage_Layers[0].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[0].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[0].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[0].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
 	Nirvana_Stage_Layers[0].Bkg.Image_ID = LoadImage(NIRVANA_BKG_DIR$ + "final_bkg.png")
@@ -188,6 +213,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[1].Alpha = 255
 	Nirvana_Stage_Layers[1].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[1].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[1].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[1].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
 
@@ -210,6 +236,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[2].Alpha = 255
 	Nirvana_Stage_Layers[2].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[2].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[2].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[2].Ref_Canvas = OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)
 	SetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[2].Ref_Canvas, SPRITE_PRIORITY_GREATEST_Y, SPRITE_ORDER_DESCENDING)
@@ -315,7 +342,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 
 	'Transform
 	SetSpritePosition(Nirvana_Stage_Sprites[4].Sprite_ID, 1040, 457)
-	SetSpriteScale(Nirvana_Stage_Sprites[4].Sprite_ID, 1, 2)
+	SetSpriteScale(Nirvana_Stage_Sprites[4].Sprite_ID, 1, 1)
 	SetSpriteRotation(Nirvana_Stage_Sprites[4].Sprite_ID, 0)
 
 	'Render Settings
@@ -387,139 +414,188 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 
 	'------- SHAPE ("POLYGON_1") -------
 	Nirvana_Stage_Shapes[0].Name$ = "POLYGON_1"
-	Nirvana_Stage_Shapes[0].Sprite_ID = CreateSprite(-1, 1, 1)
+	Nirvana_Stage_Shapes[0].Sprite_ID = -1
 
 	'Base Settings
-	SetSpriteType(Nirvana_Stage_Shapes[0].Sprite_ID, SPRITE_TYPE_STATIC)
-	SetSpriteSolid(Nirvana_Stage_Shapes[0].Sprite_ID, TRUE)
 	'Shape
 	Nirvana_Stage_Shapes[0].ShapeType = SPRITE_SHAPE_POLYGON
-	SetSpriteShape(Nirvana_Stage_Shapes[0].Sprite_ID, Nirvana_Stage_Shapes[0].ShapeType)
 	Dim stage_shape_x_0[4]
 	Dim stage_shape_y_0[4]
+	Nirvana_Stage_Shapes[0].ShapeData_Matrix = DimMatrix(2, 4)
 
 	stage_shape_x_0[0] = 671
 	stage_shape_y_0[0] = 242
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 0, 0, stage_shape_x_0[0])
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 1, 0, stage_shape_y_0[0])
 
 	stage_shape_x_0[1] = 548
 	stage_shape_y_0[1] = 340
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 0, 1, stage_shape_x_0[1])
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 1, 1, stage_shape_y_0[1])
 
 	stage_shape_x_0[2] = 683
 	stage_shape_y_0[2] = 450
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 0, 2, stage_shape_x_0[2])
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 1, 2, stage_shape_y_0[2])
 
 	stage_shape_x_0[3] = 792
 	stage_shape_y_0[3] = 345
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 0, 3, stage_shape_x_0[3])
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 1, 3, stage_shape_y_0[3])
 
-	SetSpritePolygon(Nirvana_Stage_Shapes[0].Sprite_ID, stage_shape_x_0, stage_shape_y_0, 4)
 
-	'Transform
-	SetSpritePosition(Nirvana_Stage_Shapes[0].Sprite_ID,  0, 0) 'Set to (0,0) so that offset will be world position
-	SetSpriteVisible(Nirvana_Stage_Shapes[0].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("CHAIN_1") -------
 	Nirvana_Stage_Shapes[1].Name$ = "CHAIN_1"
-	Nirvana_Stage_Shapes[1].Sprite_ID = CreateSprite(-1, 1, 1)
+	Nirvana_Stage_Shapes[1].Sprite_ID = -1
 
 	'Base Settings
-	SetSpriteType(Nirvana_Stage_Shapes[1].Sprite_ID, SPRITE_TYPE_STATIC)
-	SetSpriteSolid(Nirvana_Stage_Shapes[1].Sprite_ID, TRUE)
 	'Shape
 	Nirvana_Stage_Shapes[1].ShapeType = SPRITE_SHAPE_CHAIN
-	SetSpriteShape(Nirvana_Stage_Shapes[1].Sprite_ID, Nirvana_Stage_Shapes[1].ShapeType)
 	Dim stage_shape_x_1[5]
 	Dim stage_shape_y_1[5]
+	Nirvana_Stage_Shapes[1].ShapeData_Matrix = DimMatrix(2, 5)
 
 	stage_shape_x_1[0] = 637
 	stage_shape_y_1[0] = 382
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 0, 0, stage_shape_x_1[0])
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 1, 0, stage_shape_y_1[0])
 
 	stage_shape_x_1[1] = 614
 	stage_shape_y_1[1] = 302
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 0, 1, stage_shape_x_1[1])
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 1, 1, stage_shape_y_1[1])
 
 	stage_shape_x_1[2] = 668
 	stage_shape_y_1[2] = 346
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 0, 2, stage_shape_x_1[2])
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 1, 2, stage_shape_y_1[2])
 
 	stage_shape_x_1[3] = 724
 	stage_shape_y_1[3] = 297
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 0, 3, stage_shape_x_1[3])
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 1, 3, stage_shape_y_1[3])
 
 	stage_shape_x_1[4] = 696
 	stage_shape_y_1[4] = 378
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 0, 4, stage_shape_x_1[4])
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 1, 4, stage_shape_y_1[4])
 
-	SetSpriteChain(Nirvana_Stage_Shapes[1].Sprite_ID, stage_shape_x_1, stage_shape_y_1, 5, 636, 381, 697, 377)
 
-	'Transform
-	SetSpritePosition(Nirvana_Stage_Shapes[1].Sprite_ID,  0, 0) 'Set to (0,0) so that offset will be world position
-	SetSpriteVisible(Nirvana_Stage_Shapes[1].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("BOX_1") -------
 	Nirvana_Stage_Shapes[2].Name$ = "BOX_1"
-	Nirvana_Stage_Shapes[2].Sprite_ID = CreateSprite(-1, 1, 1)
+	Nirvana_Stage_Shapes[2].Sprite_ID = -1
 
 	'Base Settings
-	SetSpriteType(Nirvana_Stage_Shapes[2].Sprite_ID, SPRITE_TYPE_STATIC)
-	SetSpriteSolid(Nirvana_Stage_Shapes[2].Sprite_ID, TRUE)
 	'Shape
 	Nirvana_Stage_Shapes[2].ShapeType = SPRITE_SHAPE_BOX
-	SetSpriteShape(Nirvana_Stage_Shapes[2].Sprite_ID, Nirvana_Stage_Shapes[2].ShapeType)
-	SetSpriteShapeOffset(Nirvana_Stage_Shapes[2].Sprite_ID, 571, 476)
-	SetSpriteBox(Nirvana_Stage_Shapes[2].Sprite_ID, 233, 40)
+	Nirvana_Stage_Shapes[2].ShapeData_Matrix = DimMatrix(4, 1)
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 0, 0, 571)
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 1, 0, 476)
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 2, 0, 233)
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 3, 0, 40)
 
-	'Transform
-	SetSpritePosition(Nirvana_Stage_Shapes[2].Sprite_ID,  0, 0) 'Set to (0,0) so that offset will be world position
-	SetSpriteVisible(Nirvana_Stage_Shapes[2].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("BOX_2") -------
 	Nirvana_Stage_Shapes[3].Name$ = "BOX_2"
-	Nirvana_Stage_Shapes[3].Sprite_ID = CreateSprite(-1, 1, 1)
+	Nirvana_Stage_Shapes[3].Sprite_ID = -1
 
 	'Base Settings
-	SetSpriteType(Nirvana_Stage_Shapes[3].Sprite_ID, SPRITE_TYPE_STATIC)
-	SetSpriteSolid(Nirvana_Stage_Shapes[3].Sprite_ID, TRUE)
 	'Shape
 	Nirvana_Stage_Shapes[3].ShapeType = SPRITE_SHAPE_BOX
-	SetSpriteShape(Nirvana_Stage_Shapes[3].Sprite_ID, Nirvana_Stage_Shapes[3].ShapeType)
-	SetSpriteShapeOffset(Nirvana_Stage_Shapes[3].Sprite_ID, 8, 288)
-	SetSpriteBox(Nirvana_Stage_Shapes[3].Sprite_ID, 532, 127)
+	Nirvana_Stage_Shapes[3].ShapeData_Matrix = DimMatrix(4, 1)
+	SetMatrixValue(Nirvana_Stage_Shapes[3].ShapeData_Matrix, 0, 0, 8)
+	SetMatrixValue(Nirvana_Stage_Shapes[3].ShapeData_Matrix, 1, 0, 288)
+	SetMatrixValue(Nirvana_Stage_Shapes[3].ShapeData_Matrix, 2, 0, 532)
+	SetMatrixValue(Nirvana_Stage_Shapes[3].ShapeData_Matrix, 3, 0, 127)
 
-	'Transform
-	SetSpritePosition(Nirvana_Stage_Shapes[3].Sprite_ID,  0, 0) 'Set to (0,0) so that offset will be world position
-	SetSpriteVisible(Nirvana_Stage_Shapes[3].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- SHAPE ("CHAIN_2") -------
 	Nirvana_Stage_Shapes[4].Name$ = "CHAIN_2"
-	Nirvana_Stage_Shapes[4].Sprite_ID = CreateSprite(-1, 1, 1)
+	Nirvana_Stage_Shapes[4].Sprite_ID = -1
 
 	'Base Settings
-	SetSpriteType(Nirvana_Stage_Shapes[4].Sprite_ID, SPRITE_TYPE_STATIC)
-	SetSpriteSolid(Nirvana_Stage_Shapes[4].Sprite_ID, TRUE)
 	'Shape
 	Nirvana_Stage_Shapes[4].ShapeType = SPRITE_SHAPE_CHAIN
-	SetSpriteShape(Nirvana_Stage_Shapes[4].Sprite_ID, Nirvana_Stage_Shapes[4].ShapeType)
 	Dim stage_shape_x_4[6]
 	Dim stage_shape_y_4[6]
+	Nirvana_Stage_Shapes[4].ShapeData_Matrix = DimMatrix(2, 6)
 
 	stage_shape_x_4[0] = 928
 	stage_shape_y_4[0] = 577
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 0, 0, stage_shape_x_4[0])
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 1, 0, stage_shape_y_4[0])
 
 	stage_shape_x_4[1] = 1214
 	stage_shape_y_4[1] = 861
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 0, 1, stage_shape_x_4[1])
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 1, 1, stage_shape_y_4[1])
 
 	stage_shape_x_4[2] = 1311
 	stage_shape_y_4[2] = 862
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 0, 2, stage_shape_x_4[2])
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 1, 2, stage_shape_y_4[2])
 
 	stage_shape_x_4[3] = 1551
 	stage_shape_y_4[3] = 622
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 0, 3, stage_shape_x_4[3])
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 1, 3, stage_shape_y_4[3])
 
 	stage_shape_x_4[4] = 1779
 	stage_shape_y_4[4] = 852
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 0, 4, stage_shape_x_4[4])
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 1, 4, stage_shape_y_4[4])
 
 	stage_shape_x_4[5] = 1914
 	stage_shape_y_4[5] = 703
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 0, 5, stage_shape_x_4[5])
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 1, 5, stage_shape_y_4[5])
 
-	SetSpriteChain(Nirvana_Stage_Shapes[4].Sprite_ID, stage_shape_x_4, stage_shape_y_4, 6, 927, 576, 1915, 702)
 
-	'Transform
-	SetSpritePosition(Nirvana_Stage_Shapes[4].Sprite_ID,  0, 0) 'Set to (0,0) so that offset will be world position
-	SetSpriteVisible(Nirvana_Stage_Shapes[4].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
+
+	'------- TILE SPRITES  -------
+	Cut_Start_Index = 0
+	Nirvana_Stage_Layers[2].Layer_TS_Stack = CreateStack_N()
+	cut_index = Cut_Start_Index + 0
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 32, 32)
+
+	cut_index = Cut_Start_Index + 0
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 464, 16)
+
+	cut_index = Cut_Start_Index + 0
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 128, 128)
+
+	cut_index = Cut_Start_Index + 1
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 272, 176)
+
+	cut_index = Cut_Start_Index + 2
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 176, 272)
+
+	cut_index = Cut_Start_Index + 2
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 240, 272)
+
+	cut_index = Cut_Start_Index + 2
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 304, 272)
+
+	cut_index = Cut_Start_Index + 3
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[2].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 64, 320)
 
 
 	'-------LAYER (tile_layer2)-------
@@ -530,6 +606,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[3].Alpha = 255
 	Nirvana_Stage_Layers[3].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[3].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[3].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[3].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
 
@@ -552,12 +629,13 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[4].Alpha = 255
 	Nirvana_Stage_Layers[4].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[4].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[4].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[4].Ref_Canvas = OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)
 	SetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[4].Ref_Canvas, SPRITE_PRIORITY_NONE, SPRITE_ORDER_ASCENDING)
 	Canvas(Nirvana_Stage_Layers[4].Ref_Canvas)
 	Nirvana_Stage_Layers[4].Layer_Sprite_Count = 1
-	Nirvana_Stage_Layers[4].Layer_Shape_Count = 0
+	Nirvana_Stage_Layers[4].Layer_Shape_Count = 1
 
 	'------- SPRITE ("guy1") -------
 	Nirvana_Stage_Sprites[8] = Nirvana_CreateSprite("gren_guy", "guy1")
@@ -600,6 +678,40 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteAlpha(Nirvana_Stage_Sprites[8].Sprite_ID, 180)
 	SetSpriteVisible(Nirvana_Stage_Sprites[8].Sprite_ID, TRUE)
 
+	'------- SHAPE ("CIRCLE_1") -------
+	Nirvana_Stage_Shapes[5].Name$ = "CIRCLE_1"
+	Nirvana_Stage_Shapes[5].Sprite_ID = CreateSprite(-1, 1, 1)
+
+	'Base Settings
+	SetSpriteType(Nirvana_Stage_Shapes[5].Sprite_ID, SPRITE_TYPE_STATIC)
+	SetSpriteSolid(Nirvana_Stage_Shapes[5].Sprite_ID, TRUE)
+	'Shape
+	Nirvana_Stage_Shapes[5].ShapeType = SPRITE_SHAPE_CIRCLE
+	SetSpriteShape(Nirvana_Stage_Shapes[5].Sprite_ID, Nirvana_Stage_Shapes[5].ShapeType)
+	Nirvana_Stage_Shapes[5].ShapeData_Matrix = DimMatrix(3, 1)
+	SetMatrixValue(Nirvana_Stage_Shapes[5].ShapeData_Matrix, 0, 0, 135)
+	SetMatrixValue(Nirvana_Stage_Shapes[5].ShapeData_Matrix, 1, 0, 87)
+	SetMatrixValue(Nirvana_Stage_Shapes[5].ShapeData_Matrix, 2, 0, 63)
+	SetSpriteShapeOffset(Nirvana_Stage_Shapes[5].Sprite_ID, 135, 87)
+	SetSpriteRadius(Nirvana_Stage_Shapes[5].Sprite_ID, 63)
+
+	'Transform
+	SetSpritePosition(Nirvana_Stage_Shapes[5].Sprite_ID,  0, 0) 'Set to (0,0) so that offset will be world position
+	SetSpriteVisible(Nirvana_Stage_Shapes[5].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
+
+	'------- TILE SPRITES  -------
+	Cut_Start_Index = 4
+	Nirvana_Stage_Layers[4].Layer_TS_Stack = CreateStack_N()
+	cut_index = Cut_Start_Index + 0
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[4].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 384, 256)
+
+	cut_index = Cut_Start_Index + 0
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[4].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 224, 32)
+
 
 	Return nv_stage
 End Function
@@ -624,6 +736,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[0].Alpha = 255
 	Nirvana_Stage_Layers[0].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[0].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[0].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[0].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
 	Nirvana_Stage_Layers[0].Bkg.Image_ID = LoadImage(NIRVANA_BKG_DIR$ + "bkg_city_ruin.png")
@@ -637,6 +750,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[1].Alpha = 255
 	Nirvana_Stage_Layers[1].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[1].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[1].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[1].Ref_Canvas = OpenCanvasSpriteLayer(vp_x, vp_y, vp_w, vp_h)
 	SetSpriteCanvasRenderPriority(Nirvana_Stage_Layers[1].Ref_Canvas, SPRITE_PRIORITY_NONE, SPRITE_ORDER_ASCENDING)
@@ -695,6 +809,11 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	'Shape
 	Nirvana_Stage_Shapes[0].ShapeType = SPRITE_SHAPE_BOX
 	SetSpriteShape(Nirvana_Stage_Shapes[0].Sprite_ID, Nirvana_Stage_Shapes[0].ShapeType)
+	Nirvana_Stage_Shapes[0].ShapeData_Matrix = DimMatrix(4, 1)
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 0, 0, 326)
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 1, 0, 366)
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 2, 0, 233)
+	SetMatrixValue(Nirvana_Stage_Shapes[0].ShapeData_Matrix, 3, 0, 92)
 	SetSpriteShapeOffset(Nirvana_Stage_Shapes[0].Sprite_ID, 326, 366)
 	SetSpriteBox(Nirvana_Stage_Shapes[0].Sprite_ID, 233, 92)
 
@@ -712,6 +831,11 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	'Shape
 	Nirvana_Stage_Shapes[1].ShapeType = SPRITE_SHAPE_BOX
 	SetSpriteShape(Nirvana_Stage_Shapes[1].Sprite_ID, Nirvana_Stage_Shapes[1].ShapeType)
+	Nirvana_Stage_Shapes[1].ShapeData_Matrix = DimMatrix(4, 1)
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 0, 0, 763)
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 1, 0, 356)
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 2, 0, 370)
+	SetMatrixValue(Nirvana_Stage_Shapes[1].ShapeData_Matrix, 3, 0, 118)
 	SetSpriteShapeOffset(Nirvana_Stage_Shapes[1].Sprite_ID, 763, 356)
 	SetSpriteBox(Nirvana_Stage_Shapes[1].Sprite_ID, 370, 118)
 
@@ -731,18 +855,27 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteShape(Nirvana_Stage_Shapes[2].Sprite_ID, Nirvana_Stage_Shapes[2].ShapeType)
 	Dim stage_shape_x_2[4]
 	Dim stage_shape_y_2[4]
+	Nirvana_Stage_Shapes[2].ShapeData_Matrix = DimMatrix(2, 4)
 
 	stage_shape_x_2[0] = 559
 	stage_shape_y_2[0] = 460
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 0, 0, stage_shape_x_2[0])
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 1, 0, stage_shape_y_2[0])
 
 	stage_shape_x_2[1] = 626
 	stage_shape_y_2[1] = 533
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 0, 1, stage_shape_x_2[1])
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 1, 1, stage_shape_y_2[1])
 
 	stage_shape_x_2[2] = 757
 	stage_shape_y_2[2] = 533
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 0, 2, stage_shape_x_2[2])
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 1, 2, stage_shape_y_2[2])
 
 	stage_shape_x_2[3] = 762
 	stage_shape_y_2[3] = 476
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 0, 3, stage_shape_x_2[3])
+	SetMatrixValue(Nirvana_Stage_Shapes[2].ShapeData_Matrix, 1, 3, stage_shape_y_2[3])
 
 	SetSpritePolygon(Nirvana_Stage_Shapes[2].Sprite_ID, stage_shape_x_2, stage_shape_y_2, 4)
 
@@ -760,6 +893,10 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	'Shape
 	Nirvana_Stage_Shapes[3].ShapeType = SPRITE_SHAPE_CIRCLE
 	SetSpriteShape(Nirvana_Stage_Shapes[3].Sprite_ID, Nirvana_Stage_Shapes[3].ShapeType)
+	Nirvana_Stage_Shapes[3].ShapeData_Matrix = DimMatrix(3, 1)
+	SetMatrixValue(Nirvana_Stage_Shapes[3].ShapeData_Matrix, 0, 0, 656)
+	SetMatrixValue(Nirvana_Stage_Shapes[3].ShapeData_Matrix, 1, 0, 388)
+	SetMatrixValue(Nirvana_Stage_Shapes[3].ShapeData_Matrix, 2, 0, 76)
 	SetSpriteShapeOffset(Nirvana_Stage_Shapes[3].Sprite_ID, 656, 388)
 	SetSpriteRadius(Nirvana_Stage_Shapes[3].Sprite_ID, 76)
 
@@ -779,15 +916,22 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteShape(Nirvana_Stage_Shapes[4].Sprite_ID, Nirvana_Stage_Shapes[4].ShapeType)
 	Dim stage_shape_x_4[3]
 	Dim stage_shape_y_4[3]
+	Nirvana_Stage_Shapes[4].ShapeData_Matrix = DimMatrix(2, 3)
 
 	stage_shape_x_4[0] = 655
 	stage_shape_y_4[0] = 309
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 0, 0, stage_shape_x_4[0])
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 1, 0, stage_shape_y_4[0])
 
 	stage_shape_x_4[1] = 988
 	stage_shape_y_4[1] = 134
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 0, 1, stage_shape_x_4[1])
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 1, 1, stage_shape_y_4[1])
 
 	stage_shape_x_4[2] = 1132
 	stage_shape_y_4[2] = 356
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 0, 2, stage_shape_x_4[2])
+	SetMatrixValue(Nirvana_Stage_Shapes[4].ShapeData_Matrix, 1, 2, stage_shape_y_4[2])
 
 	SetSpriteChain(Nirvana_Stage_Shapes[4].Sprite_ID, stage_shape_x_4, stage_shape_y_4, 3, 654, 308, 1133, 355)
 
@@ -795,6 +939,7 @@ Function Nirvana_Stage_1(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpritePosition(Nirvana_Stage_Shapes[4].Sprite_ID,  0, 0) 'Set to (0,0) so that offset will be world position
 	SetSpriteVisible(Nirvana_Stage_Shapes[4].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
+	'------- TILE SPRITES  -------
 
 	Return nv_stage
 End Function
@@ -819,6 +964,7 @@ Function Nirvana_Stage_2(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	Nirvana_Stage_Layers[0].Alpha = 255
 	Nirvana_Stage_Layers[0].Scroll_Speed.X = 1
 	Nirvana_Stage_Layers[0].Scroll_Speed.Y = 1
+	Nirvana_Stage_Layers[0].Layer_TS_Stack = -1  ' This will be set to a stack if needed in sprite layer 
 
 	Nirvana_Stage_Layers[0].Ref_Canvas = OpenCanvas(NIRVANA_WINDOW_WIDTH, NIRVANA_WINDOW_HEIGHT, vp_x, vp_y, vp_w, vp_h, 1)
 

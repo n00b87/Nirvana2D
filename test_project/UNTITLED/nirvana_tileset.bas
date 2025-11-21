@@ -7,6 +7,15 @@ Dim Tileset_ID
 Dim TileMap_ID
 Dim Mask_Index
 Dim Mask_Count
+Dim Cut_Index
+Dim Cut_Count
+End Type
+
+Type Nirvana_TilesetCut
+Dim StartTile
+Dim NumRows
+Dim NumCols
+Dim Image_ID
 End Type
 
 Dim Nirvana_Tileset_Image_Stack : Nirvana_Tileset_Image_Stack = CreateStack_N()
@@ -27,10 +36,45 @@ Nirvana_TileMask_Matrix_Name$[1] = "lava_mask"
 Nirvana_TileMask_Matrix_Name$[2] = "white"
 
 
+Dim Nirvana_Tileset_Cuts[6] As Nirvana_TilesetCut
+
+Function Nirvana_MakeTileCut(tmp_canvas, tset_image, cut_index, tile_w, tile_h)
+	If Not ImageExists(tset_image) Then
+		Return -1
+	End If
+
+	If cut_index < 0 Or cut_index >= ArraySize(Nirvana_Tileset_Cuts, 1) Then
+		Return -1
+	End If
+
+	current_canvas = ActiveCanvas()
+	Canvas(tmp_canvas)
+	ClearCanvas()
+
+	Dim img_w, img_h
+	GetImageSize(tset_image, img_w, img_h)
+	widthInTiles = img_w / tile_w
+
+	src_x = (Nirvana_Tileset_Cuts[cut_index].StartTile MOD widthInTiles) * tile_w
+	src_y = Int(Nirvana_Tileset_Cuts[cut_index].StartTile  /  widthInTiles) * tile_h
+	src_w = tile_w * Nirvana_Tileset_Cuts[cut_index].NumCols
+	src_h = tile_h * Nirvana_Tileset_Cuts[cut_index].NumRows
+
+	DrawImage_Blit(tset_image, 0, 0, src_x, src_y, src_w, src_h)
+
+	Img_ID = CanvasClip(0, 0, src_w, src_h)
+	ColorKey(Img_ID, -1)
+
+	Canvas(current_canvas)
+
+	Return Img_ID
+End Function
 Function Nirvana_Tileset_0()
 	If Nirvana_Tileset_ID_0 >= 0 Then
 		Return Nirvana_Tileset_ID_0
 	End If
+
+	TMP_CANVAS = OpenCanvas( 1024, 1024, 0, 0, 1024, 1024, 1)
 
 	If Nirvana_Tileset_Image_0 < 0 Then
 		If OS$ = "WINDOWS" Then
@@ -74,6 +118,29 @@ Function Nirvana_Tileset_0()
 	SetMatrixValue(Nirvana_TileMask_Matrix[1], 0, 47, 1)
 	SetMatrixValue(Nirvana_TileMask_Matrix[1], 0, 48, 1)
 
+	'-------CUTS-------
+
+	Nirvana_Tileset_Cuts[0].StartTile = 18
+	Nirvana_Tileset_Cuts[0].NumRows = 3
+	Nirvana_Tileset_Cuts[0].NumCols = 3
+	Nirvana_Tileset_Cuts[0].Image_ID = Nirvana_MakeTileCut(TMP_CANVAS, Nirvana_Tileset_Image_0, 0, 32, 32)
+
+	Nirvana_Tileset_Cuts[1].StartTile = 18
+	Nirvana_Tileset_Cuts[1].NumRows = 1
+	Nirvana_Tileset_Cuts[1].NumCols = 5
+	Nirvana_Tileset_Cuts[1].Image_ID = Nirvana_MakeTileCut(TMP_CANVAS, Nirvana_Tileset_Image_0, 1, 32, 32)
+
+	Nirvana_Tileset_Cuts[2].StartTile = 44
+	Nirvana_Tileset_Cuts[2].NumRows = 1
+	Nirvana_Tileset_Cuts[2].NumCols = 1
+	Nirvana_Tileset_Cuts[2].Image_ID = Nirvana_MakeTileCut(TMP_CANVAS, Nirvana_Tileset_Image_0, 2, 32, 32)
+
+	Nirvana_Tileset_Cuts[3].StartTile = 39
+	Nirvana_Tileset_Cuts[3].NumRows = 1
+	Nirvana_Tileset_Cuts[3].NumCols = 1
+	Nirvana_Tileset_Cuts[3].Image_ID = Nirvana_MakeTileCut(TMP_CANVAS, Nirvana_Tileset_Image_0, 3, 32, 32)
+
+	CloseCanvas(TMP_CANVAS)
 	Return Nirvana_Tileset_ID_0
 End Function
 
@@ -82,6 +149,8 @@ Function Nirvana_Tileset_1()
 	If Nirvana_Tileset_ID_1 >= 0 Then
 		Return Nirvana_Tileset_ID_1
 	End If
+
+	TMP_CANVAS = OpenCanvas( 1024, 1024, 0, 0, 1024, 1024, 1)
 
 	If Nirvana_Tileset_Image_1 < 0 Then
 		If OS$ = "WINDOWS" Then
@@ -116,6 +185,14 @@ Function Nirvana_Tileset_1()
 	SetMatrixValue(Nirvana_TileMask_Matrix[2], 0, 44, 1)
 	SetMatrixValue(Nirvana_TileMask_Matrix[2], 0, 45, 1)
 
+	'-------CUTS-------
+
+	Nirvana_Tileset_Cuts[4].StartTile = 25
+	Nirvana_Tileset_Cuts[4].NumRows = 1
+	Nirvana_Tileset_Cuts[4].NumCols = 3
+	Nirvana_Tileset_Cuts[4].Image_ID = Nirvana_MakeTileCut(TMP_CANVAS, Nirvana_Tileset_Image_1, 4, 32, 32)
+
+	CloseCanvas(TMP_CANVAS)
 	Return Nirvana_Tileset_ID_1
 End Function
 
@@ -124,6 +201,8 @@ Function Nirvana_Tileset_2()
 	If Nirvana_Tileset_ID_2 >= 0 Then
 		Return Nirvana_Tileset_ID_2
 	End If
+
+	TMP_CANVAS = OpenCanvas( 1024, 1024, 0, 0, 1024, 1024, 1)
 
 	If Nirvana_Tileset_Image_2 < 0 Then
 		If OS$ = "WINDOWS" Then
@@ -143,6 +222,9 @@ Function Nirvana_Tileset_2()
 
 	'-------MASK-------
 
+	'-------CUTS-------
+
+	CloseCanvas(TMP_CANVAS)
 	Return Nirvana_Tileset_ID_2
 End Function
 

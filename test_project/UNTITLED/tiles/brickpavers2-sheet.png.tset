@@ -1,0 +1,17 @@
+TILESET name="iso_test" frame_size=64,32;
+TILE fps=0 frame=0 ;
+TILE fps=0 frame=1 ;
+TILE fps=0 frame=2 ;
+TILE fps=0 frame=3 ;
+TILE fps=0 frame=4 ;
+TILE fps=0 frame=5 ;
+TILE fps=0 frame=6 ;
+TILE fps=0 frame=7 ;
+TILE fps=0 frame=8 ;
+TILE fps=0 frame=9 ;
+TILE fps=0 frame=10 ;
+TILE fps=0 frame=11 ;
+
+
+
+
