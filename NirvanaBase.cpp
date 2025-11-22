@@ -48,7 +48,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer5->Add( 0, 0, 1, wxEXPAND, 5 );
 
 	m_auiToolBar6 = new wxAuiToolBar( m_panel7, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
-	m_camera_tool = m_auiToolBar6->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/camera.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_camera_tool = m_auiToolBar6->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/camera.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Set Viewport Position"), wxEmptyString, NULL );
 
 	m_auiToolBar6->Realize();
 
@@ -58,9 +58,9 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer5->Add( 0, 0, 1, wxEXPAND, 5 );
 
 	m_mapSet_auiToolBar = new wxAuiToolBar( m_panel7, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
-	m_mapSet_free_tool = m_mapSet_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/map_set_free.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapSet_free_tool = m_mapSet_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/map_set_free.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Free Placement"), wxEmptyString, NULL );
 
-	m_mapSet_tile_tool = m_mapSet_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/map_set_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapSet_tile_tool = m_mapSet_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/map_set_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Tile-Snap Placement"), wxEmptyString, NULL );
 
 	m_mapSet_auiToolBar->Realize();
 
@@ -335,21 +335,29 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_bpButton3 = new wxBitmapButton( m_panel39, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
 
 	m_bpButton3->SetBitmap( wxBitmap( wxT("icons/plus_stage.png"), wxBITMAP_TYPE_ANY ) );
+	m_bpButton3->SetToolTip( _("New Stage") );
+
 	bSizer931->Add( m_bpButton3, 0, wxALL, 5 );
 
 	m_bpButton4 = new wxBitmapButton( m_panel39, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
 
 	m_bpButton4->SetBitmap( wxBitmap( wxT("icons/remove_stage.png"), wxBITMAP_TYPE_ANY ) );
+	m_bpButton4->SetToolTip( _("Delete Stage") );
+
 	bSizer931->Add( m_bpButton4, 0, wxALL, 5 );
 
 	m_bpButton8 = new wxBitmapButton( m_panel39, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
 
 	m_bpButton8->SetBitmap( wxBitmap( wxT("icons/write.png"), wxBITMAP_TYPE_ANY ) );
+	m_bpButton8->SetToolTip( _("Edit Stage Properties") );
+
 	bSizer931->Add( m_bpButton8, 0, wxALL, 5 );
 
 	m_bpButton9 = new wxBitmapButton( m_panel39, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
 
 	m_bpButton9->SetBitmap( wxBitmap( wxT("icons/copy.png"), wxBITMAP_TYPE_ANY ) );
+	m_bpButton9->SetToolTip( _("Copy Stage") );
+
 	bSizer931->Add( m_bpButton9, 0, wxALL, 5 );
 
 
@@ -842,21 +850,21 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer214 = new wxBoxSizer( wxHORIZONTAL );
 
 	m_mapEdit_tileTools_auiToolBar = new wxAuiToolBar( m_panel70, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
-	m_mapEdit_tileToolbar_select_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tileToolbar_select_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Select Tile"), wxEmptyString, NULL );
 
-	m_mapEdit_tileToolbar_boxSelect_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tileToolbar_boxSelect_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Box Select Tiles"), wxEmptyString, NULL );
 
-	m_mapEdit_tileToolbar_move_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tileToolbar_move_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Move Selected Tiles"), wxEmptyString, NULL );
 
-	m_mapEdit_tileToolbar_setTile_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/place_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tileToolbar_setTile_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/place_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Set Tile"), wxEmptyString, NULL );
 
-	m_mapEdit_tileToolbar_copyTile_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/copy_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tileToolbar_copyTile_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/copy_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Copy Selected Tiles"), wxEmptyString, NULL );
 
-	m_mapEdit_tileToolbar_fillTile_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/flood.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tileToolbar_fillTile_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/flood.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Flood Fill with Tile"), wxEmptyString, NULL );
 
 	m_mapEdit_tileTools_auiToolBar->AddSeparator();
 
-	m_mapEdit_tileToolbar_deleteSelected_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_tileToolbar_deleteSelected_tool = m_mapEdit_tileTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Delete Selected Tiles"), wxEmptyString, NULL );
 
 	m_mapEdit_tileTools_auiToolBar->Realize();
 
@@ -957,25 +965,25 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer19 = new wxBoxSizer( wxHORIZONTAL );
 
 	m_mapEdit_spriteTools_auiToolBar = new wxAuiToolBar( m_mapEdit_sprite_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
-	m_mapEdit_spriteToolbar_select_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_spriteToolbar_select_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Select Sprite"), wxEmptyString, NULL );
 
-	m_mapEdit_spriteToolbar_boxSelect_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_spriteToolbar_boxSelect_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Box Select Sprites"), wxEmptyString, NULL );
 
-	m_mapEdit_spriteToolbar_move_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_spriteToolbar_move_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Move Selected Sprites"), wxEmptyString, NULL );
 
-	m_mapEdit_spriteToolbar_rotate_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/rotate2D_2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_spriteToolbar_rotate_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/rotate2D_2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Rotate Selected Sprites"), wxEmptyString, NULL );
 
-	m_mapEdit_spriteToolbar_scale_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/scale2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_spriteToolbar_scale_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/scale2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Scale Selected Sprites"), wxEmptyString, NULL );
 
 	m_mapEdit_spriteTools_auiToolBar->AddSeparator();
 
-	m_mapEdit_spriteToolbar_addSprite_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/new_sprite.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_spriteToolbar_addSprite_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/new_sprite.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Create Sprite from Definition"), wxEmptyString, NULL );
 
-	m_mapEdit_spriteToolbar_deleteSprite_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_sprite.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_spriteToolbar_deleteSprite_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_sprite.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Remove Selected Sprites from Layer"), wxEmptyString, NULL );
 
-	m_mapEdit_spriteToolbar_copySprite_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/copy_sprite.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_spriteToolbar_copySprite_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/copy_sprite.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Copy Selected Sprites"), wxEmptyString, NULL );
 
-	m_mapEdit_spriteToolbar_centerOnSprite_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/nav.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_spriteToolbar_centerOnSprite_tool = m_mapEdit_spriteTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/nav.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Center Viewport on Selected Sprites"), wxEmptyString, NULL );
 
 	m_mapEdit_spriteTools_auiToolBar->Realize();
 
@@ -1030,27 +1038,27 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer251 = new wxBoxSizer( wxHORIZONTAL );
 
 	m_mapEdit_shapeTools_auiToolBar = new wxAuiToolBar( m_mapEdit_collision_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
-	m_mapEdit_shapeToolbar_select_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_select_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Select Shape"), wxEmptyString, NULL );
 
-	m_mapEdit_shapeToolbar_boxSelect_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_boxSelect_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Box Select Shapes"), wxEmptyString, NULL );
 
-	m_mapEdit_shapeToolbar_move_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_move_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Move Selected Shapes"), wxEmptyString, NULL );
 
-	m_mapEdit_shapeToolbar_draw_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/line.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
-
-	m_mapEdit_shapeTools_auiToolBar->AddSeparator();
-
-	m_mapEdit_shapeToolbar_newBox_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
-
-	m_mapEdit_shapeToolbar_newPolygon_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/polygon.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
-
-	m_mapEdit_shapeToolbar_newChain_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/chain.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
-
-	m_mapEdit_shapeToolbar_newCircle_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/circle.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_draw_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/line.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Draw Selected Shape"), wxEmptyString, NULL );
 
 	m_mapEdit_shapeTools_auiToolBar->AddSeparator();
 
-	m_mapEdit_shapeToolbar_deleteShape_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_shape.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+	m_mapEdit_shapeToolbar_newBox_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Create New Box Shape"), wxEmptyString, NULL );
+
+	m_mapEdit_shapeToolbar_newPolygon_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/polygon.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Create Convex Polygon Shape"), wxEmptyString, NULL );
+
+	m_mapEdit_shapeToolbar_newChain_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/chain.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Create Chain Shape"), wxEmptyString, NULL );
+
+	m_mapEdit_shapeToolbar_newCircle_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/circle.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Create Circle Shape"), wxEmptyString, NULL );
+
+	m_mapEdit_shapeTools_auiToolBar->AddSeparator();
+
+	m_mapEdit_shapeToolbar_deleteShape_tool = m_mapEdit_shapeTools_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/remove_shape.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, _("Delete Selected Shapes"), wxEmptyString, NULL );
 
 	m_mapEdit_shapeTools_auiToolBar->Realize();
 
@@ -1336,9 +1344,13 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer39 = new wxBoxSizer( wxHORIZONTAL );
 
 	m_newTileset_button = new wxButton( m_panel191, wxID_ANY, _("Load Tileset"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_newTileset_button->SetToolTip( _("Load Tileset Image into Project") );
+
 	bSizer39->Add( m_newTileset_button, 1, wxALL, 5 );
 
 	m_button2 = new wxButton( m_panel191, wxID_ANY, _("Delete Tileset"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_button2->SetToolTip( _("Remove Tileset from Project") );
+
 	bSizer39->Add( m_button2, 1, wxALL, 5 );
 
 
@@ -1422,9 +1434,9 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer702 = new wxBoxSizer( wxHORIZONTAL );
 
 	m_tileEdit_mode_auiToolBar = new wxAuiToolBar( m_tileEdit_tileAnimation_middle_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
-	m_tileEdit_tileSelect_tool = m_tileEdit_mode_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/select_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_tileEdit_tileSelect_tool = m_tileEdit_mode_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/select_tile.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Select Tile Mode"), wxEmptyString, NULL );
 
-	m_tileEdit_tileAnimate_tool = m_tileEdit_mode_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/tile_animation.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_tileEdit_tileAnimate_tool = m_tileEdit_mode_auiToolBar->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/tile_animation.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Animate Tile Mode"), wxEmptyString, NULL );
 
 	m_tileEdit_mode_auiToolBar->Realize();
 
@@ -1522,9 +1534,13 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer87 = new wxBoxSizer( wxVERTICAL );
 
 	m_tileEdit_newMask_button = new wxButton( m_tileEdit_tileMask_panel, wxID_ANY, _("New Mask"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_tileEdit_newMask_button->SetToolTip( _("Create New Tile Mask") );
+
 	bSizer87->Add( m_tileEdit_newMask_button, 0, wxALL|wxEXPAND, 5 );
 
 	m_tileEdit_deleteMask_button = new wxButton( m_tileEdit_tileMask_panel, wxID_ANY, _("Delete Mask"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_tileEdit_deleteMask_button->SetToolTip( _("Delete Tile Mask") );
+
 	bSizer87->Add( m_tileEdit_deleteMask_button, 0, wxALL|wxEXPAND, 5 );
 
 	m_tileEdit_mask_listBox = new wxListBox( m_tileEdit_tileMask_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
@@ -1597,9 +1613,13 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer59 = new wxBoxSizer( wxHORIZONTAL );
 
 	m_spriteEditor_newSprite_button = new wxButton( m_panel25, wxID_ANY, _("Load Sprite"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_spriteEditor_newSprite_button->SetToolTip( _("Load Sprite Definition") );
+
 	bSizer59->Add( m_spriteEditor_newSprite_button, 1, wxALL, 5 );
 
 	m_spriteEditor_deleteSprite_button = new wxButton( m_panel25, wxID_ANY, _("Delete Sprite"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_spriteEditor_deleteSprite_button->SetToolTip( _("Remove Sprite Definition") );
+
 	bSizer59->Add( m_spriteEditor_deleteSprite_button, 1, wxALL, 5 );
 
 
@@ -1665,9 +1685,13 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer64->Add( m_staticText23, 0, wxALL, 5 );
 
 	m_spriteEdit_newAnimation_button = new wxButton( m_spriteEdit_spriteAnimation_panel, wxID_ANY, _("New Animation"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_spriteEdit_newAnimation_button->SetToolTip( _("Create New Animation for Sprite") );
+
 	bSizer64->Add( m_spriteEdit_newAnimation_button, 0, wxALL|wxEXPAND, 5 );
 
 	m_spriteEdit_deleteAnimation_button = new wxButton( m_spriteEdit_spriteAnimation_panel, wxID_ANY, _("Delete Animation"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_spriteEdit_deleteAnimation_button->SetToolTip( _("Remove Animation from Sprite") );
+
 	bSizer64->Add( m_spriteEdit_deleteAnimation_button, 0, wxALL|wxEXPAND, 5 );
 
 	m_spriteEdit_animation_listBox = new wxListBox( m_spriteEdit_spriteAnimation_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
@@ -1784,11 +1808,15 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_play_bpButton = new wxBitmapButton( m_panel43, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
 
 	m_spriteEdit_play_bpButton->SetBitmap( wxBitmap( wxT("icons/play.png"), wxBITMAP_TYPE_ANY ) );
+	m_spriteEdit_play_bpButton->SetToolTip( _("Play Current Animation") );
+
 	bSizer641->Add( m_spriteEdit_play_bpButton, 0, wxALL, 5 );
 
 	m_spriteEdit_stop_bpButton = new wxBitmapButton( m_panel43, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|wxBORDER_NONE );
 
 	m_spriteEdit_stop_bpButton->SetBitmap( wxBitmap( wxT("icons/stop.png"), wxBITMAP_TYPE_ANY ) );
+	m_spriteEdit_stop_bpButton->SetToolTip( _("Stop Playing Animation") );
+
 	bSizer641->Add( m_spriteEdit_stop_bpButton, 0, wxALL, 5 );
 
 
@@ -1832,13 +1860,13 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer691 = new wxBoxSizer( wxVERTICAL );
 
 	m_auiToolBar4 = new wxAuiToolBar( m_spriteEdit_spriteCollision_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxAUI_TB_HORZ_LAYOUT );
-	m_spriteEdit_collisionSelect_tool = m_auiToolBar4->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_spriteEdit_collisionSelect_tool = m_auiToolBar4->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/cursor2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Select Point"), wxEmptyString, NULL );
 
-	m_spriteEdit_collisionBoxSelect_tool = m_auiToolBar4->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_spriteEdit_collisionBoxSelect_tool = m_auiToolBar4->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/box_select2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Box Select Points"), wxEmptyString, NULL );
 
-	m_spriteEdit_collisionMove_tool = m_auiToolBar4->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_spriteEdit_collisionMove_tool = m_auiToolBar4->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/move2.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Move Selected Points"), wxEmptyString, NULL );
 
-	m_spriteEdit_collisionDraw_tool = m_auiToolBar4->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/line.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, wxEmptyString, wxEmptyString, NULL );
+	m_spriteEdit_collisionDraw_tool = m_auiToolBar4->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/line.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_RADIO, _("Draw Shape"), wxEmptyString, NULL );
 
 	m_auiToolBar4->Realize();
 
