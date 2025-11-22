@@ -258,8 +258,8 @@
                           <property name="window_extra_style"></property>
                           <property name="window_name"></property>
                           <property name="window_style"></property>
-                          <object class="splitteritem" expanded="false">
-                            <object class="wxPanel" expanded="false">
+                          <object class="splitteritem" expanded="true">
+                            <object class="wxPanel" expanded="true">
                               <property name="BottomDockable">1</property>
                               <property name="LeftDockable">1</property>
                               <property name="RightDockable">1</property>
@@ -311,16 +311,16 @@
                               <property name="window_extra_style"></property>
                               <property name="window_name"></property>
                               <property name="window_style">wxTAB_TRAVERSAL</property>
-                              <object class="wxBoxSizer" expanded="false">
+                              <object class="wxBoxSizer" expanded="true">
                                 <property name="minimum_size"></property>
                                 <property name="name">bSizer4</property>
                                 <property name="orient">wxVERTICAL</property>
                                 <property name="permission">none</property>
-                                <object class="sizeritem" expanded="false">
+                                <object class="sizeritem" expanded="true">
                                   <property name="border">5</property>
                                   <property name="flag">wxEXPAND | wxALL</property>
                                   <property name="proportion">0</property>
-                                  <object class="wxPanel" expanded="false">
+                                  <object class="wxPanel" expanded="true">
                                     <property name="BottomDockable">1</property>
                                     <property name="LeftDockable">1</property>
                                     <property name="RightDockable">1</property>
@@ -372,7 +372,7 @@
                                     <property name="window_extra_style"></property>
                                     <property name="window_name"></property>
                                     <property name="window_style">wxTAB_TRAVERSAL</property>
-                                    <object class="wxBoxSizer" expanded="false">
+                                    <object class="wxBoxSizer" expanded="true">
                                       <property name="minimum_size"></property>
                                       <property name="name">bSizer5</property>
                                       <property name="orient">wxHORIZONTAL</property>
@@ -518,11 +518,11 @@
                                           <property name="width">0</property>
                                         </object>
                                       </object>
-                                      <object class="sizeritem" expanded="false">
+                                      <object class="sizeritem" expanded="true">
                                         <property name="border">5</property>
                                         <property name="flag">wxALL</property>
                                         <property name="proportion">0</property>
-                                        <object class="wxAuiToolBar" expanded="false">
+                                        <object class="wxAuiToolBar" expanded="true">
                                           <property name="BottomDockable">1</property>
                                           <property name="LeftDockable">1</property>
                                           <property name="RightDockable">1</property>
@@ -589,7 +589,7 @@
                                             <property name="name">m_camera_tool</property>
                                             <property name="permission">protected</property>
                                             <property name="statusbar"></property>
-                                            <property name="tooltip"></property>
+                                            <property name="tooltip">Set Viewport Position</property>
                                             <event name="OnToolClicked">OnCameraToolClick</event>
                                           </object>
                                         </object>
@@ -604,11 +604,11 @@
                                           <property name="width">0</property>
                                         </object>
                                       </object>
-                                      <object class="sizeritem" expanded="false">
+                                      <object class="sizeritem" expanded="true">
                                         <property name="border">5</property>
                                         <property name="flag">wxALL</property>
                                         <property name="proportion">0</property>
-                                        <object class="wxAuiToolBar" expanded="false">
+                                        <object class="wxAuiToolBar" expanded="true">
                                           <property name="BottomDockable">1</property>
                                           <property name="LeftDockable">1</property>
                                           <property name="RightDockable">1</property>
@@ -675,7 +675,7 @@
                                             <property name="name">m_mapSet_free_tool</property>
                                             <property name="permission">protected</property>
                                             <property name="statusbar"></property>
-                                            <property name="tooltip"></property>
+                                            <property name="tooltip">Free Placement</property>
                                             <event name="OnToolClicked">OnMapSetFree</event>
                                           </object>
                                           <object class="tool" expanded="false">
@@ -687,7 +687,7 @@
                                             <property name="name">m_mapSet_tile_tool</property>
                                             <property name="permission">protected</property>
                                             <property name="statusbar"></property>
-                                            <property name="tooltip"></property>
+                                            <property name="tooltip">Tile-Snap Placement</property>
                                             <event name="OnToolClicked">OnMapSetTiled</event>
                                           </object>
                                         </object>
@@ -3138,7 +3138,7 @@
                                                             <property name="style">wxBORDER_NONE</property>
                                                             <property name="subclass">; ; forward_declare</property>
                                                             <property name="toolbar_pane">0</property>
-                                                            <property name="tooltip"></property>
+                                                            <property name="tooltip">New Stage</property>
                                                             <property name="validator_data_type"></property>
                                                             <property name="validator_style">wxFILTER_NONE</property>
                                                             <property name="validator_type">wxDefaultValidator</property>
@@ -3213,7 +3213,7 @@
                                                             <property name="style">wxBORDER_NONE</property>
                                                             <property name="subclass">; ; forward_declare</property>
                                                             <property name="toolbar_pane">0</property>
-                                                            <property name="tooltip"></property>
+                                                            <property name="tooltip">Delete Stage</property>
                                                             <property name="validator_data_type"></property>
                                                             <property name="validator_style">wxFILTER_NONE</property>
                                                             <property name="validator_type">wxDefaultValidator</property>
@@ -3288,7 +3288,7 @@
                                                             <property name="style">wxBORDER_NONE</property>
                                                             <property name="subclass">; ; forward_declare</property>
                                                             <property name="toolbar_pane">0</property>
-                                                            <property name="tooltip"></property>
+                                                            <property name="tooltip">Edit Stage Properties</property>
                                                             <property name="validator_data_type"></property>
                                                             <property name="validator_style">wxFILTER_NONE</property>
                                                             <property name="validator_type">wxDefaultValidator</property>
@@ -3363,7 +3363,7 @@
                                                             <property name="style">wxBORDER_NONE</property>
                                                             <property name="subclass">; ; forward_declare</property>
                                                             <property name="toolbar_pane">0</property>
-                                                            <property name="tooltip"></property>
+                                                            <property name="tooltip">Copy Stage</property>
                                                             <property name="validator_data_type"></property>
                                                             <property name="validator_style">wxFILTER_NONE</property>
                                                             <property name="validator_type">wxDefaultValidator</property>
@@ -7697,7 +7697,7 @@
                                                                         <property name="name">m_mapEdit_tileToolbar_select_tool</property>
                                                                         <property name="permission">protected</property>
                                                                         <property name="statusbar"></property>
-                                                                        <property name="tooltip"></property>
+                                                                        <property name="tooltip">Select Tile</property>
                                                                         <event name="OnToolClicked">OnMapEdit_TileTool_Select</event>
                                                                       </object>
                                                                       <object class="tool" expanded="false">
@@ -7709,7 +7709,7 @@
                                                                         <property name="name">m_mapEdit_tileToolbar_boxSelect_tool</property>
                                                                         <property name="permission">protected</property>
                                                                         <property name="statusbar"></property>
-                                                                        <property name="tooltip"></property>
+                                                                        <property name="tooltip">Box Select Tiles</property>
                                                                         <event name="OnToolClicked">OnMapEdit_TileTool_BoxSelect</event>
                                                                       </object>
                                                                       <object class="tool" expanded="false">
@@ -7721,7 +7721,7 @@
                                                                         <property name="name">m_mapEdit_tileToolbar_move_tool</property>
                                                                         <property name="permission">protected</property>
                                                                         <property name="statusbar"></property>
-                                                                        <property name="tooltip"></property>
+                                                                        <property name="tooltip">Move Selected Tiles</property>
                                                                         <event name="OnToolClicked">OnMapEdit_TileTool_Move</event>
                                                                       </object>
                                                                       <object class="tool" expanded="false">
@@ -7733,7 +7733,7 @@
                                                                         <property name="name">m_mapEdit_tileToolbar_setTile_tool</property>
                                                                         <property name="permission">protected</property>
                                                                         <property name="statusbar"></property>
-                                                                        <property name="tooltip"></property>
+                                                                        <property name="tooltip">Set Tile</property>
                                                                         <event name="OnToolClicked">OnMapEdit_TileTool_SetTile</event>
                                                                       </object>
                                                                       <object class="tool" expanded="false">
@@ -7745,7 +7745,7 @@
                                                                         <property name="name">m_mapEdit_tileToolbar_copyTile_tool</property>
                                                                         <property name="permission">protected</property>
                                                                         <property name="statusbar"></property>
-                                                                        <property name="tooltip"></property>
+                                                                        <property name="tooltip">Copy Selected Tiles</property>
                                                                         <event name="OnToolClicked">OnMapEdit_TileTool_CopyTile</event>
                                                                       </object>
                                                                       <object class="tool" expanded="false">
@@ -7757,7 +7757,7 @@
                                                                         <property name="name">m_mapEdit_tileToolbar_fillTile_tool</property>
                                                                         <property name="permission">protected</property>
                                                                         <property name="statusbar"></property>
-                                                                        <property name="tooltip"></property>
+                                                                        <property name="tooltip">Flood Fill with Tile</property>
                                                                         <event name="OnToolClicked">OnMapEdit_TileTool_FillTile</event>
                                                                       </object>
                                                                       <object class="toolSeparator" expanded="false">
@@ -7772,7 +7772,7 @@
                                                                         <property name="name">m_mapEdit_tileToolbar_deleteSelected_tool</property>
                                                                         <property name="permission">protected</property>
                                                                         <property name="statusbar"></property>
-                                                                        <property name="tooltip"></property>
+                                                                        <property name="tooltip">Delete Selected Tiles</property>
                                                                         <event name="OnToolClicked">OnMapEdit_TileTool_DeleteSelected</event>
                                                                       </object>
                                                                     </object>
@@ -8548,11 +8548,11 @@
                                                   </object>
                                                 </object>
                                               </object>
-                                              <object class="auinotebookpage" expanded="false">
+                                              <object class="auinotebookpage" expanded="true">
                                                 <property name="bitmap"></property>
                                                 <property name="label">Sprites</property>
                                                 <property name="select">0</property>
-                                                <object class="wxPanel" expanded="false">
+                                                <object class="wxPanel" expanded="true">
                                                   <property name="BottomDockable">1</property>
                                                   <property name="LeftDockable">1</property>
                                                   <property name="RightDockable">1</property>
@@ -8604,25 +8604,25 @@
                                                   <property name="window_extra_style"></property>
                                                   <property name="window_name"></property>
                                                   <property name="window_style">wxTAB_TRAVERSAL</property>
-                                                  <object class="wxBoxSizer" expanded="false">
+                                                  <object class="wxBoxSizer" expanded="true">
                                                     <property name="minimum_size"></property>
                                                     <property name="name">bSizer18</property>
                                                     <property name="orient">wxVERTICAL</property>
                                                     <property name="permission">none</property>
-                                                    <object class="sizeritem" expanded="false">
+                                                    <object class="sizeritem" expanded="true">
                                                       <property name="border">5</property>
                                                       <property name="flag">wxEXPAND</property>
                                                       <property name="proportion">0</property>
-                                                      <object class="wxBoxSizer" expanded="false">
+                                                      <object class="wxBoxSizer" expanded="true">
                                                         <property name="minimum_size"></property>
                                                         <property name="name">bSizer19</property>
                                                         <property name="orient">wxHORIZONTAL</property>
                                                         <property name="permission">none</property>
-                                                        <object class="sizeritem" expanded="false">
+                                                        <object class="sizeritem" expanded="true">
                                                           <property name="border">5</property>
                                                           <property name="flag">wxALL</property>
                                                           <property name="proportion">1</property>
-                                                          <object class="wxAuiToolBar" expanded="false">
+                                                          <object class="wxAuiToolBar" expanded="true">
                                                             <property name="BottomDockable">1</property>
                                                             <property name="LeftDockable">1</property>
                                                             <property name="RightDockable">1</property>
@@ -8689,7 +8689,7 @@
                                                               <property name="name">m_mapEdit_spriteToolbar_select_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Select Sprite</property>
                                                               <event name="OnToolClicked">OnMapEdit_SpriteTool_Select</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -8701,7 +8701,7 @@
                                                               <property name="name">m_mapEdit_spriteToolbar_boxSelect_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Box Select Sprites</property>
                                                               <event name="OnToolClicked">OnMapEdit_SpriteTool_BoxSelect</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -8713,7 +8713,7 @@
                                                               <property name="name">m_mapEdit_spriteToolbar_move_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Move Selected Sprites</property>
                                                               <event name="OnToolClicked">OnMapEdit_SpriteTool_Move</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -8725,7 +8725,7 @@
                                                               <property name="name">m_mapEdit_spriteToolbar_rotate_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Rotate Selected Sprites</property>
                                                               <event name="OnToolClicked">OnMapEdit_SpriteTool_Rotate</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -8737,7 +8737,7 @@
                                                               <property name="name">m_mapEdit_spriteToolbar_scale_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Scale Selected Sprites</property>
                                                               <event name="OnToolClicked">OnMapEdit_SpriteTool_Scale</event>
                                                             </object>
                                                             <object class="toolSeparator" expanded="false">
@@ -8752,7 +8752,7 @@
                                                               <property name="name">m_mapEdit_spriteToolbar_addSprite_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Create Sprite from Definition</property>
                                                               <event name="OnToolClicked">OnMapEdit_SpriteTool_AddSprite</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -8764,7 +8764,7 @@
                                                               <property name="name">m_mapEdit_spriteToolbar_deleteSprite_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Remove Selected Sprites from Layer</property>
                                                               <event name="OnToolClicked">OnMapEdit_SpriteTool_DeleteSprite</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -8776,7 +8776,7 @@
                                                               <property name="name">m_mapEdit_spriteToolbar_copySprite_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Copy Selected Sprites</property>
                                                               <event name="OnToolClicked">OnMapEdit_SpriteTool_CopySprite</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -8788,7 +8788,7 @@
                                                               <property name="name">m_mapEdit_spriteToolbar_centerOnSprite_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Center Viewport on Selected Sprites</property>
                                                               <event name="OnToolClicked">OnMapEdit_SpriteTool_CenterOnSprite</event>
                                                             </object>
                                                           </object>
@@ -9068,11 +9068,11 @@
                                                   </object>
                                                 </object>
                                               </object>
-                                              <object class="auinotebookpage" expanded="false">
+                                              <object class="auinotebookpage" expanded="true">
                                                 <property name="bitmap"></property>
                                                 <property name="label">Collision</property>
                                                 <property name="select">0</property>
-                                                <object class="wxPanel" expanded="false">
+                                                <object class="wxPanel" expanded="true">
                                                   <property name="BottomDockable">1</property>
                                                   <property name="LeftDockable">1</property>
                                                   <property name="RightDockable">1</property>
@@ -9124,25 +9124,25 @@
                                                   <property name="window_extra_style"></property>
                                                   <property name="window_name"></property>
                                                   <property name="window_style">wxTAB_TRAVERSAL</property>
-                                                  <object class="wxBoxSizer" expanded="false">
+                                                  <object class="wxBoxSizer" expanded="true">
                                                     <property name="minimum_size"></property>
                                                     <property name="name">bSizer241</property>
                                                     <property name="orient">wxVERTICAL</property>
                                                     <property name="permission">none</property>
-                                                    <object class="sizeritem" expanded="false">
+                                                    <object class="sizeritem" expanded="true">
                                                       <property name="border">5</property>
                                                       <property name="flag">wxEXPAND</property>
                                                       <property name="proportion">0</property>
-                                                      <object class="wxBoxSizer" expanded="false">
+                                                      <object class="wxBoxSizer" expanded="true">
                                                         <property name="minimum_size"></property>
                                                         <property name="name">bSizer251</property>
                                                         <property name="orient">wxHORIZONTAL</property>
                                                         <property name="permission">none</property>
-                                                        <object class="sizeritem" expanded="false">
+                                                        <object class="sizeritem" expanded="true">
                                                           <property name="border">5</property>
                                                           <property name="flag">wxALL</property>
                                                           <property name="proportion">1</property>
-                                                          <object class="wxAuiToolBar" expanded="false">
+                                                          <object class="wxAuiToolBar" expanded="true">
                                                             <property name="BottomDockable">1</property>
                                                             <property name="LeftDockable">1</property>
                                                             <property name="RightDockable">1</property>
@@ -9209,7 +9209,7 @@
                                                               <property name="name">m_mapEdit_shapeToolbar_select_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Select Shape</property>
                                                               <event name="OnToolClicked">OnMapEdit_ShapeTool_Select</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -9221,7 +9221,7 @@
                                                               <property name="name">m_mapEdit_shapeToolbar_boxSelect_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Box Select Shapes</property>
                                                               <event name="OnToolClicked">OnMapEdit_ShapeTool_BoxSelect</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -9233,7 +9233,7 @@
                                                               <property name="name">m_mapEdit_shapeToolbar_move_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Move Selected Shapes</property>
                                                               <event name="OnToolClicked">OnMapEdit_ShapeTool_Move</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -9245,7 +9245,7 @@
                                                               <property name="name">m_mapEdit_shapeToolbar_draw_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Draw Selected Shape</property>
                                                               <event name="OnToolClicked">OnMapEdit_ShapeTool_Draw</event>
                                                             </object>
                                                             <object class="toolSeparator" expanded="false">
@@ -9260,7 +9260,7 @@
                                                               <property name="name">m_mapEdit_shapeToolbar_newBox_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Create New Box Shape</property>
                                                               <event name="OnToolClicked">OnMapEdit_ShapeTool_NewBoxShape</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -9272,7 +9272,7 @@
                                                               <property name="name">m_mapEdit_shapeToolbar_newPolygon_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Create Convex Polygon Shape</property>
                                                               <event name="OnToolClicked">OnMapEdit_ShapeTool_NewPolygonShape</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -9284,7 +9284,7 @@
                                                               <property name="name">m_mapEdit_shapeToolbar_newChain_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Create Chain Shape</property>
                                                               <event name="OnToolClicked">OnMapEdit_ShapeTool_NewChainShape</event>
                                                             </object>
                                                             <object class="tool" expanded="false">
@@ -9296,7 +9296,7 @@
                                                               <property name="name">m_mapEdit_shapeToolbar_newCircle_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Create Circle Shape</property>
                                                               <event name="OnToolClicked">OnMapEdit_ShapeTool_NewCircleShape</event>
                                                             </object>
                                                             <object class="toolSeparator" expanded="false">
@@ -9311,7 +9311,7 @@
                                                               <property name="name">m_mapEdit_shapeToolbar_deleteShape_tool</property>
                                                               <property name="permission">protected</property>
                                                               <property name="statusbar"></property>
-                                                              <property name="tooltip"></property>
+                                                              <property name="tooltip">Delete Selected Shapes</property>
                                                               <event name="OnToolClicked">OnMapEdit_ShapeTool_DeleteShape</event>
                                                             </object>
                                                           </object>
@@ -11337,11 +11337,11 @@
                 </object>
               </object>
             </object>
-            <object class="auinotebookpage" expanded="false">
+            <object class="auinotebookpage" expanded="true">
               <property name="bitmap"></property>
               <property name="label">Tile Editor</property>
               <property name="select">0</property>
-              <object class="wxPanel" expanded="false">
+              <object class="wxPanel" expanded="true">
                 <property name="BottomDockable">1</property>
                 <property name="LeftDockable">1</property>
                 <property name="RightDockable">1</property>
@@ -11393,16 +11393,16 @@
                 <property name="window_extra_style"></property>
                 <property name="window_name"></property>
                 <property name="window_style">wxTAB_TRAVERSAL</property>
-                <object class="wxBoxSizer" expanded="false">
+                <object class="wxBoxSizer" expanded="true">
                   <property name="minimum_size"></property>
                   <property name="name">bSizer351</property>
                   <property name="orient">wxVERTICAL</property>
                   <property name="permission">none</property>
-                  <object class="sizeritem" expanded="false">
+                  <object class="sizeritem" expanded="true">
                     <property name="border">5</property>
                     <property name="flag">wxEXPAND</property>
                     <property name="proportion">1</property>
-                    <object class="wxSplitterWindow" expanded="false">
+                    <object class="wxSplitterWindow" expanded="true">
                       <property name="BottomDockable">1</property>
                       <property name="LeftDockable">1</property>
                       <property name="RightDockable">1</property>
@@ -11591,7 +11591,7 @@
                                     <property name="style"></property>
                                     <property name="subclass">; ; forward_declare</property>
                                     <property name="toolbar_pane">0</property>
-                                    <property name="tooltip"></property>
+                                    <property name="tooltip">Load Tileset Image into Project</property>
                                     <property name="validator_data_type"></property>
                                     <property name="validator_style">wxFILTER_NONE</property>
                                     <property name="validator_type">wxDefaultValidator</property>
@@ -11666,7 +11666,7 @@
                                     <property name="style"></property>
                                     <property name="subclass">; ; forward_declare</property>
                                     <property name="toolbar_pane">0</property>
-                                    <property name="tooltip"></property>
+                                    <property name="tooltip">Remove Tileset from Project</property>
                                     <property name="validator_data_type"></property>
                                     <property name="validator_style">wxFILTER_NONE</property>
                                     <property name="validator_type">wxDefaultValidator</property>
@@ -11747,8 +11747,8 @@
                           </object>
                         </object>
                       </object>
-                      <object class="splitteritem" expanded="false">
-                        <object class="wxPanel" expanded="false">
+                      <object class="splitteritem" expanded="true">
+                        <object class="wxPanel" expanded="true">
                           <property name="BottomDockable">1</property>
                           <property name="LeftDockable">1</property>
                           <property name="RightDockable">1</property>
@@ -11800,7 +11800,7 @@
                           <property name="window_extra_style"></property>
                           <property name="window_name"></property>
                           <property name="window_style">wxTAB_TRAVERSAL</property>
-                          <object class="wxBoxSizer" expanded="false">
+                          <object class="wxBoxSizer" expanded="true">
                             <property name="minimum_size"></property>
                             <property name="name">bSizer93</property>
                             <property name="orient">wxVERTICAL</property>
@@ -12088,11 +12088,11 @@
                                 </object>
                               </object>
                             </object>
-                            <object class="sizeritem" expanded="false">
+                            <object class="sizeritem" expanded="true">
                               <property name="border">5</property>
                               <property name="flag">wxEXPAND | wxALL</property>
                               <property name="proportion">1</property>
-                              <object class="wxAuiNotebook" expanded="false">
+                              <object class="wxAuiNotebook" expanded="true">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
                                 <property name="RightDockable">1</property>
@@ -12148,11 +12148,11 @@
                                 <property name="window_name"></property>
                                 <property name="window_style"></property>
                                 <event name="OnAuiNotebookPageChanged">OnTileEditor_Edit_Changed</event>
-                                <object class="auinotebookpage" expanded="false">
+                                <object class="auinotebookpage" expanded="true">
                                   <property name="bitmap"></property>
                                   <property name="label">Animation</property>
                                   <property name="select">1</property>
-                                  <object class="wxPanel" expanded="false">
+                                  <object class="wxPanel" expanded="true">
                                     <property name="BottomDockable">1</property>
                                     <property name="LeftDockable">1</property>
                                     <property name="RightDockable">1</property>
@@ -12205,16 +12205,16 @@
                                     <property name="window_name"></property>
                                     <property name="window_style">wxTAB_TRAVERSAL</property>
                                     <event name="OnUpdateUI">OnUpdateTileAnimationUI</event>
-                                    <object class="wxBoxSizer" expanded="false">
+                                    <object class="wxBoxSizer" expanded="true">
                                       <property name="minimum_size"></property>
                                       <property name="name">bSizer42</property>
                                       <property name="orient">wxHORIZONTAL</property>
                                       <property name="permission">none</property>
-                                      <object class="sizeritem" expanded="false">
+                                      <object class="sizeritem" expanded="true">
                                         <property name="border">5</property>
                                         <property name="flag">wxEXPAND</property>
                                         <property name="proportion">1</property>
-                                        <object class="wxSplitterWindow" expanded="false">
+                                        <object class="wxSplitterWindow" expanded="true">
                                           <property name="BottomDockable">1</property>
                                           <property name="LeftDockable">1</property>
                                           <property name="RightDockable">1</property>
@@ -12272,8 +12272,8 @@
                                           <property name="window_extra_style"></property>
                                           <property name="window_name"></property>
                                           <property name="window_style"></property>
-                                          <object class="splitteritem" expanded="false">
-                                            <object class="wxPanel" expanded="false">
+                                          <object class="splitteritem" expanded="true">
+                                            <object class="wxPanel" expanded="true">
                                               <property name="BottomDockable">1</property>
                                               <property name="LeftDockable">1</property>
                                               <property name="RightDockable">1</property>
@@ -12326,7 +12326,7 @@
                                               <property name="window_name"></property>
                                               <property name="window_style">wxTAB_TRAVERSAL</property>
                                               <event name="OnUpdateUI">OnUpdateTileAnimationUI</event>
-                                              <object class="wxBoxSizer" expanded="false">
+                                              <object class="wxBoxSizer" expanded="true">
                                                 <property name="minimum_size"></property>
                                                 <property name="name">bSizer40</property>
                                                 <property name="orient">wxVERTICAL</property>
@@ -12610,20 +12610,20 @@
                                                     </object>
                                                   </object>
                                                 </object>
-                                                <object class="sizeritem" expanded="false">
+                                                <object class="sizeritem" expanded="true">
                                                   <property name="border">5</property>
                                                   <property name="flag">wxEXPAND</property>
                                                   <property name="proportion">0</property>
-                                                  <object class="wxBoxSizer" expanded="false">
+                                                  <object class="wxBoxSizer" expanded="true">
                                                     <property name="minimum_size"></property>
                                                     <property name="name">bSizer702</property>
                                                     <property name="orient">wxHORIZONTAL</property>
                                                     <property name="permission">none</property>
-                                                    <object class="sizeritem" expanded="false">
+                                                    <object class="sizeritem" expanded="true">
                                                       <property name="border">5</property>
                                                       <property name="flag">wxALIGN_CENTER_VERTICAL|wxALL</property>
                                                       <property name="proportion">0</property>
-                                                      <object class="wxAuiToolBar" expanded="false">
+                                                      <object class="wxAuiToolBar" expanded="true">
                                                         <property name="BottomDockable">1</property>
                                                         <property name="LeftDockable">1</property>
                                                         <property name="RightDockable">1</property>
@@ -12690,7 +12690,7 @@
                                                           <property name="name">m_tileEdit_tileSelect_tool</property>
                                                           <property name="permission">protected</property>
                                                           <property name="statusbar"></property>
-                                                          <property name="tooltip"></property>
+                                                          <property name="tooltip">Select Tile Mode</property>
                                                           <event name="OnToolClicked">OnTileEdit_TileSelect_Tool</event>
                                                         </object>
                                                         <object class="tool" expanded="false">
@@ -12702,7 +12702,7 @@
                                                           <property name="name">m_tileEdit_tileAnimate_tool</property>
                                                           <property name="permission">protected</property>
                                                           <property name="statusbar"></property>
-                                                          <property name="tooltip"></property>
+                                                          <property name="tooltip">Animate Tile Mode</property>
                                                           <event name="OnToolClicked">OnTileEdit_TileAnimation_Tool</event>
                                                         </object>
                                                       </object>
@@ -13508,7 +13508,7 @@
                                               <property name="style"></property>
                                               <property name="subclass">; ; forward_declare</property>
                                               <property name="toolbar_pane">0</property>
-                                              <property name="tooltip"></property>
+                                              <property name="tooltip">Create New Tile Mask</property>
                                               <property name="validator_data_type"></property>
                                               <property name="validator_style">wxFILTER_NONE</property>
                                               <property name="validator_type">wxDefaultValidator</property>
@@ -13583,7 +13583,7 @@
                                               <property name="style"></property>
                                               <property name="subclass">; ; forward_declare</property>
                                               <property name="toolbar_pane">0</property>
-                                              <property name="tooltip"></property>
+                                              <property name="tooltip">Delete Tile Mask</property>
                                               <property name="validator_data_type"></property>
                                               <property name="validator_style">wxFILTER_NONE</property>
                                               <property name="validator_type">wxDefaultValidator</property>
@@ -13953,11 +13953,11 @@
                 </object>
               </object>
             </object>
-            <object class="auinotebookpage" expanded="false">
+            <object class="auinotebookpage" expanded="true">
               <property name="bitmap"></property>
               <property name="label">Sprite Editor</property>
               <property name="select">0</property>
-              <object class="wxPanel" expanded="false">
+              <object class="wxPanel" expanded="true">
                 <property name="BottomDockable">1</property>
                 <property name="LeftDockable">1</property>
                 <property name="RightDockable">1</property>
@@ -14009,16 +14009,16 @@
                 <property name="window_extra_style"></property>
                 <property name="window_name"></property>
                 <property name="window_style">wxTAB_TRAVERSAL</property>
-                <object class="wxBoxSizer" expanded="false">
+                <object class="wxBoxSizer" expanded="true">
                   <property name="minimum_size"></property>
                   <property name="name">bSizer57</property>
                   <property name="orient">wxVERTICAL</property>
                   <property name="permission">none</property>
-                  <object class="sizeritem" expanded="false">
+                  <object class="sizeritem" expanded="true">
                     <property name="border">5</property>
                     <property name="flag">wxEXPAND</property>
                     <property name="proportion">1</property>
-                    <object class="wxSplitterWindow" expanded="false">
+                    <object class="wxSplitterWindow" expanded="true">
                       <property name="BottomDockable">1</property>
                       <property name="LeftDockable">1</property>
                       <property name="RightDockable">1</property>
@@ -14207,7 +14207,7 @@
                                     <property name="style"></property>
                                     <property name="subclass">; ; forward_declare</property>
                                     <property name="toolbar_pane">0</property>
-                                    <property name="tooltip"></property>
+                                    <property name="tooltip">Load Sprite Definition</property>
                                     <property name="validator_data_type"></property>
                                     <property name="validator_style">wxFILTER_NONE</property>
                                     <property name="validator_type">wxDefaultValidator</property>
@@ -14282,7 +14282,7 @@
                                     <property name="style"></property>
                                     <property name="subclass">; ; forward_declare</property>
                                     <property name="toolbar_pane">0</property>
-                                    <property name="tooltip"></property>
+                                    <property name="tooltip">Remove Sprite Definition</property>
                                     <property name="validator_data_type"></property>
                                     <property name="validator_style">wxFILTER_NONE</property>
                                     <property name="validator_type">wxDefaultValidator</property>
@@ -14363,8 +14363,8 @@
                           </object>
                         </object>
                       </object>
-                      <object class="splitteritem" expanded="false">
-                        <object class="wxPanel" expanded="false">
+                      <object class="splitteritem" expanded="true">
+                        <object class="wxPanel" expanded="true">
                           <property name="BottomDockable">1</property>
                           <property name="LeftDockable">1</property>
                           <property name="RightDockable">1</property>
@@ -14416,7 +14416,7 @@
                           <property name="window_extra_style"></property>
                           <property name="window_name"></property>
                           <property name="window_style">wxTAB_TRAVERSAL</property>
-                          <object class="wxBoxSizer" expanded="false">
+                          <object class="wxBoxSizer" expanded="true">
                             <property name="minimum_size"></property>
                             <property name="name">bSizer611</property>
                             <property name="orient">wxVERTICAL</property>
@@ -14704,11 +14704,11 @@
                                 </object>
                               </object>
                             </object>
-                            <object class="sizeritem" expanded="false">
+                            <object class="sizeritem" expanded="true">
                               <property name="border">5</property>
                               <property name="flag">wxEXPAND | wxALL</property>
                               <property name="proportion">1</property>
-                              <object class="wxAuiNotebook" expanded="false">
+                              <object class="wxAuiNotebook" expanded="true">
                                 <property name="BottomDockable">1</property>
                                 <property name="LeftDockable">1</property>
                                 <property name="RightDockable">1</property>
@@ -14981,7 +14981,7 @@
                                                   <property name="style"></property>
                                                   <property name="subclass">; ; forward_declare</property>
                                                   <property name="toolbar_pane">0</property>
-                                                  <property name="tooltip"></property>
+                                                  <property name="tooltip">Create New Animation for Sprite</property>
                                                   <property name="validator_data_type"></property>
                                                   <property name="validator_style">wxFILTER_NONE</property>
                                                   <property name="validator_type">wxDefaultValidator</property>
@@ -15056,7 +15056,7 @@
                                                   <property name="style"></property>
                                                   <property name="subclass">; ; forward_declare</property>
                                                   <property name="toolbar_pane">0</property>
-                                                  <property name="tooltip"></property>
+                                                  <property name="tooltip">Remove Animation from Sprite</property>
                                                   <property name="validator_data_type"></property>
                                                   <property name="validator_style">wxFILTER_NONE</property>
                                                   <property name="validator_type">wxDefaultValidator</property>
@@ -16249,7 +16249,7 @@
                                                             <property name="style">wxBORDER_NONE</property>
                                                             <property name="subclass">; ; forward_declare</property>
                                                             <property name="toolbar_pane">0</property>
-                                                            <property name="tooltip"></property>
+                                                            <property name="tooltip">Play Current Animation</property>
                                                             <property name="validator_data_type"></property>
                                                             <property name="validator_style">wxFILTER_NONE</property>
                                                             <property name="validator_type">wxDefaultValidator</property>
@@ -16324,7 +16324,7 @@
                                                             <property name="style">wxBORDER_NONE</property>
                                                             <property name="subclass">; ; forward_declare</property>
                                                             <property name="toolbar_pane">0</property>
-                                                            <property name="tooltip"></property>
+                                                            <property name="tooltip">Stop Playing Animation</property>
                                                             <property name="validator_data_type"></property>
                                                             <property name="validator_style">wxFILTER_NONE</property>
                                                             <property name="validator_type">wxDefaultValidator</property>
@@ -16357,11 +16357,11 @@
                                     </object>
                                   </object>
                                 </object>
-                                <object class="auinotebookpage" expanded="false">
+                                <object class="auinotebookpage" expanded="true">
                                   <property name="bitmap"></property>
                                   <property name="label">Collision</property>
                                   <property name="select">0</property>
-                                  <object class="wxPanel" expanded="false">
+                                  <object class="wxPanel" expanded="true">
                                     <property name="BottomDockable">1</property>
                                     <property name="LeftDockable">1</property>
                                     <property name="RightDockable">1</property>
@@ -16413,7 +16413,7 @@
                                     <property name="window_extra_style"></property>
                                     <property name="window_name"></property>
                                     <property name="window_style">wxTAB_TRAVERSAL</property>
-                                    <object class="wxBoxSizer" expanded="false">
+                                    <object class="wxBoxSizer" expanded="true">
                                       <property name="minimum_size"></property>
                                       <property name="name">bSizer671</property>
                                       <property name="orient">wxHORIZONTAL</property>
@@ -16497,20 +16497,20 @@
                                           </object>
                                         </object>
                                       </object>
-                                      <object class="sizeritem" expanded="false">
+                                      <object class="sizeritem" expanded="true">
                                         <property name="border">5</property>
                                         <property name="flag">wxEXPAND</property>
                                         <property name="proportion">1</property>
-                                        <object class="wxBoxSizer" expanded="false">
+                                        <object class="wxBoxSizer" expanded="true">
                                           <property name="minimum_size"></property>
                                           <property name="name">bSizer691</property>
                                           <property name="orient">wxVERTICAL</property>
                                           <property name="permission">none</property>
-                                          <object class="sizeritem" expanded="false">
+                                          <object class="sizeritem" expanded="true">
                                             <property name="border">5</property>
                                             <property name="flag">wxALL|wxEXPAND</property>
                                             <property name="proportion">0</property>
-                                            <object class="wxAuiToolBar" expanded="false">
+                                            <object class="wxAuiToolBar" expanded="true">
                                               <property name="BottomDockable">1</property>
                                               <property name="LeftDockable">1</property>
                                               <property name="RightDockable">1</property>
@@ -16577,7 +16577,7 @@
                                                 <property name="name">m_spriteEdit_collisionSelect_tool</property>
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
-                                                <property name="tooltip"></property>
+                                                <property name="tooltip">Select Point</property>
                                                 <event name="OnToolClicked">OnSpriteEdit_Collision_Select_Click</event>
                                               </object>
                                               <object class="tool" expanded="false">
@@ -16589,7 +16589,7 @@
                                                 <property name="name">m_spriteEdit_collisionBoxSelect_tool</property>
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
-                                                <property name="tooltip"></property>
+                                                <property name="tooltip">Box Select Points</property>
                                                 <event name="OnToolClicked">OnSpriteEdit_Collision_BoxSelect_Click</event>
                                               </object>
                                               <object class="tool" expanded="false">
@@ -16601,7 +16601,7 @@
                                                 <property name="name">m_spriteEdit_collisionMove_tool</property>
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
-                                                <property name="tooltip"></property>
+                                                <property name="tooltip">Move Selected Points</property>
                                                 <event name="OnToolClicked">OnSpriteEdit_Collision_Move_Click</event>
                                               </object>
                                               <object class="tool" expanded="false">
@@ -16613,7 +16613,7 @@
                                                 <property name="name">m_spriteEdit_collisionDraw_tool</property>
                                                 <property name="permission">protected</property>
                                                 <property name="statusbar"></property>
-                                                <property name="tooltip"></property>
+                                                <property name="tooltip">Draw Shape</property>
                                                 <event name="OnToolClicked">OnSpriteEdit_Collision_Draw_Click</event>
                                               </object>
                                             </object>
