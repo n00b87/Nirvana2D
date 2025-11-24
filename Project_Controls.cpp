@@ -3063,7 +3063,14 @@ void NirvanaEditor_MainFrame::OnActiveLayerSelect( wxCommandEvent& event )
 	int stage_index = map_editor->getSelectedStage();
 	int layer_index = map_editor->getSelectedLayer();
 
-	if(project->getLayerType(stage_index, layer_index) == LAYER_TYPE_SPRITE)
+	int current_tool_tab = m_mapEdit_layerObjectTools_auinotebook->GetSelection();
+
+	if(current_tool_tab < 0 || current_tool_tab >= m_mapEdit_layerObjectTools_auinotebook->GetPageCount())
+        current_tool_tab = 0;
+
+	int layer_type = project->getLayerType(stage_index, layer_index);
+
+	if(layer_type == LAYER_TYPE_SPRITE)
     {
         map_editor->getMapViewControl()->sprite_grid_type = project->getLayerSpriteGridType(stage_index, layer_index);
         map_editor->getMapViewControl()->sprite_sort_by = project->getLayerSpriteSortBy(stage_index, layer_index);
@@ -3074,16 +3081,6 @@ void NirvanaEditor_MainFrame::OnActiveLayerSelect( wxCommandEvent& event )
         m_mapEdit_spriteTileTools_simplebook->SetSelection(1);
 
 
-        m_mapEdit_tsToolbar_select_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
-        m_mapEdit_tsToolbar_boxSelect_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
-        m_mapEdit_tsToolbar_move_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
-
-        m_mapEdit_tsToolbar_setTSprite_solid_tool->SetState(wxAUI_BUTTON_STATE_CHECKED);
-
-        m_mapEdit_spriteTileTools_auiToolBar->Refresh();
-
-        selected_map_tool = MAP_TOOL_TS_SET;
-        map_editor->setMapTool(selected_map_tool);
 
 
         //std::cout << "DBG INFO: " << map_editor->getMapViewControl()->sprite_grid_type << ", "
@@ -3095,19 +3092,122 @@ void NirvanaEditor_MainFrame::OnActiveLayerSelect( wxCommandEvent& event )
         m_tilesetExtraOptions_simplebook->SetSelection(0);
         m_mapEdit_spriteTileTools_simplebook->SetSelection(0);
 
-        m_mapEdit_tileToolbar_select_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
-        m_mapEdit_tileToolbar_boxSelect_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
-        m_mapEdit_tileToolbar_move_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
-        m_mapEdit_tileToolbar_copyTile_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
-        m_mapEdit_tileToolbar_fillTile_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
-
-        m_mapEdit_tileToolbar_setTile_tool->SetState(wxAUI_BUTTON_STATE_CHECKED);
-
-        m_mapEdit_tileTools_auiToolBar->Refresh();
-
-        selected_map_tool = MAP_TOOL_TILE_SET;
-        map_editor->setMapTool(selected_map_tool);
     }
+
+    bool change_tool = false;
+
+    switch(map_editor->getMapViewControl()->map_tool)
+    {
+        case MAP_TOOL_TS_BOXSELECT:
+        case MAP_TOOL_TS_DELETE:
+        case MAP_TOOL_TS_MOVE:
+        case MAP_TOOL_TS_SELECT:
+        case MAP_TOOL_TS_SET:
+        {
+            if(m_mapEdit_layerObjectTools_auinotebook->GetPage(current_tool_tab) != m_mapEdit_tile_panel)
+            {
+                change_tool = true;
+            }
+            else if(layer_type != LAYER_TYPE_SPRITE)
+            {
+                change_tool = true;
+            }
+        }
+        break;
+
+        case MAP_TOOL_TILE_BOXSELECT:
+        case MAP_TOOL_TILE_COPY:
+        case MAP_TOOL_TILE_DELETE:
+        case MAP_TOOL_TILE_FILL:
+        case MAP_TOOL_TILE_MOVE:
+        case MAP_TOOL_TILE_SELECT:
+        case MAP_TOOL_TILE_SET:
+        {
+            if(m_mapEdit_layerObjectTools_auinotebook->GetPage(current_tool_tab) != m_mapEdit_tile_panel)
+            {
+                change_tool = true;
+            }
+            else if(layer_type == LAYER_TYPE_SPRITE)
+            {
+                change_tool = true;
+            }
+        }
+        break;
+
+        case MAP_TOOL_SPRITE_BOXSELECT:
+        case MAP_TOOL_SPRITE_COPY:
+        case MAP_TOOL_SPRITE_MOVE:
+        case MAP_TOOL_SPRITE_ROTATE:
+        case MAP_TOOL_SPRITE_SCALE:
+        case MAP_TOOL_SPRITE_SELECT:
+        {
+            if(m_mapEdit_layerObjectTools_auinotebook->GetPage(current_tool_tab) != m_mapEdit_sprite_panel)
+            {
+                change_tool = true;
+            }
+        }
+        break;
+
+        case MAP_TOOL_SHAPE_BOXSELECT:
+        case MAP_TOOL_SHAPE_DRAW:
+        case MAP_TOOL_SHAPE_MOVE:
+        case MAP_TOOL_SHAPE_SELECT:
+        {
+            if(m_mapEdit_layerObjectTools_auinotebook->GetPage(current_tool_tab) != m_mapEdit_collision_panel)
+            {
+                change_tool = true;
+            }
+        }
+        break;
+    }
+
+    if(change_tool)
+    {
+        if(m_mapEdit_layerObjectTools_auinotebook->GetPage(current_tool_tab) == m_mapEdit_tile_panel)
+        {
+            if(layer_type == LAYER_TYPE_SPRITE)
+            {
+                selected_map_tool = MAP_TOOL_TS_SET;
+                map_editor->setMapTool(selected_map_tool);
+
+                m_mapEdit_tsToolbar_select_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+                m_mapEdit_tsToolbar_boxSelect_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+                m_mapEdit_tsToolbar_move_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+
+                m_mapEdit_tsToolbar_setTSprite_solid_tool->SetState(wxAUI_BUTTON_STATE_CHECKED);
+
+                m_mapEdit_spriteTileTools_auiToolBar->Refresh();
+            }
+            else
+            {
+                selected_map_tool = MAP_TOOL_TILE_SET;
+                map_editor->setMapTool(selected_map_tool);
+
+                m_mapEdit_tileToolbar_select_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+                m_mapEdit_tileToolbar_boxSelect_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+                m_mapEdit_tileToolbar_move_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+                m_mapEdit_tileToolbar_copyTile_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+                m_mapEdit_tileToolbar_fillTile_tool->SetState(wxAUI_BUTTON_STATE_NORMAL);
+
+                m_mapEdit_tileToolbar_setTile_tool->SetState(wxAUI_BUTTON_STATE_CHECKED);
+
+                m_mapEdit_tileTools_auiToolBar->Refresh();
+            }
+        }
+        else if(m_mapEdit_layerObjectTools_auinotebook->GetPage(current_tool_tab) == m_mapEdit_sprite_panel)
+        {
+            selected_map_tool = MAP_TOOL_SPRITE_SELECT;
+            map_editor->setMapTool(selected_map_tool);
+        }
+        else if(m_mapEdit_layerObjectTools_auinotebook->GetPage(current_tool_tab) == m_mapEdit_collision_panel)
+        {
+            selected_map_tool = MAP_TOOL_SHAPE_SELECT;
+            map_editor->setMapTool(selected_map_tool);
+        }
+    }
+
+    m_mapEdit_layerObjectTools_auinotebook->SetSelection(current_tool_tab);
+
 
 	updateMapEditor();
 }

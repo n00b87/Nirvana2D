@@ -1,8 +1,8 @@
 # depslib dependency file v1.0
-1763542767 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
+1763804839 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
 	"NirvanaBase.h"
 
-1763542767 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
+1763804763 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
 	<wx/artprov.h>
 	<wx/xrc/xmlres.h>
 	<wx/intl.h>
@@ -1606,7 +1606,7 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/toolbar.h
 
-1763504666 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
+1763804763 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
 	"NirvanaBase.h"
 	"wxIrrlicht.h"
 	"Nirvana_SpriteAnimation.h"
@@ -1654,7 +1654,7 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/dialog.h
 
-1763503035 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
+1763804763 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -2844,7 +2844,7 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/dirdlg.h
 
-1763294736 /home/n00b/Projects/Nirvana2D/wxIrrlicht.h
+1763804763 /home/n00b/Projects/Nirvana2D/wxIrrlicht.h
 	<windows.h>
 	<irrlicht.h>
 	<wx/wx.h>
@@ -3200,7 +3200,7 @@
 	"Nirvana_Project.h"
 	"rc_defines.h"
 
-1763581464 source:/home/n00b/Projects/Nirvana2D/wxIrrlicht.cpp
+1763804763 source:/home/n00b/Projects/Nirvana2D/wxIrrlicht.cpp
 	<wx/wx.h>
 	<wx/stdpaths.h>
 	<wx/filename.h>
@@ -6419,7 +6419,7 @@
 
 1741217486 /usr/include/gtk-3.0/gtk/gtk-autocleanups.h
 
-1763504186 /home/n00b/Projects/Nirvana2D/rc_defines.h
+1763804763 /home/n00b/Projects/Nirvana2D/rc_defines.h
 
 1750832044 /home/n00b/Projects/Nirvana2D/rc_utf8.h
 	<string>
@@ -6467,7 +6467,7 @@
 	"wx/string.h"
 	"wx/filefn.h"
 
-1763514873 /home/n00b/Projects/Nirvana2D/Nirvana_Project.h
+1763804763 /home/n00b/Projects/Nirvana2D/Nirvana_Project.h
 	<wx/wx.h>
 	<wx/filename.h>
 	<vector>
@@ -6475,12 +6475,12 @@
 	"NirvanaEngine_Structs.h"
 	"rc_defines.h"
 
-1763504032 /home/n00b/Projects/Nirvana2D/NirvanaEngine_Structs.h
+1763804763 /home/n00b/Projects/Nirvana2D/NirvanaEngine_Structs.h
 	<irrlicht.h>
 	<vector>
 	"rc_defines.h"
 
-1763711250 source:/home/n00b/Projects/Nirvana2D/Nirvana_Project.cpp
+1763804763 source:/home/n00b/Projects/Nirvana2D/Nirvana_Project.cpp
 	"Nirvana_Project.h"
 	<wx/wx.h>
 	<wx/filename.h>
@@ -6509,7 +6509,7 @@
 	"Nirvana_Project.h"
 	<wx/arrstr.h>
 
-1762853024 source:/home/n00b/Projects/Nirvana2D/Nirvana_MapEditor.cpp
+1763804763 source:/home/n00b/Projects/Nirvana2D/Nirvana_MapEditor.cpp
 	"Nirvana_MapEditor.h"
 	<wx/display.h>
 	<irrlicht.h>
@@ -6528,7 +6528,7 @@
 	"NirvanaBase.h"
 	"Nirvana_Project.h"
 
-1763546923 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
+1763965556 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -6819,23 +6819,23 @@
 	<limits.h>
 	<float.h>
 
-1758010956 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteSortSetting_Dialog.cpp
+1763804763 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteSortSetting_Dialog.cpp
 	"NirvanaEditor_SpriteSortSetting_Dialog.h"
 
-1758010956 /home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteSortSetting_Dialog.h
+1763804763 /home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteSortSetting_Dialog.h
 	"NirvanaBase.h"
 
-1762853577 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteLayer_SelectTileset_Dialog.cpp
+1763804763 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteLayer_SelectTileset_Dialog.cpp
 	"NirvanaEditor_SpriteLayer_SelectTileset_Dialog.h"
 
-1762849805 /home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteLayer_SelectTileset_Dialog.h
+1763804763 /home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteLayer_SelectTileset_Dialog.h
 	"NirvanaBase.h"
 	"Nirvana_Project.h"
 	<wx/arrstr.h>
 
-1763329640 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.cpp
+1763804763 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.cpp
 	"NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.h"
 
-1763329568 /home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.h
+1763804763 /home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.h
 	"NirvanaBase.h"
 
