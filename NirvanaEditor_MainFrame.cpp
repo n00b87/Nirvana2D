@@ -571,7 +571,10 @@ void NirvanaEditor_MainFrame::OnSetSpriteLayerTileset( wxCommandEvent& event )
     gfx_dir.SetFullName(wxString(sheet_file_name));
 
     if(sheet_file_name.compare("")!=0)
+    {
         map_editor->getTileSelectControl()->current_sheet_image = map_editor->getTileSelectControl()->loadImage(gfx_dir.GetAbsolutePath().ToStdString());
+        project->tileset[nv_tileset_index].object.img_id = map_editor->getMapViewControl()->loadImage(gfx_dir.GetAbsolutePath().ToStdString());
+    }
 
     //std::cout << "TS Current Sheet: " << map_editor->getTileSelectControl()->current_sheet_image << std::endl;
 }

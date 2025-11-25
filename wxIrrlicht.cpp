@@ -7932,14 +7932,22 @@ void wxIrrlicht::StageSheet_SetTile_SpriteLayer_Update()
 	int tset = project->stages[selected_stage].layers[selected_layer].layer_map.nv_tileset_index;
 
 	if(tset < 0 || tset >= project->tileset.size())
-		return;
+    {
+        std::cout << "NO TSET" << std::endl;
+        return;
+    }
 
 	int img_id = project->tileset[tset].object.img_id;
 
 	if(img_id < 0 || img_id >= image.size())
-		return;
+    {
+        std::cout << "NO IMAGE" << std::endl;
+        return;
+    }
 
 	int num_rows = mapEdit_tile_selection.row.size();
+
+	std::cout << "NUM ROWS = " << num_rows << std::endl;
 
 	int num_cols = 0;
 

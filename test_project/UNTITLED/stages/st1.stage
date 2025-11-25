@@ -174,10 +174,10 @@ ROW value=-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-
 ROW value=-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1;
 END_TILEMAP;
 
-LAYER name="sprite_layer2" type=LAYER_TYPE_SPRITE tileset="tset2" scroll_speed=1,1 alpha=255 sprite_grid=SQUARE sprite_sort_by=NONE sprite_order=ASCENDING sprite_shape_data=GENERATE visible=TRUE;
+LAYER name="sprite_layer2" type=LAYER_TYPE_SPRITE tileset="gt" scroll_speed=1,1 alpha=255 sprite_grid=SQUARE sprite_sort_by=NONE sprite_order=ASCENDING sprite_shape_data=GENERATE visible=TRUE;
 SPRITE name="guy1" base="gren_guy" type=SPRITE_TYPE_DYNAMIC position=559,446 scale=1,1 rotation=360 alpha=180 animation="SPRITE_BASE_ANIMATION" visible=TRUE;
 SHAPE name="CIRCLE_1" type=SPRITE_SHAPE_CIRCLE point=135,87 radius=63 ;
-TILE_SPRITE tileset="" cut=-1 sheet_index=-1 position=64,256 frame_size=96,32 ;
-TILE_SPRITE tileset="tset2" cut=0 sheet_index=25 position=384,256 frame_size=96,32 ;
-TILE_SPRITE tileset="tset2" cut=0 sheet_index=25 position=224,32 frame_size=96,32 ;
+TILE_SPRITE tileset="gt" cut=1 sheet_index=18 position=928,96 frame_size=64,96 ;
+TILE_SPRITE tileset="gt" cut=2 sheet_index=1 position=768,160 frame_size=32,32 ;
+TILE_SPRITE tileset="gt" cut=3 sheet_index=2 position=672,192 frame_size=32,32 ;
 
