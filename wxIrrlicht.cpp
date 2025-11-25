@@ -5140,7 +5140,7 @@ void wxIrrlicht::selectISOTilesInBox(bool start_m, int start_x, int start_y, int
 	//std::cout << "across: " << m1_across << ", " << m2_across << std::endl;
 	//std::cout << "down: " << m1_down << ", " << m2_down << std::endl;
 
-	std::cout << std::endl;
+	//std::cout << std::endl;
 
 
 	int x = 0;
@@ -7703,12 +7703,12 @@ void wxIrrlicht::StageSheet_BoxSelectTile_SpriteLayer_Update()
 		int max_x = selectSprite_box_start.X > bx ? selectSprite_box_start.X : bx;
 		int max_y = selectSprite_box_start.Y > by ? selectSprite_box_start.Y : by;
 
-		std::cout << "call pick" << std::endl;
+		//std::cout << "call pick" << std::endl;
 		pickSprites(min_x, min_y, max_x, max_y, true, true);
 
 		if(pick_sprites.size() > 0)
 		{
-		    std::cout << "pick_size = " << pick_sprites.size() << std::endl;
+		    //std::cout << "pick_size = " << pick_sprites.size() << std::endl;
 			for(int i = 0; i < pick_sprites.size(); i++)
 			{
 				Nirvana_SelectTool_SpriteSelection n_sprite_selection;
@@ -10231,6 +10231,15 @@ void wxIrrlicht::UpdateStageSheet()
 	{
 		this->SetFocusFromKbd();
 	}
+	else
+    {
+        if(spriteExists(ts_sprite_id))
+            deleteSprite(ts_sprite_id);
+
+        ts_sprite_id = -1;
+        ts_sprite_cut_id = -1;
+        ts_tileset_id = -1;
+    }
 
 	if(VIEW_KEY_W)
 	{

@@ -511,7 +511,7 @@ bool NirvanaEditor_MainFrame::loadProject(wxFileName project_file)
                 {
                     if(project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[t_row].tile[t_col] >= 0)
                     {
-                        std::cout << "TILE CHECK: " << project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[t_row].tile[t_col] << std::endl; // I have to touch the array once because of MinGW's bullshit
+                        //std::cout << "TILE CHECK: " << project->stages[stage_index].layers[layer_index].layer_map.tile_map.rows[t_row].tile[t_col] << std::endl; // I have to touch the array once because of MinGW's bullshit
                         return true;
                     }
                 }
