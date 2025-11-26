@@ -1629,6 +1629,8 @@ bool NirvanaEditor_MainFrame::generateStages()
 
 	int tmap_data_index = 0;
 
+	std::vector<int> stage_loaded_tset;
+
 	//Tilesets
 	for(int stage_index = 0; stage_index < project->stages.size(); stage_index++)
 	{
@@ -2058,6 +2060,7 @@ bool NirvanaEditor_MainFrame::generateStages()
 				int tset_index = project->stages[stage_index].layers[layer_index].layer_map.nv_tileset_index;
 				if(tset_index >= 0 && tset_index < project->tileset.size())
 				{
+				    fn_str += _("\t") + _("Nirvana_Tileset_") + wxString::Format(_("%i"), tset_index) + _("()") + _("\n");
 				    fn_str += _("\tCut_Start_Index = ") + wxString::Format(_("%i"), gt_tileset_cut_start_index[tset_index]) + _("\n");
                     fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Layer_TS_Stack = CreateStack_N()") + _("\n");
 
@@ -2083,6 +2086,7 @@ bool NirvanaEditor_MainFrame::generateStages()
                         wxString pos_x_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_tile_sprites[sprite_index].x);
                         wxString pos_y_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_tile_sprites[sprite_index].y);
                         fn_str += _("\tSetSpritePosition( t_sprite, ") + pos_x_str + _(", ") + pos_y_str + _(")\n");
+                        fn_str += _("\SetSpriteGravityScale( t_sprite, 0)\n");
 
                         fn_str += _("\n");
                     }

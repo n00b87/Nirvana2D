@@ -74,7 +74,6 @@ Nirvana_NULL_Shape.Name$ = ""
 Nirvana_NULL_Shape.Sprite_ID = -1
 Nirvana_NULL_Shape.ShapeType = -1
 Nirvana_NULL_Shape.ShapeData_Matrix = -1
-
 ArrayFill(Nirvana_Stage_Shapes, Nirvana_NULL_Shape)
 
 For i = 0 To 4
@@ -172,6 +171,9 @@ Sub Nirvana_ClearStage()
 
 	Nirvana_Tileset_ID_2 = -1
 	Nirvana_Tileset_Image_2 = -1
+
+	Nirvana_Tileset_ID_3 = -1
+	Nirvana_Tileset_Image_3 = -1
 
 	Nirvana_Sprite_Image_0 = -1
 	Nirvana_Sprite_Image_1 = -1
@@ -555,6 +557,7 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 
 
 	'------- TILE SPRITES  -------
+	Nirvana_Tileset_0()
 	Cut_Start_Index = 0
 	Nirvana_Stage_Layers[2].Layer_TS_Stack = CreateStack_N()
 	cut_index = Cut_Start_Index + 0
@@ -700,17 +703,23 @@ Function Nirvana_Stage_0(vp_x, vp_y, vp_w, vp_h) As Nirvana_Stage
 	SetSpriteVisible(Nirvana_Stage_Shapes[5].Sprite_ID, FALSE) 'Image is -1 so it wouldn't render anyway
 
 	'------- TILE SPRITES  -------
-	Cut_Start_Index = 4
+	Nirvana_Tileset_3()
+	Cut_Start_Index = 9
 	Nirvana_Stage_Layers[4].Layer_TS_Stack = CreateStack_N()
-	cut_index = Cut_Start_Index + 0
+	cut_index = Cut_Start_Index + 1
 	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
 	Push_N(Nirvana_Stage_Layers[4].Layer_TS_Stack, t_sprite)
-	SetSpritePosition( t_sprite, 384, 256)
+	SetSpritePosition( t_sprite, 928, 96)
 
-	cut_index = Cut_Start_Index + 0
+	cut_index = Cut_Start_Index + 2
 	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
 	Push_N(Nirvana_Stage_Layers[4].Layer_TS_Stack, t_sprite)
-	SetSpritePosition( t_sprite, 224, 32)
+	SetSpritePosition( t_sprite, 768, 160)
+
+	cut_index = Cut_Start_Index + 3
+	t_sprite = CreateSprite(Nirvana_Tileset_Cuts[cut_index].Image_ID, Nirvana_Tileset_Cuts[cut_index].NumCols * 32, Nirvana_Tileset_Cuts[cut_index].NumRows * 32)
+	Push_N(Nirvana_Stage_Layers[4].Layer_TS_Stack, t_sprite)
+	SetSpritePosition( t_sprite, 672, 192)
 
 
 	Return nv_stage
