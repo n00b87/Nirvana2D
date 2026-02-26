@@ -604,9 +604,9 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 		{
 			wxFileName sp_path = fname;
 			sp_path.AppendDir(project->sprite_path);
-			sp_path.SetFullName(project->sprite_base[i].file.Trim() + _(".sprite"));
+			sp_path.SetFullName(project->sprite_base[i].file[0].Trim() + _(".sprite"));
 
-			pfile.Write(_("SPRITE file=\"") + project->sprite_base[i].file.Trim() + _("\";\n"));
+			pfile.Write(_("SPRITE file=\"") + project->sprite_base[i].file[0].Trim() + _("\";\n"));
 
 			wxFile sp_file(sp_path.GetAbsolutePath(), wxFile::write);
 
@@ -614,7 +614,12 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 			sp_file.Write(_("name=\"") + project->sprite_base[i].sprite_name + _("\" "));
 			sp_file.Write(_("frame_size=") + wxString::Format(_("%i"), project->sprite_base[i].object.frame_size.Width) + _(",") +
 											 wxString::Format(_("%i"), project->sprite_base[i].object.frame_size.Height) + _(" ") +
-                          _("detached_shape=") + (project->sprite_base[i].object.physics.detached ? _("TRUE") : _("FALSE")) + _(";\n"));
+                          _("detached_shape=") + (project->sprite_base[i].object.physics.detached ? _("TRUE") : _("FALSE")) + _(" "));
+
+            for(int file_index = 0; file_index < project->sprite_base[i].file.size(); file_index++)
+                sp_file.Write(_("file=\"") + project->sprite_base[i].file[file_index] + _("\" "));
+
+            sp_file.Write(_(";\n"));
 
 			//Collision Shape
 			if(project->sprite_base[i].object.physics.shape_type == SPRITE_SHAPE_BOX)
@@ -652,6 +657,7 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 				sp_file.Write(_("name=\"") + wxString(project->sprite_base[i].object.animation[ani].name) + _("\" "));
 				sp_file.Write(_("frame_count=") + wxString::Format(_("%i"), project->sprite_base[i].object.animation[ani].frames.size()) + _(" "));
 				sp_file.Write(_("fps=") + wxString::FromDouble((double)project->sprite_base[i].object.animation[ani].fps) +_(" "));
+				sp_file.Write(_("file_index=") + wxString::Format(_("%i"), project->sprite_base[i].object.animation[ani].image_file_index) + _(" "));
 
 				if(project->sprite_base[i].object.animation[ani].frames.size() > 0)
 					sp_file.Write(_("frame="));
@@ -1038,6 +1044,8 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 
 	std::vector<wxString> sprite_animation_names;
 
+	std::vector<wxString> spr_file_def;
+
 	//Sprite Definitions
 	for(int base_index = 0; base_index < project->sprite_base.size(); base_index++)
 	{
@@ -1047,40 +1055,57 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 		wxString spr_img = _("Nirvana_Sprite_Image_") + wxString::Format(_("%i"), base_index);
 		sprite_img_var.push_back(spr_img);
 
+		wxString spr_img_file = _("Nirvana_Sprite_Image_Source_") + wxString::Format(_("%i"), base_index) + _("$");
+
 		//Sprite Create Function
-		var_def.push_back(_("Dim ") + spr_img + _(" : ") + spr_img + _(" = -1"));
+		var_def.push_back(_("Dim ") + spr_img + _("[") + wxString::Format(_("%i"), (int)project->sprite_base[base_index].file.size()) + _("] : ArrayFill(") + spr_img + _(", -1)") );
+		var_def.push_back(_("Dim ") + spr_img_file + _("[") + wxString::Format(_("%i"), (int)project->sprite_base[base_index].file.size()) + _("]"));
 
 		wxString fn_str = _("");
 
 		fn_str += _("Function ") + fn_name + _("\n");
 
-		fn_str += _("\tIf ") + spr_img + _(" < 0 Then\n");
-		wxString img_path_win = project->sprite_base[base_index].file;
-		wxString img_path_x = project->sprite_base[base_index].file;
+		fn_str += _("\tFor i = 0 To ") + wxString::Format(_("%i"), (int)project->sprite_base[base_index].file.size()-1) + _("\n");
+		fn_str += _("\t\tIf ") + spr_img + _("[i] < 0 Then\n");
 
-		fn_str += _("\t\tIf OS$ = \"WINDOWS\" Then\n");
-		fn_str += _("\t\t\t") + spr_img + _(" = LoadImage(NIRVANA_SPRITE_DIR$ + \"") + img_path_win + _("\")\n");
-		fn_str += _("\t\tElse\n");
-		fn_str += _("\t\t\t") + spr_img + _(" = LoadImage(NIRVANA_SPRITE_DIR$ + \"") + img_path_x + _("\")\n");
-		fn_str += _("\t\tEnd If\n\n");
+        fn_str += _("\t\t\t") + spr_img + _("[i]") + _(" = LoadImage(") + spr_img_file + _("[i])\n");
 
-		fn_str += _("\t\tIf ") + spr_img + _(" >= 0 Then\n");
-		fn_str += _("\t\t\tPush_N(Nirvana_Sprite_Image_Stack, ") + spr_img + _(")\n");
-		fn_str += _("\t\tEnd If\n");
+        fn_str += _("\t\t\tIf ") + spr_img + _("[i]") + _(" >= 0 Then\n");
+        fn_str += _("\t\t\t\tPush_N(Nirvana_Sprite_Image_Stack, ") + spr_img + _("[i]") + _(")\n");
+        fn_str += _("\t\t\tEnd If\n");
 
-		fn_str += _("\tEnd If\n\n");
+        fn_str += _("\t\tEnd If\n\n");
+        fn_str += _("\tNext") + _("\n");
+
+		for(int img_index = 0; img_index < project->sprite_base[base_index].file.size(); img_index++)
+		{
+		    wxString img_path = project->sprite_base[base_index].file[img_index];
+
+            wxString spr_img_tmp = spr_img_file + _("[") + wxString::Format(_("%i"), img_index) + _("]") + _(" = NIRVANA_SPRITE_DIR$ + \"") + img_path + _("\"");
+            spr_file_def.push_back(spr_img_tmp);
+		}
+
+		spr_file_def.push_back(_(""));
 
 		wxString frame_width_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.frame_size.Width);
 		wxString frame_height_str = wxString::Format(_("%i"), project->sprite_base[base_index].object.frame_size.Height);
 
-		fn_str += _("\t") + _("spr_id = CreateSprite(") + spr_img + _(", ") + frame_width_str + _(", ") + frame_height_str + _(")\n\n");
+		fn_str += _("\t") + _("spr_id = CreateSprite(") + spr_img + _("[0], ") + frame_width_str + _(", ") + frame_height_str + _(")\n\n");
 
 		fn_str += _("\t\'-------ANIMATIONS-------\n\n");
-		project->sprite_base[base_index].object.animation_list_start_index = sprite_animation_names.size();
+		project->sprite_base[base_index].object.animation_list_start_index = (int)sprite_animation_names.size();
 
+		int current_img_index = 0;
 		//excluding 0 since base animation is automatically made when sprite is created
 		for(int ani = 1; ani < project->sprite_base[base_index].object.animation.size(); ani++)
 		{
+		    int ani_img_index = project->sprite_base[base_index].object.animation[ani].image_file_index;
+		    if(ani_img_index != current_img_index)
+            {
+                fn_str += _("\t") +_("SetSpriteSource(spr_id, ") +  spr_img + _("[") + wxString::Format(_("%i"), ani_img_index) + _("])\n");
+                current_img_index = ani_img_index;
+            }
+
 			wxString ani_length_str = wxString::Format(_("%i"), (int)project->sprite_base[base_index].object.animation[ani].frames.size());
 			wxString ani_speed_str = wxString::Format(_("%i"), (int)(project->sprite_base[base_index].object.animation[ani].fps) );
 			wxString ani_str = _("spr_animation") + wxString::Format(_("%i"), ani);
@@ -1103,12 +1128,12 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 
 		if(project->sprite_base[base_index].object.physics.detached)
         {
-            fn_str += _("detached_spr_id = CreateSprite(-1, ") + frame_width_str + _(", ") + frame_height_str + _(")\n\n");
+            fn_str += _("\tdetached_spr_id = CreateSprite(-1, ") + frame_width_str + _(", ") + frame_height_str + _(")\n\n");
             collision_spr_id = _("detached_spr_id");
         }
         else
         {
-            fn_str += _("detached_spr_id = -1") + _("\n\n");
+            fn_str += _("\tdetached_spr_id = -1") + _("\n\n");
         }
 
 		if(project->sprite_base[base_index].object.physics.shape_type == SPRITE_SHAPE_BOX)
@@ -1199,6 +1224,16 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 	{
 		pfile.Write(var_def[i] + _("\n"));
 	}
+
+	pfile.Write(_("\n"));
+
+	//SpriteDef vars
+	for(int i = 0; i < spr_file_def.size(); i++)
+	{
+		pfile.Write(spr_file_def[i] + _("\n"));
+	}
+
+	pfile.Write(_("\n"));
 
 	//Sprite Animation Names to pfile
 	pfile.Write(sprite_animation_name_var_def + _("\n"));
@@ -1340,6 +1375,8 @@ bool NirvanaEditor_MainFrame::generateTilesets()
 		wxString tile_width_str = wxString::Format(_("%i"), project->tileset[tset_index].object.tile_width);
 		wxString tile_height_str = wxString::Format(_("%i"), project->tileset[tset_index].object.tile_height);
 
+		fn_str += _("\tts_color = Nirvana_GetImageDefaultColorKey(TMP_CANVAS, ") + ts_img + _(", ") + tile_width_str + _(", ") + tile_height_str + _(")\n\n");
+
 		fn_str += _("\t") + tset_id_str + (" = CreateTileSet(") + ts_img + _(", ") + tile_width_str + _(", ") + tile_height_str + _(")\n\n");
 
 		//Tile Animations
@@ -1409,7 +1446,7 @@ bool NirvanaEditor_MainFrame::generateTilesets()
 			fn_str += _("\t") + _("Nirvana_Tileset_Cuts[") + wxString::Format(_("%i"), tileset_cut_index) + _("].StartTile = ") + wxString::Format(_("%i"), start_tile) + _("\n");
 			fn_str += _("\t") + _("Nirvana_Tileset_Cuts[") + wxString::Format(_("%i"), tileset_cut_index) + _("].NumRows = ") + wxString::Format(_("%i"), num_rows) + _("\n");
 			fn_str += _("\t") + _("Nirvana_Tileset_Cuts[") + wxString::Format(_("%i"), tileset_cut_index) + _("].NumCols = ") + wxString::Format(_("%i"), num_cols) + _("\n");
-			fn_str += _("\t") + _("Nirvana_Tileset_Cuts[") + wxString::Format(_("%i"), tileset_cut_index) + _("].Image_ID = Nirvana_MakeTileCut(TMP_CANVAS, ") + ts_img +_(", ") + wxString::Format(_("%i"), tileset_cut_index) + _(", ") +
+			fn_str += _("\t") + _("Nirvana_Tileset_Cuts[") + wxString::Format(_("%i"), tileset_cut_index) + _("].Image_ID = Nirvana_MakeTileCut(TMP_CANVAS, ") + ts_img +_(", ts_color,") + wxString::Format(_("%i"), tileset_cut_index) + _(", ") +
                                                                                                                                                                 tile_width_str + _(", ") + tile_height_str +_(")") + _("\n");
 
             tileset_cut_index++;
@@ -1460,7 +1497,7 @@ bool NirvanaEditor_MainFrame::generateTilesets()
 	pfile.Write(_("Dim Nirvana_Tileset_Cuts[") + wxString::Format(_("%i"), (tileset_cut_index+1)) + _("] As Nirvana_TilesetCut\n"));
 	pfile.Write(_("\n"));
 
-	pfile.Write(_("Function Nirvana_MakeTileCut(tmp_canvas, tset_image, cut_index, tile_w, tile_h)\n"));
+	pfile.Write(_("Function Nirvana_MakeTileCut(tmp_canvas, tset_image, color_key, cut_index, tile_w, tile_h)\n"));
 	pfile.Write(_("\tIf Not ImageExists(tset_image) Then\n"));
     pfile.Write(_("\t\tReturn -1\n"));
 	pfile.Write(_("\tEnd If\n"));
@@ -1485,12 +1522,27 @@ bool NirvanaEditor_MainFrame::generateTilesets()
 	pfile.Write(_("\tDrawImage_Blit(tset_image, 0, 0, src_x, src_y, src_w, src_h)\n"));
 	pfile.Write(_("\n"));
 	pfile.Write(_("\tImg_ID = CanvasClip(0, 0, src_w, src_h)\n"));
-	pfile.Write(_("\tColorKey(Img_ID, -1)\n"));
+	pfile.Write(_("\tColorKey(Img_ID, color_key)\n"));
 	pfile.Write(_("\n"));
 	pfile.Write(_("\tCanvas(current_canvas)\n"));
 	pfile.Write(_("\n"));
 	pfile.Write(_("\tReturn Img_ID\n"));
     pfile.Write(_("End Function\n"));
+
+    pfile.Write(_("\n"));
+
+    //Default Color Key Function
+    pfile.Write(_("Function Nirvana_GetImageDefaultColorKey(tmp_canvas, img, w, h)\n"));
+	pfile.Write(_("\tcurrent_canvas = ActiveCanvas()\n"));
+	pfile.Write(_("\tCanvas(tmp_canvas)\n"));
+	pfile.Write(_("\tClearCanvas()\n"));
+	pfile.Write(_("\tDrawImage_Blit(Nirvana_Tileset_Image_0, 0, 0, 0, 0, w, h)\n"));
+	pfile.Write(_("\tts_color_key = GetPixel(0,0)\n"));
+	pfile.Write(_("\tCanvas(current_canvas)\n"));
+	pfile.Write(_("\tReturn ts_color_key\n"));
+    pfile.Write(_("End Function\n"));
+
+    pfile.Write(_("\n"));
 
 
 	//tileset functions
@@ -2086,7 +2138,7 @@ bool NirvanaEditor_MainFrame::generateStages()
                         wxString pos_x_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_tile_sprites[sprite_index].x);
                         wxString pos_y_str = wxString::Format(_("%i"), project->stages[stage_index].layers[layer_index].layer_tile_sprites[sprite_index].y);
                         fn_str += _("\tSetSpritePosition( t_sprite, ") + pos_x_str + _(", ") + pos_y_str + _(")\n");
-                        fn_str += _("\SetSpriteGravityScale( t_sprite, 0)\n");
+                        fn_str += _("\tSetSpriteGravityScale( t_sprite, 0)\n");
 
                         fn_str += _("\n");
                     }
@@ -2383,7 +2435,7 @@ bool NirvanaEditor_MainFrame::generateStages()
 	for(int base_index = 0; base_index < project->sprite_base.size(); base_index++)
 	{
 		wxString spr_img = _("Nirvana_Sprite_Image_") + wxString::Format(_("%i"), base_index);
-		pfile.Write(_("\t") + spr_img + _(" = -1\n"));
+		pfile.Write(_("\tArrayFill(") + spr_img + _(", -1)\n"));
 	}
 
 	pfile.Write(_("\tNirvana_ActiveStage.Active = FALSE\n\n"));

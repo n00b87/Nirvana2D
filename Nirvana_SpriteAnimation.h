@@ -61,6 +61,8 @@ class Nirvana_SpriteEditor
 		void initAnimationPreview();
 		void initCollision();
 
+		void clearTarget(wxIrrlicht* target);
+
 		int editor_page_num = 0;
 
 	public:
@@ -90,6 +92,8 @@ class Nirvana_SpriteEditor
 
 		int getSelectedSprite();
 		int getSelectedAnimation();
+
+		void setSpriteSource(wxString img_file);
 };
 
 #endif // NIRVANA_SPRITEANIMATION_H_INCLUDED

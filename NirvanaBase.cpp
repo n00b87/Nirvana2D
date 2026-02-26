@@ -606,7 +606,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer19811->Add( m_layerSettings_shapeData_comboBox, 2, wxALL, 5 );
 
 
-	bSizer198->Add( bSizer19811, 1, wxEXPAND, 1 );
+	bSizer198->Add( bSizer19811, 0, wxEXPAND, 1 );
 
 
 	m_panel63->SetSizer( bSizer198 );
@@ -1327,7 +1327,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_panel->SetSizer( bSizer3 );
 	m_mapEdit_panel->Layout();
 	bSizer3->Fit( m_mapEdit_panel );
-	m_editorMainTab_auinotebook->AddPage( m_mapEdit_panel, _("Map Editor"), true, wxNullBitmap );
+	m_editorMainTab_auinotebook->AddPage( m_mapEdit_panel, _("Map Editor"), false, wxNullBitmap );
 	m_tileEdit_panel = new wxPanel( m_editorMainTab_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer351;
 	bSizer351 = new wxBoxSizer( wxVERTICAL );
@@ -1684,15 +1684,30 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_staticText23->Wrap( -1 );
 	bSizer64->Add( m_staticText23, 0, wxALL, 5 );
 
-	m_spriteEdit_newAnimation_button = new wxButton( m_spriteEdit_spriteAnimation_panel, wxID_ANY, _("New Animation"), wxDefaultPosition, wxDefaultSize, 0 );
+	wxBoxSizer* bSizer212;
+	bSizer212 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_spriteEdit_newAnimation_button = new wxBitmapButton( m_spriteEdit_spriteAnimation_panel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
+
+	m_spriteEdit_newAnimation_button->SetBitmap( wxBitmap( wxT("icons/new_ani.png"), wxBITMAP_TYPE_ANY ) );
 	m_spriteEdit_newAnimation_button->SetToolTip( _("Create New Animation for Sprite") );
 
-	bSizer64->Add( m_spriteEdit_newAnimation_button, 0, wxALL|wxEXPAND, 5 );
+	bSizer212->Add( m_spriteEdit_newAnimation_button, 0, wxALL, 5 );
 
-	m_spriteEdit_deleteAnimation_button = new wxButton( m_spriteEdit_spriteAnimation_panel, wxID_ANY, _("Delete Animation"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_spriteEdit_deleteAnimation_button = new wxBitmapButton( m_spriteEdit_spriteAnimation_panel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
+
+	m_spriteEdit_deleteAnimation_button->SetBitmap( wxBitmap( wxT("icons/delete_ani.png"), wxBITMAP_TYPE_ANY ) );
 	m_spriteEdit_deleteAnimation_button->SetToolTip( _("Remove Animation from Sprite") );
 
-	bSizer64->Add( m_spriteEdit_deleteAnimation_button, 0, wxALL|wxEXPAND, 5 );
+	bSizer212->Add( m_spriteEdit_deleteAnimation_button, 0, wxALL, 5 );
+
+	m_spriteEdit_changeImage_button = new wxBitmapButton( m_spriteEdit_spriteAnimation_panel, wxID_ANY, wxNullBitmap, wxDefaultPosition, wxDefaultSize, wxBU_AUTODRAW|0 );
+
+	m_spriteEdit_changeImage_button->SetBitmap( wxBitmap( wxT("icons/src_image.png"), wxBITMAP_TYPE_ANY ) );
+	bSizer212->Add( m_spriteEdit_changeImage_button, 0, wxALL, 5 );
+
+
+	bSizer64->Add( bSizer212, 0, wxEXPAND, 5 );
 
 	m_spriteEdit_animation_listBox = new wxListBox( m_spriteEdit_spriteAnimation_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
 	bSizer64->Add( m_spriteEdit_animation_listBox, 1, wxALL|wxEXPAND, 5 );
@@ -2071,7 +2086,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_panel->SetSizer( bSizer57 );
 	m_spriteEdit_panel->Layout();
 	bSizer57->Fit( m_spriteEdit_panel );
-	m_editorMainTab_auinotebook->AddPage( m_spriteEdit_panel, _("Sprite Editor"), false, wxNullBitmap );
+	m_editorMainTab_auinotebook->AddPage( m_spriteEdit_panel, _("Sprite Editor"), true, wxNullBitmap );
 
 	bSizer1->Add( m_editorMainTab_auinotebook, 1, wxEXPAND | wxALL, 5 );
 
@@ -2219,6 +2234,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_spriteAnimation_panel->Connect( wxEVT_UPDATE_UI, wxUpdateUIEventHandler( Nirvana_MainFrame::OnUpdateSpriteAnimationUI ), NULL, this );
 	m_spriteEdit_newAnimation_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnSpriteEdit_NewAnimation_Click ), NULL, this );
 	m_spriteEdit_deleteAnimation_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnSpriteEdit_DeleteAnimation_Click ), NULL, this );
+	m_spriteEdit_changeImage_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnSpriteEdit_changeSource_Click ), NULL, this );
 	m_spriteEdit_animation_listBox->Connect( wxEVT_COMMAND_LISTBOX_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnSpriteEdit_Animation_Selected ), NULL, this );
 	m_spriteEdit_animationID_textCtrl->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( Nirvana_MainFrame::OnSpriteEdit_AnimationIDChanged ), NULL, this );
 	m_spriteAnimation_spriteSheet_panel->Connect( wxEVT_ENTER_WINDOW, wxMouseEventHandler( Nirvana_MainFrame::OnEnterSpriteAnimationSheet ), NULL, this );
@@ -2435,6 +2451,70 @@ NewSprite_Dialog::NewSprite_Dialog( wxWindow* parent, wxWindowID id, const wxStr
 }
 
 NewSprite_Dialog::~NewSprite_Dialog()
+{
+}
+
+SetSpriteSheet_Dialog::SetSpriteSheet_Dialog( wxWindow* parent, wxWindowID id, const wxString& title, const wxPoint& pos, const wxSize& size, long style ) : wxDialog( parent, id, title, pos, size, style )
+{
+	this->SetSizeHints( wxDefaultSize, wxDefaultSize );
+
+	wxBoxSizer* bSizer95;
+	bSizer95 = new wxBoxSizer( wxVERTICAL );
+
+	wxBoxSizer* bSizer96;
+	bSizer96 = new wxBoxSizer( wxHORIZONTAL );
+
+	m_staticText40 = new wxStaticText( this, wxID_ANY, _("Spritesheet"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText40->Wrap( -1 );
+	bSizer96->Add( m_staticText40, 1, wxALL, 5 );
+
+	wxBoxSizer* bSizer99;
+	bSizer99 = new wxBoxSizer( wxVERTICAL );
+
+	m_spriteSheet_searchCtrl = new wxSearchCtrl( this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0 );
+	#ifndef __WXMAC__
+	m_spriteSheet_searchCtrl->ShowSearchButton( true );
+	#endif
+	m_spriteSheet_searchCtrl->ShowCancelButton( false );
+	bSizer99->Add( m_spriteSheet_searchCtrl, 0, wxALL|wxEXPAND, 5 );
+
+	m_spriteSheet_listBox = new wxListBox( this, wxID_ANY, wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	bSizer99->Add( m_spriteSheet_listBox, 1, wxALL|wxEXPAND, 5 );
+
+
+	bSizer96->Add( bSizer99, 4, wxEXPAND, 5 );
+
+
+	bSizer95->Add( bSizer96, 1, wxEXPAND, 5 );
+
+	wxBoxSizer* bSizer100;
+	bSizer100 = new wxBoxSizer( wxHORIZONTAL );
+
+
+	bSizer100->Add( 0, 0, 1, wxEXPAND, 5 );
+
+	m_newSprite_cancel_button = new wxButton( this, wxID_ANY, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer100->Add( m_newSprite_cancel_button, 0, wxALL, 5 );
+
+	m_newSprite_ok_button = new wxButton( this, wxID_ANY, _("OK"), wxDefaultPosition, wxDefaultSize, 0 );
+	bSizer100->Add( m_newSprite_ok_button, 0, wxALL, 5 );
+
+
+	bSizer95->Add( bSizer100, 0, wxEXPAND, 5 );
+
+
+	this->SetSizer( bSizer95 );
+	this->Layout();
+
+	this->Centre( wxBOTH );
+
+	// Connect Events
+	m_spriteSheet_searchCtrl->Connect( wxEVT_COMMAND_TEXT_UPDATED, wxCommandEventHandler( SetSpriteSheet_Dialog::OnSearch ), NULL, this );
+	m_newSprite_cancel_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SetSpriteSheet_Dialog::OnCancel ), NULL, this );
+	m_newSprite_ok_button->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( SetSpriteSheet_Dialog::OnCreate ), NULL, this );
+}
+
+SetSpriteSheet_Dialog::~SetSpriteSheet_Dialog()
 {
 }
 

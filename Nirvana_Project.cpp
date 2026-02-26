@@ -164,7 +164,8 @@ bool Nirvana_Project::createSprite(wxString spr_id, wxString img_file, int frame
 
 	Nirvana_SpriteBase obj;
 	obj.sprite_name = spr_id.Trim();
-	obj.file = img_file;
+	obj.file.clear();
+	obj.file.push_back(img_file);
 	obj.object.frame_size.set(frame_width, frame_height);
 	obj.object.active = true;
 	obj.object.image_id = -1;
@@ -180,7 +181,8 @@ int Nirvana_Project::loadSpriteDefinition(wxString spr_file)
 {
 	Nirvana_SpriteBase obj;
 	obj.sprite_name = _("sprite");
-	obj.file = spr_file;
+	obj.file.clear();
+	//obj.file.push_back(spr_file);
 	obj.object.frame_size.set(32, 32); //32 is default for now
 	obj.object.active = true;
 	obj.object.image_id = -1;
@@ -235,7 +237,15 @@ int Nirvana_Project::loadSpriteDefinition(wxString spr_file)
 					{
 						obj.object.physics.detached = p_cmd[i].dict[obj_index].val.Upper().compare(_("TRUE"))==0 ? true : false;
 					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("file"))==0)
+					{
+						obj.file.push_back(p_cmd[i].dict[obj_index].val);
+					}
 				}
+
+				//This is to ensure backwards compatability with older versions of Nirvana
+				if(obj.file.size() == 0)
+                    obj.file.push_back(spr_file);
 			}
 			else if(p_cmd[i].dict[0].key.compare(_("SHAPE"))==0)
 			{
@@ -306,6 +316,8 @@ int Nirvana_Project::loadSpriteDefinition(wxString spr_file)
 			else if(p_cmd[i].dict[0].key.compare(_("ANIMATION"))==0)
 			{
 				sprite2D_animation_obj ani_obj;
+				ani_obj.image_file_index = 0; //default to 0 but change if
+
 				for(int obj_index = 1; obj_index < p_cmd[i].dict.size(); obj_index++)
 				{
 					if(p_cmd[i].dict[obj_index].key.compare(_("name"))==0)
@@ -332,14 +344,22 @@ int Nirvana_Project::loadSpriteDefinition(wxString spr_file)
 							ani_obj.frames.push_back(frame_value);
 						}
 					}
+					else if(p_cmd[i].dict[obj_index].key.compare(_("file_index"))==0)
+					{
+						p_cmd[i].dict[obj_index].val.ToInt(&ani_obj.image_file_index);
+					}
+
 				}
 
+				//wxMessageBox(_("A_IMG_INDEX = ") + wxString::Format(_("%i"), ani_obj.image_file_index));
 				obj.object.animation.push_back(ani_obj);
 			}
 		}
 	}
 	else
 		return -1;
+
+    //wxMessageBox(_("SPR: ") + obj.sprite_name + _(", ani_size=") + wxString::Format(_("%i"),obj.object.animation.size()));
 
 	wxString check_id = obj.sprite_name.Trim();
 	int n = 1;
@@ -740,6 +760,7 @@ bool Nirvana_Project::createTileset(wxString tset_id, wxString img_file, int til
 	Nirvana_Tileset obj;
 	obj.tileset_name = tset_id.Trim();
 	obj.file = img_file;
+	obj.object.color_set_flag = false;
 	obj.object.tile_width = tile_width;
 	obj.object.tile_height = tile_height;
 	obj.object.active = true;
@@ -755,6 +776,7 @@ int Nirvana_Project::loadTileset(wxString tset_file)
 	Nirvana_Tileset obj;
 	obj.tileset_name = _("tileset");
 	obj.file = tset_file;
+	obj.object.color_set_flag = false;
 	obj.object.tile_width = 32;
 	obj.object.tile_height = 32;
 	obj.object.active = true;
@@ -923,6 +945,7 @@ void Nirvana_Project::setTilesetObject(int tileset_index, tileset_obj obj)
 	if(tileset_index >= 0 && tileset_index < tileset.size())
 	{
 		tileset[tileset_index].object = obj;
+		tileset[tileset_index].object.color_set_flag = false;
 	}
 }
 

@@ -5,6 +5,7 @@
 
 #include "Nirvana_Project.h"
 #include "NirvanaEditor_NewSprite_Dialog.h"
+#include "NirvanaEditor_SetSpriteSheet_Dialog.h"
 #include "NirvanaEditor_NewTileset_Dialog.h"
 #include "NirvanaEditor_SpriteLayer_SelectTileset_Dialog.h"
 #include "NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.h"
@@ -1022,6 +1023,7 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_Animation_Selected( wxCommandEvent& e
 	m_spriteEdit_FPS_spinCtrl->SetValue(project->getSpriteAnimationFPS(spr_id, ani_id));
 
 	sprite_editor->getAnimationFrameControl()->scroll_offset_x = 0;
+	sprite_editor->getAnimationFrameControl()->scroll_offset_y = 0;
 }
 
 void NirvanaEditor_MainFrame::OnSpriteEdit_NewAnimation_Click( wxCommandEvent& event )
@@ -1060,6 +1062,56 @@ void NirvanaEditor_MainFrame::OnSpriteEdit_DeleteAnimation_Click( wxCommandEvent
 	{
 		m_spriteEdit_animation_listBox->AppendAndEnsureVisible(wxString(n_sprite.animation[i].name));
 	}
+}
+
+void NirvanaEditor_MainFrame::OnSpriteEdit_changeSource_Click( wxCommandEvent& event )
+{
+    if(!editor_init)
+		return;
+
+	if(!project)
+		return;
+
+	if(!project->active)
+	{
+		//wxMessageBox(_("You must have an open project."));
+		return;
+	}
+
+	int spr_id = sprite_editor->getSelectedSprite();
+
+	if(spr_id < 0 || spr_id >= project->getSpriteCount())
+		return;
+
+    int ani_id = sprite_editor->getSelectedAnimation();
+
+	if(ani_id < 0 || ani_id >= project->getSpriteNumAnimations(spr_id))
+		return;
+
+	NirvanaEditor_SetSpriteSheet_Dialog* dialog = new NirvanaEditor_SetSpriteSheet_Dialog(this);
+
+	wxFileName gfx_path(project->getDir());
+
+	if(project)
+		gfx_path.AppendDir(project->sprite_path);
+	else
+		gfx_path.AppendDir(_("gfx"));
+
+	dialog->files = getDirFileList(gfx_path.GetAbsolutePath());
+
+	dialog->refresh_list();
+
+	dialog->project = project;
+
+
+	PreDialog();
+	dialog->ShowModal();
+	PostDialog();
+
+	if(!dialog->create_flag)
+		return;
+
+	sprite_editor->setSpriteSource(dialog->selected_file);
 }
 
 void NirvanaEditor_MainFrame::OnSpriteEdit_SpriteIDChanged( wxCommandEvent& event )

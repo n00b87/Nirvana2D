@@ -289,7 +289,17 @@ int Nirvana_SpriteEditor::newAnimation()
 			i = 0;
 		}
 	}
+
+	int img_index = 0;
+
+	if(n_sprite.animation.size() > 0)
+    {
+        img_index = n_sprite.animation[ n_sprite.animation.size()-1 ].image_file_index;
+        //wxMessageBox(_("N_SIZE_DBG: ") + wxString::Format(_("%i"), n_sprite.animation.size()) + _(", ") + wxString::Format(_("%i"), img_index));
+    }
+
 	animation_obj.name = ani_name;
+	animation_obj.image_file_index = img_index;
 	animation_obj.fps = 0;
 	animation_obj.num_frames = 1;
 	animation_obj.frames.push_back(0);
@@ -298,13 +308,15 @@ int Nirvana_SpriteEditor::newAnimation()
 	project->setSpriteObject(selected_sprite, n_sprite);
 
 	// Add animation to Frame Panel
-	spriteFrame_target->createSpriteAnimation(n_sprite.animation[animation_id].name,
+	spriteFrame_target->createSpriteAnimation(    img_index,
+                                                  n_sprite.animation[animation_id].name,
 												  spriteFrame_target->spriteEdit_selected_sprite,
 												  n_sprite.animation[animation_id].num_frames,
 												  n_sprite.animation[animation_id].fps);
 
 	// Add animation to Preview Panel
-	spritePreview_target->createSpriteAnimation(n_sprite.animation[animation_id].name,
+	spritePreview_target->createSpriteAnimation(  img_index,
+                                                  n_sprite.animation[animation_id].name,
 												  spritePreview_target->spriteEdit_selected_sprite,
 												  n_sprite.animation[animation_id].num_frames,
 												  n_sprite.animation[animation_id].fps);
@@ -345,12 +357,14 @@ void Nirvana_SpriteEditor::deleteAnimation()
 	// Starting at 1 because 0 is created by createSprite
 	for(int i = 1; i < n_sprite.animation.size(); i++)
 	{
-		spriteFrame_target->createSpriteAnimation(n_sprite.animation[i].name,
+		spriteFrame_target->createSpriteAnimation(n_sprite.animation[i].image_file_index,
+                                                  n_sprite.animation[i].name,
 												  spriteFrame_target->spriteEdit_selected_sprite,
 												  n_sprite.animation[i].num_frames,
 												  n_sprite.animation[i].fps);
 
-		spritePreview_target->createSpriteAnimation(n_sprite.animation[i].name,
+		spritePreview_target->createSpriteAnimation(n_sprite.animation[i].image_file_index,
+                                                    n_sprite.animation[i].name,
 													spritePreview_target->spriteEdit_selected_sprite,
 												    n_sprite.animation[i].num_frames,
 												    n_sprite.animation[i].fps);
@@ -361,6 +375,18 @@ void Nirvana_SpriteEditor::deleteAnimation()
 
 	wxString animation_id = wxString(n_sprite.animation[selected_animation].name);
 	//selectAnimation(animation_id);
+}
+
+void Nirvana_SpriteEditor::clearTarget(wxIrrlicht* target)
+{
+    for(int i = 0; i < target->spr_edit_current_sheet.size(); i++)
+    {
+        if(target->imageExists(target->spr_edit_current_sheet[i]))
+			target->deleteImage(target->spr_edit_current_sheet[i]);
+    }
+
+    target->current_sheet_image = -1;
+    target->spriteEdit_selected_sprite = -1;
 }
 
 void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
@@ -391,63 +417,56 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	{
 		stopEditor(); //just to temporarily release context from whatever has it
 
-		//START COLLISION SCREEN IMAGE LOADING
-		getCollisionControl()->GetDevice()->getContextManager()->activateContext(getCollisionControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
+		//CLEAR COLLISION TARGET
+		{
+		    getCollisionControl()->GetDevice()->getContextManager()->activateContext(getCollisionControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 
-		getCollisionControl()->setActiveCanvas(getCollisionControl()->sheet_canvas);
-		getCollisionControl()->clearCanvas();
+            getCollisionControl()->setActiveCanvas(getCollisionControl()->sheet_canvas);
+            getCollisionControl()->clearCanvas();
 
-		if(spriteCollision_target->imageExists(spriteCollision_target->current_sheet_image))
-			spriteCollision_target->deleteImage(spriteCollision_target->current_sheet_image);
+            clearTarget(spriteCollision_target);
 
-		spriteCollision_target->current_sheet_image = -1;
-
-
-		//STOP COLLISION SCREEN IMAGE LOADING
-		getCollisionControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+            getCollisionControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+		}
 
 
-		getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(getAnimationSheetControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
+		//CLEAR SPRITE SHEET TARGET
+		{
+		    getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(getAnimationSheetControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 
-		getAnimationSheetControl()->setActiveCanvas(getAnimationSheetControl()->sheet_canvas);
-		getAnimationSheetControl()->clearCanvas();
+            getAnimationSheetControl()->setActiveCanvas(getAnimationSheetControl()->sheet_canvas);
+            getAnimationSheetControl()->clearCanvas();
 
-		if(spriteSheet_target->imageExists(spriteSheet_target->current_sheet_image))
-			spriteSheet_target->deleteImage(spriteSheet_target->current_sheet_image);
+            clearTarget(spriteSheet_target);
 
-		spriteSheet_target->current_sheet_image = -1;
-
-		getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+            getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+		}
 
 		startEditor(editor_page_num);
 
 
-		getAnimationFrameControl()->setActiveCanvas(getAnimationFrameControl()->frame_canvas);
-		getAnimationFrameControl()->clearCanvas();
+		//CLEAR ANIMATION FRAMES TARGET
+		{
+		    getAnimationFrameControl()->GetDevice()->getContextManager()->activateContext(getAnimationFrameControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 
-		if(spriteFrame_target->spriteExists(spriteFrame_target->spriteEdit_selected_sprite))
-			spriteFrame_target->deleteSprite(spriteFrame_target->spriteEdit_selected_sprite);
+		    getAnimationFrameControl()->setActiveCanvas(getAnimationFrameControl()->frame_canvas);
+            getAnimationFrameControl()->clearCanvas();
 
-		spriteFrame_target->spriteEdit_selected_sprite = -1;
+            clearTarget(spriteFrame_target);
 
-		if(spriteFrame_target->imageExists(spriteFrame_target->current_sheet_image))
-			spriteFrame_target->deleteImage(spriteFrame_target->current_sheet_image);
-
-		spriteFrame_target->current_sheet_image = -1;
+            getAnimationFrameControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+		}
 
 
-		getAnimationPreviewControl()->setActiveCanvas(getAnimationPreviewControl()->preview_canvas);
-		getAnimationPreviewControl()->clearCanvas();
+		//CLEAR PREVIEW TARGET
+		{
+		    getAnimationPreviewControl()->setActiveCanvas(getAnimationPreviewControl()->preview_canvas);
+            getAnimationPreviewControl()->clearCanvas();
 
-		if(spritePreview_target->imageExists(spritePreview_target->current_sheet_image))
-			spritePreview_target->deleteImage(spritePreview_target->current_sheet_image);
+            clearTarget(spritePreview_target);
 
-		spritePreview_target->current_sheet_image = -1;
-
-		if(spritePreview_target->spriteExists(spritePreview_target->spriteEdit_selected_sprite))
-			spritePreview_target->deleteSprite(spritePreview_target->spriteEdit_selected_sprite);
-
-		spritePreview_target->spriteEdit_selected_sprite = -1;
+            getAnimationPreviewControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+		}
 
 		return;
 	}
@@ -461,9 +480,13 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	else
 		fname.AppendDir(_("gfx"));
 
-	fname.SetFullName(n_sprite.file);
+	std::vector<std::string> sprite_sheet_file;
 
-	std::string sprite_sheet_file = fname.GetAbsolutePath().ToStdString();
+	for(int i = 0; i < n_sprite.file.size(); i++)
+	{
+	    fname.SetFullName(n_sprite.file[i]);
+        sprite_sheet_file.push_back(fname.GetAbsolutePath().ToStdString());
+	}
 
 	//wxMessageBox(_("sprite: ") + wxString(n_sprite.sprite_name) + _("\nimg: ") + wxString(sprite_sheet_file));
 
@@ -472,10 +495,18 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	//START COLLISION SCREEN IMAGE LOADING
 	getCollisionControl()->GetDevice()->getContextManager()->activateContext(getCollisionControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 
-	if(spriteCollision_target->imageExists(spriteCollision_target->current_sheet_image))
-		spriteCollision_target->deleteImage(spriteCollision_target->current_sheet_image);
+	clearTarget(spriteCollision_target);
 
-	spriteCollision_target->current_sheet_image = spriteCollision_target->loadImage(sprite_sheet_file);
+	for(int i = 0; i < sprite_sheet_file.size(); i++)
+	{
+	    spriteCollision_target->spr_edit_current_sheet.push_back(spriteCollision_target->loadImage(sprite_sheet_file[i]));
+	}
+
+	if(spriteCollision_target->spr_edit_current_sheet.size() > 0)
+        spriteCollision_target->current_sheet_image = spriteCollision_target->spr_edit_current_sheet[0];
+    else
+        spriteCollision_target->current_sheet_image = -1;
+
 	spriteCollision_target->current_frame_width = n_sprite.object.frame_size.Width;
 	spriteCollision_target->current_frame_height = n_sprite.object.frame_size.Height;
 
@@ -485,10 +516,18 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 
 	getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(getAnimationSheetControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 
-	if(spriteSheet_target->imageExists(spriteSheet_target->current_sheet_image))
-		spriteSheet_target->deleteImage(spriteSheet_target->current_sheet_image);
+	clearTarget(spriteSheet_target);
 
-	spriteSheet_target->current_sheet_image = spriteSheet_target->loadImage(sprite_sheet_file);
+	for(int i = 0; i < sprite_sheet_file.size(); i++)
+	{
+	    spriteSheet_target->spr_edit_current_sheet.push_back(spriteSheet_target->loadImage(sprite_sheet_file[i]));
+	}
+
+	if(spriteSheet_target->spr_edit_current_sheet.size() > 0)
+        spriteSheet_target->current_sheet_image = spriteSheet_target->spr_edit_current_sheet[0];
+    else
+        spriteSheet_target->current_sheet_image = -1;
+
 	spriteSheet_target->current_frame_width = n_sprite.object.frame_size.Width;
 	spriteSheet_target->current_frame_height = n_sprite.object.frame_size.Height;
 
@@ -500,10 +539,18 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	spriteFrame_target->clear_flag = true;
 	spriteFrame_target->spriteEdit_selected_animation = -1;
 
-	if(spriteFrame_target->imageExists(spriteFrame_target->current_sheet_image))
-		spriteFrame_target->deleteImage(spriteFrame_target->current_sheet_image);
+	clearTarget(spriteFrame_target);
 
-	spriteFrame_target->current_sheet_image = spriteFrame_target->loadImage(sprite_sheet_file);
+	for(int i = 0; i < sprite_sheet_file.size(); i++)
+	{
+	    spriteFrame_target->spr_edit_current_sheet.push_back(spriteFrame_target->loadImage(sprite_sheet_file[i]));
+	}
+
+	if(spriteFrame_target->spr_edit_current_sheet.size() > 0)
+        spriteFrame_target->current_sheet_image = spriteFrame_target->spr_edit_current_sheet[0];
+    else
+        spriteFrame_target->current_sheet_image = -1;
+
 	spriteFrame_target->current_frame_width = n_sprite.object.frame_size.Width;
 	spriteFrame_target->current_frame_height = n_sprite.object.frame_size.Height;
 	spriteSheet_target->getImageSizeI(spriteSheet_target->current_sheet_image,
@@ -521,10 +568,12 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	// Starting at 1 because 0 is created by createSprite
 	for(int i = 1; i < n_sprite.object.animation.size(); i++)
 	{
-		spriteFrame_target->createSpriteAnimation(n_sprite.object.animation[i].name,
+		spriteFrame_target->createSpriteAnimation(n_sprite.object.animation[i].image_file_index,
+                                                  n_sprite.object.animation[i].name,
 												  spriteFrame_target->spriteEdit_selected_sprite,
 												  n_sprite.object.animation[i].num_frames,
 												  n_sprite.object.animation[i].fps);
+
 
 		for(int a_frame = 0; a_frame < n_sprite.object.animation[i].frames.size(); a_frame++)
 		{
@@ -541,10 +590,18 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	spritePreview_target->clear_flag = true;
 	spritePreview_target->spriteEdit_selected_animation = -1;
 
-	if(spritePreview_target->imageExists(spritePreview_target->current_sheet_image))
-		spritePreview_target->deleteImage(spritePreview_target->current_sheet_image);
+	clearTarget(spritePreview_target);
 
-	spritePreview_target->current_sheet_image = spritePreview_target->loadImage(sprite_sheet_file);
+	for(int i = 0; i < sprite_sheet_file.size(); i++)
+	{
+	    spritePreview_target->spr_edit_current_sheet.push_back(spritePreview_target->loadImage(sprite_sheet_file[i]));
+	}
+
+	if(spritePreview_target->spr_edit_current_sheet.size() > 0)
+        spritePreview_target->current_sheet_image = spritePreview_target->spr_edit_current_sheet[0];
+    else
+        spritePreview_target->current_sheet_image = -1;
+
 	spritePreview_target->current_frame_width = n_sprite.object.frame_size.Width;
 	spritePreview_target->current_frame_height = n_sprite.object.frame_size.Height;
 	spriteSheet_target->getImageSizeI(spriteSheet_target->current_sheet_image,
@@ -565,7 +622,8 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	for(int i = 1; i < n_sprite.object.animation.size(); i++)
 	{
 		//std::cout << "Animation: " << n_sprite.object.animation[i].name << " :: " << n_sprite.object.animation[i].num_frames << std::endl;
-		spritePreview_target->createSpriteAnimation(n_sprite.object.animation[i].name,
+		spritePreview_target->createSpriteAnimation(n_sprite.object.animation[i].image_file_index,
+                                                    n_sprite.object.animation[i].name,
 													spritePreview_target->spriteEdit_selected_sprite,
 												    n_sprite.object.animation[i].num_frames,
 												    n_sprite.object.animation[i].fps);
@@ -576,6 +634,110 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 		}
 	}
 
+}
+
+
+void Nirvana_SpriteEditor::setSpriteSource(wxString img_file)
+{
+    if(selected_sprite < 0 || selected_sprite >= project->getSpriteCount())
+		return;
+
+	if(selected_animation < 0 || selected_animation >= project->getSpriteNumAnimations(selected_sprite))
+		return;
+
+
+    Nirvana_SpriteBase n_sprite = project->getSprite(selected_sprite);
+
+	if(!n_sprite.object.active)
+        return;
+
+
+    wxFileName fname(project->getDir());
+
+	if(project)
+		fname.AppendDir(project->sprite_path);
+	else
+		fname.AppendDir(_("gfx"));
+
+    fname.SetFullName(img_file.Trim());
+
+    int img_index = -1;
+
+	for(int i = 0; i < n_sprite.file.size(); i++)
+	{
+	    if(n_sprite.file[i].Trim().compare(img_file.Trim())==0)
+        {
+            img_index = i;
+            break;
+            //sprite_sheet_file.push_back(fname.GetAbsolutePath().ToStdString());
+        }
+	}
+
+	int frame_index = -1;
+	int frame_img_id = -1;
+
+	int preview_index = -1;
+	int preview_img_id = -1;
+
+	int sheet_index = -1;
+	int sheet_img_id = -1;
+
+	int collision_index = -1;
+	int collision_img_id = -1;
+
+	if(img_index < 0)
+    {
+        img_index = project->sprite_base[selected_sprite].file.size();
+        project->sprite_base[selected_sprite].file.push_back(img_file.Trim());
+        project->sprite_base[selected_sprite].object.animation[selected_animation].image_file_index = img_index;
+
+        frame_index = spriteFrame_target->spr_edit_current_sheet.size();
+        frame_img_id = spriteFrame_target->loadImage(fname.GetAbsolutePath().ToStdString());
+        spriteFrame_target->spr_edit_current_sheet.push_back(frame_img_id);
+
+        preview_index = spritePreview_target->spr_edit_current_sheet.size();
+        preview_img_id = spritePreview_target->loadImage(fname.GetAbsolutePath().ToStdString());
+        spritePreview_target->spr_edit_current_sheet.push_back(preview_img_id);
+
+        sheet_index = spriteSheet_target->spr_edit_current_sheet.size();
+        sheet_img_id = spriteSheet_target->loadImage(fname.GetAbsolutePath().ToStdString());
+        spriteSheet_target->spr_edit_current_sheet.push_back(sheet_img_id);
+
+        collision_index = spriteCollision_target->spr_edit_current_sheet.size();
+        collision_img_id = spriteCollision_target->loadImage(fname.GetAbsolutePath().ToStdString());
+        spriteCollision_target->spr_edit_current_sheet.push_back(collision_img_id);
+    }
+    else
+    {
+        project->sprite_base[selected_sprite].object.animation[selected_animation].image_file_index = img_index;
+
+        frame_index = img_index;
+        frame_img_id = spriteFrame_target->spr_edit_current_sheet[frame_index];
+
+        preview_index = img_index;
+        preview_img_id = spritePreview_target->spr_edit_current_sheet[frame_index];
+
+        sheet_index = img_index;
+        sheet_img_id = spriteSheet_target->spr_edit_current_sheet[frame_index];
+
+        collision_index = img_index;
+        collision_img_id = spriteCollision_target->spr_edit_current_sheet[frame_index];
+    }
+
+
+	int frame_spr_id = spriteFrame_target->spriteEdit_selected_sprite;
+	spriteFrame_target->sprite[frame_spr_id].animation[selected_animation].animation_image_id = frame_img_id;
+	spriteFrame_target->sprite[frame_spr_id].animation[selected_animation].image_file_index = frame_index;
+	spriteFrame_target->current_sheet_image = frame_img_id;
+
+
+	int preview_spr_id = spritePreview_target->spriteEdit_selected_sprite;
+	spritePreview_target->sprite[frame_spr_id].animation[selected_animation].animation_image_id = preview_img_id;
+	spritePreview_target->sprite[frame_spr_id].animation[selected_animation].image_file_index = preview_index;
+	spritePreview_target->current_sheet_image = preview_img_id;
+
+	spriteSheet_target->current_sheet_image = sheet_img_id;
+	spriteCollision_target->current_sheet_image = collision_img_id;
 }
 
 
@@ -613,7 +775,19 @@ void Nirvana_SpriteEditor::selectAnimation(wxString animation_id)
 
 	//wxMessageBox(_("ANI: ") + wxString::Format(_("%i"), ani));
 
+	int img_index = project->sprite_base[selected_sprite].object.animation[ani].image_file_index;
+
 	spriteFrame_target->spriteEdit_selected_animation = ani;
+
+	if(img_index >= 0 && img_index < project->sprite_base[selected_sprite].file.size())
+	{
+	    spriteFrame_target->current_sheet_image = spriteFrame_target->spr_edit_current_sheet[img_index];
+        spritePreview_target->current_sheet_image = spritePreview_target->spr_edit_current_sheet[img_index];
+        spriteSheet_target->current_sheet_image = spriteSheet_target->spr_edit_current_sheet[img_index];
+        spriteCollision_target->current_sheet_image = spriteCollision_target->spr_edit_current_sheet[img_index];
+	}
+
+
 	selected_animation = ani;
 }
 

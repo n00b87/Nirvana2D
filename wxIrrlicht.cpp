@@ -380,12 +380,14 @@ void wxIrrlicht::OnRender() {
 					}
 					else if(canvas[canvas_id].bkg_render_type == IMG_RENDER_SETTING_TILED)
 					{
+					    std::cout << "DEBUG: " << (imageExists(canvas[canvas_id].bkg_render_image_id) ? "TRUE" : "FALSE") << ", " << tsx << ", " << tsy << ", " << vpw << ", " << vph << ", " << img_w << ", " << img_h << std::endl;
 						if(imageExists(canvas[canvas_id].bkg_render_image_id))
 						{
 							for(int it_y = tsy; it_y < vph; it_y+=img_h)
 							{
 								for(int  it_x = tsx; it_x < vpw; it_x+=img_w)
 								{
+								    std::cout << "DRAW BKG" << std::endl;
 									drawImage(canvas[canvas_id].bkg_render_image_id, it_x, it_y);
 								}
 							}
@@ -7439,6 +7441,22 @@ int wxIrrlicht::getCutFromTileSelection()
 	if(img_id < 0 || img_id >= image.size())
 		return -1;
 
+    if(!project->tileset[tset].object.color_set_flag)
+    {
+        setActiveCanvas(back_buffer);
+        setClearColor(0);
+        clearCanvas();
+
+        //std::cout << "TEST CKb" << std::endl;
+        int tile_w = project->tileset[tset].object.tile_width;
+        int tile_h = project->tileset[tset].object.tile_height;
+        drawImage_Blit(img_id, 0, 0, 0, 0, tile_w, tile_h);
+        project->tileset[tset].object.default_color_key = getPixelColor(0, 0);
+        project->tileset[tset].object.color_set_flag = true;
+
+        clearCanvas();
+    }
+
 	int num_rows = mapEdit_tile_selection.row.size();
 
 	//std::cout << "SetTILE: rows=" << num_rows << std::endl;
@@ -7504,7 +7522,7 @@ int wxIrrlicht::getCutFromTileSelection()
         drawImage_Blit(img_id, 0, 0, src_x, src_y, src_w, src_h);
 
         project->tileset[tset].tileset_cut[cut_index].cut_image_id = canvasClip(0, 0, src_w, src_h);
-        setColorKey(project->tileset[tset].tileset_cut[cut_index].cut_image_id, -1);
+        setColorKey(project->tileset[tset].tileset_cut[cut_index].cut_image_id, project->tileset[tset].object.default_color_key);
 
         setActiveCanvas(current_active_canvas);
 
@@ -10591,6 +10609,12 @@ void wxIrrlicht::UpdateStageTileSelect_SpriteLayer()
 		scroll_offset_x += scroll_speed;
 	}
 
+	if(scroll_offset_x < 0)
+        scroll_offset_x = 0;
+
+    if(scroll_offset_y < 0)
+        scroll_offset_y = 0;
+
 	int bx = ( (px+scroll_offset_x) / current_frame_width) *  current_frame_width;
 	int by = ( (py+scroll_offset_y) / current_frame_height) *  current_frame_height;
 
@@ -10874,6 +10898,12 @@ void wxIrrlicht::UpdateStageTileSelect()
 	{
 		scroll_offset_x += scroll_speed;
 	}
+
+	if(scroll_offset_x < 0)
+        scroll_offset_x = 0;
+
+    if(scroll_offset_y < 0)
+        scroll_offset_y = 0;
 
 	int bx = ( (px+scroll_offset_x) / current_frame_width) *  current_frame_width;
 	int by = ( (py+scroll_offset_y) / current_frame_height) *  current_frame_height;
@@ -11949,6 +11979,7 @@ int wxIrrlicht::loadImageEx(std::string img_file, irr::u32 color_key, bool use_c
 {
     mapEdit_getContext();
     image_obj img;
+    img.file_name = img_file;
     img.image = m_pDriver->getTexture(img_file.c_str());
     img.alpha = 255;
 
@@ -12547,6 +12578,12 @@ void wxIrrlicht::setColorKey(int img_id, irr::u32 colorkey)
 		colorkey = img_pixels[0];
 		image[img_id].image->unlock();
 	}
+	else
+    {
+        irr::u32* img_pixels = (irr::u32*)image[img_id].image->lock();
+		image[img_id].image->unlock();
+    }
+
     m_pDriver->makeColorKeyTexture(image[img_id].image, irr::video::SColor(colorkey));
 }
 
@@ -12558,7 +12595,7 @@ void wxIrrlicht::setColorKey(int img_id, irr::u32 colorkey)
 
 #define SPRITE_BASE_ANIMATION 0
 
-int wxIrrlicht::createSpriteAnimation(std::string name, int spr_id, int anim_length, double fps)
+int wxIrrlicht::createSpriteAnimation(int img_file_index, std::string name, int spr_id, int anim_length, double fps)
 {
 	if(spr_id < 0 || spr_id >= sprite.size())
 		return -1;
@@ -12571,6 +12608,17 @@ int wxIrrlicht::createSpriteAnimation(std::string name, int spr_id, int anim_len
 
 	sprite2D_animation_obj animation;
 	animation.name = name;
+	animation.image_file_index = img_file_index;
+	//wxMessageBox(("DBG: ") + wxString::Format(_("%i"), spr_edit_current_sheet.size()));
+	if(spr_edit_current_sheet.size() > 0)
+    {
+        animation.animation_image_id = spr_edit_current_sheet[img_file_index]; //sprite[spr_id].image_id;
+    }
+	else
+    {
+        animation.animation_image_id = sprite[spr_id].active_image_id;
+    }
+
 	animation.current_frame = 0;
 	animation.fps = fps;
 	animation.frame_swap_time = 1000/fps;
@@ -12897,6 +12945,7 @@ int wxIrrlicht::createSprite(int layer_sprite_index, int img_id, double w, doubl
 	sprite[spr_id].active = true;
 	sprite[spr_id].id = spr_id;
 	sprite[spr_id].image_id = img_id;
+	sprite[spr_id].active_image_id = img_id;
 	sprite[spr_id].frame_size.set(w, h);
 	sprite[spr_id].layer_sprite_index = layer_sprite_index;
 	sprite[spr_id].layer_sprite_unique_id = -1;
@@ -12957,7 +13006,7 @@ int wxIrrlicht::createSprite(int layer_sprite_index, int img_id, double w, doubl
 	sprite[spr_id].current_animation_loop = 0;
 	sprite[spr_id].isPlaying = false;
 	sprite[spr_id].animation.clear();
-	createSpriteAnimation("SPRITE_BASE_ANIMATION", spr_id, 1, 0);
+	createSpriteAnimation(0, "SPRITE_BASE_ANIMATION", spr_id, 1, 0);
 	//sprite[spr_id].animation[0].name = "SPRITE_BASE_ANIMATION";
 
 	int i = canvas[active_canvas].sprite_id.size();
@@ -14389,12 +14438,17 @@ void wxIrrlicht::util_drawSprites(int canvas_id)
 
 		position.set(x, y);
 
-		int img_id = n_sprite->image_id;
-		if(img_id < 0 || img_id >= image.size())
-			continue;
 
 		//src_size = rc_image[img_id].image->getSize();
 		int current_animation = n_sprite->current_animation;
+
+		if(current_animation < 0 || current_animation >= n_sprite->animation.size())
+            continue;
+
+        int img_id = n_sprite->animation[current_animation].animation_image_id;
+		if(img_id < 0 || img_id >= image.size())
+			continue;
+
 		//std::cout << "current_animation = " << n_sprite->current_animation << " ~ " << n_sprite->animation.size() << std::endl;
 		if((spr_timer - n_sprite->animation[current_animation].frame_start_time) >= n_sprite->animation[current_animation].frame_swap_time)
 		{
@@ -14480,6 +14534,7 @@ int wxIrrlicht::createTileSet(int img_id, int tile_w, int tile_h)
 
 	tset.active = true;
 	tset.img_id = img_id;
+	tset.default_color_key = -1;
 
 	tset.tile_width = tile_w;
 	tset.tile_height = tile_h;
@@ -15545,21 +15600,22 @@ int wxIrrlicht::util_getImageID(std::string img_file) //checks to see if file ha
 {
 	wxString test_img_file = wxString(img_file).Trim();
 
+	for(int i = 0; i < image.size(); i++)
+	{
+	    wxString img_file = wxString(image[i].file_name);
+		if(img_file.Trim().compare(test_img_file)==0)
+		{
+			if(imageExists(i))
+				return i;
+		}
+	}
+
 	for(int i = 0; i < project->getTilesetCount(); i++)
 	{
 		if(project->tileset[i].file.Trim().compare(test_img_file)==0)
 		{
 			if(imageExists(project->tileset[i].object.img_id))
 				return project->tileset[i].object.img_id;
-		}
-	}
-
-	for(int i = 0; i < project->getSpriteCount(); i++)
-	{
-		if(project->sprite_base[i].file.Trim().compare(test_img_file)==0)
-		{
-			if(imageExists(project->sprite_base[i].object.image_id))
-				return project->sprite_base[i].object.image_id;
 		}
 	}
 
@@ -15574,6 +15630,7 @@ int wxIrrlicht::util_getImageID(std::string img_file) //checks to see if file ha
 				return project->stages[selected_stage].layers[i].bkg.image_id;
 		}
 	}
+
 
 	return -1;
 }
@@ -15603,9 +15660,9 @@ void wxIrrlicht::addLayerSprite(int layer_index, int project_sprite)
 	mapEdit_getContext();
 	setActiveCanvas(project->stages[selected_stage].layers[layer_index].ref_canvas);
 
-	int img_id = project->sprite_base[base_index].object.image_id;
+	std::vector<int> img_id;
 
-	if(img_id < 0)
+	//if(img_id < 0)
 	{
 		wxFileName img_path(project->getDir());
 
@@ -15614,27 +15671,31 @@ void wxIrrlicht::addLayerSprite(int layer_index, int project_sprite)
 		else
 			img_path.AppendDir(_("gfx"));
 
-		img_path.SetFullName(project->sprite_base[base_index].file);
+		for(int i = 0; i < project->sprite_base[base_index].file.size(); i++)
+		{
+		    img_path.SetFullName(project->sprite_base[base_index].file[i]);
 
-		//std::cout << "Load: " << base_index << " :: " << img_path.GetAbsolutePath().ToStdString() << std::endl;
+            //std::cout << "Load: " << base_index << " :: " << img_path.GetAbsolutePath().ToStdString() << std::endl;
 
-		img_id = util_getImageID(img_path.GetAbsolutePath().ToStdString());
+            int n_id = util_getImageID(img_path.GetAbsolutePath().ToStdString());
 
-		if(img_id < 0)
-			project->sprite_base[base_index].object.image_id = loadImage(img_path.GetAbsolutePath().ToStdString());
-		else
-			project->sprite_base[base_index].object.image_id = img_id;
+            if(n_id < 0)
+                img_id.push_back(loadImage(img_path.GetAbsolutePath().ToStdString()));
+            else
+                img_id.push_back(n_id);
+		}
 
-		img_id = project->sprite_base[base_index].object.image_id;
-
-		if(img_id < 0)
+		if(img_id.size() == 0)
 			return;
+		project->sprite_base[base_index].object.image_id = img_id[0];
 	}
 
+	int base_image = img_id[0];
 	int w = project->sprite_base[base_index].object.frame_size.Width;
 	int h = project->sprite_base[base_index].object.frame_size.Height;
 
-	project->stages[selected_stage].layers[layer_index].layer_sprites[project_sprite].map_sprite_id = createSprite(project_sprite, img_id, w, h);
+
+	project->stages[selected_stage].layers[layer_index].layer_sprites[project_sprite].map_sprite_id = createSprite(project_sprite, base_image, w, h);
 	int spr_id = project->stages[selected_stage].layers[layer_index].layer_sprites[project_sprite].map_sprite_id;
 
 	int x = project->stages[selected_stage].layers[layer_index].layer_sprites[project_sprite].position.X;
@@ -15661,7 +15722,14 @@ void wxIrrlicht::addLayerSprite(int layer_index, int project_sprite)
 	// NOTE: Starting at 1 since createSprite() will automatically create BASE_ANIMATION
 	for(int i = 1; i < project->sprite_base[base_index].object.animation.size(); i++)
 	{
-		createSpriteAnimation(project->sprite_base[base_index].object.animation[i].name,
+	    int img_index = project->sprite_base[base_index].object.animation[i].image_file_index;
+	    if(img_index >= 0 && img_index < img_id.size())
+            sprite[spr_id].active_image_id = img_id[img_index];
+        else
+            sprite[spr_id].active_image_id = 0;
+
+		createSpriteAnimation(project->sprite_base[base_index].object.animation[i].image_file_index,
+                              project->sprite_base[base_index].object.animation[i].name,
 							  spr_id,
 							  project->getSpriteNumAnimationFrames(base_index, i),
 							  project->getSpriteAnimationFPS(base_index, i));
@@ -15683,6 +15751,26 @@ void wxIrrlicht::addLayerSprite(int layer_index, int project_sprite)
 	}
 }
 
+irr::u32 wxIrrlicht::getPixelColor(int x, int y)
+{
+    irr::video::ITexture* texture = canvas[active_canvas].texture;
+
+    video::ECOLOR_FORMAT format = texture->getColorFormat(); //std::cout << "format = " << (int) format << std::endl;
+
+    irr::u32 color = 0;
+
+    if(video::ECF_A8R8G8B8 == format)
+    {
+        u8 * texels = (u8 *)texture->lock(irr::video::ETLM_READ_ONLY);
+        u32 pitch = texture->getPitch();
+        irr::video::SColor * texel = (SColor *)(texels + ((y * pitch) + (x * sizeof(SColor))));
+        irr::video::SColor c = texel[0];
+        texture->unlock();
+        color = c.color;
+    }
+
+    return color;
+}
 
 int wxIrrlicht::loadTilesetCuts(int tset)
 {
@@ -15703,6 +15791,20 @@ int wxIrrlicht::loadTilesetCuts(int tset)
     int current_clear_color = clear_color.color;
     setActiveCanvas(back_buffer);
     setClearColor(0);
+
+    clearCanvas();
+
+    if(!project->tileset[tset].object.color_set_flag)
+    {
+        //std::cout << "TEST CK" << std::endl;
+        int tile_w = project->tileset[tset].object.tile_width;
+        int tile_h = project->tileset[tset].object.tile_height;
+        drawImage_Blit(img_id, 0, 0, 0, 0, tile_w, tile_h);
+        project->tileset[tset].object.default_color_key = getPixelColor(0, 0);
+        project->tileset[tset].object.color_set_flag = true;
+    }
+
+    irr::u32 ts_color = project->tileset[tset].object.default_color_key;
 
 	for(int cut_index = 0; cut_index < project->tileset[tset].tileset_cut.size(); cut_index++)
     {
@@ -15725,7 +15827,7 @@ int wxIrrlicht::loadTilesetCuts(int tset)
         drawImage_Blit(img_id, 0, 0, src_x, src_y, src_w, src_h);
 
         project->tileset[tset].tileset_cut[cut_index].cut_image_id = canvasClip(0, 0, src_w, src_h);
-        setColorKey(project->tileset[tset].tileset_cut[cut_index].cut_image_id, -1);
+        setColorKey(project->tileset[tset].tileset_cut[cut_index].cut_image_id, ts_color);
     }
 
 	setClearColor(current_clear_color);

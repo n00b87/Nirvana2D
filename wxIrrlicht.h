@@ -215,7 +215,9 @@ class wxIrrlicht : public wxControl {
 		// SPRITES
 		irr::core::array<sprite2D_obj> sprite;
 
-		int createSpriteAnimation(std::string name, int spr_id, int anim_length, double fps);
+		irr::core::array<int> spr_edit_current_sheet;
+
+		int createSpriteAnimation(int img_file_index, std::string name, int spr_id, int anim_length, double fps);
 		void deleteSpriteAnimation(int spr_id, int animation);
 		void setSpriteFrame(int spr_id, int frame);
 		int getSpriteFrame(int spr_id);
@@ -478,6 +480,7 @@ class wxIrrlicht : public wxControl {
 
         void util_drawSelectedTS();
 
+        irr::u32 getPixelColor(int x, int y);
         int loadTilesetCuts(int tset);
         void addLayerTS(int layer_index, int ts_index);
 

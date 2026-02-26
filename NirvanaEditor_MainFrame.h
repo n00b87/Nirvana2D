@@ -206,6 +206,7 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnSpriteEdit_Animation_Selected( wxCommandEvent& event );
 		void OnSpriteEdit_NewAnimation_Click( wxCommandEvent& event );
 		void OnSpriteEdit_DeleteAnimation_Click( wxCommandEvent& event );
+		void OnSpriteEdit_changeSource_Click( wxCommandEvent& event );
 		void OnSpriteEdit_AnimationIDChanged( wxCommandEvent& event );
 		void OnSpriteEdit_NumFramesChange( wxSpinEvent& event );
 		void OnSpriteEdit_FPSChanged( wxSpinEvent& event );

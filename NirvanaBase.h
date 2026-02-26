@@ -317,8 +317,9 @@ class Nirvana_MainFrame : public wxFrame
 		wxAuiNotebook* m_spriteEdit_tools_auinotebook;
 		wxPanel* m_spriteEdit_spriteAnimation_panel;
 		wxStaticText* m_staticText23;
-		wxButton* m_spriteEdit_newAnimation_button;
-		wxButton* m_spriteEdit_deleteAnimation_button;
+		wxBitmapButton* m_spriteEdit_newAnimation_button;
+		wxBitmapButton* m_spriteEdit_deleteAnimation_button;
+		wxBitmapButton* m_spriteEdit_changeImage_button;
 		wxListBox* m_spriteEdit_animation_listBox;
 		wxSplitterWindow* m_splitter5;
 		wxPanel* m_panel42;
@@ -496,6 +497,7 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnUpdateSpriteAnimationUI( wxUpdateUIEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_NewAnimation_Click( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_DeleteAnimation_Click( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnSpriteEdit_changeSource_Click( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_Animation_Selected( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSpriteEdit_AnimationIDChanged( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnEnterSpriteAnimationSheet( wxMouseEvent& event ) { event.Skip(); }
@@ -629,6 +631,34 @@ class NewSprite_Dialog : public wxDialog
 		NewSprite_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Load Sprite"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 603,461 ), long style = wxDEFAULT_DIALOG_STYLE );
 
 		~NewSprite_Dialog();
+
+};
+
+///////////////////////////////////////////////////////////////////////////////
+/// Class SetSpriteSheet_Dialog
+///////////////////////////////////////////////////////////////////////////////
+class SetSpriteSheet_Dialog : public wxDialog
+{
+	private:
+
+	protected:
+		wxStaticText* m_staticText40;
+		wxSearchCtrl* m_spriteSheet_searchCtrl;
+		wxListBox* m_spriteSheet_listBox;
+		wxButton* m_newSprite_cancel_button;
+		wxButton* m_newSprite_ok_button;
+
+		// Virtual event handlers, override them in your derived class
+		virtual void OnSearch( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCancel( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnCreate( wxCommandEvent& event ) { event.Skip(); }
+
+
+	public:
+
+		SetSpriteSheet_Dialog( wxWindow* parent, wxWindowID id = wxID_ANY, const wxString& title = _("Select Spritesheet"), const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxSize( 603,461 ), long style = wxDEFAULT_DIALOG_STYLE );
+
+		~SetSpriteSheet_Dialog();
 
 };
 

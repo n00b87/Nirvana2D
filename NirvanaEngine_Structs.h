@@ -48,6 +48,7 @@ struct CircleSettings
 
 struct image_obj
 {
+    std::string file_name;
     irr::video::ITexture* image;
     irr::u8 alpha = 255;
     irr::video::SColor color_mod = irr::video::SColor(255,255,255,255);
@@ -71,6 +72,8 @@ struct tileset_obj
 	bool active;
 
 	int img_id = -1;
+	bool color_set_flag;
+	irr::u32 default_color_key;
 
 	int tile_width;
 	int tile_height;
@@ -156,6 +159,8 @@ struct sprite2D_animation_obj
 {
 	std::string name;
 
+	int image_file_index; //index in Nirvana_SpriteBase
+	int animation_image_id;
 	irr::core::array<int> frames;
 
 	int num_frames;
@@ -172,6 +177,7 @@ struct sprite2D_obj
 	int id; //This is needed to reference this sprite in the contact listener
 	bool active = false;
 	int image_id;
+	int active_image_id; //used for loading stages
 	int sheet_numFrames;
 	int frames_per_row;
 
@@ -261,7 +267,7 @@ struct Nirvana_SelectTool_SpriteSelection
 
 struct Nirvana_SpriteBase
 {
-	wxString file;
+	std::vector<wxString> file;
 	wxString sprite_name;
 
 	sprite2D_obj object;
