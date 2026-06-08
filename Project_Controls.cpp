@@ -1058,8 +1058,8 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 		wxString spr_img_file = _("Nirvana_Sprite_Image_Source_") + wxString::Format(_("%i"), base_index) + _("$");
 
 		//Sprite Create Function
-		var_def.push_back(_("Dim ") + spr_img + _("[") + wxString::Format(_("%i"), (int)project->sprite_base[base_index].file.size()) + _("] : ArrayFill(") + spr_img + _(", -1)") );
-		var_def.push_back(_("Dim ") + spr_img_file + _("[") + wxString::Format(_("%i"), (int)project->sprite_base[base_index].file.size()) + _("]"));
+		var_def.push_back(_("Dim ") + spr_img + _("[") + wxString::Format(_("%i"), (int)project->sprite_base[base_index].file.size()+1) + _("] : ArrayFill(") + spr_img + _(", -1)") );
+		var_def.push_back(_("Dim ") + spr_img_file + _("[") + wxString::Format(_("%i"), (int)project->sprite_base[base_index].file.size()+1) + _("]"));
 
 		wxString fn_str = _("");
 
@@ -1208,7 +1208,7 @@ bool NirvanaEditor_MainFrame::generateSpriteDefinitions()
 		fn_def.push_back(fn_str);
 	}
 
-	wxString sprite_animation_name_var_def = _("Dim Nirvana_SpriteAnimationNames$[") + wxString::Format(_("%i"), (int)sprite_animation_names.size()) + _("]\n\n");
+	wxString sprite_animation_name_var_def = _("Dim Nirvana_SpriteAnimationNames$[") + wxString::Format(_("%i"), (int)sprite_animation_names.size()+1) + _("]\n\n");
 
 	var_def.push_back(_("\n"));
 
@@ -1480,7 +1480,7 @@ bool NirvanaEditor_MainFrame::generateTilesets()
 	pfile.Write(_("\n"));
 
 	//tile mask array
-	int mask_array_size = tileset_mask_names.size();
+	int mask_array_size = (tileset_mask_names.size() == 0 ? 1 : tileset_mask_names.size());
 	mask_array_size = mask_array_size < 0 ? 1 : mask_array_size;
 	pfile.Write(_("Dim Nirvana_TileMask_Matrix[") + wxString::Format(_("%i"), mask_array_size) + _("]\n"));
 	pfile.Write(_("Dim Nirvana_TileMask_Matrix_Name$[") + wxString::Format(_("%i"), mask_array_size) + _("]\n"));
@@ -2328,10 +2328,10 @@ bool NirvanaEditor_MainFrame::generateStages()
 	pfile.Write(_("\n\n"));
 
 
-	pfile.Write(_("Dim Nirvana_Stage_Sprites[") + wxString::Format(_("%i"), stage_sprite_array_size) + _("] As Nirvana_Sprite\n"));
-	pfile.Write(_("Dim Nirvana_Stage_Shape_Points[") + wxString::Format(_("%i"), stage_shape_point_array_size) + _("] As Nirvana_Vector2D\n"));
-	pfile.Write(_("Dim Nirvana_Stage_Shapes[") + wxString::Format(_("%i"), stage_shape_array_size) + _("] As Nirvana_Shape\n"));
-	pfile.Write(_("Dim Nirvana_Stage_Layers[") + wxString::Format(_("%i"), stage_layer_array_size) + _("] As Nirvana_Layer\n"));
+	pfile.Write(_("Dim Nirvana_Stage_Sprites[") + wxString::Format(_("%i"), stage_sprite_array_size+1) + _("] As Nirvana_Sprite\n"));
+	pfile.Write(_("Dim Nirvana_Stage_Shape_Points[") + wxString::Format(_("%i"), stage_shape_point_array_size+1) + _("] As Nirvana_Vector2D\n"));
+	pfile.Write(_("Dim Nirvana_Stage_Shapes[") + wxString::Format(_("%i"), stage_shape_array_size+1) + _("] As Nirvana_Shape\n"));
+	pfile.Write(_("Dim Nirvana_Stage_Layers[") + wxString::Format(_("%i"), stage_layer_array_size+1) + _("] As Nirvana_Layer\n"));
 	pfile.Write(_("\n"));
 	pfile.Write(_("Dim Nirvana_NULL_Shape As Nirvana_Shape\n"));
     pfile.Write(_("Nirvana_NULL_Shape.Name$ = \"\"\n"));
