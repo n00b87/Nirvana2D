@@ -68,6 +68,8 @@
 		<Unit filename="NirvanaEditor_NewTileset_Dialog.h" />
 		<Unit filename="NirvanaEditor_SetCamera_Dialog.cpp" />
 		<Unit filename="NirvanaEditor_SetCamera_Dialog.h" />
+		<Unit filename="NirvanaEditor_SetSpriteSheet_Dialog.cpp" />
+		<Unit filename="NirvanaEditor_SetSpriteSheet_Dialog.h" />
 		<Unit filename="NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.cpp" />
 		<Unit filename="NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.h" />
 		<Unit filename="NirvanaEditor_SpriteLayer_SelectTileset_Dialog.cpp" />

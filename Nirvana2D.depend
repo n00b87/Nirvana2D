@@ -1,8 +1,8 @@
 # depslib dependency file v1.0
-1763804839 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
+1771918340 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
 	"NirvanaBase.h"
 
-1763804763 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
+1771918340 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
 	<wx/artprov.h>
 	<wx/xrc/xmlres.h>
 	<wx/intl.h>
@@ -1606,7 +1606,7 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/toolbar.h
 
-1763804763 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
+1771832502 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
 	"NirvanaBase.h"
 	"wxIrrlicht.h"
 	"Nirvana_SpriteAnimation.h"
@@ -1654,13 +1654,14 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/dialog.h
 
-1764109663 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
+1771967415 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
 	<wx/arrstr.h>
 	"Nirvana_Project.h"
 	"NirvanaEditor_NewSprite_Dialog.h"
+	"NirvanaEditor_SetSpriteSheet_Dialog.h"
 	"NirvanaEditor_NewTileset_Dialog.h"
 	"NirvanaEditor_SpriteLayer_SelectTileset_Dialog.h"
 	"NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.h"
@@ -2844,7 +2845,7 @@
 
 1731957962 /usr/include/wx-3.2/wx/gtk/dirdlg.h
 
-1763804763 /home/n00b/Projects/Nirvana2D/wxIrrlicht.h
+1771980092 /home/n00b/Projects/Nirvana2D/wxIrrlicht.h
 	<windows.h>
 	<irrlicht.h>
 	<wx/wx.h>
@@ -3193,14 +3194,14 @@
 1731957962 /usr/include/wx-3.2/wx/unix/glx11.h
 	<GL/gl.h>
 
-1750832044 /home/n00b/Projects/Nirvana2D/Nirvana_SpriteAnimation.h
+1771921142 /home/n00b/Projects/Nirvana2D/Nirvana_SpriteAnimation.h
 	<wx/wx.h>
 	<wx/window.h>
 	"wxIrrlicht.h"
 	"Nirvana_Project.h"
 	"rc_defines.h"
 
-1764110059 source:/home/n00b/Projects/Nirvana2D/wxIrrlicht.cpp
+1771985458 source:/home/n00b/Projects/Nirvana2D/wxIrrlicht.cpp
 	<wx/wx.h>
 	<wx/stdpaths.h>
 	<wx/filename.h>
@@ -3375,9 +3376,9 @@
 1743691131 /usr/include/glib-2.0/glib/gmacros.h
 	<stddef.h>
 
-1747037349 /usr/include/glib-2.0/glib/gversionmacros.h
+1765380519 /usr/include/glib-2.0/glib/gversionmacros.h
 
-1747037349 /usr/include/glib-2.0/glib/glib-visibility.h
+1765380519 /usr/include/glib-2.0/glib/glib-visibility.h
 
 1743691131 /usr/include/glib-2.0/glib/garray.h
 	<glib/gtypes.h>
@@ -3882,7 +3883,7 @@
 	<glib.h>
 	<gobject/gobject-visibility.h>
 
-1747037349 /usr/include/glib-2.0/gobject/gobject-visibility.h
+1765380519 /usr/include/glib-2.0/gobject/gobject-visibility.h
 
 1743691131 /usr/include/glib-2.0/gobject/gvalue.h
 	<gobject/gtype.h>
@@ -3917,7 +3918,7 @@
 1743691131 /usr/include/glib-2.0/gobject/genums.h
 	<gobject/gtype.h>
 
-1747037349 /usr/include/glib-2.0/gobject/glib-enumtypes.h
+1765380519 /usr/include/glib-2.0/gobject/glib-enumtypes.h
 	<glib-object.h>
 
 1743691131 /usr/include/glib-2.0/gobject/gparamspecs.h
@@ -3950,7 +3951,7 @@
 
 1743691131 /usr/include/glib-2.0/gobject/gobject-autocleanups.h
 
-1747037349 /usr/include/glib-2.0/gio/gio-visibility.h
+1765380519 /usr/include/glib-2.0/gio/gio-visibility.h
 
 1743691131 /usr/include/glib-2.0/gio/gaction.h
 	<gio/giotypes.h>
@@ -4187,7 +4188,7 @@
 1743691131 /usr/include/glib-2.0/gio/gsocketaddress.h
 	<gio/giotypes.h>
 
-1747037349 /usr/include/glib-2.0/gio/gioenumtypes.h
+1765380519 /usr/include/glib-2.0/gio/gioenumtypes.h
 	<glib-object.h>
 	<gio/gio-visibility.h>
 
@@ -4199,7 +4200,7 @@
 	<glib.h>
 	<gmodule/gmodule-visibility.h>
 
-1747037349 /usr/include/glib-2.0/gmodule/gmodule-visibility.h
+1765380519 /usr/include/glib-2.0/gmodule/gmodule-visibility.h
 
 1743691131 /usr/include/glib-2.0/gio/gioscheduler.h
 	<gio/giotypes.h>
@@ -6427,7 +6428,7 @@
 	<codecvt>
 	<locale>
 
-1750832044 source:/home/n00b/Projects/Nirvana2D/Nirvana_SpriteAnimation.cpp
+1771925268 source:/home/n00b/Projects/Nirvana2D/Nirvana_SpriteAnimation.cpp
 	"Nirvana_SpriteAnimation.h"
 	<wx/display.h>
 	<irrlicht.h>
@@ -6475,12 +6476,12 @@
 	"NirvanaEngine_Structs.h"
 	"rc_defines.h"
 
-1763804763 /home/n00b/Projects/Nirvana2D/NirvanaEngine_Structs.h
+1771983890 /home/n00b/Projects/Nirvana2D/NirvanaEngine_Structs.h
 	<irrlicht.h>
 	<vector>
 	"rc_defines.h"
 
-1763804763 source:/home/n00b/Projects/Nirvana2D/Nirvana_Project.cpp
+1771983970 source:/home/n00b/Projects/Nirvana2D/Nirvana_Project.cpp
 	"Nirvana_Project.h"
 	<wx/wx.h>
 	<wx/filename.h>
@@ -6528,7 +6529,7 @@
 	"NirvanaBase.h"
 	"Nirvana_Project.h"
 
-1764107837 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
+1771978607 source:/home/n00b/Projects/Nirvana2D/Project_Controls.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -6814,7 +6815,7 @@
 
 1758111459 /usr/include/x86_64-linux-gnu/bits/types/struct_statx.h
 
-1747037349 /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h
+1765380519 /usr/lib/x86_64-linux-gnu/glib-2.0/include/glibconfig.h
 	<glib/gmacros.h>
 	<limits.h>
 	<float.h>
@@ -6838,4 +6839,12 @@
 
 1763804763 /home/n00b/Projects/Nirvana2D/NirvanaEditor_SpriteLayer_ChangeTilesetWarning_Dialog.h
 	"NirvanaBase.h"
+
+1771924585 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_SetSpriteSheet_Dialog.cpp
+	"NirvanaEditor_SetSpriteSheet_Dialog.h"
+
+1771924665 /home/n00b/Projects/Nirvana2D/NirvanaEditor_SetSpriteSheet_Dialog.h
+	"NirvanaBase.h"
+	"Nirvana_Project.h"
+	<wx/arrstr.h>
 

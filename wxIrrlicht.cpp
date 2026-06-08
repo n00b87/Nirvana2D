@@ -2586,7 +2586,7 @@ void wxIrrlicht::UpdateTileMask()
 		if(tileEdit_tileMask.tiles[i])
 		{
 			int selected_tile_x = current_frame_width * (i % (img_w/current_frame_width)) - scroll_offset_x;
-			int selected_tile_y = current_frame_height * ((int) (tileEdit_selected_sheet_frame / (img_w/current_frame_width))) - scroll_offset_y;
+			int selected_tile_y = current_frame_height * ((int) (i / (img_w/current_frame_width))) - scroll_offset_y;
 
 			setColor(rgb(150, 150, 150));
 			drawRect(selected_tile_x, selected_tile_y, current_frame_width, current_frame_height);
