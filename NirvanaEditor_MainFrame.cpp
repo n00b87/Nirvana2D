@@ -67,47 +67,20 @@ Nirvana_MainFrame( parent )
 
 	map_editor->setProject(project);
 
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getMapViewControl());
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getCollisionControl());
+	std::vector<wxIrrlicht*> editor_controls;
+	editor_controls.push_back(map_editor->getMapViewControl());
+	editor_controls.push_back(map_editor->getTileSelectControl());
+	editor_controls.push_back(tile_editor->getAnimationSheetControl());
+	editor_controls.push_back(tile_editor->getAnimationFrameControl());
+	editor_controls.push_back(tile_editor->getAnimationPreviewControl());
+	editor_controls.push_back(tile_editor->getMaskSheetControl());
+	editor_controls.push_back(sprite_editor->getAnimationSheetControl());
+	editor_controls.push_back(sprite_editor->getCollisionControl());
+	editor_controls.push_back(sprite_editor->getAnimationPreviewControl());
+	editor_controls.push_back(sprite_editor->getAnimationFrameControl());
 
-	sprite_editor->getCollisionControl()->shared_control.push_back(map_editor->getMapViewControl());
-	sprite_editor->getCollisionControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	sprite_editor->getCollisionControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	sprite_editor->getCollisionControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	sprite_editor->getCollisionControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	sprite_editor->getCollisionControl()->shared_control.push_back(sprite_editor->getCollisionControl());
+	setSharedControl(editor_controls);
 
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getMapViewControl());
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getCollisionControl());
-
-	tile_editor->getMaskSheetControl()->shared_control.push_back(map_editor->getMapViewControl());
-	tile_editor->getMaskSheetControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	tile_editor->getMaskSheetControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	tile_editor->getMaskSheetControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	tile_editor->getMaskSheetControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	tile_editor->getMaskSheetControl()->shared_control.push_back(sprite_editor->getCollisionControl());
-
-	map_editor->getMapViewControl()->shared_control.push_back(map_editor->getMapViewControl());
-	map_editor->getMapViewControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	map_editor->getMapViewControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	map_editor->getMapViewControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	map_editor->getMapViewControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	map_editor->getMapViewControl()->shared_control.push_back(sprite_editor->getCollisionControl());
-
-	map_editor->getTileSelectControl()->shared_control.push_back(map_editor->getMapViewControl());
-	map_editor->getTileSelectControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	map_editor->getTileSelectControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	map_editor->getTileSelectControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	map_editor->getTileSelectControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	map_editor->getTileSelectControl()->shared_control.push_back(sprite_editor->getCollisionControl());
 
 	map_editor->getTileSelectControl()->stage_edit_control = map_editor->getMapViewControl();
 
@@ -332,6 +305,19 @@ void NirvanaEditor_MainFrame::OnNirvanaClose( wxCloseEvent& event )
 
 	Close();
 }
+
+
+void NirvanaEditor_MainFrame::setSharedControl(std::vector<wxIrrlicht*> editor_controls)
+{
+    for(int a = 0; a < editor_controls.size(); a++)
+    {
+        for(int b = 0; b < editor_controls.size(); b++)
+        {
+            editor_controls[a]->shared_control.push_back(editor_controls[b]);
+        }
+    }
+}
+
 
 void NirvanaEditor_MainFrame::PreDialog()
 {

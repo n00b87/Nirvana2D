@@ -411,6 +411,8 @@ class wxIrrlicht : public wxControl {
         void UpdateSpriteAnimationPreview();
         void UpdateSpriteCollision();
 
+        bool dbg_flag = false;
+
 
         int tileEdit_selected_tileset = -1;
         int tileEdit_selected_tile = -1;

@@ -1123,7 +1123,25 @@ void wxIrrlicht::UpdateSpriteAnimationFrame()
 							//std::cout << "sheet=(" << sheet_w << ", " << frames_per_row << ") frame=(" << current_frame_width << ", " << current_frame_height << ") " << std::endl;
 						}
 
-						drawImage_BlitEx_SW(current_sheet_image, fx, 0, 64, 64, sheet_x, sheet_y, current_frame_width, current_frame_height);
+						double render_w = current_frame_width;
+						double render_h = current_frame_height;
+						double render_scale = 1;
+
+						if(render_w > render_h)
+                        {
+                            render_scale = 64 / render_w;
+                        }
+                        else
+                        {
+                            render_scale = 64 / render_h;
+                        }
+
+						render_w = ( render_w * render_scale );
+						render_h = ( render_h * render_scale );
+
+						//std::cout << "dbg r_size = " << render_w << ", " << render_h << std::endl;
+
+						drawImage_BlitEx(current_sheet_image, fx, 0, (int)render_w, (int)render_h, sheet_x, sheet_y, current_frame_width, current_frame_height);
 					}
 					setColor(rgb(30, 30, 30));
 					drawRect(fx, 0, 64, 63);
@@ -1214,7 +1232,9 @@ void wxIrrlicht::UpdateSpriteAnimationPreview()
 
 	if(imageExists(current_sheet_image))
 	{
-		drawImage_BlitEx_SW(current_sheet_image, 0, 0, 64, 64, 0, 0, 64, 64);
+	    //drawImage_BlitEx(current_sheet_image, 0, 0, current_frame_width, current_frame_height, 0, 0, current_frame_width, current_frame_height);
+		//std::cout << "DB SZ = " << current_frame_width << ", " << current_frame_height << std::endl;
+		//drawImage_BlitEx_SW(current_sheet_image, 0, 0, 64, 64, 0, 0, current_frame_width, current_frame_height);
 	}
 
 	return;
@@ -2388,6 +2408,7 @@ void wxIrrlicht::UpdateTileAnimationFrame()
 					int fx = i*64-scroll_offset_x;
 					if(sheet_frame >= 0 && fx >= 0 && fx < pw)
 					{
+					    //wxMessageBox(_("STS: ") + wxString::Format(_("%i"), sheet_w) + _(", ") + wxString::Format(_("%i"), current_frame_width) + _(", ") + wxString::Format(_("%i"), sheet_frame));
 						int frames_per_row = sheet_w / current_frame_width;
 						int sheet_x = (sheet_frame % frames_per_row) * current_frame_width;
 						int sheet_y = (sheet_frame / frames_per_row) * current_frame_height;
@@ -13822,7 +13843,11 @@ void wxIrrlicht::deleteSprite(int spr_id)
 
 		if(canvas_sprite == spr_id)
 		{
+		    int pre_size = canvas[parent_canvas].sprite_id.size();
 			canvas[parent_canvas].sprite_id.erase(i,1);
+
+			//std::cout << "NUM_SPR = " << pre_size << " to " << canvas[parent_canvas].sprite_id.size() << std::endl;
+
 			break;
 		}
 	}
@@ -15193,7 +15218,7 @@ void wxIrrlicht::util_drawSprites(int canvas_id)
 		if(!n_sprite->active)
 			continue;
 		//std::cout << "TEST" << std::endl;
-		//td::cout << "debug info: " << canvas_id << " --> " << spr_index << "   id = " << sprite->id << "   anim_size = " << sprite->animation.size() << std::endl; continue;
+		//std::cout << "debug info: " << canvas_id << " --> " << spr_index << "   id = " << spr_id << "   anim_size = " << n_sprite->animation.size() << std::endl; //continue;
 		if(!n_sprite->visible)
 			continue;
 
@@ -15284,14 +15309,14 @@ void wxIrrlicht::util_drawSprites(int canvas_id)
 							 n_sprite->color_mod.getBlue());
 
 		//I don't want to draw an image that doesn't exists. Thats just crazy.
-		if(m_pDriver->getDriverType() == irr::video::EDT_OPENGL)
+		if(m_pDriver->getDriverType() == irr::video::EDT_OPENGL && control_id != NV_SPRITE_EDIT_ANIMATION_PREVIEW)
 			util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
 		else
 		{
 			//setColor(rgb(255,0,0));
 			//drawRectFill(0, 0, 100, 100);
 			//std::cout << "COME ON" << std::endl;
-			drawImage_BlitEx_SW(img_id, 0, 0, 64, 64, frame_pos.X, frame_pos.Y, current_frame_width, current_frame_height);
+			drawImage_BlitEx(img_id, 0, 0, current_frame_width, current_frame_height, frame_pos.X, frame_pos.Y, current_frame_width, current_frame_height);
 		}
 	}
 	//Must set back to canvas 0 (the backbuffer) before returning

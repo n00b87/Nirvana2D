@@ -108,6 +108,8 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		std::vector<int> gt_tileset_cut_start_index;
         std::vector<int> gt_tileset_cut_count;
 
+        void setSharedControl(std::vector<wxIrrlicht*> editor_controls);
+
 	public:
 		/** Constructor */
 		NirvanaEditor_MainFrame( wxWindow* parent );
