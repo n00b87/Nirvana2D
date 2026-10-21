@@ -408,4 +408,240 @@ struct nirvana_project_file_obj
 	std::vector<nirvana_project_dict_obj> dict;
 };
 
+
+
+#define NIRVANA_ACTION_SETTILE              1
+#define NIRVANA_ACTION_FILLTILE             2
+#define NIRVANA_ACTION_COPYTILE             3
+#define NIRVANA_ACTION_MOVETILE             4
+#define NIRVANA_ACTION_DELETETILE           5
+
+#define NIRVANA_ACTION_CREATE_TSPRITE       6
+#define NIRVANA_ACTION_DELETE_TSPRITE       7
+#define NIRVANA_ACTION_TRANSFORM_TSPRITE    8
+
+#define NIRVANA_ACTION_CREATESPRITE         9
+#define NIRVANA_ACTION_DELETESPRITE         10
+#define NIRVANA_ACTION_COPYSPRITE           11
+#define NIRVANA_ACTION_TRANSFORM_SPRITE     12
+
+#define NIRVANA_ACTION_MOVESHAPE            13
+#define NIRVANA_ACTION_DRAWPOINT            14
+#define NIRVANA_ACTION_CREATESHAPE          15
+#define NIRVANA_ACTION_DELETESHAPE          16
+
+#define NIRVANA_ACTION_SETBKG               17
+
+#define NIRVANA_ACTION_SETTILE_ISO          18
+#define NIRVANA_ACTION_FILLTILE_ISO         19
+#define NIRVANA_ACTION_MOVETILE_ISO         20
+#define NIRVANA_ACTION_COPYTILE_ISO         21
+#define NIRVANA_ACTION_DELETETILE_ISO       22
+
+
+struct nirvana_stageAction_tile
+{
+    int iso_map;
+
+    int old_tile;
+    int new_tile;
+
+    int map_tile_pos_x;
+    int map_tile_pos_y;
+};
+
+struct nirvana_stageAction_shape
+{
+    sprite2D_physics_obj shape_obj;
+};
+
+struct nirvana_stageAction_sprite
+{
+    int sprite_id;
+
+    int canvas_id;
+
+    int image_id;
+
+    int base_sprite_index;
+
+    std::string id_name;
+
+    int project_shape_index;
+
+    int layer_ts_index;
+
+    tileSprite_obj t_sprite;
+
+    int old_pos_x;
+    int old_pos_y;
+
+    int pos_x;
+    int pos_y;
+
+    double old_angle;
+
+    double angle;
+
+    double old_scale_x;
+    double old_scale_y;
+
+    double scale_x;
+    double scale_y;
+
+
+	int base_unique_id = -1;
+
+	int layer_sprite_unique_id = -1;
+
+	irr::u8 alpha = 255;
+	bool visible = true;
+	int body_type = SPRITE_TYPE_DYNAMIC;
+	std::string animation_name = "SPRITE_BASE_ANIMATION";
+
+	nirvana_stageAction_shape old_shape;
+	nirvana_stageAction_shape new_shape;
+};
+
+struct nirvana_stageAction_bkg
+{
+    Nirvana_Map_Background old_bkg;
+    Nirvana_Map_Background new_bkg;
+};
+
+struct nirvana_stageAction
+{
+    int action_type;
+
+    bool isUndo;
+
+    int stage_index;
+    int layer_index;
+
+    int tset;
+
+    int num_rows;
+    int num_cols;
+
+    std::vector<nirvana_stageAction_tile> tiles;
+
+    std::vector<nirvana_stageAction_sprite> sprite;
+
+    nirvana_stageAction_bkg bkg;
+};
+
+//bool current_action_is_undo = false;
+//bool current_action_is_redo = false;
+
+nirvana_stageAction current_action;
+
+std::vector<nirvana_stageAction> undo_buffer;
+std::vector<nirvana_stageAction> redo_buffer;
+
+#define UNDO_REDO_BUFFER_SIZE   50
+
+void push_undo(nirvana_stageAction n_action)
+{
+    if(undo_buffer.size() >= UNDO_REDO_BUFFER_SIZE)
+    {
+        std::vector<nirvana_stageAction> tmp_action;
+        for(int i = 0; i < (undo_buffer.size()-1); i++)
+        {
+            tmp_action.push_back(undo_buffer[i+1]);
+        }
+
+        undo_buffer.clear();
+
+        for(int i = 0; i < tmp_action.size(); i++)
+        {
+            undo_buffer.push_back(tmp_action[i]);
+        }
+
+        undo_buffer[undo_buffer.size()-1] = n_action;
+    }
+    else
+    {
+        undo_buffer.push_back(n_action);
+    }
+
+    current_action.action_type = -1;
+    current_action.tiles.clear();
+    current_action.sprite.clear();
+}
+
+nirvana_stageAction pop_undo()
+{
+    nirvana_stageAction n_action;
+
+    if(undo_buffer.size() > 0)
+    {
+        n_action = undo_buffer[undo_buffer.size()-1];
+        undo_buffer.erase(undo_buffer.begin() + undo_buffer.size()-1);
+    }
+    else
+    {
+        n_action.action_type = -1;
+    }
+
+    return n_action;
+}
+
+void clear_undo()
+{
+    undo_buffer.clear();
+}
+
+
+void push_redo(nirvana_stageAction n_action)
+{
+    if(redo_buffer.size() >= UNDO_REDO_BUFFER_SIZE)
+    {
+        std::vector<nirvana_stageAction> tmp_action;
+        for(int i = 0; i < (redo_buffer.size()-1); i++)
+        {
+            tmp_action.push_back(redo_buffer[i+1]);
+        }
+
+        redo_buffer.clear();
+
+        for(int i = 0; i < tmp_action.size(); i++)
+        {
+            redo_buffer.push_back(tmp_action[i]);
+        }
+
+        redo_buffer[redo_buffer.size()-1] = n_action;
+    }
+    else
+    {
+        redo_buffer.push_back(n_action);
+    }
+
+    current_action.action_type = -1;
+    current_action.tiles.clear();
+    current_action.sprite.clear();
+}
+
+nirvana_stageAction pop_redo()
+{
+    nirvana_stageAction n_action;
+
+    if(redo_buffer.size() > 0)
+    {
+        n_action = redo_buffer[redo_buffer.size()-1];
+        redo_buffer.erase(redo_buffer.begin() + redo_buffer.size()-1);
+    }
+    else
+    {
+        n_action.action_type = -1;
+    }
+
+    return n_action;
+}
+
+void clear_redo()
+{
+    redo_buffer.clear();
+}
+
+
 #endif // NIRVANAENGINE_STRUCTS_H_INCLUDED

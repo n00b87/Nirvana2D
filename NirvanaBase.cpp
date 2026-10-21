@@ -1262,7 +1262,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_collision_panel->Layout();
 	bSizer241->Fit( m_mapEdit_collision_panel );
 	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_mapEdit_collision_panel, _("Collision"), false, wxNullBitmap );
-	m_panel16 = new wxPanel( m_mapEdit_layerObjectTools_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
+	m_mapEdit_displayImage_panel = new wxPanel( m_mapEdit_layerObjectTools_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer27;
 	bSizer27 = new wxBoxSizer( wxVERTICAL );
 
@@ -1272,11 +1272,11 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer1271;
 	bSizer1271 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText562 = new wxStaticText( m_panel16, wxID_ANY, _("Render Type:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText562 = new wxStaticText( m_mapEdit_displayImage_panel, wxID_ANY, _("Render Type:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText562->Wrap( -1 );
 	bSizer1271->Add( m_staticText562, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_mapEdit_canvasRenderSetting_comboBox = new wxComboBox( m_panel16, wxID_ANY, _("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	m_mapEdit_canvasRenderSetting_comboBox = new wxComboBox( m_mapEdit_displayImage_panel, wxID_ANY, _("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
 	bSizer1271->Add( m_mapEdit_canvasRenderSetting_comboBox, 4, wxALL, 5 );
 
 
@@ -1285,11 +1285,11 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	wxBoxSizer* bSizer32;
 	bSizer32 = new wxBoxSizer( wxHORIZONTAL );
 
-	m_staticText82 = new wxStaticText( m_panel16, wxID_ANY, _("Layer Image:"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText82 = new wxStaticText( m_mapEdit_displayImage_panel, wxID_ANY, _("Layer Image:"), wxDefaultPosition, wxDefaultSize, 0 );
 	m_staticText82->Wrap( -1 );
 	bSizer32->Add( m_staticText82, 1, wxALIGN_CENTER_VERTICAL|wxALL, 5 );
 
-	m_mapEdit_canvasImage_comboBox = new wxComboBox( m_panel16, wxID_ANY, _("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
+	m_mapEdit_canvasImage_comboBox = new wxComboBox( m_mapEdit_displayImage_panel, wxID_ANY, _("Combo!"), wxDefaultPosition, wxDefaultSize, 0, NULL, 0 );
 	bSizer32->Add( m_mapEdit_canvasImage_comboBox, 4, wxALL, 5 );
 
 
@@ -1299,10 +1299,10 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	bSizer27->Add( bSizer30, 1, wxEXPAND, 5 );
 
 
-	m_panel16->SetSizer( bSizer27 );
-	m_panel16->Layout();
-	bSizer27->Fit( m_panel16 );
-	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_panel16, _("Image"), false, wxNullBitmap );
+	m_mapEdit_displayImage_panel->SetSizer( bSizer27 );
+	m_mapEdit_displayImage_panel->Layout();
+	bSizer27->Fit( m_mapEdit_displayImage_panel );
+	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_mapEdit_displayImage_panel, _("Image"), false, wxNullBitmap );
 
 	bSizer15->Add( m_mapEdit_layerObjectTools_auinotebook, 1, wxEXPAND | wxALL, 5 );
 
@@ -1327,7 +1327,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_panel->SetSizer( bSizer3 );
 	m_mapEdit_panel->Layout();
 	bSizer3->Fit( m_mapEdit_panel );
-	m_editorMainTab_auinotebook->AddPage( m_mapEdit_panel, _("Map Editor"), false, wxNullBitmap );
+	m_editorMainTab_auinotebook->AddPage( m_mapEdit_panel, _("Map Editor"), true, wxNullBitmap );
 	m_tileEdit_panel = new wxPanel( m_editorMainTab_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer351;
 	bSizer351 = new wxBoxSizer( wxVERTICAL );
@@ -2086,7 +2086,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_panel->SetSizer( bSizer57 );
 	m_spriteEdit_panel->Layout();
 	bSizer57->Fit( m_spriteEdit_panel );
-	m_editorMainTab_auinotebook->AddPage( m_spriteEdit_panel, _("Sprite Editor"), true, wxNullBitmap );
+	m_editorMainTab_auinotebook->AddPage( m_spriteEdit_panel, _("Sprite Editor"), false, wxNullBitmap );
 
 	bSizer1->Add( m_editorMainTab_auinotebook, 1, wxEXPAND | wxALL, 5 );
 
@@ -2094,6 +2094,57 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	this->SetSizer( bSizer1 );
 	this->Layout();
 	m_menubar1 = new wxMenuBar( 0 );
+	m_menu1 = new wxMenu();
+	wxMenuItem* m_menuItem1;
+	m_menuItem1 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("New Project") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu1->Append( m_menuItem1 );
+
+	wxMenuItem* m_menuItem2;
+	m_menuItem2 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("Open Project") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu1->Append( m_menuItem2 );
+
+	wxMenuItem* m_menuItem3;
+	m_menuItem3 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("Save") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu1->Append( m_menuItem3 );
+
+	m_menu1->AppendSeparator();
+
+	wxMenuItem* m_menuItem4;
+	m_menuItem4 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("Generate Code") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu1->Append( m_menuItem4 );
+
+	m_menu1->AppendSeparator();
+
+	m_recentProjects_menu = new wxMenu();
+	wxMenuItem* m_recentProjects_menuItem = new wxMenuItem( m_menu1, wxID_ANY, _("Recent"), wxEmptyString, wxITEM_NORMAL, m_recentProjects_menu );
+	m_menu1->Append( m_recentProjects_menuItem );
+
+	m_menu1->AppendSeparator();
+
+	wxMenuItem* m_menuItem6;
+	m_menuItem6 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("Exit") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu1->Append( m_menuItem6 );
+
+	m_menubar1->Append( m_menu1, _("Project") );
+
+	m_menu2 = new wxMenu();
+	wxMenuItem* m_menuItem8;
+	m_menuItem8 = new wxMenuItem( m_menu2, wxID_ANY, wxString( _("Undo") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu2->Append( m_menuItem8 );
+
+	wxMenuItem* m_menuItem9;
+	m_menuItem9 = new wxMenuItem( m_menu2, wxID_ANY, wxString( _("Redo") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu2->Append( m_menuItem9 );
+
+	m_menubar1->Append( m_menu2, _("Edit") );
+
+	m_menu5 = new wxMenu();
+	wxMenuItem* m_menuItem11;
+	m_menuItem11 = new wxMenuItem( m_menu5, wxID_ANY, wxString( _("About") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menu5->Append( m_menuItem11 );
+
+	m_menubar1->Append( m_menu5, _("Help") );
+
 	this->SetMenuBar( m_menubar1 );
 
 	m_toolBar1 = this->CreateToolBar( wxTB_HORIZONTAL, wxID_ANY );
@@ -2102,6 +2153,12 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_openProject_tool = m_toolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/folder.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
 	m_saveProject_tool = m_toolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/save.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	m_toolBar1->AddSeparator();
+
+	m_tool44 = m_toolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/undo.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
+
+	m_tool45 = m_toolBar1->AddTool( wxID_ANY, _("tool"), wxBitmap( wxT("icons/redo.png"), wxBITMAP_TYPE_ANY ), wxNullBitmap, wxITEM_NORMAL, wxEmptyString, wxEmptyString, NULL );
 
 	m_toolBar1->AddSeparator();
 
@@ -2263,6 +2320,8 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	this->Connect( m_newProject_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnNewProject ) );
 	this->Connect( m_openProject_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnOpenProject ) );
 	this->Connect( m_saveProject_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnSaveProject ) );
+	this->Connect( m_tool44->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnStageUndo ) );
+	this->Connect( m_tool45->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnStageRedo ) );
 	this->Connect( m_generate_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnGenerate ) );
 }
 

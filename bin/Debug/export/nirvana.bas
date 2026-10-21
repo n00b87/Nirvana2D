@@ -129,6 +129,25 @@ Function Nirvana_GetLayerShapeCount(layer_index)
 	Return Nirvana_Stage_Layers[layer_index].Layer_Shape_Count
 End Function
 
+Function Nirvana_GetLayerShape(layer_index, shape_index) As Nirvana_Shape
+	If layer_index < 0 Or layer_index >= Nirvana_ActiveStage.Layer_Count Then
+		Return Nirvana_NULL_Shape
+	End If
+	
+	If shape_index < 0 Or shape_index >= Nirvana_Stage_Layers[layer_index].Layer_Shape_Count Then
+		Return Nirvana_NULL_Shape
+	End If
+	
+	start_index = 0
+	For i = 0 To layer_index-1
+		start_index = start_index + Nirvana_Stage_Layers[i].Layer_Shape_Count
+	Next
+	
+	shape_index = start_index + shape_index
+	
+	Return Nirvana_Stage_Shapes[shape_index]
+End Function
+
 Function Nirvana_GetLayerBackgroundImageID(layer_index)
 	If layer_index < 0 Or layer_index >= Nirvana_ActiveStage.Layer_Count Then
 		Return -1
@@ -297,8 +316,15 @@ Function Nirvana_GetLayerMaskHit(layer_index, mask_index, x, y)
 	tile_x = Int(x / Nirvana_ActiveStage.Tile_Size.Width)
 	tile_y = Int(y / Nirvana_ActiveStage.Tile_Size.Height)
 	tile = GetTile(Nirvana_Stage_Layers[layer_index].Layer_TileMap.TileMap_ID, tile_x, tile_y)
+	tile2 = -1
+	If Nirvana_Stage_Layers[layer_index].LayerType = NIRVANA_LAYER_TYPE_ISO_TILEMAP Then
+		tile2 = GetTile(Nirvana_Stage_Layers[layer_index].Layer_TileMap2.TileMap_ID, tile_x, tile_y)
+	End If
 	If tile < 0 Then
-		Return False
+		If tile2 < 0 Then
+			Return False
+		End If
+		tile = tile2
 	End If
 	Return MatrixValue(Nirvana_TileMask_Matrix[mask_index], 0, tile)
 End Function

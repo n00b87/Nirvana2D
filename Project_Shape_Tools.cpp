@@ -74,6 +74,21 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewBoxShape( wxCommandEvent& e
 	m_mapEdit_shapeTools_auiToolBar->ToggleTool(m_mapEdit_shapeToolbar_draw_tool->GetId(), true);
 
 	refreshCurrentShapeUI();
+
+
+	nirvana_stageAction_sprite action_sprite;
+	action_sprite.project_shape_index = shape_index;
+	action_sprite.old_shape.shape_obj = project->stages[stage_index].layers[layer_index].layer_shapes[shape_index];
+	action_sprite.new_shape.shape_obj = project->stages[stage_index].layers[layer_index].layer_shapes[shape_index];
+
+	current_action.action_type = NIRVANA_ACTION_CREATESHAPE;
+	current_action.stage_index = stage_index;
+	current_action.layer_index = layer_index;
+	current_action.sprite.clear();
+	current_action.sprite.push_back(action_sprite);
+
+	push_undo(current_action);
+	clear_redo();
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewPolygonShape( wxCommandEvent& event )
@@ -108,6 +123,21 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewPolygonShape( wxCommandEven
 	m_mapEdit_shapeTools_auiToolBar->ToggleTool(m_mapEdit_shapeToolbar_draw_tool->GetId(), true);
 
 	refreshCurrentShapeUI();
+
+
+	nirvana_stageAction_sprite action_sprite;
+	action_sprite.project_shape_index = shape_index;
+	action_sprite.old_shape.shape_obj = project->stages[stage_index].layers[layer_index].layer_shapes[shape_index];
+	action_sprite.new_shape.shape_obj = project->stages[stage_index].layers[layer_index].layer_shapes[shape_index];
+
+	current_action.action_type = NIRVANA_ACTION_CREATESHAPE;
+	current_action.stage_index = stage_index;
+	current_action.layer_index = layer_index;
+	current_action.sprite.clear();
+	current_action.sprite.push_back(action_sprite);
+
+	push_undo(current_action);
+	clear_redo();
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewChainShape( wxCommandEvent& event )
@@ -142,6 +172,21 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewChainShape( wxCommandEvent&
 	m_mapEdit_shapeTools_auiToolBar->ToggleTool(m_mapEdit_shapeToolbar_draw_tool->GetId(), true);
 
 	refreshCurrentShapeUI();
+
+
+	nirvana_stageAction_sprite action_sprite;
+	action_sprite.project_shape_index = shape_index;
+	action_sprite.old_shape.shape_obj = project->stages[stage_index].layers[layer_index].layer_shapes[shape_index];
+	action_sprite.new_shape.shape_obj = project->stages[stage_index].layers[layer_index].layer_shapes[shape_index];
+
+	current_action.action_type = NIRVANA_ACTION_CREATESHAPE;
+	current_action.stage_index = stage_index;
+	current_action.layer_index = layer_index;
+	current_action.sprite.clear();
+	current_action.sprite.push_back(action_sprite);
+
+	push_undo(current_action);
+	clear_redo();
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewCircleShape( wxCommandEvent& event )
@@ -176,6 +221,21 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_NewCircleShape( wxCommandEvent
 	m_mapEdit_shapeTools_auiToolBar->ToggleTool(m_mapEdit_shapeToolbar_draw_tool->GetId(), true);
 
 	refreshCurrentShapeUI();
+
+
+	nirvana_stageAction_sprite action_sprite;
+	action_sprite.project_shape_index = shape_index;
+	action_sprite.old_shape.shape_obj = project->stages[stage_index].layers[layer_index].layer_shapes[shape_index];
+	action_sprite.new_shape.shape_obj = project->stages[stage_index].layers[layer_index].layer_shapes[shape_index];
+
+	current_action.action_type = NIRVANA_ACTION_CREATESHAPE;
+	current_action.stage_index = stage_index;
+	current_action.layer_index = layer_index;
+	current_action.sprite.clear();
+	current_action.sprite.push_back(action_sprite);
+
+	push_undo(current_action);
+	clear_redo();
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_DeleteShape( wxCommandEvent& event )
@@ -200,6 +260,11 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_DeleteShape( wxCommandEvent& e
 	if(shape_index < 0 || shape_index >= project->stages[stage_index].layers[layer_index].layer_shapes.size())
 		return;
 
+	nirvana_stageAction_sprite action_sprite;
+	action_sprite.project_shape_index = shape_index;
+	action_sprite.old_shape.shape_obj = project->stages[stage_index].layers[layer_index].layer_shapes[shape_index];
+	action_sprite.new_shape.shape_obj = project->stages[stage_index].layers[layer_index].layer_shapes[shape_index];
+
 	project->deleteShape(stage_index, layer_index, shape_index);
 	map_editor->selectShape(-1);
 
@@ -212,6 +277,17 @@ void NirvanaEditor_MainFrame::OnMapEdit_ShapeTool_DeleteShape( wxCommandEvent& e
 
 	m_mapEdit_shapeEdit_simplebook->SetSelection(0);
 	refreshCurrentShapeUI();
+
+
+
+	current_action.action_type = NIRVANA_ACTION_DELETESHAPE;
+	current_action.stage_index = stage_index;
+	current_action.layer_index = layer_index;
+	current_action.sprite.clear();
+	current_action.sprite.push_back(action_sprite);
+
+	push_undo(current_action);
+	clear_redo();
 }
 
 

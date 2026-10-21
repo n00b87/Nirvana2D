@@ -641,12 +641,46 @@ void NirvanaEditor_MainFrame::OnMapEdit_TSTool_DeleteSelected( wxCommandEvent& e
 	if(map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.size() == 0)
 		return;
 
+
+	current_action.action_type = NIRVANA_ACTION_DELETE_TSPRITE;
+    current_action.stage_index = stage_index;
+    current_action.layer_index = layer_index;
+
 	irr::core::array<int> layer_spr_array; //The irrlicht array has built-in sort and I don't feel like doing it myself
 
 	for(int i = 0; i < map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.size(); i++)
 	{
 		int map_spr_id = map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection[i].layer_sprite_index;
 		int spr_index = map_editor->getMapViewControl()->sprite[map_spr_id].layer_ts_index;
+
+		nirvana_stageAction_sprite action_sprite;
+
+        if(spr_index >= 0 || spr_index < project->stages[stage_index].layers[layer_index].layer_tile_sprites.size())
+        {
+            action_sprite.sprite_id = project->stages[stage_index].layers[layer_index].layer_tile_sprites[spr_index].sprite_id;
+            action_sprite.layer_ts_index = spr_index;
+            action_sprite.t_sprite = project->stages[stage_index].layers[layer_index].layer_tile_sprites[spr_index];
+            action_sprite.image_id = project->stages[stage_index].layers[layer_index].layer_tile_sprites[spr_index].image_id;
+            action_sprite.t_sprite.sprite_id = -1;
+
+            int sx = map_editor->getMapViewControl()->sprite[map_spr_id].position.X;
+            int sy = map_editor->getMapViewControl()->sprite[map_spr_id].position.Y;
+
+            int sx2 = action_sprite.t_sprite.x;
+            int sy2 = action_sprite.t_sprite.y;
+
+            //std::cout << "DBG: DLT -> image=" << action_sprite.image_id << ", " << map_editor->getMapViewControl()->sprite[map_spr_id].image_id << " pos=(" << sx << ", " << sy << ") (" << sx2 << ", " << sy2 << ")" << std::endl;
+        }
+        else
+        {
+            //std::cout << "DBG: **DLT -> " << spr_index << ", " << map_spr_id << " -- size = " << project->stages[stage_index].layers[layer_index].layer_tile_sprites.size() << std::endl;
+
+            action_sprite.sprite_id = -1;
+            action_sprite.layer_ts_index = -1;
+            action_sprite.image_id = -1;
+        }
+
+        current_action.sprite.push_back(action_sprite);
 
 		map_editor->getMapViewControl()->deleteSprite(map_spr_id);
 		layer_spr_array.push_back(spr_index);
@@ -666,9 +700,16 @@ void NirvanaEditor_MainFrame::OnMapEdit_TSTool_DeleteSelected( wxCommandEvent& e
 		project->stages[stage_index].layers[layer_index].layer_tile_sprites[layer_spr_array[i]].tset = -1;
 	}
 
+	if(current_action.sprite.size() > 0)
+    {
+        push_undo(current_action);
+        clear_redo();
+    }
+
 
 	map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.clear();
 	map_editor->getMapViewControl()->selected_sprite = -1;
+
 }
 
 

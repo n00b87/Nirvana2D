@@ -85,6 +85,7 @@
 		<Unit filename="Nirvana_Project.h" />
 		<Unit filename="Nirvana_SpriteAnimation.cpp" />
 		<Unit filename="Nirvana_SpriteAnimation.h" />
+		<Unit filename="Nirvana_Stage_Undo_Redo.cpp" />
 		<Unit filename="Nirvana_TileAnimation.cpp" />
 		<Unit filename="Nirvana_TileAnimation.h" />
 		<Unit filename="Project_Controls.cpp" />

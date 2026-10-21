@@ -77,6 +77,34 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		bool generateTilesets();
 		bool generateStages();
 
+		void stage_undo();
+		void stage_redo();
+
+		void stage_action_setTile(nirvana_stageAction* n_action);
+		void stage_action_setTile_iso(nirvana_stageAction* n_action);
+
+		void stage_action_fillTile(nirvana_stageAction* n_action);
+		void stage_action_fillTile_iso(nirvana_stageAction* n_action);
+
+		void stage_action_moveTile(nirvana_stageAction* n_action);
+		void stage_action_moveTile_iso(nirvana_stageAction* n_action);
+
+		void stage_action_createSprite(nirvana_stageAction* n_action);
+		void stage_action_deleteSprite(nirvana_stageAction* n_action);
+		void stage_action_transformSprite(nirvana_stageAction* n_action);
+
+		void stage_action_createTileSprite(nirvana_stageAction* n_action);
+		void stage_action_deleteTileSprite(nirvana_stageAction* n_action);
+		void stage_action_transformTileSprite(nirvana_stageAction* n_action);
+
+
+		void stage_action_createShape(nirvana_stageAction* n_action);
+		void stage_action_deleteShape(nirvana_stageAction* n_action);
+		void stage_action_transformShape(nirvana_stageAction* n_action);
+
+		void stage_action_setBackground(nirvana_stageAction* n_action);
+
+
 		std::vector<int> gt_tileset_cut_start_index;
         std::vector<int> gt_tileset_cut_count;
 
@@ -96,6 +124,9 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		void OnOpenProject( wxCommandEvent& event );
 		void OnSaveProject( wxCommandEvent& event );
 		void OnGenerate( wxCommandEvent& event );
+
+		void OnStageUndo( wxCommandEvent& event );
+		void OnStageRedo( wxCommandEvent& event );
 
 		void OnMapSetFree( wxCommandEvent& event );
 		void OnMapSetTiled( wxCommandEvent& event );
