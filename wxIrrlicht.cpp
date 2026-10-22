@@ -8914,6 +8914,35 @@ void wxIrrlicht::StageSheet_SetTile_SpriteLayer_Update()
                     if(selected_st_index >= 0)
                     {
                         int spr_index = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[selected_st_index].sprite_id;
+                        int p_spr_index = sprite[spr_index].layer_ts_index;
+
+                        if(p_spr_index >= 0 && p_spr_index < project->stages[selected_stage].layers[selected_layer].layer_tile_sprites.size())
+                        {
+                            tileSprite_obj tsprite;
+                            tsprite = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[p_spr_index];
+                            //tsprite.sprite_id = spr_index;
+                            //tsprite.sheet_index = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[selected_st_index].sheet_index;
+
+
+                            nirvana_stageAction_sprite action_sprite;
+
+                            action_sprite.sprite_id = tsprite.sprite_id; // new sprite is created on redo
+
+                            action_sprite.image_id = tsprite.image_id;
+
+                            action_sprite.t_sprite = tsprite;
+
+                            action_sprite.canvas_id = canvas_index;
+
+                            action_sprite.old_pos_x = tsprite.x;
+                            action_sprite.old_pos_y = tsprite.y;
+                            action_sprite.pos_x = tsprite.x;
+                            action_sprite.pos_y = tsprite.y;
+
+                            current_action.sprite.push_back(action_sprite);
+                        }
+
+
                         deleteSprite(spr_index);
                         project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[selected_st_index].sprite_id = -1;
                     }
@@ -8921,7 +8950,11 @@ void wxIrrlicht::StageSheet_SetTile_SpriteLayer_Update()
                     mapEdit_lastAction_erase = true;
                 }
 
-                current_action.action_type = NIRVANA_ACTION_CREATE_TSPRITE;
+                if(mapEdit_lastAction_erase)
+                    current_action.action_type = NIRVANA_ACTION_DELETE_TSPRITE;
+                else
+                    current_action.action_type = NIRVANA_ACTION_CREATE_TSPRITE;
+
                 current_action.tset = tset;
                 current_action.stage_index = selected_stage;
                 current_action.layer_index = selected_layer;
@@ -8932,7 +8965,7 @@ void wxIrrlicht::StageSheet_SetTile_SpriteLayer_Update()
 		}
 
 	}
-	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	else if( ( (!mouse_state.LeftIsDown()) || ( (!mouse_state.RightIsDown()) && mapEdit_lastAction_erase ) ) && left_drag_init )
 	{
 
 	    if(current_action.sprite.size() > 0)
@@ -9519,6 +9552,11 @@ void wxIrrlicht::StageSheet_RotateSpriteUpdate()
 	}
 
 
+	current_action.action_type = NIRVANA_ACTION_TRANSFORM_SPRITE;
+    current_action.stage_index = selected_stage;
+    current_action.layer_index = selected_layer;
+
+
 	if(mouse_state.LeftIsDown())
 	{
 		bool init_click = false;
@@ -9695,6 +9733,11 @@ void wxIrrlicht::StageSheet_ScaleSpriteUpdate()
 		right_drag_init = false;
 		return;
 	}
+
+
+	current_action.action_type = NIRVANA_ACTION_TRANSFORM_SPRITE;
+    current_action.stage_index = selected_stage;
+    current_action.layer_index = selected_layer;
 
 
 	if(mouse_state.LeftIsDown())
