@@ -335,6 +335,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxStaticText* m_staticText25;
 		wxSpinCtrl* m_spriteEdit_FPS_spinCtrl;
 		wxPanel* m_panel43;
+		wxStaticText* m_staticText122;
 		wxPanel* m_spriteAnimation_preview_panel;
 		wxBitmapButton* m_spriteEdit_play_bpButton;
 		wxBitmapButton* m_spriteEdit_stop_bpButton;
@@ -532,9 +533,10 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnNewProject( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnOpenProject( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSaveProject( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnGenerate( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnNirvanaClose( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnStageUndo( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnStageRedo( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnGenerate( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:

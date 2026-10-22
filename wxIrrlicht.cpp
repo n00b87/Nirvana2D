@@ -555,6 +555,9 @@ void wxIrrlicht::OnTimer(wxTimerEvent& event) {
 	if(!m_init)
 		return;
 
+    if(!m_pDevice)
+        return;
+
     m_pDevice->getTimer()->tick();
 
     OnUpdate();
@@ -9320,6 +9323,10 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 
 	//std::cout << "DBG2" << std::endl;
 
+	current_action.action_type = NIRVANA_ACTION_TRANSFORM_SPRITE;
+    current_action.stage_index = selected_stage;
+    current_action.layer_index = selected_layer;
+
 
 	if(mouse_state.LeftIsDown())
 	{
@@ -9340,6 +9347,26 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 					int spr_x = sprite[sprite_index].position.X;
 					int spr_y = sprite[sprite_index].position.Y;
 					mapEdit_selectSpriteTool_selection[i].start_pos.set(spr_x, spr_y);
+
+					nirvana_stageAction_sprite action_sprite;
+					action_sprite.old_alpha = sprite[sprite_index].alpha;
+					action_sprite.old_animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+					action_sprite.base_sprite_index = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_base;
+					action_sprite.base_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].base_unique_id;
+					action_sprite.old_body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+					action_sprite.canvas_id = sprite[sprite_index].parent_canvas;
+					action_sprite.old_id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+					action_sprite.image_id = sprite[sprite_index].image_id;
+					action_sprite.layer_sprite_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].layer_sprite_unique_id;
+					action_sprite.old_angle = sprite[sprite_index].angle;
+					action_sprite.old_pos_x = sprite[sprite_index].position.X;
+					action_sprite.old_pos_y = sprite[sprite_index].position.Y;
+					action_sprite.old_scale_x = sprite[sprite_index].scale.X;
+					action_sprite.old_scale_y = sprite[sprite_index].scale.Y;
+					action_sprite.sprite_id = sprite_index;
+					action_sprite.old_visible = sprite[sprite_index].visible;
+
+					current_action.sprite.push_back(action_sprite);
 				}
 
 				left_drag_init = true;
@@ -9404,6 +9431,31 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 	}
 	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
 	{
+	    if(mapEdit_selectSpriteTool_selection.size() == current_action.sprite.size())
+	    {
+	        for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+            {
+                int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
+                int spr_x = sprite[sprite_index].position.X;
+                int spr_y = sprite[sprite_index].position.Y;
+                mapEdit_selectSpriteTool_selection[i].start_pos.set(spr_x, spr_y);
+
+                current_action.sprite[i].alpha = sprite[sprite_index].alpha;
+                current_action.sprite[i].animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+                current_action.sprite[i].body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+                current_action.sprite[i].id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+                current_action.sprite[i].angle = sprite[sprite_index].angle;
+                current_action.sprite[i].pos_x = sprite[sprite_index].position.X;
+                current_action.sprite[i].pos_y = sprite[sprite_index].position.Y;
+                current_action.sprite[i].scale_x = sprite[sprite_index].scale.X;
+                current_action.sprite[i].scale_y = sprite[sprite_index].scale.Y;
+                current_action.sprite[i].visible = sprite[sprite_index].visible;
+            }
+
+            push_undo(current_action);
+            clear_redo();
+	    }
+
 
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
@@ -9502,6 +9554,27 @@ void wxIrrlicht::StageSheet_RotateSpriteUpdate()
 					int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
 					float spr_angle = sprite[sprite_index].angle;
 					mapEdit_selectSpriteTool_selection[i].angle = spr_angle;
+
+
+					nirvana_stageAction_sprite action_sprite;
+                    action_sprite.old_alpha = sprite[sprite_index].alpha;
+                    action_sprite.old_animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+                    action_sprite.base_sprite_index = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_base;
+                    action_sprite.base_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].base_unique_id;
+                    action_sprite.old_body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+                    action_sprite.canvas_id = sprite[sprite_index].parent_canvas;
+                    action_sprite.old_id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+                    action_sprite.image_id = sprite[sprite_index].image_id;
+                    action_sprite.layer_sprite_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].layer_sprite_unique_id;
+                    action_sprite.old_angle = sprite[sprite_index].angle;
+                    action_sprite.old_pos_x = sprite[sprite_index].position.X;
+                    action_sprite.old_pos_y = sprite[sprite_index].position.Y;
+                    action_sprite.old_scale_x = sprite[sprite_index].scale.X;
+                    action_sprite.old_scale_y = sprite[sprite_index].scale.Y;
+                    action_sprite.sprite_id = sprite_index;
+                    action_sprite.old_visible = sprite[sprite_index].visible;
+
+                    current_action.sprite.push_back(action_sprite);
 				}
 
 				left_drag_init = true;
@@ -9537,6 +9610,32 @@ void wxIrrlicht::StageSheet_RotateSpriteUpdate()
 	}
 	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
 	{
+
+	    if(mapEdit_selectSpriteTool_selection.size() == current_action.sprite.size())
+        {
+            for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+            {
+                int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
+                int spr_x = sprite[sprite_index].position.X;
+                int spr_y = sprite[sprite_index].position.Y;
+                mapEdit_selectSpriteTool_selection[i].start_pos.set(spr_x, spr_y);
+
+                current_action.sprite[i].alpha = sprite[sprite_index].alpha;
+                current_action.sprite[i].animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+                current_action.sprite[i].body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+                current_action.sprite[i].id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+                current_action.sprite[i].angle = sprite[sprite_index].angle;
+                current_action.sprite[i].pos_x = sprite[sprite_index].position.X;
+                current_action.sprite[i].pos_y = sprite[sprite_index].position.Y;
+                current_action.sprite[i].scale_x = sprite[sprite_index].scale.X;
+                current_action.sprite[i].scale_y = sprite[sprite_index].scale.Y;
+                current_action.sprite[i].visible = sprite[sprite_index].visible;
+            }
+
+            push_undo(current_action);
+            clear_redo();
+        }
+
 
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
@@ -9616,6 +9715,27 @@ void wxIrrlicht::StageSheet_ScaleSpriteUpdate()
 					int spr_x = sprite[sprite_index].scale.X;
 					int spr_y = sprite[sprite_index].scale.Y;
 					mapEdit_selectSpriteTool_selection[i].start_scale.set(spr_x, spr_y);
+
+
+					nirvana_stageAction_sprite action_sprite;
+                    action_sprite.old_alpha = sprite[sprite_index].alpha;
+                    action_sprite.old_animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+                    action_sprite.base_sprite_index = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_base;
+                    action_sprite.base_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].base_unique_id;
+                    action_sprite.old_body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+                    action_sprite.canvas_id = sprite[sprite_index].parent_canvas;
+                    action_sprite.old_id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+                    action_sprite.image_id = sprite[sprite_index].image_id;
+                    action_sprite.layer_sprite_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].layer_sprite_unique_id;
+                    action_sprite.old_angle = sprite[sprite_index].angle;
+                    action_sprite.old_pos_x = sprite[sprite_index].position.X;
+                    action_sprite.old_pos_y = sprite[sprite_index].position.Y;
+                    action_sprite.old_scale_x = sprite[sprite_index].scale.X;
+                    action_sprite.old_scale_y = sprite[sprite_index].scale.Y;
+                    action_sprite.sprite_id = sprite_index;
+                    action_sprite.old_visible = sprite[sprite_index].visible;
+
+                    current_action.sprite.push_back(action_sprite);
 				}
 
 				left_drag_init = true;
@@ -9660,6 +9780,33 @@ void wxIrrlicht::StageSheet_ScaleSpriteUpdate()
 	}
 	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
 	{
+
+	    if(mapEdit_selectSpriteTool_selection.size() == current_action.sprite.size())
+        {
+            for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+            {
+                int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
+                int spr_x = sprite[sprite_index].position.X;
+                int spr_y = sprite[sprite_index].position.Y;
+                mapEdit_selectSpriteTool_selection[i].start_pos.set(spr_x, spr_y);
+
+                current_action.sprite[i].alpha = sprite[sprite_index].alpha;
+                current_action.sprite[i].animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+                current_action.sprite[i].body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+                current_action.sprite[i].id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+                current_action.sprite[i].angle = sprite[sprite_index].angle;
+                current_action.sprite[i].pos_x = sprite[sprite_index].position.X;
+                current_action.sprite[i].pos_y = sprite[sprite_index].position.Y;
+                current_action.sprite[i].scale_x = sprite[sprite_index].scale.X;
+                current_action.sprite[i].scale_y = sprite[sprite_index].scale.Y;
+                current_action.sprite[i].visible = sprite[sprite_index].visible;
+            }
+
+            push_undo(current_action);
+            clear_redo();
+        }
+
+
 
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();

@@ -25,6 +25,9 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		Nirvana_Project* project;
 
 		bool editor_init = false;
+		bool config_output_complete = false;
+
+		wxFileName exe_path;
 
 		wxString default_tile_path = _("tiles");
 		wxString default_sprite_path = _("sprites");
@@ -108,7 +111,8 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		std::vector<int> gt_tileset_cut_start_index;
         std::vector<int> gt_tileset_cut_count;
 
-        void setSharedControl(std::vector<wxIrrlicht*> editor_controls);
+        std::vector<wxIrrlicht*> editor_controls;
+        void setSharedControl();
 
 	public:
 		/** Constructor */

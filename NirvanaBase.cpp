@@ -1492,7 +1492,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_staticText15->Wrap( -1 );
 	bSizer47->Add( m_staticText15, 0, wxALL, 5 );
 
-	m_tileAnimation_preview_panel = new wxPanel( m_tileEdit_tileAnimation_Right_panel, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE|wxTAB_TRAVERSAL );
+	m_tileAnimation_preview_panel = new wxPanel( m_tileEdit_tileAnimation_Right_panel, wxID_ANY, wxDefaultPosition, wxSize( 128,128 ), wxBORDER_SIMPLE|wxTAB_TRAVERSAL );
 	bSizer47->Add( m_tileAnimation_preview_panel, 1, wxEXPAND | wxALL, 5 );
 
 	wxBoxSizer* bSizer49;
@@ -1814,6 +1814,10 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 
 	bSizer67->Add( 0, 0, 1, wxEXPAND, 5 );
 
+	m_staticText122 = new wxStaticText( m_panel43, wxID_ANY, _("Preview"), wxDefaultPosition, wxDefaultSize, 0 );
+	m_staticText122->Wrap( -1 );
+	bSizer67->Add( m_staticText122, 0, wxALL, 0 );
+
 	m_spriteAnimation_preview_panel = new wxPanel( m_panel43, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxBORDER_SIMPLE|wxTAB_TRAVERSAL );
 	bSizer67->Add( m_spriteAnimation_preview_panel, 1, wxALL|wxEXPAND, 5 );
 
@@ -2096,21 +2100,21 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_menubar1 = new wxMenuBar( 0 );
 	m_menu1 = new wxMenu();
 	wxMenuItem* m_menuItem1;
-	m_menuItem1 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("New Project") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItem1 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("New Project") ) + wxT('\t') + wxT("CTRL+N"), wxEmptyString, wxITEM_NORMAL );
 	m_menu1->Append( m_menuItem1 );
 
 	wxMenuItem* m_menuItem2;
-	m_menuItem2 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("Open Project") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItem2 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("Open Project") ) + wxT('\t') + wxT("CTRL+O"), wxEmptyString, wxITEM_NORMAL );
 	m_menu1->Append( m_menuItem2 );
 
 	wxMenuItem* m_menuItem3;
-	m_menuItem3 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("Save") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItem3 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("Save") ) + wxT('\t') + wxT("CTRL+S"), wxEmptyString, wxITEM_NORMAL );
 	m_menu1->Append( m_menuItem3 );
 
 	m_menu1->AppendSeparator();
 
 	wxMenuItem* m_menuItem4;
-	m_menuItem4 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("Generate Code") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItem4 = new wxMenuItem( m_menu1, wxID_ANY, wxString( _("Generate Code") ) + wxT('\t') + wxT("F9"), wxEmptyString, wxITEM_NORMAL );
 	m_menu1->Append( m_menuItem4 );
 
 	m_menu1->AppendSeparator();
@@ -2129,18 +2133,18 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 
 	m_menu2 = new wxMenu();
 	wxMenuItem* m_menuItem8;
-	m_menuItem8 = new wxMenuItem( m_menu2, wxID_ANY, wxString( _("Undo") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItem8 = new wxMenuItem( m_menu2, wxID_ANY, wxString( _("Undo") ) + wxT('\t') + wxT("CTRL+Z"), wxEmptyString, wxITEM_NORMAL );
 	m_menu2->Append( m_menuItem8 );
 
 	wxMenuItem* m_menuItem9;
-	m_menuItem9 = new wxMenuItem( m_menu2, wxID_ANY, wxString( _("Redo") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItem9 = new wxMenuItem( m_menu2, wxID_ANY, wxString( _("Redo") ) + wxT('\t') + wxT("CTRL+Y"), wxEmptyString, wxITEM_NORMAL );
 	m_menu2->Append( m_menuItem9 );
 
 	m_menubar1->Append( m_menu2, _("Edit") );
 
 	m_menu5 = new wxMenu();
 	wxMenuItem* m_menuItem11;
-	m_menuItem11 = new wxMenuItem( m_menu5, wxID_ANY, wxString( _("About") ) , wxEmptyString, wxITEM_NORMAL );
+	m_menuItem11 = new wxMenuItem( m_menu5, wxID_ANY, wxString( _("About") ) + wxT('\t') + wxT("F1"), wxEmptyString, wxITEM_NORMAL );
 	m_menu5->Append( m_menuItem11 );
 
 	m_menubar1->Append( m_menu5, _("Help") );
@@ -2317,6 +2321,13 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_spriteEdit_collisionCircle_X_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnSpriteEdit_collisionCircle_X_spinCtrl ), NULL, this );
 	m_spriteEdit_collisionCircle_Y_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnSpriteEdit_collisionCircle_Y_spinCtrl ), NULL, this );
 	m_spriteEdit_collisionCircle_Radius_spinCtrl->Connect( wxEVT_COMMAND_SPINCTRL_UPDATED, wxSpinEventHandler( Nirvana_MainFrame::OnSpriteEdit_collisionCircle_Radius_spinCtrl ), NULL, this );
+	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnNewProject ), this, m_menuItem1->GetId());
+	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnOpenProject ), this, m_menuItem2->GetId());
+	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnSaveProject ), this, m_menuItem3->GetId());
+	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnGenerate ), this, m_menuItem4->GetId());
+	m_menu1->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnNirvanaClose ), this, m_menuItem6->GetId());
+	m_menu2->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnStageUndo ), this, m_menuItem8->GetId());
+	m_menu2->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( Nirvana_MainFrame::OnStageRedo ), this, m_menuItem9->GetId());
 	this->Connect( m_newProject_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnNewProject ) );
 	this->Connect( m_openProject_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnOpenProject ) );
 	this->Connect( m_saveProject_tool->GetId(), wxEVT_COMMAND_TOOL_CLICKED, wxCommandEventHandler( Nirvana_MainFrame::OnSaveProject ) );

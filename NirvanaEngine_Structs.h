@@ -465,6 +465,7 @@ struct nirvana_stageAction_sprite
 
     int base_sprite_index;
 
+    std::string old_id_name;
     std::string id_name;
 
     int project_shape_index;
@@ -494,9 +495,16 @@ struct nirvana_stageAction_sprite
 
 	int layer_sprite_unique_id = -1;
 
+	irr::u8 old_alpha = 255;
 	irr::u8 alpha = 255;
+
+	bool old_visible = true;
 	bool visible = true;
+
+	int old_body_type = SPRITE_TYPE_DYNAMIC;
 	int body_type = SPRITE_TYPE_DYNAMIC;
+
+	std::string old_animation_name = "SPRITE_BASE_ANIMATION";
 	std::string animation_name = "SPRITE_BASE_ANIMATION";
 
 	nirvana_stageAction_shape old_shape;

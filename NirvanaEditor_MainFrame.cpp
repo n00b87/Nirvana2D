@@ -16,6 +16,8 @@ NirvanaEditor_MainFrame::NirvanaEditor_MainFrame( wxWindow* parent )
 :
 Nirvana_MainFrame( parent )
 {
+    exe_path = wxFileName(wxStandardPaths::Get().GetExecutablePath());
+
 	project = new Nirvana_Project();
 
 	tile_editor = new Nirvana_TileEditor(this, m_tileAnimation_tileSheet_panel, m_tileAnimation_tileFrames_panel,
@@ -67,7 +69,6 @@ Nirvana_MainFrame( parent )
 
 	map_editor->setProject(project);
 
-	std::vector<wxIrrlicht*> editor_controls;
 	editor_controls.push_back(map_editor->getMapViewControl());
 	editor_controls.push_back(map_editor->getTileSelectControl());
 	editor_controls.push_back(tile_editor->getAnimationSheetControl());
@@ -79,7 +80,7 @@ Nirvana_MainFrame( parent )
 	editor_controls.push_back(sprite_editor->getAnimationPreviewControl());
 	editor_controls.push_back(sprite_editor->getAnimationFrameControl());
 
-	setSharedControl(editor_controls);
+	setSharedControl();
 
 
 	map_editor->getTileSelectControl()->stage_edit_control = map_editor->getMapViewControl();
@@ -271,43 +272,60 @@ void NirvanaEditor_MainFrame::OnNirvanaClose( wxCloseEvent& event )
 {
     //On Windows, writing the config file on close doesn't seem to work
     #ifdef _WIN32
-    Close();
+    //Close();
     #endif // _WIN32
 
-	wxFileName fname(wxStandardPaths::Get().GetExecutablePath());
+	wxFileName fname = exe_path;
 	fname.AppendDir(_("config"));
 	fname.SetFullName(_("nirvana.config"));
 
-	//Create config file if it doesn't exists
-	wxFile cfg_file(fname.GetAbsolutePath(), wxFile::write);
-
-	if(cfg_file.IsOpened())
+	if(!config_output_complete)
 	{
-		wxString map_control_config = _("MAP_EDITOR_MAP_CONTROL ");
-		map_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getMapViewControl()->scroll_speed) + _(" ");
-		map_control_config += _("show_grid=") + (map_editor->getMapViewControl()->show_grid ? _("true") : _("false")) + _(" ");
-		map_control_config += _("grid_color=") + wxString::Format(_("%u"), map_editor->getMapViewControl()->grid_color.color) + _(" ");
-		map_control_config += _("show_shapes=") + (map_editor->getMapViewControl()->show_shapes_all ? _("true") : _("false")) + _(";");
+	    config_output_complete = true;
 
-		wxString tileSelect_control_config = _("TILE_SELECT_CONTROL ");
-		tileSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getTileSelectControl()->scroll_speed) + _(";");
+	    //Create config file if it doesn't exists
+        wxFile cfg_file(fname.GetAbsolutePath(), wxFile::write);
 
-		wxString spriteSelect_control_config = _("SPRITE_SELECT_CONTROL ");
-		spriteSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), sprite_editor->getAnimationSheetControl()->scroll_speed) + _(";");
+        if(cfg_file.IsOpened())
+        {
+            wxString map_control_config = _("MAP_EDITOR_MAP_CONTROL ");
+            //wxMessageBox(_("TEST: ") + )
+            map_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getMapViewControl()->scroll_speed) + _(" ");
+            map_control_config += _("show_grid=") + (map_editor->getMapViewControl()->show_grid ? _("true") : _("false")) + _(" ");
+            map_control_config += _("grid_color=") + wxString::Format(_("%u"), map_editor->getMapViewControl()->grid_color.color) + _(" ");
+            map_control_config += _("show_shapes=") + (map_editor->getMapViewControl()->show_shapes_all ? _("true") : _("false")) + _(";");
+
+            wxString tileSelect_control_config = _("TILE_SELECT_CONTROL ");
+            tileSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getTileSelectControl()->scroll_speed) + _(";");
+
+            wxString spriteSelect_control_config = _("SPRITE_SELECT_CONTROL ");
+            spriteSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), sprite_editor->getAnimationSheetControl()->scroll_speed) + _(";");
 
 
-		cfg_file.Write(map_control_config + _("\n"));
-		cfg_file.Write(tileSelect_control_config + _("\n"));
-		cfg_file.Write(spriteSelect_control_config + _("\n"));
+            cfg_file.Write(map_control_config + _("\n"));
+            cfg_file.Write(tileSelect_control_config + _("\n"));
+            cfg_file.Write(spriteSelect_control_config + _("\n"));
 
-		cfg_file.Close();
+            cfg_file.Close();
+        }
+
+        map_editor->stopEditor(true);
+        sprite_editor->stopEditor();
+        tile_editor->stopEditor();
+
+        for(int i = 0; i < editor_controls.size(); i++)
+        {
+            delete editor_controls[i];
+        }
+
 	}
 
 	Close();
+
 }
 
 
-void NirvanaEditor_MainFrame::setSharedControl(std::vector<wxIrrlicht*> editor_controls)
+void NirvanaEditor_MainFrame::setSharedControl()
 {
     for(int a = 0; a < editor_controls.size(); a++)
     {
