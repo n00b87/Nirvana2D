@@ -6,6 +6,7 @@
 
 #include "rc_defines.h"
 
+
 struct canvas_obj
 {
     irr::video::ITexture* texture;
@@ -650,6 +651,7 @@ void clear_redo()
 {
     redo_buffer.clear();
 }
+
 
 
 #endif // NIRVANAENGINE_STRUCTS_H_INCLUDED

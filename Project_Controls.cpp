@@ -555,6 +555,8 @@ void NirvanaEditor_MainFrame::OnOpenProject( wxCommandEvent& event )
 
 	this->SetTitle(wxString(project->project_name) + _(" - Nirvana2D"));
 
+	addRecentProject();
+
 	return;
 }
 
@@ -571,6 +573,8 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 		wxMessageBox(_("You must have an open project to save"));
 		return;
 	}
+
+	addRecentProject();
 
 	int current_main_tab = m_editorMainTab_auinotebook->GetSelection();
 	int current_project_tab = m_projectManager_auinotebook->GetSelection();
