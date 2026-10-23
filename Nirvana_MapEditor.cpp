@@ -208,6 +208,9 @@ void Nirvana_MapEditor::setMapTool(int tool_id)
 
 void Nirvana_MapEditor::selectStage(int stage_index)
 {
+    clear_undo();
+    clear_redo();
+
 	selected_layer = -1;
 	selected_sprite = -1;
 	selected_tile = -1;

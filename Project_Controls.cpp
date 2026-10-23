@@ -332,6 +332,9 @@ void NirvanaEditor_MainFrame::OnNewProject( wxCommandEvent& event )
 	if(!dialog->create_flag)
 		return;
 
+    clear_undo();
+    clear_redo();
+
 	newProject(dialog->project_path, dialog->project_name);
 
 	this->SetTitle(wxString(project->project_name) + _(" - Nirvana2D"));
@@ -398,6 +401,9 @@ bool NirvanaEditor_MainFrame::loadProject(wxFileName project_file)
 {
 	if(!editor_init)
 		return false;
+
+    clear_undo();
+    clear_redo();
 
 	wxFile pfile(project_file.GetAbsolutePath(), wxFile::read);
 	wxString p_data = _("");

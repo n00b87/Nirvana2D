@@ -941,6 +941,9 @@ void NirvanaEditor_MainFrame::OnMainTabChanged( wxAuiNotebookEvent& event )
 	if(!editor_init)
 		return;
 
+    clear_undo();
+    clear_redo();
+
 	int page_index = event.GetSelection();
 	wxPanel* new_panel = (wxPanel*)m_editorMainTab_auinotebook->GetPage(page_index);
 
