@@ -384,6 +384,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxToolBarToolBase* m_generate_tool;
 
 		// Virtual event handlers, override them in your derived class
+		virtual void OnActivate( wxActivateEvent& event ) { event.Skip(); }
 		virtual void OnNirvanaClose( wxCloseEvent& event ) { event.Skip(); }
 		virtual void OnMainTabChanged( wxAuiNotebookEvent& event ) { event.Skip(); }
 		virtual void OnActiveLayerSelect( wxCommandEvent& event ) { event.Skip(); }

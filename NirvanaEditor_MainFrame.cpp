@@ -39,6 +39,8 @@ Nirvana_MainFrame( parent )
 
 	sprite_editor->getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
 	sprite_editor->getAnimationSheetControl()->update_events = false;
+	sprite_editor->getAnimationSheetControl()->pre_active_change_update_events = false;
+
 
 	m_spriteEdit_collisionShape_comboBox->Append(_("BOX"));
 	m_spriteEdit_collisionShape_comboBox->Append(_("POLYGON"));
@@ -66,6 +68,7 @@ Nirvana_MainFrame( parent )
 	map_editor->getMapViewControl()->project = project;
 
 	map_editor->getTileSelectControl()->update_events = true;
+	map_editor->getTileSelectControl()->pre_active_change_update_events = true;
 
 	map_editor->setProject(project);
 
@@ -327,6 +330,35 @@ Nirvana_MainFrame( parent )
     }
 }
 
+void NirvanaEditor_MainFrame::OnActivate( wxActivateEvent& event )
+{
+    if( (!event.GetActive()) && window_is_active)
+    {
+        //std::cout << "DISABLE" << std::endl;
+        for(int i = 0; i < editor_controls.size(); i++)
+        {
+            if(editor_controls[i])
+            {
+                editor_controls[i]->pre_active_change_update_events = editor_controls[i]->enable_update;
+                editor_controls[i]->enable_update = false;
+            }
+        }
+    }
+    else if( event.GetActive() && (!window_is_active))
+    {
+        //std::cout << "ENABLE" << std::endl;
+        for(int i = 0; i < editor_controls.size(); i++)
+        {
+            if(editor_controls[i])
+            {
+                editor_controls[i]->enable_update = editor_controls[i]->pre_active_change_update_events;
+            }
+        }
+    }
+
+    window_is_active = event.GetActive();
+}
+
 void NirvanaEditor_MainFrame::OnNirvanaClose( wxCloseEvent& event )
 {
     //On Windows, writing the config file on close doesn't seem to work
@@ -443,6 +475,9 @@ void NirvanaEditor_MainFrame::addRecentProject()
 
 void NirvanaEditor_MainFrame::OnRecentProject( wxCommandEvent& event )
 {
+    if(!project)
+        return;
+
     for(int i = 0; i < recent_projects.size(); i++)
     {
         if(recent_projects[i].m_item->GetId() == event.GetId())

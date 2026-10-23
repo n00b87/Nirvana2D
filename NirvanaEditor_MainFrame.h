@@ -33,6 +33,8 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 		bool editor_init = false;
 		bool config_output_complete = false;
 
+		bool window_is_active = true;
+
 		wxFileName exe_path;
 
 		std::vector<nirvana_recent_project> recent_projects;
@@ -134,6 +136,8 @@ class NirvanaEditor_MainFrame : public Nirvana_MainFrame
 
 	protected:
 		void OnMainTabChanged( wxAuiNotebookEvent& event );
+
+		void OnActivate( wxActivateEvent& event );
 
 		void OnNirvanaClose( wxCloseEvent& event );
 

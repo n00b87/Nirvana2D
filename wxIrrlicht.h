@@ -405,6 +405,7 @@ class wxIrrlicht : public wxControl {
         int spriteEdit_selected_frame_frame = -1;
 
         bool update_events = false;
+        bool pre_active_change_update_events = false;
 
         void UpdateSpriteAnimationSheet();
         void UpdateSpriteAnimationFrame();

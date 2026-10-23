@@ -192,6 +192,8 @@ actual_params->WindowId = (HWND)this->GetHandle();
 
     is_tile_select_screen = false;
 
+    pre_active_change_update_events = update_events;
+
 	m_init = true;
 
 	wxString editor_path = wxStandardPaths::Get().GetExecutablePath();

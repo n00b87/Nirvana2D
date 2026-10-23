@@ -1,8 +1,8 @@
 # depslib dependency file v1.0
-1792619757 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
+1792768576 source:/home/n00b/Projects/Nirvana2D/NirvanaBase.cpp
 	"NirvanaBase.h"
 
-1792619757 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
+1792768576 /home/n00b/Projects/Nirvana2D/NirvanaBase.h
 	<wx/artprov.h>
 	<wx/xrc/xmlres.h>
 	<wx/intl.h>
@@ -1607,7 +1607,7 @@
 
 1765945870 /usr/include/wx-3.2/wx/gtk/toolbar.h
 
-1792760233 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
+1792771574 /home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.h
 	"NirvanaBase.h"
 	"wxIrrlicht.h"
 	"Nirvana_SpriteAnimation.h"
@@ -1655,7 +1655,7 @@
 
 1765945870 /usr/include/wx-3.2/wx/gtk/dialog.h
 
-1792763665 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
+1792771788 source:/home/n00b/Projects/Nirvana2D/NirvanaEditor_MainFrame.cpp
 	"NirvanaEditor_MainFrame.h"
 	<wx/stdpaths.h>
 	<wx/dir.h>
@@ -2846,7 +2846,7 @@
 
 1765945870 /usr/include/wx-3.2/wx/gtk/dirdlg.h
 
-1792573662 /home/n00b/Projects/Nirvana2D/wxIrrlicht.h
+1792771524 /home/n00b/Projects/Nirvana2D/wxIrrlicht.h
 	<windows.h>
 	<irrlicht.h>
 	<wx/wx.h>
@@ -3202,7 +3202,7 @@
 	"Nirvana_Project.h"
 	"rc_defines.h"
 
-1792670746 source:/home/n00b/Projects/Nirvana2D/wxIrrlicht.cpp
+1792771710 source:/home/n00b/Projects/Nirvana2D/wxIrrlicht.cpp
 	<wx/wx.h>
 	<wx/stdpaths.h>
 	<wx/filename.h>
