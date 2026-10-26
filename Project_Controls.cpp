@@ -2585,6 +2585,9 @@ void NirvanaEditor_MainFrame::OnGenerate( wxCommandEvent& event )
 		if(!template_tgt_path.Exists())
             wxCopyFile(template_path.GetAbsolutePath(), template_tgt_path.GetAbsolutePath());
 	}
+
+	if(studio_project_path.Exists())
+        wxMessageBox(_("Code Generation Complete"));
 }
 
 void NirvanaEditor_MainFrame::OnNewStage( wxCommandEvent& event )

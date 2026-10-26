@@ -956,7 +956,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_tile_panel->SetSizer( bSizer16 );
 	m_mapEdit_tile_panel->Layout();
 	bSizer16->Fit( m_mapEdit_tile_panel );
-	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_mapEdit_tile_panel, _("Tiles"), true, wxNullBitmap );
+	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_mapEdit_tile_panel, _("Tiles"), false, wxNullBitmap );
 	m_mapEdit_sprite_panel = new wxPanel( m_mapEdit_layerObjectTools_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer18;
 	bSizer18 = new wxBoxSizer( wxVERTICAL );
@@ -1029,7 +1029,7 @@ Nirvana_MainFrame::Nirvana_MainFrame( wxWindow* parent, wxWindowID id, const wxS
 	m_mapEdit_sprite_panel->SetSizer( bSizer18 );
 	m_mapEdit_sprite_panel->Layout();
 	bSizer18->Fit( m_mapEdit_sprite_panel );
-	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_mapEdit_sprite_panel, _("Sprites"), false, wxNullBitmap );
+	m_mapEdit_layerObjectTools_auinotebook->AddPage( m_mapEdit_sprite_panel, _("Sprites"), true, wxNullBitmap );
 	m_mapEdit_collision_panel = new wxPanel( m_mapEdit_layerObjectTools_auinotebook, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTAB_TRAVERSAL );
 	wxBoxSizer* bSizer241;
 	bSizer241 = new wxBoxSizer( wxVERTICAL );
