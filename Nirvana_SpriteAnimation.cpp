@@ -159,7 +159,7 @@ void Nirvana_SpriteEditor::initAnimationFrame()
 	spriteFrame_target->debug_string = _("frame");
 
 	irr::SIrrlichtCreationParameters params;
-    params.DriverType = irr::video::EDT_BURNINGSVIDEO;
+    params.DriverType = irr::video::EDT_OPENGL;
     params.WindowSize = irr::core::dimension2du(t_size, 96);
 
 	spriteFrame_target->InitIrr(&params);
@@ -192,14 +192,14 @@ void Nirvana_SpriteEditor::initAnimationPreview()
 		//wxMessageBox(_("SIZE[") + wxString::Format(_("%i"), i) + _("] = ") + wxString::Format(_("%i"), w) + _(", ") + wxString::Format(_("%i"), h) );
 	}
 
-	t_size = t_size/4;
+	t_size = t_size;
 
 	spritePreview_target=new wxIrrlicht(animation_preview, wxID_ANY, false, wxPoint(ClientW(0), ClientH(0)), wxGetDisplaySize());
 
 	spritePreview_target->debug_string = _("preview");
 
 	irr::SIrrlichtCreationParameters params;
-    params.DriverType = irr::video::EDT_BURNINGSVIDEO;
+    params.DriverType = irr::video::EDT_OPENGL;
     params.WindowSize = irr::core::dimension2du(t_size, t_size);
 
 	spritePreview_target->InitIrr(&params);
@@ -210,7 +210,7 @@ void Nirvana_SpriteEditor::initAnimationPreview()
 	irr::scene::ISceneManager* smgr = device->getSceneManager();
 	irr::gui::IGUIEnvironment* guienv = device->getGUIEnvironment();
 
-	spritePreview_target->preview_canvas = spritePreview_target->createCanvas(t_size, t_size, 0, 0, t_size, t_size, CANVAS_TYPE_SPRITE);
+	spritePreview_target->preview_canvas = spritePreview_target->createCanvas(t_size, t_size, 0, 0, animation_preview->GetClientSize().GetX(), animation_preview->GetClientSize().GetY(), CANVAS_TYPE_SPRITE);
 	spritePreview_target->setActiveCanvas(spritePreview_target->preview_canvas);
 	spritePreview_target->control_id = NV_SPRITE_EDIT_ANIMATION_PREVIEW;
 }
@@ -460,6 +460,8 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 
 		//CLEAR PREVIEW TARGET
 		{
+		    getAnimationPreviewControl()->GetDevice()->getContextManager()->activateContext(getAnimationPreviewControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
+
 		    getAnimationPreviewControl()->setActiveCanvas(getAnimationPreviewControl()->preview_canvas);
             getAnimationPreviewControl()->clearCanvas();
 
@@ -536,6 +538,8 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	startEditor(editor_page_num);
 
 
+	getAnimationFrameControl()->GetDevice()->getContextManager()->activateContext(getAnimationFrameControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
+
 	spriteFrame_target->clear_flag = true;
 	spriteFrame_target->spriteEdit_selected_animation = -1;
 
@@ -585,9 +589,15 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 	int spr_index = spriteFrame_target->spriteEdit_selected_sprite;
 	project->setSpriteObject(selected_sprite, spriteFrame_target->sprite[spr_index]);
 
+	getAnimationFrameControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+
 	spriteCollision_target->collision_physics_obj = project->getSpritePhysics(selected_sprite);
 
+
+	getAnimationPreviewControl()->GetDevice()->getContextManager()->activateContext(getAnimationPreviewControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
+
 	spritePreview_target->clear_flag = true;
+	int preview_selected_sprite = spritePreview_target->spriteEdit_selected_sprite;
 	spritePreview_target->spriteEdit_selected_animation = -1;
 
 	clearTarget(spritePreview_target);
@@ -608,8 +618,15 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 									  &spritePreview_target->sheet_width,
 									  &spritePreview_target->sheet_height);
 
-	if(spritePreview_target->spriteExists(spritePreview_target->spriteEdit_selected_sprite))
-		spritePreview_target->deleteSprite(spritePreview_target->spriteEdit_selected_sprite);
+	if(spritePreview_target->spriteExists(preview_selected_sprite))
+    {
+        //std::cout << "delete sprite" << std::endl;
+        spritePreview_target->deleteSprite(preview_selected_sprite);
+    }
+    else
+    {
+        //std::cout << "SPR does not exists: " << preview_selected_sprite << std::endl;
+    }
 
 	spritePreview_target->setActiveCanvas(spritePreview_target->preview_canvas);
 	spritePreview_target->spriteEdit_selected_sprite = spritePreview_target->createSprite(-1,
@@ -633,6 +650,8 @@ void Nirvana_SpriteEditor::selectSprite(wxString spr_id)
 			spritePreview_target->setSpriteAnimationFrame(spritePreview_target->spriteEdit_selected_sprite, i, a_frame, n_sprite.object.animation[i].frames[a_frame]);
 		}
 	}
+
+	getAnimationPreviewControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
 
 }
 

@@ -192,6 +192,8 @@ actual_params->WindowId = (HWND)this->GetHandle();
 
     is_tile_select_screen = false;
 
+    pre_active_change_update_events = update_events;
+
 	m_init = true;
 
 	wxString editor_path = wxStandardPaths::Get().GetExecutablePath();
@@ -380,14 +382,14 @@ void wxIrrlicht::OnRender() {
 					}
 					else if(canvas[canvas_id].bkg_render_type == IMG_RENDER_SETTING_TILED)
 					{
-					    std::cout << "DEBUG: " << (imageExists(canvas[canvas_id].bkg_render_image_id) ? "TRUE" : "FALSE") << ", " << tsx << ", " << tsy << ", " << vpw << ", " << vph << ", " << img_w << ", " << img_h << std::endl;
+					    //std::cout << "DEBUG: " << (imageExists(canvas[canvas_id].bkg_render_image_id) ? "TRUE" : "FALSE") << ", " << tsx << ", " << tsy << ", " << vpw << ", " << vph << ", " << img_w << ", " << img_h << std::endl;
 						if(imageExists(canvas[canvas_id].bkg_render_image_id))
 						{
 							for(int it_y = tsy; it_y < vph; it_y+=img_h)
 							{
 								for(int  it_x = tsx; it_x < vpw; it_x+=img_w)
 								{
-								    std::cout << "DRAW BKG" << std::endl;
+								    //std::cout << "DRAW BKG" << std::endl;
 									drawImage(canvas[canvas_id].bkg_render_image_id, it_x, it_y);
 								}
 							}
@@ -554,6 +556,9 @@ void wxIrrlicht::OnSize(wxSizeEvent& event) {
 void wxIrrlicht::OnTimer(wxTimerEvent& event) {
 	if(!m_init)
 		return;
+
+    if(!m_pDevice)
+        return;
 
     m_pDevice->getTimer()->tick();
 
@@ -1123,7 +1128,25 @@ void wxIrrlicht::UpdateSpriteAnimationFrame()
 							//std::cout << "sheet=(" << sheet_w << ", " << frames_per_row << ") frame=(" << current_frame_width << ", " << current_frame_height << ") " << std::endl;
 						}
 
-						drawImage_BlitEx_SW(current_sheet_image, fx, 0, 64, 64, sheet_x, sheet_y, current_frame_width, current_frame_height);
+						double render_w = current_frame_width;
+						double render_h = current_frame_height;
+						double render_scale = 1;
+
+						if(render_w > render_h)
+                        {
+                            render_scale = 64 / render_w;
+                        }
+                        else
+                        {
+                            render_scale = 64 / render_h;
+                        }
+
+						render_w = ( render_w * render_scale );
+						render_h = ( render_h * render_scale );
+
+						//std::cout << "dbg r_size = " << render_w << ", " << render_h << std::endl;
+
+						drawImage_BlitEx(current_sheet_image, fx, 0, (int)render_w, (int)render_h, sheet_x, sheet_y, current_frame_width, current_frame_height);
 					}
 					setColor(rgb(30, 30, 30));
 					drawRect(fx, 0, 64, 63);
@@ -1214,7 +1237,9 @@ void wxIrrlicht::UpdateSpriteAnimationPreview()
 
 	if(imageExists(current_sheet_image))
 	{
-		drawImage_BlitEx_SW(current_sheet_image, 0, 0, 64, 64, 0, 0, 64, 64);
+	    //drawImage_BlitEx(current_sheet_image, 0, 0, current_frame_width, current_frame_height, 0, 0, current_frame_width, current_frame_height);
+		//std::cout << "DB SZ = " << current_frame_width << ", " << current_frame_height << std::endl;
+		//drawImage_BlitEx_SW(current_sheet_image, 0, 0, 64, 64, 0, 0, current_frame_width, current_frame_height);
 	}
 
 	return;
@@ -2388,6 +2413,7 @@ void wxIrrlicht::UpdateTileAnimationFrame()
 					int fx = i*64-scroll_offset_x;
 					if(sheet_frame >= 0 && fx >= 0 && fx < pw)
 					{
+					    //wxMessageBox(_("STS: ") + wxString::Format(_("%i"), sheet_w) + _(", ") + wxString::Format(_("%i"), current_frame_width) + _(", ") + wxString::Format(_("%i"), sheet_frame));
 						int frames_per_row = sheet_w / current_frame_width;
 						int sheet_x = (sheet_frame % frames_per_row) * current_frame_width;
 						int sheet_y = (sheet_frame / frames_per_row) * current_frame_height;
@@ -2837,6 +2863,30 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 				{
 					if(tmap_x >= 0 && tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile.size())
 					{
+					    nirvana_stageAction_tile action_tile;
+					    action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x];
+					    action_tile.new_tile = mapEdit_tile_selection.row[tr].data[tc];
+					    action_tile.map_tile_pos_x = tmap_x;
+					    action_tile.map_tile_pos_y = tmap_y;
+
+					    int c_index = -1;
+					    for(int cti = 0; cti < current_action.tiles.size(); cti++)
+                        {
+                            if(current_action.tiles[cti].map_tile_pos_x == tmap_x && current_action.tiles[cti].map_tile_pos_y == tmap_y)
+                            {
+                                c_index = cti;
+                                break;
+                            }
+                        }
+
+					    if(c_index >= 0)
+                        {
+                            action_tile.old_tile = current_action.tiles[c_index].old_tile;
+                            current_action.tiles[c_index] = action_tile;
+                        }
+                        else
+                            current_action.tiles.push_back(action_tile);
+
 						project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x] = mapEdit_tile_selection.row[tr].data[tc];
 					}
 				}
@@ -2875,6 +2925,13 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 
 				//std::cout << "TEST: " << selected_layer << std::endl;
 
+				current_action.action_type = NIRVANA_ACTION_SETTILE;
+                current_action.num_rows = num_rows;
+                current_action.num_cols = num_cols;
+                current_action.tset = tset;
+                current_action.stage_index = selected_stage;
+                current_action.layer_index = selected_layer;
+
 				left_drag_init = true;
 			}
 		}
@@ -2885,6 +2942,13 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 		//this->ReleaseMouse();
 		left_drag_init = false;
 		//wxMessageBox(_("RELEASE"));
+
+		if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
+
 		return;
 	}
 
@@ -2903,6 +2967,31 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 			if(tmap_x >= 0 && tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile.size())
 			{
 			    //std::cout << "YEET" << std::endl;
+
+			    nirvana_stageAction_tile action_tile;
+                action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x];
+                action_tile.new_tile = -1;
+                action_tile.map_tile_pos_x = tmap_x;
+                action_tile.map_tile_pos_y = tmap_y;
+
+                int c_index = -1;
+                for(int cti = 0; cti < current_action.tiles.size(); cti++)
+                {
+                    if(current_action.tiles[cti].map_tile_pos_x == tmap_x && current_action.tiles[cti].map_tile_pos_y == tmap_y)
+                    {
+                        c_index = cti;
+                        break;
+                    }
+                }
+
+                if(c_index >= 0)
+                {
+                    action_tile.old_tile = current_action.tiles[c_index].old_tile;
+                    current_action.tiles[c_index] = action_tile;
+                }
+                else
+                    current_action.tiles.push_back(action_tile);
+
 				project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x] = -1;
 			}
 		}
@@ -2913,8 +3002,16 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 			if( px >= 0 && px < pw && py >= 0 && py < ph )
 			{
 				right_drag_init = true;
+
+				current_action.action_type = NIRVANA_ACTION_SETTILE;
+                current_action.num_rows = num_rows;
+                current_action.num_cols = num_cols;
+                current_action.tset = tset;
+                current_action.stage_index = selected_stage;
+                current_action.layer_index = selected_layer;
 			}
 		}
+
 	}
 	else if( (!mouse_state.RightIsDown()) && right_drag_init )
 	{
@@ -2922,6 +3019,13 @@ void wxIrrlicht::StageSheet_SetTileUpdate()
 		//this->ReleaseMouse();
 		right_drag_init = false;
 		//wxMessageBox(_("RELEASE"));
+
+		if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
+
 		return;
 	}
 }
@@ -3186,6 +3290,31 @@ void wxIrrlicht::StageSheet_SetTileUpdate_ISO()
                     {
                         if(tmap_x >= 0 && tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile.size())
                         {
+                            nirvana_stageAction_tile action_tile;
+                            action_tile.iso_map = 1;
+                            action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile[tmap_x];
+                            action_tile.new_tile = mapEdit_tile_selection.row[tr].data[tc];
+                            action_tile.map_tile_pos_x = tmap_x;
+                            action_tile.map_tile_pos_y = tmap_y;
+
+                            int c_index = -1;
+                            for(int cti = 0; cti < current_action.tiles.size(); cti++)
+                            {
+                                if(current_action.tiles[cti].iso_map == action_tile.iso_map && current_action.tiles[cti].map_tile_pos_x == tmap_x && current_action.tiles[cti].map_tile_pos_y == tmap_y)
+                                {
+                                    c_index = cti;
+                                    break;
+                                }
+                            }
+
+                            if(c_index >= 0)
+                            {
+                                action_tile.old_tile = current_action.tiles[c_index].old_tile;
+                                current_action.tiles[c_index] = action_tile;
+                            }
+                            else
+                                current_action.tiles.push_back(action_tile);
+
                             project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile[tmap_x] = mapEdit_tile_selection.row[tr].data[tc];
                         }
                     }
@@ -3196,6 +3325,32 @@ void wxIrrlicht::StageSheet_SetTileUpdate_ISO()
                     {
                         if(tmap_x >= 0 && tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile.size())
                         {
+                            nirvana_stageAction_tile action_tile;
+                            action_tile.iso_map = 0;
+                            action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x];
+                            action_tile.new_tile = mapEdit_tile_selection.row[tr].data[tc];
+                            action_tile.map_tile_pos_x = tmap_x;
+                            action_tile.map_tile_pos_y = tmap_y;
+
+                            int c_index = -1;
+                            for(int cti = 0; cti < current_action.tiles.size(); cti++)
+                            {
+                                if(current_action.tiles[cti].iso_map == action_tile.iso_map && current_action.tiles[cti].map_tile_pos_x == tmap_x && current_action.tiles[cti].map_tile_pos_y == tmap_y)
+                                {
+                                    c_index = cti;
+                                    break;
+                                }
+                            }
+
+                            if(c_index >= 0)
+                            {
+                                action_tile.old_tile = current_action.tiles[c_index].old_tile;
+                                current_action.tiles[c_index] = action_tile;
+                            }
+                            else
+                                current_action.tiles.push_back(action_tile);
+
+
                             project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x] = mapEdit_tile_selection.row[tr].data[tc];
                         }
                     }
@@ -3235,6 +3390,15 @@ void wxIrrlicht::StageSheet_SetTileUpdate_ISO()
 
 				//std::cout << "TEST: " << selected_layer << std::endl;
 
+
+				current_action.action_type = NIRVANA_ACTION_SETTILE_ISO;
+                current_action.num_rows = num_rows;
+                current_action.num_cols = num_cols;
+                current_action.tset = tset;
+                current_action.stage_index = selected_stage;
+                current_action.layer_index = selected_layer;
+
+
 				left_drag_init = true;
 			}
 		}
@@ -3245,6 +3409,13 @@ void wxIrrlicht::StageSheet_SetTileUpdate_ISO()
 		//this->ReleaseMouse();
 		left_drag_init = false;
 		//wxMessageBox(_("RELEASE"));
+
+		if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
+
 		return;
 	}
 
@@ -3283,6 +3454,31 @@ void wxIrrlicht::StageSheet_SetTileUpdate_ISO()
             {
                 if(tmap_x >= 0 && tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile.size())
                 {
+                    nirvana_stageAction_tile action_tile;
+                    action_tile.iso_map = 1;
+                    action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile[tmap_x];
+                    action_tile.new_tile = -1;
+                    action_tile.map_tile_pos_x = tmap_x;
+                    action_tile.map_tile_pos_y = tmap_y;
+
+                    int c_index = -1;
+                    for(int cti = 0; cti < current_action.tiles.size(); cti++)
+                    {
+                        if(current_action.tiles[cti].iso_map == action_tile.iso_map && current_action.tiles[cti].map_tile_pos_x == tmap_x && current_action.tiles[cti].map_tile_pos_y == tmap_y)
+                        {
+                            c_index = cti;
+                            break;
+                        }
+                    }
+
+                    if(c_index >= 0)
+                    {
+                        action_tile.old_tile = current_action.tiles[c_index].old_tile;
+                        current_action.tiles[c_index] = action_tile;
+                    }
+                    else
+                        current_action.tiles.push_back(action_tile);
+
                     //std::cout << "YEET" << std::endl;
                     project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[tmap_y].tile[tmap_x] = -1;
                 }
@@ -3294,6 +3490,31 @@ void wxIrrlicht::StageSheet_SetTileUpdate_ISO()
             {
                 if(tmap_x >= 0 && tmap_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile.size())
                 {
+                    nirvana_stageAction_tile action_tile;
+                    action_tile.iso_map = 0;
+                    action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x];
+                    action_tile.new_tile = -1;
+                    action_tile.map_tile_pos_x = tmap_x;
+                    action_tile.map_tile_pos_y = tmap_y;
+
+                    int c_index = -1;
+                    for(int cti = 0; cti < current_action.tiles.size(); cti++)
+                    {
+                        if(current_action.tiles[cti].iso_map == action_tile.iso_map && current_action.tiles[cti].map_tile_pos_x == tmap_x && current_action.tiles[cti].map_tile_pos_y == tmap_y)
+                        {
+                            c_index = cti;
+                            break;
+                        }
+                    }
+
+                    if(c_index >= 0)
+                    {
+                        action_tile.old_tile = current_action.tiles[c_index].old_tile;
+                        current_action.tiles[c_index] = action_tile;
+                    }
+                    else
+                        current_action.tiles.push_back(action_tile);
+
                     //std::cout << "YEET" << std::endl;
                     project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x] = -1;
                 }
@@ -3306,6 +3527,13 @@ void wxIrrlicht::StageSheet_SetTileUpdate_ISO()
 			if( px >= 0 && px < pw && py >= 0 && py < ph )
 			{
 				right_drag_init = true;
+
+				current_action.action_type = NIRVANA_ACTION_SETTILE_ISO;
+                current_action.num_rows = num_rows;
+                current_action.num_cols = num_cols;
+                current_action.tset = tset;
+                current_action.stage_index = selected_stage;
+                current_action.layer_index = selected_layer;
 			}
 		}
 	}
@@ -3315,6 +3543,16 @@ void wxIrrlicht::StageSheet_SetTileUpdate_ISO()
 		//this->ReleaseMouse();
 		right_drag_init = false;
 		//wxMessageBox(_("RELEASE"));
+
+
+		if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
+
+
+
 		return;
 	}
 }
@@ -3478,12 +3716,47 @@ void wxIrrlicht::StageSheet_FillTileUpdate()
 								{
 									int base_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x];
 									if(base_tile != fill_tile)
-										util_fillTile(base_tile, fill_tile, tmap_x, tmap_y);
+                                    {
+
+                                        nirvana_stageAction_tile action_tile;
+                                        action_tile.old_tile = base_tile;
+                                        action_tile.new_tile = fill_tile;
+                                        action_tile.map_tile_pos_x = tmap_x;
+                                        action_tile.map_tile_pos_y = tmap_y;
+
+                                        int c_index = -1;
+                                        for(int cti = 0; cti < current_action.tiles.size(); cti++)
+                                        {
+                                            if(current_action.tiles[cti].map_tile_pos_x == tmap_x && current_action.tiles[cti].map_tile_pos_y == tmap_y)
+                                            {
+                                                c_index = cti;
+                                                break;
+                                            }
+                                        }
+
+                                        if(c_index >= 0)
+                                        {
+                                            action_tile.old_tile = current_action.tiles[c_index].old_tile;
+                                            current_action.tiles[c_index] = action_tile;
+                                        }
+                                        else
+                                            current_action.tiles.push_back(action_tile);
+
+
+                                        util_fillTile(base_tile, fill_tile, tmap_x, tmap_y);
+                                    }
 								}
 							}
 						}
 					}
 				}
+
+
+				current_action.action_type = NIRVANA_ACTION_FILLTILE;
+                current_action.tset = tset;
+                current_action.stage_index = selected_stage;
+                current_action.layer_index = selected_layer;
+
 
 				left_drag_init = true;
 			}
@@ -3491,6 +3764,14 @@ void wxIrrlicht::StageSheet_FillTileUpdate()
 	}
 	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
 	{
+
+	    if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
+
+
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
 		left_drag_init = false;
@@ -3526,12 +3807,45 @@ void wxIrrlicht::StageSheet_FillTileUpdate()
 								{
 									int base_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[tmap_y].tile[tmap_x];
 									if(base_tile >= 0)
-										util_fillTile(base_tile, -1, tmap_x, tmap_y);
+                                    {
+
+                                        nirvana_stageAction_tile action_tile;
+                                        action_tile.old_tile = base_tile;
+                                        action_tile.new_tile = -1;
+                                        action_tile.map_tile_pos_x = tmap_x;
+                                        action_tile.map_tile_pos_y = tmap_y;
+
+                                        int c_index = -1;
+                                        for(int cti = 0; cti < current_action.tiles.size(); cti++)
+                                        {
+                                            if(current_action.tiles[cti].map_tile_pos_x == tmap_x && current_action.tiles[cti].map_tile_pos_y == tmap_y)
+                                            {
+                                                c_index = cti;
+                                                break;
+                                            }
+                                        }
+
+                                        if(c_index >= 0)
+                                        {
+                                            action_tile.old_tile = current_action.tiles[c_index].old_tile;
+                                            current_action.tiles[c_index] = action_tile;
+                                        }
+                                        else
+                                            current_action.tiles.push_back(action_tile);
+
+
+                                        util_fillTile(base_tile, -1, tmap_x, tmap_y);
+                                    }
 								}
 							}
 						}
 					}
 				}
+
+				current_action.action_type = NIRVANA_ACTION_FILLTILE;
+                current_action.tset = tset;
+                current_action.stage_index = selected_stage;
+                current_action.layer_index = selected_layer;
 
 				right_drag_init = true;
 			}
@@ -3539,6 +3853,13 @@ void wxIrrlicht::StageSheet_FillTileUpdate()
 	}
 	else if( (!mouse_state.RightIsDown()) && right_drag_init )
 	{
+
+	    if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
+
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
 		right_drag_init = false;
@@ -3871,6 +4192,33 @@ void wxIrrlicht::StageSheet_FillTileUpdate_ISO()
 
 									if(base_tile != fill_tile)
                                     {
+
+                                        nirvana_stageAction_tile action_tile;
+                                        action_tile.old_tile = base_tile;
+                                        action_tile.new_tile = fill_tile;
+                                        action_tile.map_tile_pos_x = tmap_x;
+                                        action_tile.map_tile_pos_y = tmap_y;
+                                        action_tile.iso_map = (use_map2 ? 1 : 0);
+
+                                        int c_index = -1;
+                                        for(int cti = 0; cti < current_action.tiles.size(); cti++)
+                                        {
+                                            if(current_action.tiles[cti].iso_map == action_tile.iso_map && current_action.tiles[cti].map_tile_pos_x == tmap_x && current_action.tiles[cti].map_tile_pos_y == tmap_y)
+                                            {
+                                                c_index = cti;
+                                                break;
+                                            }
+                                        }
+
+                                        if(c_index >= 0)
+                                        {
+                                            action_tile.old_tile = current_action.tiles[c_index].old_tile;
+                                            current_action.tiles[c_index] = action_tile;
+                                        }
+                                        else
+                                            current_action.tiles.push_back(action_tile);
+
+
                                         //std::cout << (use_map2 ? "USE ISO: " : "NA: ") << tmap_x << ", " << tmap_y << std::endl;
                                         util_fillTile_ISO(base_tile, fill_tile, tmap_x, tmap_y, use_map2);
                                     }
@@ -3884,12 +4232,25 @@ void wxIrrlicht::StageSheet_FillTileUpdate_ISO()
 					}
 				}
 
+				current_action.action_type = NIRVANA_ACTION_FILLTILE_ISO;
+                current_action.tset = tset;
+                current_action.stage_index = selected_stage;
+                current_action.layer_index = selected_layer;
+
+
 				left_drag_init = true;
 			}
 		}
 	}
 	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
 	{
+
+	    if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
+
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
 		left_drag_init = false;
@@ -3965,6 +4326,33 @@ void wxIrrlicht::StageSheet_FillTileUpdate_ISO()
 
 									if(base_tile != -1)
                                     {
+
+                                        nirvana_stageAction_tile action_tile;
+                                        action_tile.old_tile = base_tile;
+                                        action_tile.new_tile = -1;
+                                        action_tile.map_tile_pos_x = tmap_x;
+                                        action_tile.map_tile_pos_y = tmap_y;
+                                        action_tile.iso_map = (use_map2 ? 1 : 0);
+
+                                        int c_index = -1;
+                                        for(int cti = 0; cti < current_action.tiles.size(); cti++)
+                                        {
+                                            if(current_action.tiles[cti].iso_map == action_tile.iso_map && current_action.tiles[cti].map_tile_pos_x == tmap_x && current_action.tiles[cti].map_tile_pos_y == tmap_y)
+                                            {
+                                                c_index = cti;
+                                                break;
+                                            }
+                                        }
+
+                                        if(c_index >= 0)
+                                        {
+                                            action_tile.old_tile = current_action.tiles[c_index].old_tile;
+                                            current_action.tiles[c_index] = action_tile;
+                                        }
+                                        else
+                                            current_action.tiles.push_back(action_tile);
+
+
                                         //std::cout << (use_map2 ? "USE ISO: " : "NA: ") << tmap_x << ", " << tmap_y << std::endl;
                                         util_fillTile_ISO(base_tile, -1, tmap_x, tmap_y, use_map2);
                                     }
@@ -3978,12 +4366,25 @@ void wxIrrlicht::StageSheet_FillTileUpdate_ISO()
 					}
 				}
 
+				current_action.action_type = NIRVANA_ACTION_FILLTILE_ISO;
+                current_action.tset = tset;
+                current_action.stage_index = selected_stage;
+                current_action.layer_index = selected_layer;
+
+
 				right_drag_init = true;
 			}
 		}
 	}
 	else if( (!mouse_state.RightIsDown()) && right_drag_init )
 	{
+
+	    if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
+
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
 		right_drag_init = false;
@@ -6077,6 +6478,11 @@ void wxIrrlicht::StageSheet_MoveTileUpdate()
 				tmp_selection.resize(mapEdit_selectTileTool_selection.size());
 			tmp_selection.clear();
 
+			current_action.action_type = NIRVANA_ACTION_MOVETILE;
+            current_action.tset = tset;
+            current_action.stage_index = selected_stage;
+            current_action.layer_index = selected_layer;
+
 			//Clear old tile positions
 			for(int i = 0; i < mapEdit_selectTileTool_selection.size(); i++)
 			{
@@ -6087,6 +6493,14 @@ void wxIrrlicht::StageSheet_MoveTileUpdate()
 				{
 					if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile.size())
 					{
+					    nirvana_stageAction_tile action_tile;
+                        action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x];
+                        action_tile.new_tile = -1;
+                        action_tile.map_tile_pos_x = dst_x;
+                        action_tile.map_tile_pos_y = dst_y;
+
+                        current_action.tiles.push_back(action_tile);
+
 						project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x] = -1;
 					}
 				}
@@ -6109,6 +6523,14 @@ void wxIrrlicht::StageSheet_MoveTileUpdate()
 				{
 					if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile.size())
 					{
+					    nirvana_stageAction_tile action_tile;
+                        action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x];
+                        action_tile.new_tile = tile_index;
+                        action_tile.map_tile_pos_x = dst_x;
+                        action_tile.map_tile_pos_y = dst_y;
+
+                        current_action.tiles.push_back(action_tile);
+
 						project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x] = tile_index;
 
 						Nirvana_SelectTool_TileSelection t_select;
@@ -6123,6 +6545,12 @@ void wxIrrlicht::StageSheet_MoveTileUpdate()
 			mapEdit_selectTileTool_selection = tmp_selection;
 		}
 
+
+        if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
 
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
@@ -6441,6 +6869,12 @@ void wxIrrlicht::StageSheet_MoveTileUpdate_ISO()
 			tmp_selection.clear();
 
 
+			current_action.action_type = NIRVANA_ACTION_MOVETILE_ISO;
+            current_action.tset = tset;
+            current_action.stage_index = selected_stage;
+            current_action.layer_index = selected_layer;
+
+
 			//Clear old tile positions
 			for(int i = 0; i < mapEdit_selectTileTool_selection.size(); i++)
 			{
@@ -6454,6 +6888,15 @@ void wxIrrlicht::StageSheet_MoveTileUpdate_ISO()
                     {
                         if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile.size())
                         {
+                            nirvana_stageAction_tile action_tile;
+                            action_tile.iso_map = 1;
+                            action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile[dst_x];
+                            action_tile.new_tile = -1;
+                            action_tile.map_tile_pos_x = dst_x;
+                            action_tile.map_tile_pos_y = dst_y;
+
+                            current_action.tiles.push_back(action_tile);
+
                             project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile[dst_x] = -1;
                         }
                     }
@@ -6464,6 +6907,15 @@ void wxIrrlicht::StageSheet_MoveTileUpdate_ISO()
                     {
                         if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile.size())
                         {
+                            nirvana_stageAction_tile action_tile;
+                            action_tile.iso_map = 0;
+                            action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x];
+                            action_tile.new_tile = -1;
+                            action_tile.map_tile_pos_x = dst_x;
+                            action_tile.map_tile_pos_y = dst_y;
+
+                            current_action.tiles.push_back(action_tile);
+
                             project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x] = -1;
                         }
                     }
@@ -6524,6 +6976,15 @@ void wxIrrlicht::StageSheet_MoveTileUpdate_ISO()
                     {
                         if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile.size())
                         {
+                            nirvana_stageAction_tile action_tile;
+                            action_tile.iso_map = 1;
+                            action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile[dst_x];
+                            action_tile.new_tile = tile_index;
+                            action_tile.map_tile_pos_x = dst_x;
+                            action_tile.map_tile_pos_y = dst_y;
+
+                            current_action.tiles.push_back(action_tile);
+
                             project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile[dst_x] = tile_index;
 
                             //Nirvana_SelectTool_TileSelection t_select;
@@ -6541,6 +7002,15 @@ void wxIrrlicht::StageSheet_MoveTileUpdate_ISO()
                     {
                         if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile.size())
                         {
+                            nirvana_stageAction_tile action_tile;
+                            action_tile.iso_map = 0;
+                            action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x];
+                            action_tile.new_tile = tile_index;
+                            action_tile.map_tile_pos_x = dst_x;
+                            action_tile.map_tile_pos_y = dst_y;
+
+                            current_action.tiles.push_back(action_tile);
+
                             project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x] = tile_index;
 
                             //Nirvana_SelectTool_TileSelection t_select;
@@ -6563,6 +7033,13 @@ void wxIrrlicht::StageSheet_MoveTileUpdate_ISO()
 
 			//mapEdit_selectTileTool_selection = tmp_selection;
 		}
+
+
+		if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
 
 
 		//SHOW_CURSOR;
@@ -6768,6 +7245,11 @@ void wxIrrlicht::StageSheet_CopyTileUpdate()
 				tmp_selection.resize(mapEdit_selectTileTool_selection.size());
 			tmp_selection.clear();
 
+			current_action.action_type = NIRVANA_ACTION_COPYTILE;
+            current_action.tset = tset;
+            current_action.stage_index = selected_stage;
+            current_action.layer_index = selected_layer;
+
 			for(int i = 0; i < mapEdit_selectTileTool_selection.size(); i++)
 			{
 				if(img_w <= 0 || img_h <= 0)
@@ -6785,6 +7267,14 @@ void wxIrrlicht::StageSheet_CopyTileUpdate()
 				{
 					if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile.size())
 					{
+					    nirvana_stageAction_tile action_tile;
+                        action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x];
+                        action_tile.new_tile = tile_index;
+                        action_tile.map_tile_pos_x = dst_x;
+                        action_tile.map_tile_pos_y = dst_y;
+
+                        current_action.tiles.push_back(action_tile);
+
 						project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x] = tile_index;
 
 						Nirvana_SelectTool_TileSelection t_select;
@@ -6798,6 +7288,13 @@ void wxIrrlicht::StageSheet_CopyTileUpdate()
 			mapEdit_selectTileTool_selection.clear();
 			mapEdit_selectTileTool_selection = tmp_selection;
 		}
+
+
+		if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
 
 
 		//SHOW_CURSOR;
@@ -7118,6 +7615,11 @@ void wxIrrlicht::StageSheet_CopyTileUpdate_ISO()
 				tmp_selection.resize(mapEdit_selectTileTool_selection.size());
 			tmp_selection.clear();
 
+			current_action.action_type = NIRVANA_ACTION_COPYTILE_ISO;
+            current_action.tset = tset;
+            current_action.stage_index = selected_stage;
+            current_action.layer_index = selected_layer;
+
 
 			for(int i = 0; i < mapEdit_selectTileTool_selection.size(); i++)
 			{
@@ -7173,6 +7675,16 @@ void wxIrrlicht::StageSheet_CopyTileUpdate_ISO()
                     {
                         if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile.size())
                         {
+
+                            nirvana_stageAction_tile action_tile;
+                            action_tile.iso_map = 1;
+                            action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile[dst_x];
+                            action_tile.new_tile = tile_index;
+                            action_tile.map_tile_pos_x = dst_x;
+                            action_tile.map_tile_pos_y = dst_y;
+
+                            current_action.tiles.push_back(action_tile);
+
                             project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile[dst_x] = tile_index;
 
                             //Nirvana_SelectTool_TileSelection t_select;
@@ -7190,6 +7702,15 @@ void wxIrrlicht::StageSheet_CopyTileUpdate_ISO()
                     {
                         if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile.size())
                         {
+                            nirvana_stageAction_tile action_tile;
+                            action_tile.iso_map = 0;
+                            action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x];
+                            action_tile.new_tile = tile_index;
+                            action_tile.map_tile_pos_x = dst_x;
+                            action_tile.map_tile_pos_y = dst_y;
+
+                            current_action.tiles.push_back(action_tile);
+
                             project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x] = tile_index;
 
                             //Nirvana_SelectTool_TileSelection t_select;
@@ -7214,6 +7735,13 @@ void wxIrrlicht::StageSheet_CopyTileUpdate_ISO()
 		}
 
 
+		if(current_action.tiles.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
+
+
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
 		left_drag_init = false;
@@ -7235,6 +7763,13 @@ void wxIrrlicht::StageSheet_DeleteSelectedTileUpdate()
 	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
 		return;
 
+    int tset = project->stages[selected_stage].layers[selected_layer].layer_map.nv_tileset_index;
+
+    current_action.action_type = NIRVANA_ACTION_DELETETILE;
+    current_action.tset = tset;
+    current_action.stage_index = selected_stage;
+    current_action.layer_index = selected_layer;
+
 
 	//Clear old tile positions
 	for(int i = 0; i < mapEdit_selectTileTool_selection.size(); i++)
@@ -7246,10 +7781,24 @@ void wxIrrlicht::StageSheet_DeleteSelectedTileUpdate()
 		{
 			if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile.size())
 			{
+			    nirvana_stageAction_tile action_tile;
+                action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x];
+                action_tile.new_tile = -1;
+                action_tile.map_tile_pos_x = dst_x;
+                action_tile.map_tile_pos_y = dst_y;
+
+                current_action.tiles.push_back(action_tile);
+
 				project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x] = -1;
 			}
 		}
 	}
+
+	if(current_action.tiles.size() > 0)
+    {
+        push_undo(current_action);
+        clear_redo();
+    }
 
 	mapEdit_selectTileTool_selection.clear();
 
@@ -7267,6 +7816,13 @@ void wxIrrlicht::StageSheet_DeleteSelectedTileUpdate_ISO()
 	if(selected_layer < 0 || selected_layer >= project->stages[selected_stage].layers.size())
 		return;
 
+    int tset = project->stages[selected_stage].layers[selected_layer].layer_map.nv_tileset_index;
+
+    current_action.action_type = NIRVANA_ACTION_DELETETILE_ISO;
+    current_action.tset = tset;
+    current_action.stage_index = selected_stage;
+    current_action.layer_index = selected_layer;
+
 
 	//Clear old tile positions
 	for(int i = 0; i < mapEdit_selectTileTool_selection.size(); i++)
@@ -7281,6 +7837,15 @@ void wxIrrlicht::StageSheet_DeleteSelectedTileUpdate_ISO()
             {
                 if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile.size())
                 {
+                    nirvana_stageAction_tile action_tile;
+                    action_tile.iso_map = 1;
+                    action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile[dst_x];
+                    action_tile.new_tile = -1;
+                    action_tile.map_tile_pos_x = dst_x;
+                    action_tile.map_tile_pos_y = dst_y;
+
+                    current_action.tiles.push_back(action_tile);
+
                     project->stages[selected_stage].layers[selected_layer].layer_map.tile_map2.rows[dst_y].tile[dst_x] = -1;
                 }
             }
@@ -7291,11 +7856,26 @@ void wxIrrlicht::StageSheet_DeleteSelectedTileUpdate_ISO()
             {
                 if(dst_x >= 0 && dst_x < project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile.size())
                 {
+                    nirvana_stageAction_tile action_tile;
+                    action_tile.iso_map = 0;
+                    action_tile.old_tile = project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x];
+                    action_tile.new_tile = -1;
+                    action_tile.map_tile_pos_x = dst_x;
+                    action_tile.map_tile_pos_y = dst_y;
+
+                    current_action.tiles.push_back(action_tile);
+
                     project->stages[selected_stage].layers[selected_layer].layer_map.tile_map.rows[dst_y].tile[dst_x] = -1;
                 }
             }
         }
 	}
+
+	if(current_action.tiles.size() > 0)
+    {
+        push_undo(current_action);
+        clear_redo();
+    }
 
 	mapEdit_selectTileTool_selection.clear();
 
@@ -7824,6 +8404,12 @@ void wxIrrlicht::StageSheet_MoveTile_SpriteLayer_Update()
 					mapEdit_selectSpriteTool_selection[i].start_pos.set(spr_x, spr_y);
 				}
 
+
+				current_action.action_type = NIRVANA_ACTION_TRANSFORM_TSPRITE;
+                current_action.stage_index = selected_stage;
+                current_action.layer_index = selected_layer;
+
+
 				left_drag_init = true;
 			}
 		}
@@ -7874,9 +8460,59 @@ void wxIrrlicht::StageSheet_MoveTile_SpriteLayer_Update()
                     }
 
 
+                    int ts_index = sprite[sprite_index].layer_ts_index;
+
+
+                    nirvana_stageAction_sprite action_sprite;
+
+                    action_sprite.sprite_id = sprite_index;
+                    action_sprite.layer_ts_index = ts_index;
+
+                    action_sprite.old_pos_x = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[ts_index].x;
+                    action_sprite.old_pos_y = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[ts_index].y;
+                    action_sprite.pos_x = spr_x;
+                    action_sprite.pos_y = spr_y;
+
+                    action_sprite.old_scale_x = sprite[sprite_index].scale.X;
+                    action_sprite.old_scale_y = sprite[sprite_index].scale.Y;
+                    action_sprite.scale_x = sprite[sprite_index].scale.X;
+                    action_sprite.scale_y = sprite[sprite_index].scale.Y;
+
+                    action_sprite.old_angle = sprite[sprite_index].angle;
+                    action_sprite.angle = sprite[sprite_index].angle;
+
+                    int action_sprite_index = -1;
+
+                    for(int asi = 0; asi < current_action.sprite.size(); asi++)
+                    {
+                        if(current_action.sprite[asi].sprite_id == action_sprite.sprite_id)
+                        {
+                            action_sprite_index = asi;
+                            break;
+                        }
+                    }
+
+                    if(action_sprite_index >= 0)
+                    {
+                        action_sprite.old_pos_x = current_action.sprite[action_sprite_index].old_pos_x;
+                        action_sprite.old_pos_y = current_action.sprite[action_sprite_index].old_pos_y;
+
+                        action_sprite.old_scale_x = current_action.sprite[action_sprite_index].old_scale_x;
+                        action_sprite.old_scale_y = current_action.sprite[action_sprite_index].old_scale_y;
+
+                        action_sprite.old_angle = current_action.sprite[action_sprite_index].old_angle;
+
+                        current_action.sprite[action_sprite_index] = action_sprite;
+                    }
+                    else
+                    {
+                        //std::cout << "PUSH TILE SPR MOVE" << std::endl;
+                        current_action.sprite.push_back(action_sprite);
+                    }
+
+
                     setSpritePosition(sprite_index, spr_x, spr_y);
 
-                    int ts_index = sprite[sprite_index].layer_ts_index;
                     if(ts_index >= 0 && ts_index < project->stages[selected_stage].layers[selected_layer].layer_tile_sprites.size())
                     {
                         project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[ts_index].x = spr_x;
@@ -7891,6 +8527,11 @@ void wxIrrlicht::StageSheet_MoveTile_SpriteLayer_Update()
 	}
 	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
 	{
+	    if(current_action.sprite.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
 
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
@@ -8231,6 +8872,25 @@ void wxIrrlicht::StageSheet_SetTile_SpriteLayer_Update()
                         tsprite.sprite_id = createSprite(-1, tsprite.image_id, tsprite.width, tsprite.height);
                         setSpritePosition(tsprite.sprite_id, actual_spr_x, actual_spr_y);
 
+                        //std::cout << "DBG: tsprite.image = " << tsprite.image_id << std::endl;
+
+
+                        nirvana_stageAction_sprite action_sprite;
+
+                        action_sprite.sprite_id = -1; // new sprite is created on redo
+
+                        action_sprite.image_id = tsprite.image_id;
+
+                        action_sprite.t_sprite = tsprite;
+
+                        action_sprite.canvas_id = canvas_index;
+
+                        action_sprite.old_pos_x = tsprite.x;
+                        action_sprite.old_pos_y = tsprite.y;
+                        action_sprite.pos_x = tsprite.x;
+                        action_sprite.pos_y = tsprite.y;
+
+
                         if(layer_st_index < 0)
                         {
                             sprite[tsprite.sprite_id].layer_ts_index = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites.size();
@@ -8241,6 +8901,12 @@ void wxIrrlicht::StageSheet_SetTile_SpriteLayer_Update()
                             sprite[tsprite.sprite_id].layer_ts_index = layer_st_index;
                             project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[layer_st_index] = tsprite;
                         }
+
+
+
+                        action_sprite.layer_ts_index = sprite[tsprite.sprite_id].layer_ts_index;
+
+                        current_action.sprite.push_back(action_sprite);
                     }
 
                     mapEdit_lastAction_erase = false;
@@ -8250,6 +8916,35 @@ void wxIrrlicht::StageSheet_SetTile_SpriteLayer_Update()
                     if(selected_st_index >= 0)
                     {
                         int spr_index = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[selected_st_index].sprite_id;
+                        int p_spr_index = sprite[spr_index].layer_ts_index;
+
+                        if(p_spr_index >= 0 && p_spr_index < project->stages[selected_stage].layers[selected_layer].layer_tile_sprites.size())
+                        {
+                            tileSprite_obj tsprite;
+                            tsprite = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[p_spr_index];
+                            //tsprite.sprite_id = spr_index;
+                            //tsprite.sheet_index = project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[selected_st_index].sheet_index;
+
+
+                            nirvana_stageAction_sprite action_sprite;
+
+                            action_sprite.sprite_id = tsprite.sprite_id; // new sprite is created on redo
+
+                            action_sprite.image_id = tsprite.image_id;
+
+                            action_sprite.t_sprite = tsprite;
+
+                            action_sprite.canvas_id = canvas_index;
+
+                            action_sprite.old_pos_x = tsprite.x;
+                            action_sprite.old_pos_y = tsprite.y;
+                            action_sprite.pos_x = tsprite.x;
+                            action_sprite.pos_y = tsprite.y;
+
+                            current_action.sprite.push_back(action_sprite);
+                        }
+
+
                         deleteSprite(spr_index);
                         project->stages[selected_stage].layers[selected_layer].layer_tile_sprites[selected_st_index].sprite_id = -1;
                     }
@@ -8257,14 +8952,29 @@ void wxIrrlicht::StageSheet_SetTile_SpriteLayer_Update()
                     mapEdit_lastAction_erase = true;
                 }
 
+                if(mapEdit_lastAction_erase)
+                    current_action.action_type = NIRVANA_ACTION_DELETE_TSPRITE;
+                else
+                    current_action.action_type = NIRVANA_ACTION_CREATE_TSPRITE;
+
+                current_action.tset = tset;
+                current_action.stage_index = selected_stage;
+                current_action.layer_index = selected_layer;
+
 
                 left_drag_init = true; // This could be left or right mouse click but I check the left mouse when making a new sprite so it doesn't matter
             }
 		}
 
 	}
-	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
+	else if( ( (!mouse_state.LeftIsDown()) || ( (!mouse_state.RightIsDown()) && mapEdit_lastAction_erase ) ) && left_drag_init )
 	{
+
+	    if(current_action.sprite.size() > 0)
+        {
+            push_undo(current_action);
+            clear_redo();
+        }
 
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
@@ -8648,6 +9358,10 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 
 	//std::cout << "DBG2" << std::endl;
 
+	current_action.action_type = NIRVANA_ACTION_TRANSFORM_SPRITE;
+    current_action.stage_index = selected_stage;
+    current_action.layer_index = selected_layer;
+
 
 	if(mouse_state.LeftIsDown())
 	{
@@ -8668,6 +9382,26 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 					int spr_x = sprite[sprite_index].position.X;
 					int spr_y = sprite[sprite_index].position.Y;
 					mapEdit_selectSpriteTool_selection[i].start_pos.set(spr_x, spr_y);
+
+					nirvana_stageAction_sprite action_sprite;
+					action_sprite.old_alpha = sprite[sprite_index].alpha;
+					action_sprite.old_animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+					action_sprite.base_sprite_index = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_base;
+					action_sprite.base_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].base_unique_id;
+					action_sprite.old_body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+					action_sprite.canvas_id = sprite[sprite_index].parent_canvas;
+					action_sprite.old_id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+					action_sprite.image_id = sprite[sprite_index].image_id;
+					action_sprite.layer_sprite_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].layer_sprite_unique_id;
+					action_sprite.old_angle = sprite[sprite_index].angle;
+					action_sprite.old_pos_x = sprite[sprite_index].position.X;
+					action_sprite.old_pos_y = sprite[sprite_index].position.Y;
+					action_sprite.old_scale_x = sprite[sprite_index].scale.X;
+					action_sprite.old_scale_y = sprite[sprite_index].scale.Y;
+					action_sprite.sprite_id = sprite_index;
+					action_sprite.old_visible = sprite[sprite_index].visible;
+
+					current_action.sprite.push_back(action_sprite);
 				}
 
 				left_drag_init = true;
@@ -8732,6 +9466,31 @@ void wxIrrlicht::StageSheet_MoveSpriteUpdate()
 	}
 	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
 	{
+	    if(mapEdit_selectSpriteTool_selection.size() == current_action.sprite.size())
+	    {
+	        for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+            {
+                int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
+                int spr_x = sprite[sprite_index].position.X;
+                int spr_y = sprite[sprite_index].position.Y;
+                mapEdit_selectSpriteTool_selection[i].start_pos.set(spr_x, spr_y);
+
+                current_action.sprite[i].alpha = sprite[sprite_index].alpha;
+                current_action.sprite[i].animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+                current_action.sprite[i].body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+                current_action.sprite[i].id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+                current_action.sprite[i].angle = sprite[sprite_index].angle;
+                current_action.sprite[i].pos_x = sprite[sprite_index].position.X;
+                current_action.sprite[i].pos_y = sprite[sprite_index].position.Y;
+                current_action.sprite[i].scale_x = sprite[sprite_index].scale.X;
+                current_action.sprite[i].scale_y = sprite[sprite_index].scale.Y;
+                current_action.sprite[i].visible = sprite[sprite_index].visible;
+            }
+
+            push_undo(current_action);
+            clear_redo();
+	    }
+
 
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
@@ -8795,6 +9554,11 @@ void wxIrrlicht::StageSheet_RotateSpriteUpdate()
 	}
 
 
+	current_action.action_type = NIRVANA_ACTION_TRANSFORM_SPRITE;
+    current_action.stage_index = selected_stage;
+    current_action.layer_index = selected_layer;
+
+
 	if(mouse_state.LeftIsDown())
 	{
 		bool init_click = false;
@@ -8830,6 +9594,27 @@ void wxIrrlicht::StageSheet_RotateSpriteUpdate()
 					int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
 					float spr_angle = sprite[sprite_index].angle;
 					mapEdit_selectSpriteTool_selection[i].angle = spr_angle;
+
+
+					nirvana_stageAction_sprite action_sprite;
+                    action_sprite.old_alpha = sprite[sprite_index].alpha;
+                    action_sprite.old_animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+                    action_sprite.base_sprite_index = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_base;
+                    action_sprite.base_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].base_unique_id;
+                    action_sprite.old_body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+                    action_sprite.canvas_id = sprite[sprite_index].parent_canvas;
+                    action_sprite.old_id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+                    action_sprite.image_id = sprite[sprite_index].image_id;
+                    action_sprite.layer_sprite_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].layer_sprite_unique_id;
+                    action_sprite.old_angle = sprite[sprite_index].angle;
+                    action_sprite.old_pos_x = sprite[sprite_index].position.X;
+                    action_sprite.old_pos_y = sprite[sprite_index].position.Y;
+                    action_sprite.old_scale_x = sprite[sprite_index].scale.X;
+                    action_sprite.old_scale_y = sprite[sprite_index].scale.Y;
+                    action_sprite.sprite_id = sprite_index;
+                    action_sprite.old_visible = sprite[sprite_index].visible;
+
+                    current_action.sprite.push_back(action_sprite);
 				}
 
 				left_drag_init = true;
@@ -8865,6 +9650,32 @@ void wxIrrlicht::StageSheet_RotateSpriteUpdate()
 	}
 	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
 	{
+
+	    if(mapEdit_selectSpriteTool_selection.size() == current_action.sprite.size())
+        {
+            for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+            {
+                int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
+                int spr_x = sprite[sprite_index].position.X;
+                int spr_y = sprite[sprite_index].position.Y;
+                mapEdit_selectSpriteTool_selection[i].start_pos.set(spr_x, spr_y);
+
+                current_action.sprite[i].alpha = sprite[sprite_index].alpha;
+                current_action.sprite[i].animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+                current_action.sprite[i].body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+                current_action.sprite[i].id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+                current_action.sprite[i].angle = sprite[sprite_index].angle;
+                current_action.sprite[i].pos_x = sprite[sprite_index].position.X;
+                current_action.sprite[i].pos_y = sprite[sprite_index].position.Y;
+                current_action.sprite[i].scale_x = sprite[sprite_index].scale.X;
+                current_action.sprite[i].scale_y = sprite[sprite_index].scale.Y;
+                current_action.sprite[i].visible = sprite[sprite_index].visible;
+            }
+
+            push_undo(current_action);
+            clear_redo();
+        }
+
 
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
@@ -8926,6 +9737,11 @@ void wxIrrlicht::StageSheet_ScaleSpriteUpdate()
 	}
 
 
+	current_action.action_type = NIRVANA_ACTION_TRANSFORM_SPRITE;
+    current_action.stage_index = selected_stage;
+    current_action.layer_index = selected_layer;
+
+
 	if(mouse_state.LeftIsDown())
 	{
 		bool init_click = false;
@@ -8944,6 +9760,27 @@ void wxIrrlicht::StageSheet_ScaleSpriteUpdate()
 					int spr_x = sprite[sprite_index].scale.X;
 					int spr_y = sprite[sprite_index].scale.Y;
 					mapEdit_selectSpriteTool_selection[i].start_scale.set(spr_x, spr_y);
+
+
+					nirvana_stageAction_sprite action_sprite;
+                    action_sprite.old_alpha = sprite[sprite_index].alpha;
+                    action_sprite.old_animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+                    action_sprite.base_sprite_index = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_base;
+                    action_sprite.base_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].base_unique_id;
+                    action_sprite.old_body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+                    action_sprite.canvas_id = sprite[sprite_index].parent_canvas;
+                    action_sprite.old_id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+                    action_sprite.image_id = sprite[sprite_index].image_id;
+                    action_sprite.layer_sprite_unique_id = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].layer_sprite_unique_id;
+                    action_sprite.old_angle = sprite[sprite_index].angle;
+                    action_sprite.old_pos_x = sprite[sprite_index].position.X;
+                    action_sprite.old_pos_y = sprite[sprite_index].position.Y;
+                    action_sprite.old_scale_x = sprite[sprite_index].scale.X;
+                    action_sprite.old_scale_y = sprite[sprite_index].scale.Y;
+                    action_sprite.sprite_id = sprite_index;
+                    action_sprite.old_visible = sprite[sprite_index].visible;
+
+                    current_action.sprite.push_back(action_sprite);
 				}
 
 				left_drag_init = true;
@@ -8988,6 +9825,33 @@ void wxIrrlicht::StageSheet_ScaleSpriteUpdate()
 	}
 	else if( (!mouse_state.LeftIsDown()) && left_drag_init )
 	{
+
+	    if(mapEdit_selectSpriteTool_selection.size() == current_action.sprite.size())
+        {
+            for(int i = 0; i < mapEdit_selectSpriteTool_selection.size(); i++)
+            {
+                int sprite_index = mapEdit_selectSpriteTool_selection[i].layer_sprite_index; //This is suppose to be rc index
+                int spr_x = sprite[sprite_index].position.X;
+                int spr_y = sprite[sprite_index].position.Y;
+                mapEdit_selectSpriteTool_selection[i].start_pos.set(spr_x, spr_y);
+
+                current_action.sprite[i].alpha = sprite[sprite_index].alpha;
+                current_action.sprite[i].animation_name = sprite[sprite_index].animation[ ( (sprite[sprite_index].current_animation >= 0 && sprite[sprite_index].current_animation < sprite[sprite_index].animation.size()) ? sprite[sprite_index].current_animation : 0) ].name;
+                current_action.sprite[i].body_type = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].body_type;
+                current_action.sprite[i].id_name = project->stages[selected_stage].layers[selected_layer].layer_sprites[ ((sprite[sprite_index].layer_sprite_index >= 0 && sprite[sprite_index].layer_sprite_index < project->stages[selected_stage].layers[selected_layer].layer_sprites.size()) ? sprite[sprite_index].layer_sprite_index : 0) ].sprite_name;
+                current_action.sprite[i].angle = sprite[sprite_index].angle;
+                current_action.sprite[i].pos_x = sprite[sprite_index].position.X;
+                current_action.sprite[i].pos_y = sprite[sprite_index].position.Y;
+                current_action.sprite[i].scale_x = sprite[sprite_index].scale.X;
+                current_action.sprite[i].scale_y = sprite[sprite_index].scale.Y;
+                current_action.sprite[i].visible = sprite[sprite_index].visible;
+            }
+
+            push_undo(current_action);
+            clear_redo();
+        }
+
+
 
 		//SHOW_CURSOR;
 		//this->ReleaseMouse();
@@ -9431,6 +10295,10 @@ void wxIrrlicht::stage_collisionEdit_move()
 
 	irr::core::vector2di mouse_pos(px, py);
 
+	current_action.action_type = NIRVANA_ACTION_MOVESHAPE;
+	current_action.stage_index = selected_stage;
+	current_action.layer_index = selected_layer;
+
 	switch(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_type)
 	{
 		case SPRITE_SHAPE_BOX:
@@ -9449,6 +10317,14 @@ void wxIrrlicht::stage_collisionEdit_move()
 						init_click = true;
 
 						drag_start = wxPoint(bx, by);
+
+						nirvana_stageAction_sprite action_sprite;
+						action_sprite.project_shape_index = selected_shape;
+						action_sprite.old_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+						action_sprite.new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+
+						current_action.sprite.push_back(action_sprite);
+
 						collision_move_start_offset.set(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x, project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
 						collision_move_start_size.set(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width, project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_height);
 
@@ -9638,6 +10514,18 @@ void wxIrrlicht::stage_collisionEdit_move()
 					}
 				}
 			}
+			else if(left_drag_init)
+            {
+                if(current_action.sprite.size() > 0)
+                {
+                    current_action.sprite[0].new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+                    push_undo(current_action);
+                    clear_redo();
+
+                    left_drag_init = false;
+                    //std::cout << "YOLO" << std::endl;
+                }
+            }
 		}
 		break;
 
@@ -9657,6 +10545,14 @@ void wxIrrlicht::stage_collisionEdit_move()
 						init_click = true;
 
 						drag_start = wxPoint(bx, by);
+
+						nirvana_stageAction_sprite action_sprite;
+						action_sprite.project_shape_index = selected_shape;
+						action_sprite.old_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+						action_sprite.new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+
+						current_action.sprite.push_back(action_sprite);
+
 						collision_move_start_offset.set(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x, project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
 						collision_move_start_radius = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].radius;
 
@@ -9780,6 +10676,18 @@ void wxIrrlicht::stage_collisionEdit_move()
 					}
 				}
 			}
+			else
+            {
+                if(current_action.sprite.size() > 0)
+                {
+                    current_action.sprite[0].new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+                    push_undo(current_action);
+                    clear_redo();
+
+                    left_drag_init = false;
+                    //std::cout << "YOLO" << std::endl;
+                }
+            }
 		}
 		break;
 
@@ -9799,6 +10707,14 @@ void wxIrrlicht::stage_collisionEdit_move()
 						init_click = true;
 
 						drag_start = wxPoint(bx, by);
+
+						nirvana_stageAction_sprite action_sprite;
+						action_sprite.project_shape_index = selected_shape;
+						action_sprite.old_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+						action_sprite.new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+
+						current_action.sprite.push_back(action_sprite);
+
 						collision_move_start_offset.set(project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_x, project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].offset_y);
 						collision_move_start_points.clear();
 
@@ -9844,6 +10760,18 @@ void wxIrrlicht::stage_collisionEdit_move()
 					}
 				}
 			}
+			else
+            {
+                if(current_action.sprite.size() > 0)
+                {
+                    current_action.sprite[0].new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+                    push_undo(current_action);
+                    clear_redo();
+
+                    left_drag_init = false;
+                    //std::cout << "YOLO" << std::endl;
+                }
+            }
 		}
 		break;
 	}
@@ -9886,6 +10814,13 @@ void wxIrrlicht::stage_collisionEdit_draw()
 
 	irr::core::vector2di mouse_pos(px, py);
 
+
+	current_action.action_type = NIRVANA_ACTION_DRAWPOINT;
+    current_action.stage_index = selected_stage;
+    current_action.layer_index = selected_layer;
+
+
+
 	switch(collision_physics_obj.shape_type)
 	{
 		case SPRITE_SHAPE_BOX:
@@ -9921,10 +10856,19 @@ void wxIrrlicht::stage_collisionEdit_draw()
 								m_mapEdit_boxShape_posY_spinCtrl->SetValue(collision_physics_obj.offset_y);
 
 							collision_poly_draw_flag = true;
+
+
+							nirvana_stageAction_sprite action_sprite;
+                            action_sprite.project_shape_index = selected_shape;
+                            action_sprite.old_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+                            action_sprite.new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+
+                            current_action.sprite.push_back(action_sprite);
 						}
 
 						collision_object_modified = true;
 						//parent_window->UpdateWindowUI();
+
 					}
 				}
 				else
@@ -9955,6 +10899,14 @@ void wxIrrlicht::stage_collisionEdit_draw()
 					collision_physics_obj.shape_name = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_name; //to keep shape name
 					project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape] = collision_physics_obj;
 					//std::cout << "test: " << project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_name << ", " << project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].box_width << std::endl;
+
+
+					if(current_action.sprite.size() > 0)
+					{
+					    current_action.sprite[0].new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+                        push_undo(current_action);
+                        clear_redo();
+					}
 				}
 			}
 		}
@@ -9991,6 +10943,14 @@ void wxIrrlicht::stage_collisionEdit_draw()
 									m_mapEdit_polyShape_grid->DeleteRows(0, m_mapEdit_polyShape_grid->GetNumberRows());
 								}
 							}
+
+
+							nirvana_stageAction_sprite action_sprite;
+                            action_sprite.project_shape_index = selected_shape;
+                            action_sprite.old_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+                            action_sprite.new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+
+                            current_action.sprite.push_back(action_sprite);
 						}
 
 						if(tile_snap)
@@ -10048,7 +11008,29 @@ void wxIrrlicht::stage_collisionEdit_draw()
 
 				collision_object_modified = true;
 				parent_window->Refresh();
+
+
+				if(current_action.sprite.size() > 0)
+                {
+                    current_action.sprite[0].new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+                    push_undo(current_action);
+                    clear_redo();
+                }
 			}
+			else if( !(px >= 0 && px < pw && py >= 0 && py < ph) )
+            {
+                if(collision_poly_draw_flag)
+                {
+                    if(current_action.sprite.size() > 0)
+                    {
+                        //std::cout << "CLOSE  EARLY" << std::endl;
+                        current_action.sprite[0].new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+                        push_undo(current_action);
+                        clear_redo();
+                    }
+                    collision_poly_draw_flag = false;
+                }
+            }
 		}
 		break;
 
@@ -10087,6 +11069,14 @@ void wxIrrlicht::stage_collisionEdit_draw()
 							if(m_mapEdit_circleShape_centerY_spinCtrl)
 								m_mapEdit_circleShape_centerY_spinCtrl->SetValue(collision_physics_obj.offset_y);
 
+
+                            nirvana_stageAction_sprite action_sprite;
+                            action_sprite.project_shape_index = selected_shape;
+                            action_sprite.old_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+                            action_sprite.new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+
+                            current_action.sprite.push_back(action_sprite);
+
 						}
 
 						collision_object_modified = true;
@@ -10114,6 +11104,13 @@ void wxIrrlicht::stage_collisionEdit_draw()
 					collision_poly_draw_flag = false;
 					collision_physics_obj.shape_name = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape].shape_name; //to keep shape name
 					project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape] = collision_physics_obj;
+
+					if(current_action.sprite.size() > 0)
+                    {
+                        current_action.sprite[0].new_shape.shape_obj = project->stages[selected_stage].layers[selected_layer].layer_shapes[selected_shape];
+                        push_undo(current_action);
+                        clear_redo();
+                    }
 				}
 			}
 		}
@@ -12930,7 +13927,7 @@ int wxIrrlicht::createSprite(int layer_sprite_index, int img_id, double w, doubl
 	{
 		if(!sprite[i].active)
 		{
-			spr_id = i;
+		    spr_id = i;
 			break;
 		}
 	}
@@ -13038,7 +14035,11 @@ void wxIrrlicht::deleteSprite(int spr_id)
 
 		if(canvas_sprite == spr_id)
 		{
+		    int pre_size = canvas[parent_canvas].sprite_id.size();
 			canvas[parent_canvas].sprite_id.erase(i,1);
+
+			//std::cout << "NUM_SPR = " << pre_size << " to " << canvas[parent_canvas].sprite_id.size() << std::endl;
+
 			break;
 		}
 	}
@@ -14409,7 +15410,7 @@ void wxIrrlicht::util_drawSprites(int canvas_id)
 		if(!n_sprite->active)
 			continue;
 		//std::cout << "TEST" << std::endl;
-		//td::cout << "debug info: " << canvas_id << " --> " << spr_index << "   id = " << sprite->id << "   anim_size = " << sprite->animation.size() << std::endl; continue;
+		//std::cout << "debug info: " << canvas_id << " --> " << spr_index << "   id = " << spr_id << "   anim_size = " << n_sprite->animation.size() << std::endl; //continue;
 		if(!n_sprite->visible)
 			continue;
 
@@ -14500,14 +15501,14 @@ void wxIrrlicht::util_drawSprites(int canvas_id)
 							 n_sprite->color_mod.getBlue());
 
 		//I don't want to draw an image that doesn't exists. Thats just crazy.
-		if(m_pDriver->getDriverType() == irr::video::EDT_OPENGL)
+		if(m_pDriver->getDriverType() == irr::video::EDT_OPENGL && control_id != NV_SPRITE_EDIT_ANIMATION_PREVIEW)
 			util_draw2DImage(m_pDriver, image[img_id].image, sourceRect, position, rotationPoint, rotation, scale, useAlphaChannel, color, screenSize);
 		else
 		{
 			//setColor(rgb(255,0,0));
 			//drawRectFill(0, 0, 100, 100);
 			//std::cout << "COME ON" << std::endl;
-			drawImage_BlitEx_SW(img_id, 0, 0, 64, 64, frame_pos.X, frame_pos.Y, current_frame_width, current_frame_height);
+			drawImage_BlitEx(img_id, 0, 0, current_frame_width, current_frame_height, frame_pos.X, frame_pos.Y, current_frame_width, current_frame_height);
 		}
 	}
 	//Must set back to canvas 0 (the backbuffer) before returning
@@ -15888,4 +16889,7 @@ void wxIrrlicht::addLayerTS(int layer_index, int ts_index)
 
 	setSpritePosition(spr_id, x, y);
 	sprite[spr_id].layer_ts_index = ts_index;
+
+	project->stages[selected_stage].layers[layer_index].layer_tile_sprites[ts_index].image_id = img_id;
+	project->stages[selected_stage].layers[layer_index].layer_tile_sprites[ts_index].tset = tset;
 }

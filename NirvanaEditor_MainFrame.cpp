@@ -16,6 +16,8 @@ NirvanaEditor_MainFrame::NirvanaEditor_MainFrame( wxWindow* parent )
 :
 Nirvana_MainFrame( parent )
 {
+    exe_path = wxFileName(wxStandardPaths::Get().GetExecutablePath());
+
 	project = new Nirvana_Project();
 
 	tile_editor = new Nirvana_TileEditor(this, m_tileAnimation_tileSheet_panel, m_tileAnimation_tileFrames_panel,
@@ -37,6 +39,8 @@ Nirvana_MainFrame( parent )
 
 	sprite_editor->getAnimationSheetControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
 	sprite_editor->getAnimationSheetControl()->update_events = false;
+	sprite_editor->getAnimationSheetControl()->pre_active_change_update_events = false;
+
 
 	m_spriteEdit_collisionShape_comboBox->Append(_("BOX"));
 	m_spriteEdit_collisionShape_comboBox->Append(_("POLYGON"));
@@ -64,50 +68,23 @@ Nirvana_MainFrame( parent )
 	map_editor->getMapViewControl()->project = project;
 
 	map_editor->getTileSelectControl()->update_events = true;
+	map_editor->getTileSelectControl()->pre_active_change_update_events = true;
 
 	map_editor->setProject(project);
 
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getMapViewControl());
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	sprite_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getCollisionControl());
+	editor_controls.push_back(map_editor->getMapViewControl());
+	editor_controls.push_back(map_editor->getTileSelectControl());
+	editor_controls.push_back(tile_editor->getAnimationSheetControl());
+	editor_controls.push_back(tile_editor->getAnimationFrameControl());
+	editor_controls.push_back(tile_editor->getAnimationPreviewControl());
+	editor_controls.push_back(tile_editor->getMaskSheetControl());
+	editor_controls.push_back(sprite_editor->getAnimationSheetControl());
+	editor_controls.push_back(sprite_editor->getCollisionControl());
+	editor_controls.push_back(sprite_editor->getAnimationPreviewControl());
+	editor_controls.push_back(sprite_editor->getAnimationFrameControl());
 
-	sprite_editor->getCollisionControl()->shared_control.push_back(map_editor->getMapViewControl());
-	sprite_editor->getCollisionControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	sprite_editor->getCollisionControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	sprite_editor->getCollisionControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	sprite_editor->getCollisionControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	sprite_editor->getCollisionControl()->shared_control.push_back(sprite_editor->getCollisionControl());
+	setSharedControl();
 
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getMapViewControl());
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	tile_editor->getAnimationSheetControl()->shared_control.push_back(sprite_editor->getCollisionControl());
-
-	tile_editor->getMaskSheetControl()->shared_control.push_back(map_editor->getMapViewControl());
-	tile_editor->getMaskSheetControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	tile_editor->getMaskSheetControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	tile_editor->getMaskSheetControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	tile_editor->getMaskSheetControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	tile_editor->getMaskSheetControl()->shared_control.push_back(sprite_editor->getCollisionControl());
-
-	map_editor->getMapViewControl()->shared_control.push_back(map_editor->getMapViewControl());
-	map_editor->getMapViewControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	map_editor->getMapViewControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	map_editor->getMapViewControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	map_editor->getMapViewControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	map_editor->getMapViewControl()->shared_control.push_back(sprite_editor->getCollisionControl());
-
-	map_editor->getTileSelectControl()->shared_control.push_back(map_editor->getMapViewControl());
-	map_editor->getTileSelectControl()->shared_control.push_back(map_editor->getTileSelectControl());
-	map_editor->getTileSelectControl()->shared_control.push_back(tile_editor->getAnimationSheetControl());
-	map_editor->getTileSelectControl()->shared_control.push_back(tile_editor->getMaskSheetControl());
-	map_editor->getTileSelectControl()->shared_control.push_back(sprite_editor->getAnimationSheetControl());
-	map_editor->getTileSelectControl()->shared_control.push_back(sprite_editor->getCollisionControl());
 
 	map_editor->getTileSelectControl()->stage_edit_control = map_editor->getMapViewControl();
 
@@ -292,46 +269,265 @@ Nirvana_MainFrame( parent )
 
 	map_editor->getMapViewControl()->force_refresh();
 	map_editor->getMapViewControl()->is_tile_select_screen = true;
+
+
+
+	// Recent Projects
+	wxFileName data_path = exe_path;
+	data_path.AppendDir(_("data"));
+	data_path.SetFullName(_("recent_projects.data"));
+
+	max_recent_projects = 5;
+
+	if(data_path.Exists())
+    {
+        wxFile recent_data_file(data_path.GetAbsolutePath());
+
+        if(recent_data_file.IsOpened())
+        {
+            wxString rdata = _("");
+            recent_data_file.ReadAll(&rdata);
+            recent_data_file.Close();
+
+            rdata += _("\n");
+            wxString current_line = _("");
+
+            int ln_num = 0;
+
+            for(int i = 0; i < rdata.Length(); i++)
+            {
+                if(ln_num >= max_recent_projects)
+                    break;
+
+                wxString c = rdata.substr(i, 1);
+
+                if(c.compare(_("\n"))==0)
+                {
+                    wxFileName fname(current_line);
+
+                    if(fname.Exists())
+                    {
+                        nirvana_recent_project p;
+                        p.project_path = fname;
+                        p.m_item = new wxMenuItem( m_recentProjects_menu, wxID_ANY, current_line, wxEmptyString, wxITEM_NORMAL );
+                        m_recentProjects_menu->Append(p.m_item);
+                        m_recentProjects_menu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( NirvanaEditor_MainFrame::OnRecentProject ), this, p.m_item->GetId());
+
+                        recent_projects.push_back(p);
+                    }
+
+                    //std::cout << "LINE: " << current_line.ToStdString() << std::endl;
+
+                    current_line = _("");
+                    ln_num++;
+                }
+                else
+                {
+                    current_line += c;
+                }
+            }
+        }
+    }
+}
+
+void NirvanaEditor_MainFrame::OnActivate( wxActivateEvent& event )
+{
+    if( (!event.GetActive()) && window_is_active)
+    {
+        //std::cout << "DISABLE" << std::endl;
+        for(int i = 0; i < editor_controls.size(); i++)
+        {
+            if(editor_controls[i])
+            {
+                editor_controls[i]->pre_active_change_update_events = editor_controls[i]->enable_update;
+                editor_controls[i]->enable_update = false;
+            }
+        }
+    }
+    else if( event.GetActive() && (!window_is_active))
+    {
+        //std::cout << "ENABLE" << std::endl;
+        for(int i = 0; i < editor_controls.size(); i++)
+        {
+            if(editor_controls[i])
+            {
+                editor_controls[i]->enable_update = editor_controls[i]->pre_active_change_update_events;
+            }
+        }
+    }
+
+    window_is_active = event.GetActive();
 }
 
 void NirvanaEditor_MainFrame::OnNirvanaClose( wxCloseEvent& event )
 {
     //On Windows, writing the config file on close doesn't seem to work
     #ifdef _WIN32
-    Close();
+    //Close();
     #endif // _WIN32
 
-	wxFileName fname(wxStandardPaths::Get().GetExecutablePath());
+	wxFileName fname = exe_path;
 	fname.AppendDir(_("config"));
 	fname.SetFullName(_("nirvana.config"));
 
-	//Create config file if it doesn't exists
-	wxFile cfg_file(fname.GetAbsolutePath(), wxFile::write);
-
-	if(cfg_file.IsOpened())
+	if(!config_output_complete)
 	{
-		wxString map_control_config = _("MAP_EDITOR_MAP_CONTROL ");
-		map_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getMapViewControl()->scroll_speed) + _(" ");
-		map_control_config += _("show_grid=") + (map_editor->getMapViewControl()->show_grid ? _("true") : _("false")) + _(" ");
-		map_control_config += _("grid_color=") + wxString::Format(_("%u"), map_editor->getMapViewControl()->grid_color.color) + _(" ");
-		map_control_config += _("show_shapes=") + (map_editor->getMapViewControl()->show_shapes_all ? _("true") : _("false")) + _(";");
+	    config_output_complete = true;
 
-		wxString tileSelect_control_config = _("TILE_SELECT_CONTROL ");
-		tileSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getTileSelectControl()->scroll_speed) + _(";");
+	    //Create config file if it doesn't exists
+        wxFile cfg_file(fname.GetAbsolutePath(), wxFile::write);
 
-		wxString spriteSelect_control_config = _("SPRITE_SELECT_CONTROL ");
-		spriteSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), sprite_editor->getAnimationSheetControl()->scroll_speed) + _(";");
+        if(cfg_file.IsOpened())
+        {
+            wxString map_control_config = _("MAP_EDITOR_MAP_CONTROL ");
+            //wxMessageBox(_("TEST: ") + )
+            map_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getMapViewControl()->scroll_speed) + _(" ");
+            map_control_config += _("show_grid=") + (map_editor->getMapViewControl()->show_grid ? _("true") : _("false")) + _(" ");
+            map_control_config += _("grid_color=") + wxString::Format(_("%u"), map_editor->getMapViewControl()->grid_color.color) + _(" ");
+            map_control_config += _("show_shapes=") + (map_editor->getMapViewControl()->show_shapes_all ? _("true") : _("false")) + _(";");
+
+            wxString tileSelect_control_config = _("TILE_SELECT_CONTROL ");
+            tileSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), map_editor->getTileSelectControl()->scroll_speed) + _(";");
+
+            wxString spriteSelect_control_config = _("SPRITE_SELECT_CONTROL ");
+            spriteSelect_control_config += _("scroll_speed=") + wxString::Format(_("%i"), sprite_editor->getAnimationSheetControl()->scroll_speed) + _(";");
 
 
-		cfg_file.Write(map_control_config + _("\n"));
-		cfg_file.Write(tileSelect_control_config + _("\n"));
-		cfg_file.Write(spriteSelect_control_config + _("\n"));
+            cfg_file.Write(map_control_config + _("\n"));
+            cfg_file.Write(tileSelect_control_config + _("\n"));
+            cfg_file.Write(spriteSelect_control_config + _("\n"));
 
-		cfg_file.Close();
+            cfg_file.Close();
+        }
+
+        map_editor->stopEditor(true);
+        sprite_editor->stopEditor();
+        tile_editor->stopEditor();
+
+        for(int i = 0; i < editor_controls.size(); i++)
+        {
+            delete editor_controls[i];
+        }
+
 	}
 
 	Close();
+
 }
+
+
+void NirvanaEditor_MainFrame::addRecentProject()
+{
+    for(int i = 0; i < recent_projects.size(); i++)
+    {
+        m_recentProjects_menu->Remove(recent_projects[i].m_item->GetId());
+        delete recent_projects[i].m_item;
+    }
+
+
+    wxFileName fname = project->project_filename_obj;
+
+	wxFileName pfile_path = fname;
+	pfile_path.SetFullName(wxString(project->project_name).Trim() + _(".nvprj"));
+
+
+    for(int i = recent_projects.size() - 1; i >= 0; i--)
+    {
+        if(recent_projects[i].project_path.GetAbsolutePath().compare(pfile_path.GetAbsolutePath())==0)
+        {
+            recent_projects.erase(recent_projects.begin()+i);
+        }
+    }
+
+    if(max_recent_projects > 0)
+    {
+        for(int i = recent_projects.size()-1; i >= (max_recent_projects-1); i--)
+        {
+            recent_projects.erase(recent_projects.begin() + i);
+        }
+    }
+
+    //if(current_found)
+    //    return;
+
+    nirvana_recent_project p;
+    p.project_path = pfile_path;
+    recent_projects.insert(recent_projects.begin(), p);
+
+    for(int i = 0; i < recent_projects.size(); i++)
+    {
+        recent_projects[i].m_item = new wxMenuItem( m_recentProjects_menu, wxID_ANY, recent_projects[i].project_path.GetAbsolutePath(), wxEmptyString, wxITEM_NORMAL );
+        m_recentProjects_menu->Append(recent_projects[i].m_item);
+        m_recentProjects_menu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( NirvanaEditor_MainFrame::OnRecentProject ), this, recent_projects[i].m_item->GetId());
+    }
+
+
+    wxFileName data_path = exe_path;
+	data_path.AppendDir(_("data"));
+	data_path.SetFullName(_("recent_projects.data"));
+
+	wxFile recent_data_file(data_path.GetAbsolutePath(), wxFile::write);
+
+    if(recent_data_file.IsOpened())
+    {
+        for(int i = 0; i < recent_projects.size(); i++)
+        {
+            //std::cout << "ADD: " << recent_projects[i].project_path.GetAbsolutePath().ToStdString() << std::endl;
+            recent_data_file.Write(recent_projects[i].project_path.GetAbsolutePath() + _("\n"));
+        }
+
+        //std::cout << std::endl;
+
+        recent_data_file.Close();
+    }
+}
+
+void NirvanaEditor_MainFrame::OnRecentProject( wxCommandEvent& event )
+{
+    if(!project)
+        return;
+
+    for(int i = 0; i < recent_projects.size(); i++)
+    {
+        if(recent_projects[i].m_item->GetId() == event.GetId())
+        {
+            //std::cout << "RECENT: " << recent_projects[i].m_item->GetItemLabelText().ToStdString() << std::endl;
+
+            wxFileName project_path = recent_projects[i].project_path;
+            project_path.SetFullName(_(""));
+
+            wxString project_name = recent_projects[i].project_path.GetName();
+
+
+            newProject(project_path, project_name, false); // Needed to clear all the UI stuff and create empty project
+
+            if(!loadProject(recent_projects[i].project_path))
+            {
+                wxMessageBox(_("Could not load project"));
+                return;
+            }
+
+
+            this->SetTitle(wxString(project->project_name) + _(" - Nirvana2D"));
+
+            addRecentProject();
+
+            break;
+        }
+    }
+}
+
+void NirvanaEditor_MainFrame::setSharedControl()
+{
+    for(int a = 0; a < editor_controls.size(); a++)
+    {
+        for(int b = 0; b < editor_controls.size(); b++)
+        {
+            editor_controls[a]->shared_control.push_back(editor_controls[b]);
+        }
+    }
+}
+
 
 void NirvanaEditor_MainFrame::PreDialog()
 {
@@ -641,12 +837,46 @@ void NirvanaEditor_MainFrame::OnMapEdit_TSTool_DeleteSelected( wxCommandEvent& e
 	if(map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.size() == 0)
 		return;
 
+
+	current_action.action_type = NIRVANA_ACTION_DELETE_TSPRITE;
+    current_action.stage_index = stage_index;
+    current_action.layer_index = layer_index;
+
 	irr::core::array<int> layer_spr_array; //The irrlicht array has built-in sort and I don't feel like doing it myself
 
 	for(int i = 0; i < map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.size(); i++)
 	{
 		int map_spr_id = map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection[i].layer_sprite_index;
 		int spr_index = map_editor->getMapViewControl()->sprite[map_spr_id].layer_ts_index;
+
+		nirvana_stageAction_sprite action_sprite;
+
+        if(spr_index >= 0 || spr_index < project->stages[stage_index].layers[layer_index].layer_tile_sprites.size())
+        {
+            action_sprite.sprite_id = project->stages[stage_index].layers[layer_index].layer_tile_sprites[spr_index].sprite_id;
+            action_sprite.layer_ts_index = spr_index;
+            action_sprite.t_sprite = project->stages[stage_index].layers[layer_index].layer_tile_sprites[spr_index];
+            action_sprite.image_id = project->stages[stage_index].layers[layer_index].layer_tile_sprites[spr_index].image_id;
+            action_sprite.t_sprite.sprite_id = -1;
+
+            int sx = map_editor->getMapViewControl()->sprite[map_spr_id].position.X;
+            int sy = map_editor->getMapViewControl()->sprite[map_spr_id].position.Y;
+
+            int sx2 = action_sprite.t_sprite.x;
+            int sy2 = action_sprite.t_sprite.y;
+
+            //std::cout << "DBG: DLT -> image=" << action_sprite.image_id << ", " << map_editor->getMapViewControl()->sprite[map_spr_id].image_id << " pos=(" << sx << ", " << sy << ") (" << sx2 << ", " << sy2 << ")" << std::endl;
+        }
+        else
+        {
+            //std::cout << "DBG: **DLT -> " << spr_index << ", " << map_spr_id << " -- size = " << project->stages[stage_index].layers[layer_index].layer_tile_sprites.size() << std::endl;
+
+            action_sprite.sprite_id = -1;
+            action_sprite.layer_ts_index = -1;
+            action_sprite.image_id = -1;
+        }
+
+        current_action.sprite.push_back(action_sprite);
 
 		map_editor->getMapViewControl()->deleteSprite(map_spr_id);
 		layer_spr_array.push_back(spr_index);
@@ -666,9 +896,16 @@ void NirvanaEditor_MainFrame::OnMapEdit_TSTool_DeleteSelected( wxCommandEvent& e
 		project->stages[stage_index].layers[layer_index].layer_tile_sprites[layer_spr_array[i]].tset = -1;
 	}
 
+	if(current_action.sprite.size() > 0)
+    {
+        push_undo(current_action);
+        clear_redo();
+    }
+
 
 	map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.clear();
 	map_editor->getMapViewControl()->selected_sprite = -1;
+
 }
 
 
@@ -714,6 +951,9 @@ void NirvanaEditor_MainFrame::OnMainTabChanged( wxAuiNotebookEvent& event )
 {
 	if(!editor_init)
 		return;
+
+    clear_undo();
+    clear_redo();
 
 	int page_index = event.GetSelection();
 	wxPanel* new_panel = (wxPanel*)m_editorMainTab_auinotebook->GetPage(page_index);

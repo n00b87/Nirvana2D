@@ -405,11 +405,14 @@ class wxIrrlicht : public wxControl {
         int spriteEdit_selected_frame_frame = -1;
 
         bool update_events = false;
+        bool pre_active_change_update_events = false;
 
         void UpdateSpriteAnimationSheet();
         void UpdateSpriteAnimationFrame();
         void UpdateSpriteAnimationPreview();
         void UpdateSpriteCollision();
+
+        bool dbg_flag = false;
 
 
         int tileEdit_selected_tileset = -1;

@@ -119,7 +119,7 @@ void Nirvana_TileEditor::initAnimationFrame()
 	tileFrame_target->debug_string = _("frame");
 
 	irr::SIrrlichtCreationParameters params;
-    params.DriverType = irr::video::EDT_BURNINGSVIDEO;
+    params.DriverType = irr::video::EDT_OPENGL;
     params.WindowSize = irr::core::dimension2du(t_size, 96);
 
 	tileFrame_target->InitIrr(&params);
@@ -159,7 +159,7 @@ void Nirvana_TileEditor::initAnimationPreview()
 	tilePreview_target->debug_string = _("preview");
 
 	irr::SIrrlichtCreationParameters params;
-    params.DriverType = irr::video::EDT_BURNINGSVIDEO;
+    params.DriverType = irr::video::EDT_OPENGL;
     params.WindowSize = irr::core::dimension2du(t_size, t_size);
 
 	tilePreview_target->InitIrr(&params);
@@ -333,6 +333,7 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 		startEditor(editor_page_num);
 
 		//FRAME and PREVIEW are both software devices
+		getAnimationFrameControl()->GetDevice()->getContextManager()->activateContext(getAnimationFrameControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 		getAnimationFrameControl()->setActiveCanvas(getAnimationFrameControl()->frame_canvas);
 		getAnimationFrameControl()->clearCanvas();
 
@@ -345,6 +346,10 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 		if(tileFrame_target->imageExists(tileFrame_target->current_sheet_image))
 			tileFrame_target->deleteImage(tileFrame_target->current_sheet_image);
 
+        getAnimationFrameControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+
+
+		getAnimationPreviewControl()->GetDevice()->getContextManager()->activateContext(getAnimationPreviewControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 		getAnimationPreviewControl()->setActiveCanvas(getAnimationPreviewControl()->preview_canvas);
 		getAnimationPreviewControl()->clearCanvas();
 
@@ -364,6 +369,9 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 			tilePreview_target->deleteImage(tilePreview_target->current_sheet_image);
 
 		tilePreview_target->current_sheet_image = -1;
+
+		getAnimationPreviewControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+
 		return;
 	}
 
@@ -409,6 +417,7 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 
 	startEditor(editor_page_num);
 
+    getAnimationFrameControl()->GetDevice()->getContextManager()->activateContext(getAnimationFrameControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
 
 	if(tileFrame_target->imageExists(tileFrame_target->current_sheet_image))
 		tileFrame_target->deleteImage(tileFrame_target->current_sheet_image);
@@ -419,6 +428,7 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 	tileSheet_target->getImageSizeI(tileSheet_target->current_sheet_image,
 									  &tileFrame_target->sheet_width,
 									  &tileFrame_target->sheet_height);
+
 
 	//COOK
 	if(tileFrame_target->tilesetExists(tileFrame_target->tileEdit_selected_tileset))
@@ -452,6 +462,11 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 	//std::cout << "tileset_index = " << tileset_index << std::endl;
 	project->setTilesetObject(selected_tileset, tileFrame_target->tileset[tileset_index]);
 
+	getAnimationFrameControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
+
+
+	getAnimationPreviewControl()->GetDevice()->getContextManager()->activateContext(getAnimationPreviewControl()->GetDevice()->getVideoDriver()->getExposedVideoData());
+
 
 	if(tilePreview_target->imageExists(tilePreview_target->current_sheet_image))
 		tilePreview_target->deleteImage(tilePreview_target->current_sheet_image);
@@ -459,9 +474,9 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 	tilePreview_target->current_sheet_image = tilePreview_target->loadImage(tile_sheet_file);
 	tilePreview_target->current_frame_width = n_tileset.object.tile_width;
 	tilePreview_target->current_frame_height = n_tileset.object.tile_height;
-	tileSheet_target->getImageSizeI(tileSheet_target->current_sheet_image,
-									  &tilePreview_target->sheet_width,
-									  &tilePreview_target->sheet_height);
+	//tileSheet_target->getImageSizeI(tileSheet_target->current_sheet_image,
+		//							  &tilePreview_target->sheet_width,
+		//							  &tilePreview_target->sheet_height);
 
 	if(tilePreview_target->tilesetExists(tilePreview_target->tileEdit_selected_tileset))
 		tilePreview_target->deleteTileSet(tilePreview_target->tileEdit_selected_tileset);
@@ -490,6 +505,8 @@ void Nirvana_TileEditor::selectTileset(wxString tset_id)
 
 	tilePreview_target->tileEdit_preview_tilemap = tilePreview_target->createTileMap(tilePreview_target->tileEdit_selected_tileset, 1000, 1000);
 	tilePreview_target->fillTile(tilePreview_target->tileEdit_preview_tilemap, -1, 0, 0, 1000, 1000);
+
+	getAnimationPreviewControl()->GetDevice()->getContextManager()->activateContext(irr::video::SExposedVideoData());
 }
 
 

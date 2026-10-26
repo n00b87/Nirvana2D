@@ -332,6 +332,9 @@ void NirvanaEditor_MainFrame::OnNewProject( wxCommandEvent& event )
 	if(!dialog->create_flag)
 		return;
 
+    clear_undo();
+    clear_redo();
+
 	newProject(dialog->project_path, dialog->project_name);
 
 	this->SetTitle(wxString(project->project_name) + _(" - Nirvana2D"));
@@ -398,6 +401,9 @@ bool NirvanaEditor_MainFrame::loadProject(wxFileName project_file)
 {
 	if(!editor_init)
 		return false;
+
+    clear_undo();
+    clear_redo();
 
 	wxFile pfile(project_file.GetAbsolutePath(), wxFile::read);
 	wxString p_data = _("");
@@ -555,6 +561,8 @@ void NirvanaEditor_MainFrame::OnOpenProject( wxCommandEvent& event )
 
 	this->SetTitle(wxString(project->project_name) + _(" - Nirvana2D"));
 
+	addRecentProject();
+
 	return;
 }
 
@@ -571,6 +579,8 @@ void NirvanaEditor_MainFrame::OnSaveProject( wxCommandEvent& event )
 		wxMessageBox(_("You must have an open project to save"));
 		return;
 	}
+
+	addRecentProject();
 
 	int current_main_tab = m_editorMainTab_auinotebook->GetSelection();
 	int current_project_tab = m_projectManager_auinotebook->GetSelection();
@@ -1751,8 +1761,10 @@ bool NirvanaEditor_MainFrame::generateStages()
 				{
 					fn_str += _("\tNirvana_Stage_Layers[") + layer_list_index_str + _("].Bkg.Image_ID = LoadImage(NIRVANA_BKG_DIR$ + \"") + wxString(project->stages[stage_index].layers[layer_index].bkg.img_file) + _("\")\n");
 
-					wxString render_setting_str = _("NIRVANA_IMG_RENDER_SETTING_NORMAL");
-					if(project->stages[stage_index].layers[layer_index].bkg.render_setting == IMG_RENDER_SETTING_STRETCHED)
+					wxString render_setting_str = _("NIRVANA_IMG_RENDER_SETTING_NONE");
+					if(project->stages[stage_index].layers[layer_index].bkg.render_setting == IMG_RENDER_SETTING_NORMAL)
+						render_setting_str = _("NIRVANA_IMG_RENDER_SETTING_NORMAL");
+					else if(project->stages[stage_index].layers[layer_index].bkg.render_setting == IMG_RENDER_SETTING_STRETCHED)
 						render_setting_str = _("NIRVANA_IMG_RENDER_SETTING_STRETCHED");
 					else if(project->stages[stage_index].layers[layer_index].bkg.render_setting == IMG_RENDER_SETTING_TILED)
 						render_setting_str = _("NIRVANA_IMG_RENDER_SETTING_TILED");
@@ -2573,6 +2585,9 @@ void NirvanaEditor_MainFrame::OnGenerate( wxCommandEvent& event )
 		if(!template_tgt_path.Exists())
             wxCopyFile(template_path.GetAbsolutePath(), template_tgt_path.GetAbsolutePath());
 	}
+
+	if(studio_project_path.Exists())
+        wxMessageBox(_("Code Generation Complete"));
 }
 
 void NirvanaEditor_MainFrame::OnNewStage( wxCommandEvent& event )
@@ -3040,11 +3055,12 @@ void NirvanaEditor_MainFrame::updateMapEditor()
 
 			case LAYER_TYPE_CANVAS_2D:
 			{
+			    m_mapEdit_canvasRenderSetting_comboBox->Append(_("NONE"));
 				m_mapEdit_canvasRenderSetting_comboBox->Append(_("NORMAL"));
 				m_mapEdit_canvasRenderSetting_comboBox->Append(_("STRETCHED"));
 				m_mapEdit_canvasRenderSetting_comboBox->Append(_("TILED"));
 
-				if(current_layer.bkg.render_setting >= 0 && current_layer.bkg.render_setting < 3)
+				if(current_layer.bkg.render_setting >= 0 && current_layer.bkg.render_setting < 4)
 					m_mapEdit_canvasRenderSetting_comboBox->SetSelection(current_layer.bkg.render_setting);
 
 				wxFileName fname(project->getDir());
@@ -3691,6 +3707,17 @@ void NirvanaEditor_MainFrame::OnBkg_RenderType( wxCommandEvent& event )
 	if(layer_index < 0 || layer_index >= project->getStageNumLayers(stage_index))
 		return;
 
+    current_action.action_type = NIRVANA_ACTION_SETBKG;
+    current_action.stage_index = stage_index;
+    current_action.layer_index = layer_index;
+    current_action.bkg.old_bkg = project->stages[stage_index].layers[layer_index].bkg;
+    current_action.bkg.new_bkg = current_action.bkg.old_bkg;
+    current_action.bkg.new_bkg.render_setting = map_editor->getMapViewControl()->canvas[project->stages[stage_index].layers[layer_index].ref_canvas].bkg_render_type;
+
+    // NOTE: I am leaving backgrounds out of undo/redo for now since it has bugs I can't currently find. Maybe one day.
+    //push_undo(current_action);
+    //clear_redo();
+
 	project->stages[stage_index].layers[layer_index].bkg.render_setting = m_mapEdit_canvasRenderSetting_comboBox->GetSelection();
 
 	if(project->stages[stage_index].layers[layer_index].ref_canvas >= 0 && project->stages[stage_index].layers[layer_index].ref_canvas < map_editor->getMapViewControl()->canvas.size())
@@ -3726,7 +3753,13 @@ void NirvanaEditor_MainFrame::OnBkg_LayerImage( wxCommandEvent& event )
 	if(!fname.Exists())
 		return;
 
-	project->stages[stage_index].layers[layer_index].bkg.img_file = fname.GetFullName();
+    current_action.action_type = NIRVANA_ACTION_SETBKG;
+    current_action.stage_index = stage_index;
+    current_action.layer_index = layer_index;
+
+    current_action.bkg.old_bkg = project->stages[stage_index].layers[layer_index].bkg;
+
+	project->stages[stage_index].layers[layer_index].bkg.img_file = fname.GetFullName().ToStdString();
 	//std::cout << "Filename: " << project->stages[stage_index].layers[layer_index].bkg.img_file << std::endl;
 
 	if(map_editor->getMapViewControl()->imageExists(project->stages[stage_index].layers[layer_index].bkg.image_id))
@@ -3740,6 +3773,12 @@ void NirvanaEditor_MainFrame::OnBkg_LayerImage( wxCommandEvent& event )
 	{
 		map_editor->getMapViewControl()->canvas[project->stages[stage_index].layers[layer_index].ref_canvas].bkg_render_image_id = project->stages[stage_index].layers[layer_index].bkg.image_id;
 	}
+
+
+	current_action.bkg.new_bkg = project->stages[stage_index].layers[layer_index].bkg;
+
+    //push_undo(current_action);
+    //clear_redo();
 
 	//std::cout << "IMG ID: " << project->stages[stage_index].layers[layer_index].bkg.image_id << std::endl;
 }

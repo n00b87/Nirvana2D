@@ -119,6 +119,7 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_AddSprite( wxCommandEvent& ev
 		return;
 	}
 
+
 	map_editor->getMapViewControl()->mapEdit_getContext();
 	map_editor->getMapViewControl()->setActiveCanvas(project->stages[stage_index].layers[layer_index].ref_canvas);
 	map_editor->getMapViewControl()->addLayerSprite(layer_index, sprite_index);
@@ -134,6 +135,24 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_AddSprite( wxCommandEvent& ev
 	m_mapEdit_spriteTools_auiToolBar->ToggleTool(m_mapEdit_spriteToolbar_move_tool->GetId(), true);
 	selected_map_tool = MAP_TOOL_SPRITE_MOVE;
 	map_editor->setMapTool(selected_map_tool);
+
+
+
+	current_action.action_type = NIRVANA_ACTION_CREATESPRITE;
+	current_action.stage_index = stage_index;
+	current_action.layer_index = layer_index;
+
+	nirvana_stageAction_sprite action_sprite;
+	action_sprite.sprite_id = project->stages[stage_index].layers[layer_index].layer_sprites[sprite_index].map_sprite_id;
+	action_sprite.pos_x = x;
+	action_sprite.pos_y = y;
+	action_sprite.base_sprite_index = base_sprite_index;
+	action_sprite.id_name = dialog->id_name.ToStdString();
+
+	current_action.sprite.push_back(action_sprite);
+
+	push_undo(current_action);
+	clear_redo();
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent& event )
@@ -196,6 +215,39 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent&
 		map_spr_id = map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection[i].layer_sprite_index;
 		spr_index = map_editor->getMapViewControl()->sprite[map_spr_id].layer_sprite_index;
 
+
+		nirvana_stageAction_sprite action_sprite;
+        action_sprite.sprite_id = map_spr_id;
+        action_sprite.pos_x = map_editor->getMapViewControl()->sprite[map_spr_id].position.X;
+        action_sprite.pos_y = map_editor->getMapViewControl()->sprite[map_spr_id].position.Y;
+        action_sprite.scale_x = map_editor->getMapViewControl()->sprite[map_spr_id].scale.X;
+        action_sprite.scale_y = map_editor->getMapViewControl()->sprite[map_spr_id].scale.Y;
+        action_sprite.angle = map_editor->getMapViewControl()->sprite[map_spr_id].angle;
+        action_sprite.canvas_id = map_editor->getMapViewControl()->sprite[map_spr_id].parent_canvas;
+        action_sprite.visible = map_editor->getMapViewControl()->sprite[map_spr_id].visible;
+        action_sprite.alpha = map_editor->getMapViewControl()->sprite[map_spr_id].alpha;
+        action_sprite.body_type = project->stages[stage_index].layers[layer_index].layer_sprites[spr_index].body_type;
+
+        if(spr_index >= 0 && spr_index < project->stages[stage_index].layers[layer_index].layer_sprites.size())
+        {
+            action_sprite.layer_sprite_unique_id = project->stages[stage_index].layers[layer_index].layer_sprites[spr_index].layer_sprite_unique_id;
+            action_sprite.base_unique_id = project->stages[stage_index].layers[layer_index].layer_sprites[spr_index].base_unique_id;
+            for(int bi = 0; bi < project->sprite_base.size(); bi++)
+            {
+                if(action_sprite.base_unique_id == project->sprite_base[bi].unique_id)
+                {
+                    action_sprite.base_sprite_index = bi;
+                    break;
+                }
+            }
+            action_sprite.id_name = project->stages[stage_index].layers[layer_index].layer_sprites[spr_index].sprite_name;
+            action_sprite.animation_name = project->stages[stage_index].layers[layer_index].layer_sprites[spr_index].animation_name;
+        }
+
+
+        current_action.sprite.push_back(action_sprite);
+
+
 		//std::cout << "delete: " << map_spr_id << ", " << spr_index << ", " << project->stages[stage_index].layers[layer_index].layer_sprites[spr_index].sprite_name << std::endl;
 
 		map_editor->getMapViewControl()->deleteSprite(map_spr_id);
@@ -251,6 +303,15 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_DeleteSprite( wxCommandEvent&
 		wxString list_spr_name = wxString(project->stages[stage_index].layers[layer_index].layer_sprites[i].sprite_name).Trim();
 		m_mapEdit_layerSprite_listBox->AppendAndEnsureVisible(list_spr_name);
 	}
+
+
+
+	current_action.action_type = NIRVANA_ACTION_DELETESPRITE;
+	current_action.stage_index = stage_index;
+	current_action.layer_index = layer_index;
+
+	push_undo(current_action);
+	clear_redo();
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_CopySprite( wxCommandEvent& event )
@@ -280,6 +341,7 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_CopySprite( wxCommandEvent& e
 	map_editor->getMapViewControl()->mapEdit_getContext();
 	map_editor->getMapViewControl()->setActiveCanvas(project->stages[stage_index].layers[layer_index].ref_canvas);
 
+
 	for(int i = 0; i < map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection.size(); i++)
 	{
 		int map_sprite_index = map_editor->getMapViewControl()->mapEdit_selectSpriteTool_selection[i].layer_sprite_index;
@@ -306,7 +368,49 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_CopySprite( wxCommandEvent& e
 
 		wxString list_spr_name = wxString(project->stages[stage_index].layers[layer_index].layer_sprites[copy_layer_sprite_index].sprite_name).Trim();
 		m_mapEdit_layerSprite_listBox->AppendAndEnsureVisible(list_spr_name);
+
+
+
+
+		nirvana_stageAction_sprite action_sprite;
+        action_sprite.sprite_id = map_spr_id;
+        action_sprite.pos_x = map_editor->getMapViewControl()->sprite[map_spr_id].position.X;
+        action_sprite.pos_y = map_editor->getMapViewControl()->sprite[map_spr_id].position.Y;
+        action_sprite.scale_x = map_editor->getMapViewControl()->sprite[map_spr_id].scale.X;
+        action_sprite.scale_y = map_editor->getMapViewControl()->sprite[map_spr_id].scale.Y;
+        action_sprite.angle = map_editor->getMapViewControl()->sprite[map_spr_id].angle;
+        action_sprite.canvas_id = map_editor->getMapViewControl()->sprite[map_spr_id].parent_canvas;
+        action_sprite.visible = map_editor->getMapViewControl()->sprite[map_spr_id].visible;
+        action_sprite.alpha = map_editor->getMapViewControl()->sprite[map_spr_id].alpha;
+        action_sprite.body_type = project->stages[stage_index].layers[layer_index].layer_sprites[copy_layer_sprite_index].body_type;
+
+        if(copy_layer_sprite_index >= 0 && copy_layer_sprite_index < project->stages[stage_index].layers[layer_index].layer_sprites.size())
+        {
+            action_sprite.layer_sprite_unique_id = project->stages[stage_index].layers[layer_index].layer_sprites[copy_layer_sprite_index].layer_sprite_unique_id;
+            action_sprite.base_unique_id = project->stages[stage_index].layers[layer_index].layer_sprites[copy_layer_sprite_index].base_unique_id;
+            for(int bi = 0; bi < project->sprite_base.size(); bi++)
+            {
+                if(action_sprite.base_unique_id == project->sprite_base[bi].unique_id)
+                {
+                    action_sprite.base_sprite_index = bi;
+                    break;
+                }
+            }
+            action_sprite.id_name = project->stages[stage_index].layers[layer_index].layer_sprites[copy_layer_sprite_index].sprite_name;
+            action_sprite.animation_name = project->stages[stage_index].layers[layer_index].layer_sprites[copy_layer_sprite_index].animation_name;
+        }
+
+
+        current_action.sprite.push_back(action_sprite);
 	}
+
+	current_action.action_type = NIRVANA_ACTION_COPYSPRITE;
+	current_action.stage_index = stage_index;
+	current_action.layer_index = layer_index;
+
+	push_undo(current_action);
+	clear_redo();
+
 
 	m_mapEdit_layerSprite_listBox->DeselectAll();
 
@@ -321,6 +425,7 @@ void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_CopySprite( wxCommandEvent& e
 
 	selected_map_tool = MAP_TOOL_SPRITE_MOVE;
 	map_editor->setMapTool(selected_map_tool);
+	m_mapEdit_spriteTools_auiToolBar->ToggleTool(m_mapEdit_spriteToolbar_move_tool->GetId(), true);
 }
 
 void NirvanaEditor_MainFrame::OnMapEdit_SpriteTool_CenterOnSprite( wxCommandEvent& event )

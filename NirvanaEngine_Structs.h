@@ -1,10 +1,13 @@
 #ifndef NIRVANAENGINE_STRUCTS_H_INCLUDED
 #define NIRVANAENGINE_STRUCTS_H_INCLUDED
 
+#include <wx/wx.h>
+#include <string>
 #include <irrlicht.h>
 #include <vector>
 
 #include "rc_defines.h"
+
 
 struct canvas_obj
 {
@@ -407,5 +410,158 @@ struct nirvana_project_file_obj
 {
 	std::vector<nirvana_project_dict_obj> dict;
 };
+
+
+
+#define NIRVANA_ACTION_SETTILE              1
+#define NIRVANA_ACTION_FILLTILE             2
+#define NIRVANA_ACTION_COPYTILE             3
+#define NIRVANA_ACTION_MOVETILE             4
+#define NIRVANA_ACTION_DELETETILE           5
+
+#define NIRVANA_ACTION_CREATE_TSPRITE       6
+#define NIRVANA_ACTION_DELETE_TSPRITE       7
+#define NIRVANA_ACTION_TRANSFORM_TSPRITE    8
+
+#define NIRVANA_ACTION_CREATESPRITE         9
+#define NIRVANA_ACTION_DELETESPRITE         10
+#define NIRVANA_ACTION_COPYSPRITE           11
+#define NIRVANA_ACTION_TRANSFORM_SPRITE     12
+
+#define NIRVANA_ACTION_MOVESHAPE            13
+#define NIRVANA_ACTION_DRAWPOINT            14
+#define NIRVANA_ACTION_CREATESHAPE          15
+#define NIRVANA_ACTION_DELETESHAPE          16
+
+#define NIRVANA_ACTION_SETBKG               17
+
+#define NIRVANA_ACTION_SETTILE_ISO          18
+#define NIRVANA_ACTION_FILLTILE_ISO         19
+#define NIRVANA_ACTION_MOVETILE_ISO         20
+#define NIRVANA_ACTION_COPYTILE_ISO         21
+#define NIRVANA_ACTION_DELETETILE_ISO       22
+
+
+struct nirvana_stageAction_tile
+{
+    int iso_map;
+
+    int old_tile;
+    int new_tile;
+
+    int map_tile_pos_x;
+    int map_tile_pos_y;
+};
+
+struct nirvana_stageAction_shape
+{
+    sprite2D_physics_obj shape_obj;
+};
+
+struct nirvana_stageAction_sprite
+{
+    int sprite_id;
+
+    int canvas_id;
+
+    int image_id;
+
+    int base_sprite_index;
+
+    std::string old_id_name;
+    std::string id_name;
+
+    int project_shape_index;
+
+    int layer_ts_index;
+
+    tileSprite_obj t_sprite;
+
+    int old_pos_x;
+    int old_pos_y;
+
+    int pos_x;
+    int pos_y;
+
+    double old_angle;
+
+    double angle;
+
+    double old_scale_x;
+    double old_scale_y;
+
+    double scale_x;
+    double scale_y;
+
+
+	int base_unique_id = -1;
+
+	int layer_sprite_unique_id = -1;
+
+	irr::u8 old_alpha = 255;
+	irr::u8 alpha = 255;
+
+	bool old_visible = true;
+	bool visible = true;
+
+	int old_body_type = SPRITE_TYPE_DYNAMIC;
+	int body_type = SPRITE_TYPE_DYNAMIC;
+
+	std::string old_animation_name = "SPRITE_BASE_ANIMATION";
+	std::string animation_name = "SPRITE_BASE_ANIMATION";
+
+	nirvana_stageAction_shape old_shape;
+	nirvana_stageAction_shape new_shape;
+};
+
+struct nirvana_stageAction_bkg
+{
+    Nirvana_Map_Background old_bkg;
+    Nirvana_Map_Background new_bkg;
+};
+
+struct nirvana_stageAction
+{
+    int action_type;
+
+    bool isUndo;
+
+    int stage_index;
+    int layer_index;
+
+    int tset;
+
+    int num_rows;
+    int num_cols;
+
+    std::vector<nirvana_stageAction_tile> tiles;
+
+    std::vector<nirvana_stageAction_sprite> sprite;
+
+    nirvana_stageAction_bkg bkg;
+};
+
+//bool current_action_is_undo = false;
+//bool current_action_is_redo = false;
+
+extern nirvana_stageAction current_action;
+
+extern std::vector<nirvana_stageAction> undo_buffer;
+extern std::vector<nirvana_stageAction> redo_buffer;
+
+#define UNDO_REDO_BUFFER_SIZE   50
+
+void push_undo(nirvana_stageAction n_action);
+
+nirvana_stageAction pop_undo();
+
+void clear_undo();
+
+void push_redo(nirvana_stageAction n_action);
+
+nirvana_stageAction pop_redo();
+
+void clear_redo();
+
 
 #endif // NIRVANAENGINE_STRUCTS_H_INCLUDED

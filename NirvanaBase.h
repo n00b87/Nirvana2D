@@ -259,7 +259,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxSpinCtrl* m_mapEdit_circleShape_centerY_spinCtrl;
 		wxStaticText* m_staticText8721;
 		wxSpinCtrl* m_mapEdit_circleShape_radius_spinCtrl;
-		wxPanel* m_panel16;
+		wxPanel* m_mapEdit_displayImage_panel;
 		wxStaticText* m_staticText562;
 		wxComboBox* m_mapEdit_canvasRenderSetting_comboBox;
 		wxStaticText* m_staticText82;
@@ -335,6 +335,7 @@ class Nirvana_MainFrame : public wxFrame
 		wxStaticText* m_staticText25;
 		wxSpinCtrl* m_spriteEdit_FPS_spinCtrl;
 		wxPanel* m_panel43;
+		wxStaticText* m_staticText122;
 		wxPanel* m_spriteAnimation_preview_panel;
 		wxBitmapButton* m_spriteEdit_play_bpButton;
 		wxBitmapButton* m_spriteEdit_stop_bpButton;
@@ -370,13 +371,20 @@ class Nirvana_MainFrame : public wxFrame
 		wxStaticText* m_staticText311;
 		wxSpinCtrl* m_spriteEdit_collisionCircle_Radius_spinCtrl;
 		wxMenuBar* m_menubar1;
+		wxMenu* m_menu1;
+		wxMenu* m_recentProjects_menu;
+		wxMenu* m_menu2;
+		wxMenu* m_menu5;
 		wxToolBar* m_toolBar1;
 		wxToolBarToolBase* m_newProject_tool;
 		wxToolBarToolBase* m_openProject_tool;
 		wxToolBarToolBase* m_saveProject_tool;
+		wxToolBarToolBase* m_tool44;
+		wxToolBarToolBase* m_tool45;
 		wxToolBarToolBase* m_generate_tool;
 
 		// Virtual event handlers, override them in your derived class
+		virtual void OnActivate( wxActivateEvent& event ) { event.Skip(); }
 		virtual void OnNirvanaClose( wxCloseEvent& event ) { event.Skip(); }
 		virtual void OnMainTabChanged( wxAuiNotebookEvent& event ) { event.Skip(); }
 		virtual void OnActiveLayerSelect( wxCommandEvent& event ) { event.Skip(); }
@@ -527,6 +535,9 @@ class Nirvana_MainFrame : public wxFrame
 		virtual void OnOpenProject( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnSaveProject( wxCommandEvent& event ) { event.Skip(); }
 		virtual void OnGenerate( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnNirvanaClose( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnStageUndo( wxCommandEvent& event ) { event.Skip(); }
+		virtual void OnStageRedo( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
